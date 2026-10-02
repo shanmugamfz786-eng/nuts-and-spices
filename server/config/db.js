@@ -40,7 +40,7 @@ const memoryStore = {
   reviews: [],
   coupons: [],
   settings: {
-    whatsapp_number: process.env.STORE_WHATSAPP_NUMBER || '919876543210',
+    whatsapp_number: process.env.STORE_WHATSAPP_NUMBER || '919655298540',
     delivery_charge: '50'
   }
 };
