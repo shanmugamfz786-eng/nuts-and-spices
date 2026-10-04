@@ -3,13 +3,6 @@ export const CATALOG_VERSION = 'v8_1791107354675';
 
 export const CATEGORIES = [
   {
-    id: 'weight-loss',
-    name: 'Weight Loss Product',
-    icon: '🏋️',
-    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=600',
-    description: 'Healthy products for weight management'
-  },
-  {
     "id": "all",
     "name": "All Products",
     "icon": "✨",
