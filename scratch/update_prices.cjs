@@ -139,7 +139,7 @@ function parseUserList(text) {
       continue;
     }
 
-    const match = line.match(/^[\d\.]+\s*(.*)$/);
+    const match = line.match(/^(?:[\d\.]+\s*)?(.*)$/);
     if (match) {
       const rawText = match[1].trim();
       // separate product name and price string
@@ -260,6 +260,7 @@ const nameMappings = {
   'FALX': 'FLAX',
   'COCUMER': 'CUCUMBER',
   'FRIED PEANUT': 'PEANUT',
+  'CASHEW 320 SIZE': 'CASHEW 320',
   'KARUPPU KAHUNI': 'KARUPPU KAVUNI',
   'KAATTUYANA': 'KAATTUYANAM',
   'VARAHU': 'VARAGU',
