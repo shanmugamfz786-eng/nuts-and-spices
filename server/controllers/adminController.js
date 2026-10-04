@@ -61,7 +61,7 @@ export const PRODUCTS = ${JSON.stringify(products, null, 2)};
     fs.writeFileSync(productsFilePath, codeContent, 'utf-8');
 
     const projectRoot = path.join(__dirname, '../../');
-    exec('git add . && git commit -m "Admin catalog live auto-sync to GitHub main" && git push origin main', { cwd: projectRoot }, (error, stdout, stderr) => {
+    exec('git add . && git commit -m "Admin catalog live auto-sync to GitHub main [skip ci]" && git push origin main', { cwd: projectRoot }, (error, stdout, stderr) => {
       if (error) {
         console.warn('Git push note:', error.message);
       } else {
