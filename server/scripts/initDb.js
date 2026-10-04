@@ -190,6 +190,7 @@ export async function initializeDatabase() {
 
     console.log('🎉 TiDB / MySQL Database initial seeding completed!');
   } catch (err) {
+    console.error('❌ Database init error:', err);
     console.log('ℹ️ Running backend in high-speed Memory Mode for fast execution.');
   }
 }
