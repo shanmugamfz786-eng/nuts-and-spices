@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v8_1791105625202';
+export const CATALOG_VERSION = 'v8_1791105724518';
 
 export const CATEGORIES = [
   {
@@ -89,6 +89,44 @@ export const CATEGORIES = [
 ];
 
 export const PRODUCTS = [
+  {
+    "id": "prod-1791105721658",
+    "badge": "New",
+    "rating": 5,
+    "reviews": 0,
+    "status": "Active",
+    "active": true,
+    "name": "hari",
+    "category": "viral-product",
+    "categoryName": "VIRAL PRODUCT",
+    "description": "gommala dei....",
+    "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800",
+    "price": 250,
+    "discountPercent": 10,
+    "discount": "10% OFF",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 278
+      },
+      {
+        "label": "500g",
+        "price": 450,
+        "originalPrice": 500
+      },
+      {
+        "label": "1kg",
+        "price": 1000,
+        "originalPrice": 1111
+      }
+    ],
+    "stock": 1000,
+    "ingredients": "100% Natural Premium Grade",
+    "origin": "India",
+    "shelfLife": "9 Months",
+    "storage": "Store in airtight jar in cool dry place"
+  },
   {
     "id": "vp-01",
     "name": "VEG CHIPS",
