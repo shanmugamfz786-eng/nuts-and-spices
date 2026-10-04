@@ -11,6 +11,7 @@ export default function AdminProducts() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Hidden file input for quick row image upload
   const [quickUploadProductId, setQuickUploadProductId] = useState(null);
@@ -153,17 +154,31 @@ export default function AdminProducts() {
         return;
       }
       try {
-        const compressedBase64 = await compressImageFile(file);
-        if (compressedBase64) {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const res = await fetch('http://localhost:5001/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        
+        if (data.success) {
           if (quickUploadProductId) {
-            updateProduct(quickUploadProductId, { image: compressedBase64 });
+            updateProduct(quickUploadProductId, { image: data.imageUrl });
             setQuickUploadProductId(null);
           } else {
-            setFormData(prev => ({ ...prev, image: compressedBase64 }));
+            setFormData(prev => ({ ...prev, image: data.imageUrl }));
           }
+        } else {
+          alert('Failed to upload image to Cloudinary.');
         }
       } catch (err) {
         console.error('Failed to process product image:', err);
+        alert('Error uploading image.');
+      } finally {
+        setUploadingImage(false);
       }
     }
     if (e.target) e.target.value = '';
@@ -636,7 +651,7 @@ export default function AdminProducts() {
                     <label className="flex-1 cursor-pointer">
                       <div className="w-full px-4 py-2 bg-white border border-gray-200 text-gray-700 font-extrabold text-xs rounded-lg hover:bg-gray-100 transition-colors text-center flex items-center justify-center gap-2">
                         <Upload className="w-3.5 h-3.5" />
-                        <span>Click to Upload Image (Max 20MB)</span>
+                        <span>{uploadingImage ? 'Uploading...' : 'Click to Upload Image (Max 20MB)'}</span>
                       </div>
                       <input 
                         type="file" 

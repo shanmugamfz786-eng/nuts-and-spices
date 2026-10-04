@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
     formData.append('image', file);
 
     try {
-      const res = await fetch('/api/upload', {
+      const res = await fetch('http://localhost:5001/api/upload', {
         method: 'POST',
         body: formData
       });
