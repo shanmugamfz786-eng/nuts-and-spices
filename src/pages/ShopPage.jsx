@@ -87,27 +87,33 @@ export default function ShopPage() {
       )}
 
       {/* TOP SORT & VIEW HEADER BAR */}
-      <div className="flex items-center justify-end gap-3 border-b border-gray-200/70 pb-4">
+      <div className="flex items-center justify-between gap-3 border-b border-gray-200/70 pb-4">
         
-        {/* Sort By Dropdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 font-medium">
-            Sort by:
-          </span>
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 pl-3 pr-8 appearance-none focus:outline-none focus:border-[#8B3A13] shadow-2xs cursor-pointer min-w-[130px]"
-            >
-              <option value="relevant">Relevant</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Top Rated</option>
-            </select>
-            <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
+        {/* Total Products Count */}
+        <div className="text-sm font-extrabold text-[#4A3525]">
+          Showing <span className="text-[#8B3A13]">{filtered.length}</span> Products
         </div>
+
+        <div className="flex items-center gap-3">
+          {/* Sort By Dropdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 font-medium">
+              Sort by:
+            </span>
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 pl-3 pr-8 appearance-none focus:outline-none focus:border-[#8B3A13] shadow-2xs cursor-pointer min-w-[130px]"
+              >
+                <option value="relevant">Relevant</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
 
         {/* View Mode Toggle Buttons */}
         <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-gray-200">
@@ -136,6 +142,7 @@ export default function ShopPage() {
               <rect x="3" y="13.5" width="18" height="6.5" rx="1.5" />
             </svg>
           </button>
+        </div>
         </div>
 
       </div>

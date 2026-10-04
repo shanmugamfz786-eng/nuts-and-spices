@@ -255,6 +255,10 @@ export default function AdminProducts() {
           </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          <div className="px-4 py-2.5 bg-[#F8FAFC] border border-gray-200 text-[#4A3525] rounded-xl font-extrabold text-xs shadow-sm flex items-center gap-2 tracking-wide uppercase">
+            <Package className="w-4 h-4 text-[#8B3A13]" />
+            Total Products: <span className="text-[#8B3A13] text-sm">{products.length}</span>
+          </div>
 
           <button
             onClick={handleOpenAddModal}
