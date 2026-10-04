@@ -24,8 +24,7 @@ export default function AdminProducts() {
     image: 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
     discountPercent: 10,
     weightOptions: [
-      { label: '250g', price: 250 },
-      { label: '500g', price: 450 }
+      { label: '', price: '' }
     ],
     stock: 50,
     ingredients: '100% Natural Premium Grade',
@@ -52,8 +51,7 @@ export default function AdminProducts() {
       image: 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
       discountPercent: 10,
       weightOptions: [
-        { label: '250g', price: 250 },
-        { label: '500g', price: 450 }
+        { label: '', price: '' }
       ],
       stock: 50,
       ingredients: '100% Natural Premium Grade',
@@ -149,6 +147,11 @@ export default function AdminProducts() {
   const handleFileChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        alert('File size exceeds the 20MB limit. Please choose a smaller image.');
+        if (e.target) e.target.value = '';
+        return;
+      }
       try {
         const compressedBase64 = await compressImageFile(file);
         if (compressedBase64) {
@@ -429,6 +432,8 @@ export default function AdminProducts() {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
+
+
                 {/* 1. Product Name */}
                 <div className="sm:col-span-2">
                   <label className="block font-bold uppercase text-gray-600 mb-1">Product Name *</label>
@@ -499,7 +504,7 @@ export default function AdminProducts() {
                       className="inline-flex items-center gap-1 px-3 py-1 bg-[#8B3A13] hover:bg-[#6E2C00] text-[#D4AF37] font-extrabold text-[11px] uppercase tracking-wider rounded-lg transition-all cursor-pointer shadow-xs"
                     >
                       <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>+ Add Weight</span>
+                      <span>Add Weight</span>
                     </button>
                   </div>
 
@@ -614,6 +619,44 @@ export default function AdminProducts() {
                     placeholder="e.g. Cool dry place / Airtight container"
                     className="w-full bg-gray-50 border border-gray-200 focus:border-amber-500 rounded-xl p-2.5 text-gray-900 outline-none"
                   />
+                </div>
+
+                {/* 11. Product Image */}
+                <div className="sm:col-span-2">
+                  <label className="block font-bold uppercase text-gray-600 mb-1">Product Image</label>
+                  <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl p-2.5">
+                    {formData.image && formData.image !== 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800' ? (
+                      <img src={formData.image} alt="Preview" className="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-200 shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center shrink-0 border border-gray-300">
+                        <Upload className="w-5 h-5 text-gray-500" />
+                      </div>
+                    )}
+                    
+                    <label className="flex-1 cursor-pointer">
+                      <div className="w-full px-4 py-2 bg-white border border-gray-200 text-gray-700 font-extrabold text-xs rounded-lg hover:bg-gray-100 transition-colors text-center flex items-center justify-center gap-2">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Click to Upload Image (Max 20MB)</span>
+                      </div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleFileChange} 
+                      />
+                    </label>
+
+                    {formData.image && formData.image !== 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800' && (
+                      <button 
+                        type="button"
+                        onClick={() => setFormData({ ...formData, image: '' })}
+                        className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Remove Image"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
               </div>

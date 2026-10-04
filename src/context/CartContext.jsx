@@ -176,6 +176,9 @@ export const CartProvider = ({ children }) => {
       if (path.startsWith('/admin')) {
         return 'admin';
       }
+      if (path.length > 1) {
+        return path.substring(1);
+      }
     }
     return 'home';
   });
@@ -196,6 +199,8 @@ export const CartProvider = ({ children }) => {
         setActivePage('admin');
       } else if (path === '/' || path === '') {
         setActivePage('home');
+      } else {
+        setActivePage(path.substring(1));
       }
     };
 
