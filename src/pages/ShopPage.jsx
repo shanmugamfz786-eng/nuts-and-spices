@@ -53,7 +53,16 @@ export default function ShopPage() {
 
   // Sorting
   const getPrice = (item) => Number(item?.weights?.[0]?.price) || Number(item?.price) || 0;
-  if (sortBy === 'price-low') {
+  if (sortBy === 'relevant') {
+    const categoryOrder = categories ? categories.map(c => c.id) : [];
+    filtered.sort((a, b) => {
+       let idxA = categoryOrder.indexOf(a.category);
+       let idxB = categoryOrder.indexOf(b.category);
+       if (idxA === -1) idxA = 999;
+       if (idxB === -1) idxB = 999;
+       return idxA - idxB;
+    });
+  } else if (sortBy === 'price-low') {
     filtered.sort((a, b) => getPrice(a) - getPrice(b));
   } else if (sortBy === 'price-high') {
     filtered.sort((a, b) => getPrice(b) - getPrice(a));
