@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v8_1791137016867';
+export const CATALOG_VERSION = 'v8_1791137193188';
 
 export const CATEGORIES = [
   {
@@ -113,7 +113,7 @@ export const PRODUCTS = [
     "stock": 45,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://res.cloudinary.com/znts7wz2/image/upload/v1791126283/nuts_and_spices_products/t4u2yxy6y9qoikr3iuxh.jpg"
+    "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800"
   },
   {
     "id": "vp-02",

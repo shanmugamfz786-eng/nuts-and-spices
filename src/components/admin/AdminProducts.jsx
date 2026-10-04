@@ -205,12 +205,14 @@ export default function AdminProducts() {
     const categoryObj = categories.find(c => c.id === formData.category);
     const categoryName = categoryObj ? categoryObj.name : 'General';
 
+    const finalImage = formData.image || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800';
+
     const payload = {
       name: formData.name,
       category: formData.category,
       categoryName: categoryName,
       description: formData.description,
-      image: formData.image || (editingProduct ? editingProduct.image : 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800'),
+      image: finalImage,
       price: basePrice,
       discountPercent: discountPct,
       discount: discountPct > 0 ? `${discountPct}% OFF` : '',
@@ -226,6 +228,14 @@ export default function AdminProducts() {
 
     if (editingProduct) {
       updateProduct(editingProduct.id, payload);
+      // If the image was changed or removed, delete the old image from Cloudinary
+      if (editingProduct.image && editingProduct.image !== finalImage && editingProduct.image.includes('res.cloudinary.com')) {
+        fetch('http://localhost:5001/api/upload/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageUrl: editingProduct.image })
+        }).catch(err => console.error('Failed to delete old image from Cloudinary', err));
+      }
     } else {
       addProduct(payload);
     }
@@ -723,6 +733,13 @@ export default function AdminProducts() {
               </button>
               <button
                 onClick={() => {
+                  if (deleteConfirmProduct.image && deleteConfirmProduct.image.includes('res.cloudinary.com')) {
+                    fetch('http://localhost:5001/api/upload/delete', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ imageUrl: deleteConfirmProduct.image })
+                    }).catch(err => console.error('Failed to delete old image from Cloudinary', err));
+                  }
                   deleteProduct(deleteConfirmProduct.id);
                   setDeleteConfirmProduct(null);
                 }}
