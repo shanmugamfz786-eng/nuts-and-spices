@@ -70,15 +70,15 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 sm:gap-8">
+        {/* Categories Horizontal Scroll */}
+        <div className="flex overflow-x-auto gap-4 sm:gap-6 pb-6 pt-2 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {categoriesList.map(cat => (
             <div
               key={cat.id}
               onClick={() => {
                 navigate('category', { category: cat.id });
               }}
-              className="group cursor-pointer flex flex-col items-center text-center space-y-3"
+              className="group cursor-pointer flex flex-col items-center text-center space-y-3 min-w-[110px] sm:min-w-[140px] snap-center shrink-0"
             >
               {/* Rounded Square Image Box */}
               <div className="w-full aspect-square rounded-[28px] overflow-hidden bg-white shadow-md group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1.5 border border-[#E6D7C3]/60 relative">

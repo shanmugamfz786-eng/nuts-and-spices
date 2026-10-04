@@ -8,7 +8,7 @@ export default function ShopPage() {
   const [activeCategory, setActiveCategory] = useState(selectedCategory || 'all');
   const [sortBy, setSortBy] = useState('relevant');
   const [searchFilter, setSearchFilter] = useState(searchQuery || '');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [viewMode, setViewMode] = useState('list'); // 'grid' | 'list'
 
   useEffect(() => {
     if (searchQuery !== undefined) {
