@@ -4,7 +4,7 @@ import { ArrowUp, MessageCircle } from 'lucide-react';
 import { STORE_WHATSAPP_NUMBER } from '../data/products';
 
 export default function Footer() {
-  const { navigate, categories } = useCart();
+  const { navigate, categories, storeSettings } = useCart();
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function Footer() {
               </a>
 
               <a
-                href={`https://wa.me/${STORE_WHATSAPP_NUMBER}`}
+                href={`https://wa.me/${storeSettings?.whatsappNumber || '919876543210'}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp Store Support"

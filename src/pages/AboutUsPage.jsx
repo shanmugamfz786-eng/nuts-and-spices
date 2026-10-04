@@ -4,7 +4,7 @@ import { ArrowLeft, BookOpen, ShieldCheck, ShoppingBag, HeartHandshake, Sparkles
 import { STORE_WHATSAPP_NUMBER } from '../data/products';
 
 export default function AboutUsPage() {
-  const { navigate } = useCart();
+  const { navigate, storeSettings } = useCart();
 
   const sections = [
     {
@@ -139,7 +139,7 @@ export default function AboutUsPage() {
           </button>
 
           <a
-            href={`https://wa.me/${STORE_WHATSAPP_NUMBER}`}
+            href={`https://wa.me/${storeSettings?.whatsappNumber || '919876543210'}`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-8 py-3.5 bg-[#D4AF37] hover:bg-[#B8860B] text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"

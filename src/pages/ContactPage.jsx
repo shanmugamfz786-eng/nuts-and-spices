@@ -4,7 +4,7 @@ import { ArrowLeft, MapPin, Phone, MessageSquare, Mail, Clock, Send, CheckCircle
 import { STORE_WHATSAPP_NUMBER } from '../data/products';
 
 export default function ContactPage() {
-  const { navigate } = useCart();
+  const { navigate, storeSettings } = useCart();
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -68,7 +68,7 @@ export default function ContactPage() {
                   📍 Address
                 </span>
                 <p className="text-[#4A3525] font-medium leading-relaxed">
-                  124, Gourmet Spice Market Road, T. Nagar, Chennai - 600017, Tamil Nadu, India
+                  {storeSettings?.address || '124, Gourmet Spice Market Road, T. Nagar, Chennai - 600017, Tamil Nadu, India'}
                 </p>
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function ContactPage() {
                   📞 Phone
                 </span>
                 <p className="text-[#2B1509] font-bold">
-                  +91 98765 43210
+                  {storeSettings?.phone || '+91 98765 43210'}
                 </p>
               </div>
             </div>
@@ -98,12 +98,12 @@ export default function ContactPage() {
                   💬 WhatsApp
                 </span>
                 <a
-                  href={`https://wa.me/${STORE_WHATSAPP_NUMBER}`}
+                  href={`https://wa.me/${storeSettings?.whatsappNumber || '919876543210'}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#8B3A13] font-bold hover:underline"
                 >
-                  +{STORE_WHATSAPP_NUMBER} (Instant Chat)
+                  +{storeSettings?.whatsappNumber || '919876543210'} (Instant Chat)
                 </a>
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function ContactPage() {
                   📧 Email
                 </span>
                 <p className="text-[#2B1509] font-bold">
-                  orders@nutsandspices.store
+                  {storeSettings?.email || 'orders@nutsandspices.store'}
                 </p>
               </div>
             </div>

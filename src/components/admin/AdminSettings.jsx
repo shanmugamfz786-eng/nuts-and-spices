@@ -14,7 +14,6 @@ export default function AdminSettings() {
     e.preventDefault();
     updateStoreSettings(formData);
     setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
   };
 
   return (
@@ -34,11 +33,23 @@ export default function AdminSettings() {
       </div>
 
       {isSaved && (
-        <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl text-amber-900 text-xs flex items-center gap-3 animate-in fade-in duration-300">
-          <CheckCircle className="w-5 h-5 text-[#8B3A13] shrink-0" />
-          <div>
-            <strong className="block font-bold">Store Settings Saved Successfully!</strong>
-            <span>All storefront order links & WhatsApp dispatch numbers have been updated live across the website.</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl border border-gray-100 text-center animate-in zoom-in-95 duration-300">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+              <CheckCircle className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-extrabold text-gray-900">Settings Saved!</h3>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              All storefront links and WhatsApp numbers have been updated. The changes are now live on the user pages.
+            </p>
+            <div className="pt-2">
+              <button
+                onClick={() => setIsSaved(false)}
+                className="w-full px-5 py-2.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-[#D4AF37] font-extrabold rounded-xl transition-all cursor-pointer shadow-md text-sm"
+              >
+                OK, Got it!
+              </button>
+            </div>
           </div>
         </div>
       )}

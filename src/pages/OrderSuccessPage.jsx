@@ -4,7 +4,7 @@ import { CheckCircle2, MessageSquare, ArrowRight, ShoppingBag, Copy, Check } fro
 import { STORE_WHATSAPP_NUMBER } from '../data/products';
 
 export default function OrderSuccessPage() {
-  const { lastOrder, getWhatsAppUrl, navigate } = useCart();
+  const { lastOrder, getWhatsAppUrl, navigate, storeSettings } = useCart();
   const [copied, setCopied] = React.useState(false);
 
   if (!lastOrder) {
@@ -69,7 +69,7 @@ export default function OrderSuccessPage() {
               WhatsApp Message Preview Payload
             </span>
           </div>
-          <span className="text-[10px] text-[#8C7A6B]">Target: +{STORE_WHATSAPP_NUMBER}</span>
+          <span className="text-[10px] text-[#8C7A6B]">Target: +{storeSettings?.whatsappNumber || '919876543210'}</span>
         </div>
 
         <div className="bg-white p-4 rounded-xl font-mono text-xs text-[#4A3525] leading-relaxed whitespace-pre-line border border-[#E6D7C3] shadow-2xs">

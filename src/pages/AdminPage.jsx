@@ -122,9 +122,21 @@ export default function AdminPage() {
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Top Brand Logo */}
           <div className="p-6 flex items-center justify-between border-b border-[#E6D7C3] shrink-0">
-            <h1 className="text-xl font-extrabold text-[#8B3A13] font-serif tracking-wide uppercase">
-              Admin Panel
-            </h1>
+            <div className="flex items-center gap-2.5">
+              <img 
+                src="/logo.jpg" 
+                alt="Haji Nuts & Spices Logo" 
+                className="w-10 h-10 object-contain rounded-full shadow-sm"
+              />
+              <div className="flex flex-col text-left">
+                <span className="text-xl font-black tracking-wider text-[#2B1509] font-serif uppercase leading-none">
+                  HAJI
+                </span>
+                <span className="text-[10px] font-extrabold text-[#D4AF37] tracking-widest uppercase font-serif inline-block mt-0.5">
+                  NUTS & SPICES
+                </span>
+              </div>
+            </div>
             <button 
               onClick={() => setIsMobileSidebarOpen(false)}
               className="lg:hidden text-[#8C7A6B] hover:text-[#8B3A13] cursor-pointer"

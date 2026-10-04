@@ -81,25 +81,22 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4">
             
-            {/* 1. LEFT: CATEGORY DRAWER ICON & BRAND LOGO */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <button
-                onClick={() => setIsCategoryDrawerOpen(true)}
-                className="p-1 text-[#D4AF37] hover:text-[#8B3A13] transition-colors cursor-pointer"
-                title="Browse Categories"
-              >
-                <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6" />
-              </button>
-
+            {/* 1. LEFT: BRAND LOGO WITH IMAGE */}
+            <div className="flex items-center shrink-0">
               <button 
                 onClick={() => navigate('home')}
-                className="flex flex-col text-left focus:outline-none cursor-pointer"
+                className="flex items-center gap-2 sm:gap-3 focus:outline-none cursor-pointer group"
               >
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="text-base sm:text-xl font-black tracking-wider text-[#2B1509] font-serif uppercase">
+                <img 
+                  src="/logo.jpg" 
+                  alt="Haji Nuts & Spices Logo" 
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full shadow-sm group-hover:scale-105 transition-transform"
+                />
+                <div className="flex flex-col text-left">
+                  <span className="text-base sm:text-xl font-black tracking-wider text-[#2B1509] font-serif uppercase leading-none">
                     HAJI
                   </span>
-                  <span className="text-[10px] sm:text-[11px] font-extrabold text-[#D4AF37] tracking-widest uppercase font-serif inline-block">
+                  <span className="text-[10px] sm:text-[11px] font-extrabold text-[#D4AF37] tracking-widest uppercase font-serif inline-block mt-0.5">
                     NUTS & SPICES
                   </span>
                 </div>
@@ -221,6 +218,24 @@ export default function Navbar() {
                   }`}
                 >
                   SHOP
+                </button>
+
+                <button
+                  onClick={() => navigate('about')}
+                  className={`text-xs sm:text-sm font-extrabold uppercase tracking-widest transition-colors ${
+                    activePage === 'about' ? 'text-[#8B3A13]' : 'text-[#2B1509] hover:text-[#8B3A13]'
+                  }`}
+                >
+                  ABOUT
+                </button>
+
+                <button
+                  onClick={() => navigate('contact')}
+                  className={`text-xs sm:text-sm font-extrabold uppercase tracking-widest transition-colors ${
+                    activePage === 'contact' ? 'text-[#8B3A13]' : 'text-[#2B1509] hover:text-[#8B3A13]'
+                  }`}
+                >
+                  CONTACT
                 </button>
               </nav>
 
@@ -391,12 +406,12 @@ export default function Navbar() {
             {/* Menu Items List */}
             <div className="flex-1 overflow-y-auto px-6 py-4 divide-y divide-[#E6D7C3]/60">
               
-              {/* Our Story */}
+              {/* About */}
               <button
                 onClick={() => { setIsMobileMenuOpen(false); navigate('about'); }}
                 className="w-full text-left py-4 flex items-center justify-between text-base font-extrabold font-serif text-[#2B1509] hover:text-[#8B3A13] transition-colors group cursor-pointer"
               >
-                <span>Our Story</span>
+                <span>About</span>
                 <ChevronRight className="w-5 h-5 text-[#8C7A6B] group-hover:text-[#8B3A13] group-hover:translate-x-1 transition-transform" />
               </button>
 
