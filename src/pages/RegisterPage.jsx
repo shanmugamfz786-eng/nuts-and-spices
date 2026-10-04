@@ -63,53 +63,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E6D7C3] grid grid-cols-1 md:grid-cols-12">
+    <div className="max-w-md mx-auto px-4 py-12">
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E6D7C3]">
         
-        {/* Left Side Brand Banner */}
-        <div className="md:col-span-5 bg-gradient-to-br from-[#8B3A13] via-[#A04000] to-[#B8860B] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#D4AF37]/30 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="space-y-4">
-            <div>
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#D4AF37]">
-                Gourmet Club Register
-              </span>
-            </div>
-            <h2 className="text-3xl font-black font-serif leading-tight">
-              CREATE YOUR ACCOUNT
-            </h2>
-            <p className="text-xs text-[#E6D7C3] leading-relaxed">
-              Join the Nuts & Spices Gourmet Club for direct WhatsApp order fulfillment, exclusive seasonal spice deals, and priority customer care.
-            </p>
-          </div>
-
-          <div className="space-y-4 pt-8 border-t border-[#8B3A13]/60">
-            <div className="flex items-center gap-3 text-xs text-[#E6D7C3]">
-              <Gift className="w-5 h-5 text-[#D4AF37] shrink-0" />
-              <span>Instant Member Privileges & Offers</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-[#E6D7C3]">
-              <ShieldCheck className="w-5 h-5 text-[#D4AF37] shrink-0" />
-              <span>Fast 1-Click WhatsApp Checkout</span>
-            </div>
-
-            {/* Redirect to Separate Login Page */}
-            <div className="bg-black/15 p-4 rounded-2xl border border-white/20 space-y-2">
-              <span className="text-xs font-bold text-white block">Already a Member?</span>
-              <button
-                onClick={() => navigate('login')}
-                className="w-full py-2.5 bg-white/10 hover:bg-white/20 text-[#D4AF37] font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-[#D4AF37]/40 cursor-pointer"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>GO TO LOGIN PAGE</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side Registration Form */}
-        <div className="md:col-span-7 p-8 sm:p-10 bg-[#FAF5EF]">
+        {/* Registration Form */}
+        <div className="p-8 sm:p-10 bg-[#FAF5EF]">
           
           <div className="mb-6">
             <h3 className="text-2xl font-black font-serif text-[#2B1509]">

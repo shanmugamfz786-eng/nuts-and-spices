@@ -4,7 +4,7 @@ import ProductCard from '../components/ProductCard';
 import { ArrowLeft, SlidersHorizontal, Sparkles, ShoppingBag } from 'lucide-react';
 
 export default function CategoryPage() {
-  const { navigate, products, categories, selectedCategory, setSelectedCategory } = useCart();
+  const { navigate, products, categories, selectedCategory } = useCart();
   const [sortBy, setSortBy] = useState('featured'); // 'featured' | 'price-low' | 'price-high' | 'rating'
 
   // Find category metadata
@@ -56,7 +56,7 @@ export default function CategoryPage() {
       <section className="relative bg-gradient-to-br from-[#8B3A13] via-[#A04000] to-[#B8860B] text-white py-6 px-4 sm:px-6 lg:px-8 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <button
-            onClick={() => navigate('categories')}
+            onClick={() => navigate('home', { category: 'all' })}
             className="p-2 text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full border border-white/20 cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -113,7 +113,7 @@ export default function CategoryPage() {
               We are currently updating stock for this category. Please check back soon or browse our other available collections!
             </p>
             <button
-              onClick={() => navigate('categories')}
+              onClick={() => navigate('categories', { category: 'all' })}
               className="px-6 py-2.5 rounded-full bg-[#8B3A13] text-white text-xs font-bold hover:bg-[#6E2C00] transition-colors shadow-md"
             >
               Explore Other Categories

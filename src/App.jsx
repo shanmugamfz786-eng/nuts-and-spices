@@ -98,7 +98,7 @@ function MainContent() {
       </main>
       <SearchModal />
       <AuthModal />
-      <Footer />
+      {activePage === 'home' && <Footer />}
       <MobileBottomNav />
     </div>
   );

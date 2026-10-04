@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { X, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, CheckCircle2, MessageSquare } from 'lucide-react';
 
 export default function AuthModal() {
-  const { isAuthModalOpen, setIsAuthModalOpen, authMode, setAuthMode, loginUser, registerUser } = useCart();
+  const { isAuthModalOpen, setIsAuthModalOpen, authMode, setAuthMode, loginUser, registerUser, loginAdmin, navigate } = useCart();
   
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -26,15 +26,30 @@ export default function AuthModal() {
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setErrorMessage('');
-    if (!loginIdentifier.trim() || !loginPassword) {
+    const id = loginIdentifier.trim();
+    if (!id || !loginPassword) {
       setErrorMessage('Please enter your mobile/email and password.');
+      return;
+    }
+
+    if (id.toLowerCase() === 'admin702@admin.com') {
+      const adminRes = loginAdmin(id, loginPassword);
+      if (adminRes.success) {
+        setSuccessMessage('Admin Access Granted!');
+        setTimeout(() => {
+          setIsAuthModalOpen(false);
+          navigate('admin');
+        }, 600);
+      } else {
+        setErrorMessage(adminRes.message || 'Invalid Admin Password');
+      }
       return;
     }
 
     setSuccessMessage('Logged in successfully!');
     setTimeout(() => {
       loginUser({
-        identifier: loginIdentifier.trim(),
+        identifier: id,
         password: loginPassword
       });
       setSuccessMessage('');

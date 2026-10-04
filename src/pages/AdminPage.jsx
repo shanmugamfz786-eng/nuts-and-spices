@@ -33,8 +33,14 @@ export default function AdminPage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState(null);
 
+  React.useEffect(() => {
+    if (!isAdminLoggedIn) {
+      navigate('home');
+    }
+  }, [isAdminLoggedIn, navigate]);
+
   if (!isAdminLoggedIn) {
-    return <AdminLogin />;
+    return null;
   }
 
   const newOrdersCount = orders.filter(o => o.status === 'NEW' || o.status === 'PENDING').length;

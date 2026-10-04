@@ -237,20 +237,7 @@ export default function AdminProducts() {
           </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <button
-            onClick={() => setAdminTab('featured')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all shrink-0 border bg-white text-gray-700 border-gray-300 hover:bg-amber-50"
-          >
-            <Star className="w-4 h-4 text-amber-500" />
-            <span>Manage Featured</span>
-          </button>
-          <button
-            onClick={() => setAdminTab('bestselling')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all shrink-0 border bg-white text-gray-700 border-gray-300 hover:bg-amber-50"
-          >
-            <Star className="w-4 h-4 text-amber-500" />
-            <span>Manage Best Selling</span>
-          </button>
+
           <button
             onClick={handleOpenAddModal}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all shrink-0 border border-red-700/30"

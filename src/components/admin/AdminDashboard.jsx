@@ -7,7 +7,6 @@ import {
 
 export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
   const { products, orders } = useCart();
-  const [chartPeriod, setChartPeriod] = useState('Weekly');
 
   // KPI Calculations matching screenshot
   const confirmedOrders = orders.filter(o => o.status === 'CONFIRMED' || o.status === 'DELIVERED');
@@ -17,35 +16,6 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
   const confirmedCount = confirmedOrders.length;
   const pendingCount = pendingOrders.length;
   const activeProductsCount = products.length > 0 ? products.length : 185;
-
-  // Chart data
-  const chartData = {
-    Daily: [
-      { label: 'Mon', sales: 4200, orders: 8 },
-      { label: 'Tue', sales: 6800, orders: 12 },
-      { label: 'Wed', sales: 5100, orders: 9 },
-      { label: 'Thu', sales: 8900, orders: 15 },
-      { label: 'Fri', sales: 11200, orders: 19 },
-      { label: 'Sat', sales: 14500, orders: 24 },
-      { label: 'Sun', sales: 12800, orders: 21 }
-    ],
-    Weekly: [
-      { label: 'Week 1', sales: 38400, orders: 62 },
-      { label: 'Week 2', sales: 45200, orders: 74 },
-      { label: 'Week 3', sales: 52900, orders: 86 },
-      { label: 'Week 4', sales: 61800, orders: 98 }
-    ],
-    Monthly: [
-      { label: 'May', sales: 185000, orders: 310 },
-      { label: 'Jun', sales: 210000, orders: 355 },
-      { label: 'Jul', sales: 245000, orders: 410 },
-      { label: 'Aug', sales: 289000, orders: 480 },
-      { label: 'Sep', sales: 320000, orders: 540 }
-    ]
-  };
-
-  const currentChart = chartData[chartPeriod];
-  const maxSales = Math.max(...currentChart.map(d => d.sales));
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -152,7 +122,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* RECENT ORDERS TABLE */}
-        <div className="lg:col-span-7 bg-white border border-gray-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-12 bg-white border border-gray-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
               <div>
@@ -222,73 +192,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
           </div>
         </div>
 
-        {/* SALES OVERVIEW CHART */}
-        <div className="lg:col-span-5 bg-white border border-gray-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
-              <div>
-                <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[#8B3A13]" />
-                  Sales Growth
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Revenue and order volume analysis
-                </p>
-              </div>
 
-              <div className="flex bg-gray-100 p-1 rounded-lg shrink-0">
-                {['Daily', 'Weekly', 'Monthly'].map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setChartPeriod(p)}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
-                      chartPeriod === p
-                        ? 'bg-white text-gray-900 shadow-xs'
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-4 my-4">
-              {currentChart.map((item, i) => {
-                const heightPct = Math.round((item.sales / maxSales) * 100);
-                return (
-                  <div key={i} className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-gray-700">{item.label}</span>
-                      <span className="text-gray-900">
-                        ₹{item.sales.toLocaleString('en-IN')}{' '}
-                        <span className="text-[10px] text-gray-400 font-normal">({item.orders} orders)</span>
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                      <div 
-                        className="bg-amber-500 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${heightPct}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-gray-100 bg-gray-50 p-4 rounded-xl flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase text-gray-400 block">Avg Order Value</span>
-              <span className="text-base font-extrabold text-gray-900">₹ 1,180</span>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] font-extrabold text-[#8B3A13] block">+18.4% Growth</span>
-              <span className="text-xs text-gray-400">Vs last month</span>
-            </div>
-          </div>
-
-        </div>
 
       </div>
 

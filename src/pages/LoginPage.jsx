@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { Mail, Lock, Eye, EyeOff, Sparkles, CheckCircle2, MessageSquare, ArrowRight, ShieldCheck, UserPlus } from 'lucide-react';
 
 export default function LoginPage() {
-  const { user, loginUser, logoutUser, navigate } = useCart();
+  const { user, loginUser, logoutUser, navigate, loginAdmin } = useCart();
   const [showPassword, setShowPassword] = useState(false);
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -63,15 +63,29 @@ export default function LoginPage() {
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setErrorMessage('');
-    if (!loginIdentifier.trim() || !loginPassword) {
+    const id = loginIdentifier.trim();
+    if (!id || !loginPassword) {
       setErrorMessage('Please enter your mobile/email and password.');
+      return;
+    }
+
+    if (id.toLowerCase() === 'admin702@admin.com') {
+      const adminRes = loginAdmin(id, loginPassword);
+      if (adminRes.success) {
+        setSuccessMessage('Admin Access Granted!');
+        setTimeout(() => {
+          navigate('admin');
+        }, 600);
+      } else {
+        setErrorMessage(adminRes.message || 'Invalid Admin Password');
+      }
       return;
     }
 
     setSuccessMessage('Logged in successfully!');
     setTimeout(() => {
       loginUser({
-        identifier: loginIdentifier.trim(),
+        identifier: id,
         password: loginPassword
       });
       navigate('home');
@@ -92,49 +106,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E6D7C3] grid grid-cols-1 md:grid-cols-12">
+    <div className="max-w-md mx-auto px-4 py-12">
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E6D7C3]">
         
-        {/* Left Side Brand Banner */}
-        <div className="md:col-span-5 bg-gradient-to-br from-[#8B3A13] via-[#A04000] to-[#B8860B] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#D4AF37]/30 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="space-y-4">
-            <div>
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#D4AF37]">
-                Gourmet Store Login
-              </span>
-            </div>
-            <h2 className="text-3xl font-black font-serif leading-tight">
-              LOGIN TO NUTS & SPICES
-            </h2>
-            <p className="text-xs text-[#E6D7C3] leading-relaxed">
-              Log in to your account to view order history, manage address details, and checkout instantly via WhatsApp.
-            </p>
-          </div>
-
-          <div className="space-y-4 pt-8 border-t border-[#8B3A13]/60">
-            <div className="flex items-center gap-3 text-xs text-[#E6D7C3]">
-              <ShieldCheck className="w-5 h-5 text-[#D4AF37] shrink-0" />
-              <span>100% Secure WhatsApp Fulfilled Orders</span>
-            </div>
-
-            {/* Redirect to Separate Register Page */}
-            <div className="bg-black/15 p-4 rounded-2xl border border-white/20 space-y-2">
-              <span className="text-xs font-bold text-white block">New to Nuts & Spices?</span>
-              <button
-                onClick={() => navigate('register')}
-                className="w-full py-2.5 bg-white/10 hover:bg-white/20 text-[#D4AF37] font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-[#D4AF37]/40 cursor-pointer"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>CREATE NEW ACCOUNT</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side Login Form */}
-        <div className="md:col-span-7 p-8 sm:p-10 bg-[#FAF5EF] flex flex-col justify-center">
+        {/* Login Form */}
+        <div className="p-8 sm:p-10 bg-[#FAF5EF] flex flex-col justify-center">
           
           <div className="mb-6">
             <h3 className="text-2xl font-black font-serif text-[#2B1509]">
