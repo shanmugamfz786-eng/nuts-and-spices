@@ -1604,7 +1604,7 @@ export const PRODUCTS = [
         "originalPrice": 143
       },
       {
-        "label": "250g",
+        "label": "500g",
         "price": 250,
         "originalPrice": 275
       }
@@ -1782,7 +1782,7 @@ export const PRODUCTS = [
     "reviews": 110,
     "weights": [
       {
-        "label": "250g",
+        "label": "100g",
         "price": 55,
         "originalPrice": 61
       },
@@ -1853,7 +1853,7 @@ export const PRODUCTS = [
         "originalPrice": 242
       },
       {
-        "label": "250g",
+        "label": "1250g",
         "price": 740,
         "originalPrice": 814
       }
@@ -2326,7 +2326,7 @@ export const PRODUCTS = [
         "originalPrice": 248
       },
       {
-        "label": "250g",
+        "label": "500g",
         "price": 250,
         "originalPrice": 275
       },
