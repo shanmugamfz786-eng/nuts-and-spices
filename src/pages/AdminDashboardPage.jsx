@@ -36,11 +36,42 @@ export default function AdminDashboardPage() {
   const [newProdCategory, setNewProdCategory] = useState('viral-products');
   const [newProdPrice, setNewProdPrice] = useState('');
   const [newProdStock, setNewProdStock] = useState('100');
-  const [newProdImage, setNewProdImage] = useState('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=800');
+  const [newProdImage, setNewProdImage] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setStatusMessage('Uploading image to Cloudinary...');
+    
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewProdImage(data.imageUrl);
+        setStatusMessage('Image uploaded successfully!');
+      } else {
+        setStatusMessage('Image upload failed.');
+      }
+    } catch (err) {
+      setStatusMessage('Error uploading image.');
+    } finally {
+      setUploadingImage(false);
+      setTimeout(() => setStatusMessage(''), 3000);
+    }
+  };
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -86,10 +117,12 @@ export default function AdminDashboardPage() {
       setStatusMessage(`Product "${newProdName}" created successfully!`);
       setNewProdName('');
       setNewProdPrice('');
+      setNewProdImage('');
     } else {
       setStatusMessage(`Product "${newProdName}" added to catalog!`);
       setNewProdName('');
       setNewProdPrice('');
+      setNewProdImage('');
     }
     setTimeout(() => setStatusMessage(''), 3000);
   };
@@ -322,14 +355,26 @@ export default function AdminDashboardPage() {
 
             <div className="space-y-1">
               <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
-                Image URL
+                Product Image *
               </label>
-              <input
-                type="text"
-                value={newProdImage}
-                onChange={(e) => setNewProdImage(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#FAF5EF] border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] outline-none focus:border-[#8B3A13]"
-              />
+              <div className="flex flex-col gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="w-full px-4 py-2.5 bg-[#FAF5EF] border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#8B3A13] file:text-white hover:file:bg-[#A04000] cursor-pointer"
+                />
+                {uploadingImage && <span className="text-xs text-orange-600 font-bold animate-pulse">Uploading to Cloudinary...</span>}
+                {newProdImage && !uploadingImage && (
+                  <div className="mt-2">
+                    <img src={newProdImage} alt="Preview" className="h-32 w-32 object-cover rounded-xl border border-[#E6D7C3] shadow-sm" />
+                    <p className="text-[10px] text-green-600 font-bold mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Image ready
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             <button

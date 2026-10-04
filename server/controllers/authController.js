@@ -13,7 +13,7 @@ export const registerCustomer = async (req, res) => {
     }
 
     const identifier = email || phone;
-    
+
     // Check existing
     const existing = await queryDb('SELECT * FROM users WHERE phone = ? OR email = ?', [phone, identifier]);
     if (existing && existing.length > 0) {
@@ -63,12 +63,12 @@ export const loginUser = async (req, res) => {
     // Query DB or fallback
     let userRecord = null;
     const users = await queryDb('SELECT * FROM users WHERE LOWER(phone) = ? OR LOWER(email) = ?', [cleanIdentifier, cleanIdentifier]);
-    
+
     if (users && users.length > 0) {
       userRecord = users[0];
     } else {
       // Check memory store for admin/customer
-      userRecord = memoryStore.users.find(u => 
+      userRecord = memoryStore.users.find(u =>
         (u.phone && u.phone.toLowerCase() === cleanIdentifier) ||
         (u.email && u.email.toLowerCase() === cleanIdentifier)
       );
