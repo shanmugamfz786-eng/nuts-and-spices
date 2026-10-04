@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v8_1791137225517';
+export const CATALOG_VERSION = 'v8_1791137240398';
 
 export const CATEGORIES = [
   {
@@ -160,7 +160,7 @@ export const PRODUCTS = [
       {
         "label": "1 Pack",
         "price": 350,
-        "originalPrice": 450
+        "originalPrice": 449
       }
     ],
     "description": "Live active kefir starter grains for homemade probiotic rich kefir drink.",
@@ -169,7 +169,12 @@ export const PRODUCTS = [
     "price": 350,
     "status": "Active",
     "active": true,
-    "image": "https://res.cloudinary.com/znts7wz2/image/upload/v1791126290/nuts_and_spices_products/r6fdzzpibbbw0ltmxwzb.jpg"
+    "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800",
+    "discountPercent": 22,
+    "discount": "22% OFF",
+    "stock": 45,
+    "ingredients": "100% Natural",
+    "storage": "Cool dry place"
   },
   {
     "id": "vp-04",
