@@ -1,0 +1,1900 @@
+[
+  {
+    "name": "VEG CHIPS",
+    "category": "viral-product",
+    "categoryName": "VIRAL PRODUCT",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 120,
+        "originalPrice": 144
+      },
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "500g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "1kg",
+        "price": 950,
+        "originalPrice": 1140
+      }
+    ],
+    "price": 120
+  },
+  {
+    "name": "FRUITS CHIPS",
+    "category": "viral-product",
+    "categoryName": "VIRAL PRODUCT",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 160,
+        "originalPrice": 192
+      },
+      {
+        "label": "250g",
+        "price": 360,
+        "originalPrice": 432
+      },
+      {
+        "label": "500g",
+        "price": 720,
+        "originalPrice": 864
+      },
+      {
+        "label": "1kg",
+        "price": 1350,
+        "originalPrice": 1620
+      }
+    ],
+    "price": 160
+  },
+  {
+    "name": "MILK KEFIR GRAINS",
+    "category": "viral-product",
+    "categoryName": "VIRAL PRODUCT",
+    "weights": [
+      {
+        "label": "15g to 18gr",
+        "price": 550,
+        "originalPrice": 660
+      }
+    ],
+    "price": 550
+  },
+  {
+    "name": "KUMBUCHA SCOOPY",
+    "category": "viral-product",
+    "categoryName": "VIRAL PRODUCT",
+    "weights": [
+      {
+        "label": "1pices",
+        "price": 400,
+        "originalPrice": 480
+      }
+    ],
+    "price": 400
+  },
+  {
+    "name": "PSHYLIUM HUSK @ ISABGOL",
+    "category": "viral-product",
+    "categoryName": "VIRAL PRODUCT",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 150,
+        "originalPrice": 180
+      },
+      {
+        "label": "250g",
+        "price": 375,
+        "originalPrice": 450
+      }
+    ],
+    "price": 150
+  },
+  {
+    "name": "PATHIMUGAM",
+    "category": "viral-product",
+    "categoryName": "VIRAL PRODUCT",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 140,
+        "originalPrice": 168
+      },
+      {
+        "label": "500g",
+        "price": 280,
+        "originalPrice": 336
+      },
+      {
+        "label": "1kg",
+        "price": 500,
+        "originalPrice": 600
+      }
+    ],
+    "price": 140
+  },
+  {
+    "name": "CALIFORNIA REGULAR  ALMOND",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 120,
+        "originalPrice": 144
+      },
+      {
+        "label": "250g",
+        "price": 300,
+        "originalPrice": 360
+      },
+      {
+        "label": "500g",
+        "price": 600,
+        "originalPrice": 720
+      },
+      {
+        "label": "1kg",
+        "price": 1200,
+        "originalPrice": 1440
+      }
+    ],
+    "price": 120
+  },
+  {
+    "name": "CALIFORNIA MINI BOLD  ALMOND",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 330,
+        "originalPrice": 396
+      },
+      {
+        "label": "500g",
+        "price": 650,
+        "originalPrice": 780
+      },
+      {
+        "label": "1kg",
+        "price": 1300,
+        "originalPrice": 1560
+      }
+    ],
+    "price": 330
+  },
+  {
+    "name": "CALIFORNIA BOLD  ALMOND",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 350,
+        "originalPrice": 420
+      },
+      {
+        "label": "500g",
+        "price": 700,
+        "originalPrice": 840
+      },
+      {
+        "label": "1kg",
+        "price": 1380,
+        "originalPrice": 1656
+      }
+    ],
+    "price": 350
+  },
+  {
+    "name": "CASHEW",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "250g",
+        "price": 240,
+        "originalPrice": 288
+      },
+      {
+        "label": "500g",
+        "price": 480,
+        "originalPrice": 576
+      },
+      {
+        "label": "1kg",
+        "price": 940,
+        "originalPrice": 1128
+      }
+    ],
+    "price": 100
+  },
+  {
+    "name": "KASHMIR WALNUT",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 280,
+        "originalPrice": 336
+      },
+      {
+        "label": "500g",
+        "price": 560,
+        "originalPrice": 672
+      },
+      {
+        "label": "1kg",
+        "price": 1100,
+        "originalPrice": 1320
+      }
+    ],
+    "price": 280
+  },
+  {
+    "name": "KASHMIR WALNUT PREMIUM",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 350,
+        "originalPrice": 420
+      },
+      {
+        "label": "500g",
+        "price": 700,
+        "originalPrice": 840
+      },
+      {
+        "label": "1kg",
+        "price": 1350,
+        "originalPrice": 1620
+      }
+    ],
+    "price": 350
+  },
+  {
+    "name": "HAZALNUT",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 300,
+        "originalPrice": 360
+      },
+      {
+        "label": "250g",
+        "price": 750,
+        "originalPrice": 900
+      },
+      {
+        "label": "500g",
+        "price": 1500,
+        "originalPrice": 1800
+      },
+      {
+        "label": "1kg",
+        "price": 2950,
+        "originalPrice": 3540
+      }
+    ],
+    "price": 300
+  },
+  {
+    "name": "BRAZIL NUT",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 350,
+        "originalPrice": 420
+      },
+      {
+        "label": "250g",
+        "price": 875,
+        "originalPrice": 1050
+      },
+      {
+        "label": "500g",
+        "price": 1750,
+        "originalPrice": 2100
+      }
+    ],
+    "price": 350
+  },
+  {
+    "name": "ROASTED PISTA",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 470,
+        "originalPrice": 564
+      },
+      {
+        "label": "500g",
+        "price": 940,
+        "originalPrice": 1128
+      }
+    ],
+    "price": 470
+  },
+  {
+    "name": "GREEN PISTA",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 300,
+        "originalPrice": 360
+      },
+      {
+        "label": "250g",
+        "price": 750,
+        "originalPrice": 900
+      },
+      {
+        "label": "500g",
+        "price": 1500,
+        "originalPrice": 1800
+      }
+    ],
+    "price": 300
+  },
+  {
+    "name": "BLACK RAISIN SEED",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 145,
+        "originalPrice": 174
+      },
+      {
+        "label": "500g",
+        "price": 290,
+        "originalPrice": 348
+      }
+    ],
+    "price": 145
+  },
+  {
+    "name": "AFGHAN FIG",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 240,
+        "originalPrice": 288
+      },
+      {
+        "label": "500g",
+        "price": 480,
+        "originalPrice": 576
+      }
+    ],
+    "price": 240
+  },
+  {
+    "name": "IRAN FIG",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "400g",
+        "price": 260,
+        "originalPrice": 312
+      }
+    ],
+    "price": 260
+  },
+  {
+    "name": "KIWI",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 75,
+        "originalPrice": 90
+      },
+      {
+        "label": "250g",
+        "price": 180,
+        "originalPrice": 216
+      },
+      {
+        "label": "500g",
+        "price": 350,
+        "originalPrice": 420
+      }
+    ],
+    "price": 75
+  },
+  {
+    "name": "STRABERRY",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 85,
+        "originalPrice": 102
+      },
+      {
+        "label": "250g",
+        "price": 210,
+        "originalPrice": 252
+      },
+      {
+        "label": "500g",
+        "price": 400,
+        "originalPrice": 480
+      }
+    ],
+    "price": 85
+  },
+  {
+    "name": "CRANBERRY",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 85,
+        "originalPrice": 102
+      },
+      {
+        "label": "250g",
+        "price": 210,
+        "originalPrice": 252
+      },
+      {
+        "label": "500g",
+        "price": 400,
+        "originalPrice": 480
+      }
+    ],
+    "price": 85
+  },
+  {
+    "name": "CHERRY",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 85,
+        "originalPrice": 102
+      },
+      {
+        "label": "250g",
+        "price": 210,
+        "originalPrice": 252
+      },
+      {
+        "label": "500g",
+        "price": 400,
+        "originalPrice": 480
+      }
+    ],
+    "price": 85
+  },
+  {
+    "name": "BLUBERRY",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 160,
+        "originalPrice": 192
+      },
+      {
+        "label": "250g",
+        "price": 400,
+        "originalPrice": 480
+      },
+      {
+        "label": "500g",
+        "price": 780,
+        "originalPrice": 936
+      }
+    ],
+    "price": 160
+  },
+  {
+    "name": "MANGO",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 85,
+        "originalPrice": 102
+      },
+      {
+        "label": "250g",
+        "price": 210,
+        "originalPrice": 252
+      },
+      {
+        "label": "500g",
+        "price": 400,
+        "originalPrice": 480
+      }
+    ],
+    "price": 85
+  },
+  {
+    "name": "DRY AMLA",
+    "category": "nuts-dry-fruits",
+    "categoryName": "NUTS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 40,
+        "originalPrice": 48
+      },
+      {
+        "label": "250g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "500g",
+        "price": 190,
+        "originalPrice": 228
+      }
+    ],
+    "price": 40
+  },
+  {
+    "name": "AJWA -",
+    "category": "dates",
+    "categoryName": "DATES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 330,
+        "originalPrice": 396
+      },
+      {
+        "label": "1kg",
+        "price": 640,
+        "originalPrice": 768
+      }
+    ],
+    "price": 330
+  },
+  {
+    "name": "SAFAVI KALIMA -",
+    "category": "dates",
+    "categoryName": "DATES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 290,
+        "originalPrice": 348
+      },
+      {
+        "label": "1kg",
+        "price": 560,
+        "originalPrice": 672
+      }
+    ],
+    "price": 290
+  },
+  {
+    "name": "KALUTTU -",
+    "category": "dates",
+    "categoryName": "DATES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 220,
+        "originalPrice": 264
+      },
+      {
+        "label": "1kg",
+        "price": 440,
+        "originalPrice": 528
+      }
+    ],
+    "price": 220
+  },
+  {
+    "name": "MASAFATI -",
+    "category": "dates",
+    "categoryName": "DATES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 220,
+        "originalPrice": 264
+      },
+      {
+        "label": "1kg",
+        "price": 440,
+        "originalPrice": 528
+      }
+    ],
+    "price": 220
+  },
+  {
+    "name": "BROWN DATES SEED -",
+    "category": "dates",
+    "categoryName": "DATES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "1kg",
+        "price": 200,
+        "originalPrice": 240
+      }
+    ],
+    "price": 100
+  },
+  {
+    "name": "BROWN DATES SEEDLESS -",
+    "category": "dates",
+    "categoryName": "DATES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 145,
+        "originalPrice": 174
+      },
+      {
+        "label": "1kg",
+        "price": 290,
+        "originalPrice": 348
+      }
+    ],
+    "price": 145
+  },
+  {
+    "name": "YELLOW DRY DATES",
+    "category": "dates",
+    "categoryName": "DATES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 160,
+        "originalPrice": 192
+      },
+      {
+        "label": "1kg",
+        "price": 320,
+        "originalPrice": 384
+      }
+    ],
+    "price": 160
+  },
+  {
+    "name": "BIOTIN DRINK",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "200g",
+        "price": 280,
+        "originalPrice": 336
+      }
+    ],
+    "price": 280
+  },
+  {
+    "name": "SPROUTED RAGI MALT",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 170,
+        "originalPrice": 204
+      }
+    ],
+    "price": 170
+  },
+  {
+    "name": "BLACK URID KALI KANJI",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 150,
+        "originalPrice": 180
+      }
+    ],
+    "price": 150
+  },
+  {
+    "name": "HEALTH MIX POWDER",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 140,
+        "originalPrice": 168
+      },
+      {
+        "label": "1kg",
+        "price": 280,
+        "originalPrice": 336
+      }
+    ],
+    "price": 140
+  },
+  {
+    "name": "CHOCO COCOZHI",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "Standard",
+        "price": 100,
+        "originalPrice": 120
+      }
+    ],
+    "price": 100
+  },
+  {
+    "name": "REDMUSHROOM BLACK COFFEE",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "20sachet",
+        "price": 825,
+        "originalPrice": 990
+      }
+    ],
+    "price": 825
+  },
+  {
+    "name": "RED MUSHROOM TEA",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 490,
+        "originalPrice": 588
+      }
+    ],
+    "price": 490
+  },
+  {
+    "name": "KUMBUCHA",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "285ml",
+        "price": 140,
+        "originalPrice": 168
+      }
+    ],
+    "price": 140
+  },
+  {
+    "name": "MILK KEFIR GRAINS",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      }
+    ],
+    "price": 250
+  },
+  {
+    "name": "BADHAM PISIN",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 55,
+        "originalPrice": 66
+      },
+      {
+        "label": "250g",
+        "price": 135,
+        "originalPrice": 162
+      },
+      {
+        "label": "500g",
+        "price": 270,
+        "originalPrice": 324
+      }
+    ],
+    "price": 55
+  },
+  {
+    "name": "AGAR AGAR",
+    "category": "malt-beverages",
+    "categoryName": "MALT & BEVERAGES",
+    "weights": [
+      {
+        "label": "10g",
+        "price": 25,
+        "originalPrice": 30
+      },
+      {
+        "label": "50g",
+        "price": 120,
+        "originalPrice": 144
+      }
+    ],
+    "price": 25
+  },
+  {
+    "name": "CHIA",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 55,
+        "originalPrice": 66
+      },
+      {
+        "label": "250g",
+        "price": 130,
+        "originalPrice": 156
+      },
+      {
+        "label": "500g",
+        "price": 250,
+        "originalPrice": 300
+      }
+    ],
+    "price": 55
+  },
+  {
+    "name": "PUPMKIN",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 70,
+        "originalPrice": 84
+      },
+      {
+        "label": "250g",
+        "price": 175,
+        "originalPrice": 210
+      },
+      {
+        "label": "500g",
+        "price": 340,
+        "originalPrice": 408
+      }
+    ],
+    "price": 70
+  },
+  {
+    "name": "WATERMELON",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 90,
+        "originalPrice": 108
+      },
+      {
+        "label": "250g",
+        "price": 225,
+        "originalPrice": 270
+      },
+      {
+        "label": "500g",
+        "price": 440,
+        "originalPrice": 528
+      }
+    ],
+    "price": 90
+  },
+  {
+    "name": "FALX",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 30,
+        "originalPrice": 36
+      },
+      {
+        "label": "250g",
+        "price": 75,
+        "originalPrice": 90
+      },
+      {
+        "label": "500g",
+        "price": 140,
+        "originalPrice": 168
+      }
+    ],
+    "price": 30
+  },
+  {
+    "name": "COCUMER",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 90,
+        "originalPrice": 108
+      },
+      {
+        "label": "250g",
+        "price": 225,
+        "originalPrice": 270
+      },
+      {
+        "label": "500g",
+        "price": 440,
+        "originalPrice": 528
+      }
+    ],
+    "price": 90
+  },
+  {
+    "name": "SABJA",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 45,
+        "originalPrice": 54
+      },
+      {
+        "label": "250g",
+        "price": 100,
+        "originalPrice": 120
+      }
+    ],
+    "price": 45
+  },
+  {
+    "name": "FRIED PEANUT",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 55,
+        "originalPrice": 66
+      },
+      {
+        "label": "250g",
+        "price": 110,
+        "originalPrice": 132
+      },
+      {
+        "label": "500g",
+        "price": 210,
+        "originalPrice": 252
+      }
+    ],
+    "price": 55
+  },
+  {
+    "name": "SALIYA",
+    "category": "seeds-items",
+    "categoryName": "SEEDS ITEMS",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 40,
+        "originalPrice": 48
+      },
+      {
+        "label": "250g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "500g",
+        "price": 190,
+        "originalPrice": 228
+      }
+    ],
+    "price": 40
+  },
+  {
+    "name": "FOREST HONEY",
+    "category": "honey",
+    "categoryName": "HONEY",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 220,
+        "originalPrice": 264
+      },
+      {
+        "label": "1250g",
+        "price": 740,
+        "originalPrice": 888
+      }
+    ],
+    "price": 220
+  },
+  {
+    "name": "MOUNTAIN HONEY",
+    "category": "honey",
+    "categoryName": "HONEY",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 450,
+        "originalPrice": 540
+      }
+    ],
+    "price": 450
+  },
+  {
+    "name": "HONEY AMLA",
+    "category": "honey",
+    "categoryName": "HONEY",
+    "weights": [
+      {
+        "label": "350g",
+        "price": 185,
+        "originalPrice": 222
+      }
+    ],
+    "price": 185
+  },
+  {
+    "name": "HONEY NUTS MIXED",
+    "category": "honey",
+    "categoryName": "HONEY",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 160,
+        "originalPrice": 192
+      },
+      {
+        "label": "500g",
+        "price": 300,
+        "originalPrice": 360
+      }
+    ],
+    "price": 160
+  },
+  {
+    "name": "KARUPPU KAHUNI",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 75,
+        "originalPrice": 90
+      }
+    ],
+    "price": 75
+  },
+  {
+    "name": "MAPPILAI SAMBA",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 70,
+        "originalPrice": 84
+      }
+    ],
+    "price": 70
+  },
+  {
+    "name": "KAATTUYANA",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 80,
+        "originalPrice": 96
+      }
+    ],
+    "price": 80
+  },
+  {
+    "name": "POONGAR",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 80,
+        "originalPrice": 96
+      }
+    ],
+    "price": 80
+  },
+  {
+    "name": "KARUNKURUVAI",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 80,
+        "originalPrice": 96
+      }
+    ],
+    "price": 80
+  },
+  {
+    "name": "KULLAKAR",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "500g",
+        "price": 80,
+        "originalPrice": 96
+      }
+    ],
+    "price": 80
+  },
+  {
+    "name": "KUTHIRAIVAALI",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 45,
+        "originalPrice": 54
+      },
+      {
+        "label": "500g",
+        "price": 90,
+        "originalPrice": 108
+      },
+      {
+        "label": "1kg",
+        "price": 170,
+        "originalPrice": 204
+      }
+    ],
+    "price": 45
+  },
+  {
+    "name": "THINAI",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 40,
+        "originalPrice": 48
+      },
+      {
+        "label": "500g",
+        "price": 80,
+        "originalPrice": 96
+      },
+      {
+        "label": "1kg",
+        "price": 150,
+        "originalPrice": 180
+      }
+    ],
+    "price": 40
+  },
+  {
+    "name": "VARAHU",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 45,
+        "originalPrice": 54
+      },
+      {
+        "label": "500g",
+        "price": 90,
+        "originalPrice": 108
+      },
+      {
+        "label": "1kg",
+        "price": 170,
+        "originalPrice": 204
+      }
+    ],
+    "price": 45
+  },
+  {
+    "name": "SAAMAI",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "500g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "1kg",
+        "price": 190,
+        "originalPrice": 228
+      }
+    ],
+    "price": 50
+  },
+  {
+    "name": "BLACK URID",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 45,
+        "originalPrice": 54
+      },
+      {
+        "label": "500g",
+        "price": 85,
+        "originalPrice": 102
+      },
+      {
+        "label": "1kg",
+        "price": 160,
+        "originalPrice": 192
+      }
+    ],
+    "price": 45
+  },
+  {
+    "name": "RAAGI",
+    "category": "rice-millet",
+    "categoryName": "RICE & MILLET",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 20,
+        "originalPrice": 24
+      },
+      {
+        "label": "500g",
+        "price": 40,
+        "originalPrice": 48
+      },
+      {
+        "label": "1kg",
+        "price": 75,
+        "originalPrice": 90
+      }
+    ],
+    "price": 20
+  },
+  {
+    "name": "PEPPER",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 90,
+        "originalPrice": 108
+      },
+      {
+        "label": "250g",
+        "price": 225,
+        "originalPrice": 270
+      },
+      {
+        "label": "500g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "1kg",
+        "price": 880,
+        "originalPrice": 1056
+      }
+    ],
+    "price": 90
+  },
+  {
+    "name": "JEERAGAM",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 40,
+        "originalPrice": 48
+      },
+      {
+        "label": "250g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "500g",
+        "price": 200,
+        "originalPrice": 240
+      },
+      {
+        "label": "1kg",
+        "price": 380,
+        "originalPrice": 456
+      }
+    ],
+    "price": 40
+  },
+  {
+    "name": "SOMBU",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 40,
+        "originalPrice": 48
+      },
+      {
+        "label": "250g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "500g",
+        "price": 200,
+        "originalPrice": 240
+      },
+      {
+        "label": "1kg",
+        "price": 380,
+        "originalPrice": 456
+      }
+    ],
+    "price": 40
+  },
+  {
+    "name": "KADUGU",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 20,
+        "originalPrice": 24
+      },
+      {
+        "label": "250g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "500g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "1kg",
+        "price": 190,
+        "originalPrice": 228
+      }
+    ],
+    "price": 20
+  },
+  {
+    "name": "VENTHAYAM",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 20,
+        "originalPrice": 24
+      },
+      {
+        "label": "250g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "500g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "1kg",
+        "price": 190,
+        "originalPrice": 228
+      }
+    ],
+    "price": 20
+  },
+  {
+    "name": "SADHA PATTAI",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "100g",
+        "price": 60,
+        "originalPrice": 72
+      },
+      {
+        "label": "500g",
+        "price": 300,
+        "originalPrice": 360
+      },
+      {
+        "label": "1kg",
+        "price": 590,
+        "originalPrice": 708
+      }
+    ],
+    "price": 60
+  },
+  {
+    "name": "SRILANKA PATTAI",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 100,
+        "originalPrice": 120
+      },
+      {
+        "label": "250g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "500g",
+        "price": 1000,
+        "originalPrice": 1200
+      },
+      {
+        "label": "1kg",
+        "price": 1980,
+        "originalPrice": 2376
+      }
+    ],
+    "price": 100
+  },
+  {
+    "name": "CLOVE",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 65,
+        "originalPrice": 78
+      },
+      {
+        "label": "250g",
+        "price": 325,
+        "originalPrice": 390
+      },
+      {
+        "label": "500g",
+        "price": 650,
+        "originalPrice": 780
+      },
+      {
+        "label": "1kg",
+        "price": 1280,
+        "originalPrice": 1536
+      }
+    ],
+    "price": 65
+  },
+  {
+    "name": "STAR ANISE",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 55,
+        "originalPrice": 66
+      },
+      {
+        "label": "250g",
+        "price": 275,
+        "originalPrice": 330
+      },
+      {
+        "label": "500g",
+        "price": 550,
+        "originalPrice": 660
+      },
+      {
+        "label": "1kg",
+        "price": 1080,
+        "originalPrice": 1296
+      }
+    ],
+    "price": 55
+  },
+  {
+    "name": "OOMAM",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 30,
+        "originalPrice": 36
+      },
+      {
+        "label": "250g",
+        "price": 150,
+        "originalPrice": 180
+      },
+      {
+        "label": "500g",
+        "price": 300,
+        "originalPrice": 360
+      },
+      {
+        "label": "1kg",
+        "price": 580,
+        "originalPrice": 696
+      }
+    ],
+    "price": 30
+  },
+  {
+    "name": "SATHKUPPAI",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 30,
+        "originalPrice": 36
+      },
+      {
+        "label": "250g",
+        "price": 150,
+        "originalPrice": 180
+      },
+      {
+        "label": "500g",
+        "price": 300,
+        "originalPrice": 360
+      },
+      {
+        "label": "1kg",
+        "price": 580,
+        "originalPrice": 696
+      }
+    ],
+    "price": 30
+  },
+  {
+    "name": "KARUNJEERAGAM",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 30,
+        "originalPrice": 36
+      },
+      {
+        "label": "250g",
+        "price": 150,
+        "originalPrice": 180
+      },
+      {
+        "label": "500g",
+        "price": 300,
+        "originalPrice": 360
+      },
+      {
+        "label": "1kg",
+        "price": 580,
+        "originalPrice": 696
+      }
+    ],
+    "price": 30
+  },
+  {
+    "name": "BRINJI LEAF",
+    "category": "masala",
+    "categoryName": "MASALA",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 15,
+        "originalPrice": 18
+      },
+      {
+        "label": "250g",
+        "price": 75,
+        "originalPrice": 90
+      },
+      {
+        "label": "500g",
+        "price": 150,
+        "originalPrice": 180
+      },
+      {
+        "label": "1kg",
+        "price": 280,
+        "originalPrice": 336
+      }
+    ],
+    "price": 15
+  },
+  {
+    "name": "MUTAVATTUKAL",
+    "category": "soup",
+    "categoryName": "SOUP",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "500g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "1kg",
+        "price": 980,
+        "originalPrice": 1200
+      }
+    ],
+    "price": 50
+  },
+  {
+    "name": "MUTAKATTRAAN",
+    "category": "soup",
+    "categoryName": "SOUP",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "500g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "1kg",
+        "price": 980,
+        "originalPrice": 1200
+      }
+    ],
+    "price": 50
+  },
+  {
+    "name": "VALLARAI",
+    "category": "soup",
+    "categoryName": "SOUP",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "500g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "1kg",
+        "price": 980,
+        "originalPrice": 1200
+      }
+    ],
+    "price": 50
+  },
+  {
+    "name": "THUTHUVALAI",
+    "category": "soup",
+    "categoryName": "SOUP",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "500g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "1kg",
+        "price": 980,
+        "originalPrice": 1200
+      }
+    ],
+    "price": 50
+  },
+  {
+    "name": "MURUNGAI ILAI",
+    "category": "soup",
+    "categoryName": "SOUP",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "500g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "1kg",
+        "price": 980,
+        "originalPrice": 1200
+      }
+    ],
+    "price": 50
+  },
+  {
+    "name": "AAVAARAM POO",
+    "category": "soup",
+    "categoryName": "SOUP",
+    "weights": [
+      {
+        "label": "50g",
+        "price": 50,
+        "originalPrice": 60
+      },
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      },
+      {
+        "label": "500g",
+        "price": 500,
+        "originalPrice": 600
+      },
+      {
+        "label": "1kg",
+        "price": 980,
+        "originalPrice": 1200
+      }
+    ],
+    "price": 50
+  },
+  {
+    "name": "KARUPPU KAHUNI KANCHI",
+    "category": "viral-product",
+    "categoryName": "WEIGHT LOSS PRODUCT",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 120,
+        "originalPrice": 144
+      }
+    ],
+    "price": 120
+  },
+  {
+    "name": "MILK KEFIR GRAINS (",
+    "category": "viral-product",
+    "categoryName": "WEIGHT LOSS PRODUCT",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      }
+    ],
+    "price": 250
+  },
+  {
+    "name": "KUMBUCHA SCOOPY",
+    "category": "viral-product",
+    "categoryName": "WEIGHT LOSS PRODUCT",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      }
+    ],
+    "price": 250
+  },
+  {
+    "name": "REDMUSHROOM BLACK COFFEE (",
+    "category": "viral-product",
+    "categoryName": "WEIGHT LOSS PRODUCT",
+    "weights": [
+      {
+        "label": "250g",
+        "price": 250,
+        "originalPrice": 300
+      }
+    ],
+    "price": 250
+  }
+]
