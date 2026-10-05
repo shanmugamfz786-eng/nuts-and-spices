@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v8_1791194011138';
+export const CATALOG_VERSION = 'v8_1791194011521';
 
 export const CATEGORIES = [
   {
@@ -3010,7 +3010,8 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    "isFeaturedToday": true
   },
   {
     "id": "vir-1791180887986-1",
@@ -3324,7 +3325,8 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    "isFeaturedToday": true
   },
   {
     "id": "nut-1791180887986-9",
@@ -3593,7 +3595,8 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    "isFeaturedToday": true
   },
   {
     "id": "mal-1791180887986-17",
@@ -3976,7 +3979,8 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    "isFeaturedToday": true
   },
   {
     "id": "vir-1791180887986-28",
