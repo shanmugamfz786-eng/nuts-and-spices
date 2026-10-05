@@ -4,26 +4,22 @@ import { PRODUCTS } from '../data/products.js';
 
 const seedProductImageMap = new Map(PRODUCTS.map(p => [p.id, p.image]));
 
+import { API_BASE_URL } from '../api/index.js';
+
 function getEndpoints() {
   const endpoints = [];
-  if (typeof window !== 'undefined' && window.location && window.location.origin) {
-    endpoints.push(`${window.location.origin}/api/catalog`);
-  } else {
-    endpoints.push('/api/catalog');
-  }
+  endpoints.push(`${API_BASE_URL}/catalog`);
 
   // If testing on localhost, also push to live production server so changes show on https://nuts-spices-e-commerce.vercel.app/
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    endpoints.push('https://nuts-spices-e-commerce.vercel.app/api/catalog');
+    endpoints.push('https://nuts-spices-backend.onrender.com/api/catalog'); // Updated to Render
   }
 
   return [...new Set(endpoints)];
 }
 
 export async function fetchCloudCatalog() {
-  const primaryUrl = typeof window !== 'undefined' && window.location && window.location.origin 
-    ? `${window.location.origin}/api/catalog` 
-    : '/api/catalog';
+  const primaryUrl = `${API_BASE_URL}/catalog`;
 
   try {
     const res = await fetch(primaryUrl, {
