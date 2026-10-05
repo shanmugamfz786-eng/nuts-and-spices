@@ -457,12 +457,6 @@ export const CartProvider = ({ children }) => {
       return { success: false, message: 'User not found. Please register first.' };
     }
   };
-      setUser(fallbackUser);
-      setRegisteredUsers(prev => [...prev, fallbackUser]);
-    }
-
-    setIsAuthModalOpen(false);
-  };
 
   const logoutUser = () => {
     setUser(null);
