@@ -430,34 +430,33 @@ export const CartProvider = ({ children }) => {
   const loginUser = (loginData) => {
     const identifier = (loginData.identifier || loginData.phone || loginData.email || '').trim().toLowerCase();
     
+    // Bypass for WhatsApp quick login or mock logins where name is explicitly provided
+    if (loginData.name && !loginData.password) {
+      setUser(loginData);
+      setIsAuthModalOpen(false);
+      return { success: true };
+    }
+
     const foundUser = registeredUsers.find(u => 
       (u.phone && u.phone.toLowerCase() === identifier) ||
       (u.email && u.email.toLowerCase() === identifier)
     );
 
     if (foundUser) {
+      if (foundUser.password !== loginData.password) {
+        return { success: false, message: 'Incorrect password.' };
+      }
       setUser({
         name: foundUser.name,
         phone: foundUser.phone,
         email: foundUser.email
       });
-    } else if (loginData.name) {
-      setUser(loginData);
-      setRegisteredUsers(prev => [...prev, {
-        name: loginData.name,
-        phone: loginData.phone || loginData.identifier || '',
-        email: loginData.email || '',
-        password: loginData.password || ''
-      }]);
+      setIsAuthModalOpen(false);
+      return { success: true };
     } else {
-      const fallbackName = identifier.includes('@') ? identifier.split('@')[0] : 'Customer';
-      const formattedName = fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1);
-      const fallbackUser = {
-        name: formattedName,
-        identifier: identifier,
-        email: identifier.includes('@') ? identifier : 'customer@nutsandspices.in',
-        phone: identifier.includes('@') ? '9876543210' : identifier
-      };
+      return { success: false, message: 'User not found. Please register first.' };
+    }
+  };
       setUser(fallbackUser);
       setRegisteredUsers(prev => [...prev, fallbackUser]);
     }

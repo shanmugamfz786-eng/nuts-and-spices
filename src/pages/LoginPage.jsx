@@ -82,14 +82,19 @@ export default function LoginPage() {
       return;
     }
 
-    setSuccessMessage('Logged in successfully!');
-    setTimeout(() => {
-      loginUser({
-        identifier: id,
-        password: loginPassword
-      });
-      navigate('home');
-    }, 600);
+    const res = loginUser({
+      identifier: id,
+      password: loginPassword
+    });
+
+    if (res && res.success) {
+      setSuccessMessage('Logged in successfully!');
+      setTimeout(() => {
+        navigate('home');
+      }, 600);
+    } else {
+      setErrorMessage(res?.message || 'Invalid mobile/email or password.');
+    }
   };
 
   const handleWhatsAppQuickLogin = () => {
