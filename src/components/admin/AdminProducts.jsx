@@ -1,8 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useCart, isProductActive } from '../../context/CartContext';
-import { 
-  Package, Plus, Search, Edit, Trash2, X, Upload, Star 
-} from 'lucide-react';
+import { Package, Plus, Search, Edit, Trash2, X, Upload, Star } from 'lucide-react';
+import { API_BASE_URL } from '../../api';
 
 export default function AdminProducts() {
   const { products, categories, addProduct, updateProduct, deleteProduct, toggleProductStatus, setAdminTab } = useCart();
@@ -158,7 +157,7 @@ export default function AdminProducts() {
         const formData = new FormData();
         formData.append('image', file);
 
-        const res = await fetch('http://localhost:5001/api/upload', {
+        const res = await fetch(`${API_BASE_URL}/upload`, {
           method: 'POST',
           body: formData
         });
@@ -230,7 +229,7 @@ export default function AdminProducts() {
       updateProduct(editingProduct.id, payload);
       // If the image was changed or removed, delete the old image from Cloudinary
       if (editingProduct.image && editingProduct.image !== finalImage && editingProduct.image.includes('res.cloudinary.com')) {
-        fetch('http://localhost:5001/api/upload/delete', {
+        fetch(`${API_BASE_URL}/upload/delete`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ imageUrl: editingProduct.image })
@@ -734,7 +733,7 @@ export default function AdminProducts() {
               <button
                 onClick={() => {
                   if (deleteConfirmProduct.image && deleteConfirmProduct.image.includes('res.cloudinary.com')) {
-                    fetch('http://localhost:5001/api/upload/delete', {
+                    fetch(`${API_BASE_URL}/upload/delete`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ imageUrl: deleteConfirmProduct.image })

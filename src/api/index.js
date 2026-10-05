@@ -1,6 +1,5 @@
-const API_BASE_URL = (typeof window !== 'undefined' && window.location && window.location.origin)
-  ? `${window.location.origin}/api`
-  : 'http://localhost:5001/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL 
+  || (import.meta.env.PROD ? 'https://your-render-url.onrender.com/api' : '/api');
 
 export const apiFetch = async (endpoint, options = {}) => {
   try {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { fetchAdminStatsApi, fetchOrdersApi, updateOrderStatusApi, createProductApi } from '../api';
+import { fetchAdminStatsApi, fetchOrdersApi, updateOrderStatusApi, createProductApi, API_BASE_URL } from '../api';
 import { ShoppingBag, Users, DollarSign, Package, CheckCircle2, Clock, Truck, ShieldCheck, Plus, RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
     formData.append('image', file);
 
     try {
-      const res = await fetch('http://localhost:5001/api/upload', {
+      const res = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData
       });
