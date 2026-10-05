@@ -10,7 +10,6 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import { initializeDatabase } from './scripts/initDb.js';
 import { queryDb } from './config/db.js';
 import { CATEGORIES, PRODUCTS } from '../src/data/products.js';
-import fs from 'fs';
 
 dotenv.config();
 
@@ -127,25 +126,7 @@ app.get('/api/catalog', async (req, res) => {
     console.warn('DB catalog fetch note:', err.message);
   }
 
-  // 2. If not found in DB settings, check /tmp file fallback on Vercel
-  if (!hasMasterCatalog) {
-    try {
-      if (fs.existsSync('/tmp/master_catalog.json')) {
-        const fileData = JSON.parse(fs.readFileSync('/tmp/master_catalog.json', 'utf8'));
-        if (fileData && Array.isArray(fileData.products) && Array.isArray(fileData.categories)) {
-          products = fileData.products.map(p => ({
-            ...p,
-            image: p.image || seedProductImageMap.get(p.id) || ''
-          }));
-          categories = fileData.categories;
-          updatedAt = fileData.updatedAt || updatedAt;
-          hasMasterCatalog = true;
-        }
-      }
-    } catch {}
-  }
-
-  // 3. Only if NO master catalog was ever saved, initialize from seed PRODUCTS and CATEGORIES
+  // 2. Only if NO master catalog was ever saved, initialize from seed PRODUCTS and CATEGORIES
   if (!hasMasterCatalog) {
     products = products || PRODUCTS;
     categories = categories || CATEGORIES;
