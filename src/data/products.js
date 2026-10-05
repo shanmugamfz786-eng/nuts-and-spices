@@ -2762,4 +2762,1027 @@ export const PRODUCTS = [
     "active": true,
     "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800"
   }
+,
+{
+  "id": "vir-1791180887986-0",
+  "name": "MILK KEFIR GRAINS",
+  "category": "viral-product",
+  "categoryName": "VIRAL PRODUCT",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "15g to 18gr",
+      "price": 550,
+      "originalPrice": 660
+    }
+  ],
+  "description": "Premium quality milk kefir grains sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 550,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "vir-1791180887986-1",
+  "name": "PSHYLIUM HUSK @ ISABGOL",
+  "category": "viral-product",
+  "categoryName": "VIRAL PRODUCT",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 150,
+      "originalPrice": 180
+    },
+    {
+      "label": "250g",
+      "price": 375,
+      "originalPrice": 450
+    }
+  ],
+  "description": "Premium quality pshylium husk @ isabgol sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 150,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "vir-1791180887986-2",
+  "name": "PATHIMUGAM",
+  "category": "viral-product",
+  "categoryName": "VIRAL PRODUCT",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 140,
+      "originalPrice": 168
+    },
+    {
+      "label": "500g",
+      "price": 280,
+      "originalPrice": 336
+    },
+    {
+      "label": "1kg",
+      "price": 500,
+      "originalPrice": 600
+    }
+  ],
+  "description": "Premium quality pathimugam sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 140,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "nut-1791180887986-3",
+  "name": "CALIFORNIA REGULAR  ALMOND",
+  "category": "nuts-dry-fruits",
+  "categoryName": "NUTS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 120,
+      "originalPrice": 144
+    },
+    {
+      "label": "250g",
+      "price": 300,
+      "originalPrice": 360
+    },
+    {
+      "label": "500g",
+      "price": 600,
+      "originalPrice": 720
+    },
+    {
+      "label": "1kg",
+      "price": 1200,
+      "originalPrice": 1440
+    }
+  ],
+  "description": "Premium quality california regular  almond sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 120,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "nut-1791180887986-4",
+  "name": "CALIFORNIA MINI BOLD  ALMOND",
+  "category": "nuts-dry-fruits",
+  "categoryName": "NUTS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 330,
+      "originalPrice": 396
+    },
+    {
+      "label": "500g",
+      "price": 650,
+      "originalPrice": 780
+    },
+    {
+      "label": "1kg",
+      "price": 1300,
+      "originalPrice": 1560
+    }
+  ],
+  "description": "Premium quality california mini bold  almond sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 330,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "nut-1791180887986-5",
+  "name": "CALIFORNIA BOLD  ALMOND",
+  "category": "nuts-dry-fruits",
+  "categoryName": "NUTS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 350,
+      "originalPrice": 420
+    },
+    {
+      "label": "500g",
+      "price": 700,
+      "originalPrice": 840
+    },
+    {
+      "label": "1kg",
+      "price": 1380,
+      "originalPrice": 1656
+    }
+  ],
+  "description": "Premium quality california bold  almond sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 350,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "nut-1791180887986-6",
+  "name": "CASHEW",
+  "category": "nuts-dry-fruits",
+  "categoryName": "NUTS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 100,
+      "originalPrice": 120
+    },
+    {
+      "label": "250g",
+      "price": 240,
+      "originalPrice": 288
+    },
+    {
+      "label": "500g",
+      "price": 480,
+      "originalPrice": 576
+    },
+    {
+      "label": "1kg",
+      "price": 940,
+      "originalPrice": 1128
+    }
+  ],
+  "description": "Premium quality cashew sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 100,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "nut-1791180887986-7",
+  "name": "HAZALNUT",
+  "category": "nuts-dry-fruits",
+  "categoryName": "NUTS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 300,
+      "originalPrice": 360
+    },
+    {
+      "label": "250g",
+      "price": 750,
+      "originalPrice": 900
+    },
+    {
+      "label": "500g",
+      "price": 1500,
+      "originalPrice": 1800
+    },
+    {
+      "label": "1kg",
+      "price": 2950,
+      "originalPrice": 3540
+    }
+  ],
+  "description": "Premium quality hazalnut sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 300,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "nut-1791180887986-8",
+  "name": "STRABERRY",
+  "category": "nuts-dry-fruits",
+  "categoryName": "NUTS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 85,
+      "originalPrice": 102
+    },
+    {
+      "label": "250g",
+      "price": 210,
+      "originalPrice": 252
+    },
+    {
+      "label": "500g",
+      "price": 400,
+      "originalPrice": 480
+    }
+  ],
+  "description": "Premium quality straberry sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 85,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "nut-1791180887986-9",
+  "name": "BLUBERRY",
+  "category": "nuts-dry-fruits",
+  "categoryName": "NUTS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 160,
+      "originalPrice": 192
+    },
+    {
+      "label": "250g",
+      "price": 400,
+      "originalPrice": 480
+    },
+    {
+      "label": "500g",
+      "price": 780,
+      "originalPrice": 936
+    }
+  ],
+  "description": "Premium quality bluberry sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 160,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "dat-1791180887986-10",
+  "name": "AJWA",
+  "category": "dates",
+  "categoryName": "DATES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 330,
+      "originalPrice": 396
+    },
+    {
+      "label": "1kg",
+      "price": 640,
+      "originalPrice": 768
+    }
+  ],
+  "description": "Premium quality ajwa sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 330,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "dat-1791180887986-11",
+  "name": "SAFAVI KALIMA",
+  "category": "dates",
+  "categoryName": "DATES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 290,
+      "originalPrice": 348
+    },
+    {
+      "label": "1kg",
+      "price": 560,
+      "originalPrice": 672
+    }
+  ],
+  "description": "Premium quality safavi kalima sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 290,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "dat-1791180887986-12",
+  "name": "KALUTTU",
+  "category": "dates",
+  "categoryName": "DATES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 220,
+      "originalPrice": 264
+    },
+    {
+      "label": "1kg",
+      "price": 440,
+      "originalPrice": 528
+    }
+  ],
+  "description": "Premium quality kaluttu sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 220,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "dat-1791180887986-13",
+  "name": "MASAFATI",
+  "category": "dates",
+  "categoryName": "DATES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 220,
+      "originalPrice": 264
+    },
+    {
+      "label": "1kg",
+      "price": 440,
+      "originalPrice": 528
+    }
+  ],
+  "description": "Premium quality masafati sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 220,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "dat-1791180887986-14",
+  "name": "BROWN DATES SEED",
+  "category": "dates",
+  "categoryName": "DATES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 100,
+      "originalPrice": 120
+    },
+    {
+      "label": "1kg",
+      "price": 200,
+      "originalPrice": 240
+    }
+  ],
+  "description": "Premium quality brown dates seed sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 100,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "dat-1791180887986-15",
+  "name": "BROWN DATES SEEDLESS",
+  "category": "dates",
+  "categoryName": "DATES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 145,
+      "originalPrice": 174
+    },
+    {
+      "label": "1kg",
+      "price": 290,
+      "originalPrice": 348
+    }
+  ],
+  "description": "Premium quality brown dates seedless sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 145,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "mal-1791180887986-16",
+  "name": "HEALTH MIX POWDER",
+  "category": "malt-beverages",
+  "categoryName": "MALT & BEVERAGES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 140,
+      "originalPrice": 168
+    },
+    {
+      "label": "1kg",
+      "price": 280,
+      "originalPrice": 336
+    }
+  ],
+  "description": "Premium quality health mix powder sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 140,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "mal-1791180887986-17",
+  "name": "MILK KEFIR GRAINS",
+  "category": "malt-beverages",
+  "categoryName": "MALT & BEVERAGES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 250,
+      "originalPrice": 300
+    }
+  ],
+  "description": "Premium quality milk kefir grains sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 250,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "mal-1791180887986-18",
+  "name": "BADHAM PISIN",
+  "category": "malt-beverages",
+  "categoryName": "MALT & BEVERAGES",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 55,
+      "originalPrice": 66
+    },
+    {
+      "label": "250g",
+      "price": 135,
+      "originalPrice": 162
+    },
+    {
+      "label": "500g",
+      "price": 270,
+      "originalPrice": 324
+    }
+  ],
+  "description": "Premium quality badham pisin sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 55,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "see-1791180887986-19",
+  "name": "PUPMKIN",
+  "category": "seeds-items",
+  "categoryName": "SEEDS ITEMS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 70,
+      "originalPrice": 84
+    },
+    {
+      "label": "250g",
+      "price": 175,
+      "originalPrice": 210
+    },
+    {
+      "label": "500g",
+      "price": 340,
+      "originalPrice": 408
+    }
+  ],
+  "description": "Premium quality pupmkin sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 70,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "see-1791180887986-20",
+  "name": "FALX",
+  "category": "seeds-items",
+  "categoryName": "SEEDS ITEMS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 30,
+      "originalPrice": 36
+    },
+    {
+      "label": "250g",
+      "price": 75,
+      "originalPrice": 90
+    },
+    {
+      "label": "500g",
+      "price": 140,
+      "originalPrice": 168
+    }
+  ],
+  "description": "Premium quality falx sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 30,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "see-1791180887986-21",
+  "name": "COCUMER",
+  "category": "seeds-items",
+  "categoryName": "SEEDS ITEMS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 90,
+      "originalPrice": 108
+    },
+    {
+      "label": "250g",
+      "price": 225,
+      "originalPrice": 270
+    },
+    {
+      "label": "500g",
+      "price": 440,
+      "originalPrice": 528
+    }
+  ],
+  "description": "Premium quality cocumer sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 90,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "see-1791180887986-22",
+  "name": "FRIED PEANUT",
+  "category": "seeds-items",
+  "categoryName": "SEEDS ITEMS",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 55,
+      "originalPrice": 66
+    },
+    {
+      "label": "250g",
+      "price": 110,
+      "originalPrice": 132
+    },
+    {
+      "label": "500g",
+      "price": 210,
+      "originalPrice": 252
+    }
+  ],
+  "description": "Premium quality fried peanut sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 55,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "ric-1791180887986-23",
+  "name": "KARUPPU KAHUNI",
+  "category": "rice-millet",
+  "categoryName": "RICE & MILLET",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 75,
+      "originalPrice": 90
+    }
+  ],
+  "description": "Premium quality karuppu kahuni sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 75,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "ric-1791180887986-24",
+  "name": "KAATTUYANA",
+  "category": "rice-millet",
+  "categoryName": "RICE & MILLET",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "500g",
+      "price": 80,
+      "originalPrice": 96
+    }
+  ],
+  "description": "Premium quality kaattuyana sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 80,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "ric-1791180887986-25",
+  "name": "VARAHU",
+  "category": "rice-millet",
+  "categoryName": "RICE & MILLET",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 45,
+      "originalPrice": 54
+    },
+    {
+      "label": "500g",
+      "price": 90,
+      "originalPrice": 108
+    },
+    {
+      "label": "1kg",
+      "price": 170,
+      "originalPrice": 204
+    }
+  ],
+  "description": "Premium quality varahu sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 45,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "mas-1791180887986-26",
+  "name": "PEPPER",
+  "category": "masala",
+  "categoryName": "MASALA",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "100g",
+      "price": 90,
+      "originalPrice": 108
+    },
+    {
+      "label": "250g",
+      "price": 225,
+      "originalPrice": 270
+    },
+    {
+      "label": "500g",
+      "price": 250,
+      "originalPrice": 300
+    },
+    {
+      "label": "1kg",
+      "price": 880,
+      "originalPrice": 1056
+    }
+  ],
+  "description": "Premium quality pepper sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 90,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "vir-1791180887986-27",
+  "name": "MILK KEFIR GRAINS",
+  "category": "viral-product",
+  "categoryName": "WEIGHT LOSS PRODUCT",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 250,
+      "originalPrice": 300
+    }
+  ],
+  "description": "Premium quality milk kefir grains sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 250,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+},
+{
+  "id": "vir-1791180887986-28",
+  "name": "REDMUSHROOM BLACK COFFEE",
+  "category": "viral-product",
+  "categoryName": "WEIGHT LOSS PRODUCT",
+  "badge": "New Arrival",
+  "rating": 4.5,
+  "reviews": 12,
+  "weights": [
+    {
+      "label": "250g",
+      "price": 250,
+      "originalPrice": 300
+    }
+  ],
+  "description": "Premium quality redmushroom black coffee sourced organically.",
+  "origin": "India",
+  "shelfLife": "6 Months",
+  "price": 250,
+  "status": "Active",
+  "active": true,
+  "discountPercent": 15,
+  "discount": "15% OFF",
+  "stock": 50,
+  "ingredients": "100% Natural",
+  "storage": "Cool dry place",
+  "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+}
 ];
