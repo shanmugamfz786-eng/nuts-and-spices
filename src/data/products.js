@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v8_1791194015625';
+export const CATALOG_VERSION = 'v8_1791194016737';
 
 export const CATEGORIES = [
   {
@@ -3325,8 +3325,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
-    "isFeaturedToday": true
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
   },
   {
     "id": "nut-1791180887986-9",
@@ -3595,8 +3594,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
-    "isFeaturedToday": true
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
   },
   {
     "id": "mal-1791180887986-17",
