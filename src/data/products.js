@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v8_1791194005961';
+export const CATALOG_VERSION = 'v8_1791194006354';
 
 export const CATEGORIES = [
   {
@@ -1911,7 +1911,8 @@ export const PRODUCTS = [
     "price": 80,
     "status": "Active",
     "active": true,
-    "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800"
+    "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800",
+    "isFeaturedToday": true
   },
   {
     "id": "rm-07",
