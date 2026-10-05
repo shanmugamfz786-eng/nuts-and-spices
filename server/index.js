@@ -10,6 +10,7 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import { initializeDatabase } from './scripts/initDb.js';
 import { queryDb } from './config/db.js';
 import { CATEGORIES, PRODUCTS } from '../src/data/products.js';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -94,7 +95,6 @@ export const syncServerCatalog = async (products, categories) => {
 
     // Save to /tmp filesystem for Vercel Lambda container reuse
     try {
-      const fs = await import('fs');
       fs.writeFileSync('/tmp/master_catalog.json', catalogJson);
     } catch {}
   } catch (err) {
@@ -130,7 +130,6 @@ app.get('/api/catalog', async (req, res) => {
   // 2. If not found in DB settings, check /tmp file fallback on Vercel
   if (!hasMasterCatalog) {
     try {
-      const fs = await import('fs');
       if (fs.existsSync('/tmp/master_catalog.json')) {
         const fileData = JSON.parse(fs.readFileSync('/tmp/master_catalog.json', 'utf8'));
         if (fileData && Array.isArray(fileData.products) && Array.isArray(fileData.categories)) {
