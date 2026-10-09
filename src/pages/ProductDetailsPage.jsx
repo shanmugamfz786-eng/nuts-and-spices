@@ -128,12 +128,12 @@ export default function ProductDetailsPage() {
                 Select Package Weight:
               </span>
               <div className="flex flex-wrap gap-2">
-                {safeWeights.map((w) => (
+                {safeWeights.map((w, i) => (
                   <button
-                    key={w.label}
+                    key={product.id + '-' + w.label + '-' + i}
                     onClick={() => setSelectedWeight(w)}
                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                      activeWeight.label === w.label
+                      activeWeight === w
                         ? 'bg-[#000000] text-white border-[#000000] shadow-md'
                         : 'bg-[#F9FAFB] text-[#000000] border-[#E5E7EB] hover:border-[#000000]'
                     }`}

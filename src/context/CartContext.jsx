@@ -515,7 +515,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product, weightObj, quantity = 1) => {
     const weightLabel = weightObj ? weightObj.label : (product.weights && product.weights[0] ? product.weights[0].label : 'Standard');
     const itemPrice = weightObj ? weightObj.price : (product.weights && product.weights[0] ? product.weights[0].price : product.price || 100);
-    const cartItemId = `${product.id}-${weightLabel}`;
+    const cartItemId = `${product.id}-${weightLabel}-${itemPrice}`;
 
     setCart(prevCart => {
       const existingIndex = prevCart.findIndex(item => item.cartItemId === cartItemId);

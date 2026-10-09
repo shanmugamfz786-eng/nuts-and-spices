@@ -28,8 +28,12 @@ export const createOrder = async (req, res) => {
       const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
       if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
          const parsedState = JSON.parse(adminStateRows[0].setting_value);
+         // Merge admin state with default PRODUCTS to prevent unavailable errors
          if (parsedState && parsedState.products && parsedState.products.length > 0) {
-            dbProducts = parsedState.products;
+           const adminProducts = parsedState.products;
+           // Add missing default products to dbProducts
+           const existingIds = new Set(adminProducts.map(p => p.id));
+           dbProducts = [...adminProducts, ...PRODUCTS.filter(p => !existingIds.has(p.id))];
          }
       }
     } catch(e) {
@@ -47,7 +51,11 @@ export const createOrder = async (req, res) => {
 
       // Find the specific weight/variant price
       const productWeights = backendProduct.weights || backendProduct.weights_json || [];
-      const variant = productWeights.find(w => w.label === item.weight);
+      // Try finding variant by label AND price first (to support duplicate labels with different prices)
+      let variant = productWeights.find(w => w.label === item.weight && Number(w.price) === Number(item.price));
+      if (!variant) {
+        variant = productWeights.find(w => w.label === item.weight);
+      }
       let realPrice = variant ? variant.price : null;
 
       // Fallback if weights are differently structured or single price
