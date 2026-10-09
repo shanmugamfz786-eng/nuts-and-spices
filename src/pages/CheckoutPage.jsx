@@ -81,7 +81,7 @@ export default function CheckoutPage() {
     
     try {
       const orderId = 'NS_' + Math.floor(100000 + Math.random() * 900000).toString();
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('nuts_spices_auth_token');
       
       const response = await fetch('/api/payment/create-session', {
         method: 'POST',
