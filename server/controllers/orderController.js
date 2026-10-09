@@ -24,6 +24,18 @@ export const createOrder = async (req, res) => {
       dbProducts = memoryStore.products.length > 0 ? memoryStore.products : PRODUCTS;
     }
 
+    try {
+      const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'master_admin_state_json'");
+      if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
+         const parsedState = JSON.parse(adminStateRows[0].setting_value);
+         if (parsedState && parsedState.products && parsedState.products.length > 0) {
+            dbProducts = parsedState.products;
+         }
+      }
+    } catch(e) {
+      console.warn('Failed to parse admin state json', e);
+    }
+
     let subtotal = 0;
     const validatedItems = [];
 
