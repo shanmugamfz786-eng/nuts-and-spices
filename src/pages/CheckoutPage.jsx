@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, CreditCard } from 'lucide-react';
+import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
   const { cart, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
@@ -15,6 +16,7 @@ export default function CheckoutPage() {
   });
 
   const [errors, setErrors] = useState({});
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   if (!user) {
     return (
@@ -71,22 +73,65 @@ export default function CheckoutPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    
+    setIsProcessingPayment(true);
+    
+    try {
+      const orderId = 'NS_' + Math.floor(100000 + Math.random() * 900000).toString();
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('/api/payment/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          orderId,
+          amount: cartTotal,
+          customerPhone: formData.phone,
+          customerEmail: user?.email || 'guest@nutsandspices.in',
+          customerName: formData.name
+        })
+      });
 
-    const orderId = Math.floor(100000 + Math.random() * 900000).toString();
-    const orderDetails = {
-      orderId,
-      customer: formData,
-      items: cart,
-      total: cartTotal,
-      timestamp: new Date().toLocaleString()
-    };
+      const data = await response.json();
 
-    createNewOrder(orderDetails);
-    clearCart();
-    navigate('order-success');
+      if (data.success && data.paymentSessionId) {
+        const cashfree = await load({
+          mode: 'production' // or 'sandbox'
+        });
+
+        const checkoutOptions = {
+          paymentSessionId: data.paymentSessionId,
+          redirectTarget: '_self' // redirect to return_url configured in backend
+        };
+
+        // Also create the order in DB so it's pending while payment happens
+        const orderDetails = {
+          orderId,
+          customer: formData,
+          items: cart,
+          total: cartTotal,
+          status: 'pending', // Pending payment
+          timestamp: new Date().toLocaleString()
+        };
+        await createNewOrder(orderDetails);
+        clearCart();
+
+        cashfree.checkout(checkoutOptions);
+      } else {
+        alert('Failed to initialize payment: ' + (data.message || 'Unknown error'));
+        setIsProcessingPayment(false);
+      }
+    } catch (err) {
+      console.error('Payment initialization error', err);
+      alert('Error initiating payment. Please try again.');
+      setIsProcessingPayment(false);
+    }
   };
 
   return (
@@ -245,10 +290,19 @@ export default function CheckoutPage() {
 
           <button
             type="submit"
-            className="w-full py-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+            disabled={isProcessingPayment}
+            className={`w-full py-4 text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 ${
+              isProcessingPayment ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#25D366] hover:bg-[#128C7E]'
+            }`}
           >
-            <Send className="w-4 h-4" />
-            <span>Place Order & Generate WhatsApp Payload</span>
+            {isProcessingPayment ? (
+              <span className="animate-pulse">Processing Payment...</span>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4" />
+                <span>Pay ₹{cartTotal.toLocaleString('en-IN')} Securely</span>
+              </>
+            )}
           </button>
         </form>
 

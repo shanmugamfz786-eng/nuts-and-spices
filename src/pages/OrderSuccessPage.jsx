@@ -6,8 +6,70 @@ import { STORE_WHATSAPP_NUMBER } from '../data/products';
 export default function OrderSuccessPage() {
   const { lastOrder, getWhatsAppUrl, navigate, storeSettings } = useCart();
   const [copied, setCopied] = React.useState(false);
+  const [paymentStatus, setPaymentStatus] = React.useState('verifying');
+  const [isCashfreeCallback, setIsCashfreeCallback] = React.useState(false);
 
-  if (!lastOrder) {
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order_id');
+    if (orderId) {
+      setIsCashfreeCallback(true);
+      // Verify payment
+      const token = localStorage.getItem('token');
+      fetch('/api/payment/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.isPaid) {
+          setPaymentStatus('success');
+        } else {
+          setPaymentStatus('failed');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setPaymentStatus('failed');
+      });
+    } else {
+      setIsCashfreeCallback(false);
+      setPaymentStatus('success');
+    }
+  }, []);
+
+  if (isCashfreeCallback && paymentStatus === 'verifying') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+        <h2 className="text-xl font-bold text-[#000000] animate-pulse">Verifying Payment with Cashfree...</h2>
+        <div className="w-12 h-12 border-4 border-[#25D366] border-t-transparent rounded-full animate-spin mx-auto"></div>
+      </div>
+    );
+  }
+
+  if (isCashfreeCallback && paymentStatus === 'failed') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500">
+          <span className="text-4xl font-bold">!</span>
+        </div>
+        <h2 className="text-xl font-bold text-[#000000]">Payment Failed or Pending</h2>
+        <p className="text-sm text-[#000000]">We could not verify your payment. If money was deducted, it will be refunded within 3-5 business days.</p>
+        <button
+          onClick={() => navigate('checkout')}
+          className="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold text-xs rounded-xl"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!lastOrder && !isCashfreeCallback) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold text-[#000000]">No recent order found</h2>
@@ -38,13 +100,13 @@ export default function OrderSuccessPage() {
 
         <div className="space-y-1">
           <span className="text-xs font-extrabold uppercase tracking-widest text-green-800 bg-green-50 px-3 py-1 rounded-full border border-green-200">
-            Order Saved Successfully
+            {isCashfreeCallback ? 'Payment Successful & Order Saved' : 'Order Saved Successfully'}
           </span>
           <h1 className="text-3xl font-black font-serif text-[#000000]">
-            Order #{lastOrder.orderId} Created!
+            Order #{lastOrder?.orderId || 'Confirmed'}!
           </h1>
           <p className="text-xs sm:text-sm text-[#000000] max-w-md mx-auto">
-            Click the WhatsApp button below to automatically launch WhatsApp and send your order directly to our store.
+            Your payment was successful. Click the WhatsApp button below to automatically launch WhatsApp and send your order details directly to our store manager for quick dispatch.
           </p>
         </div>
 
@@ -93,6 +155,7 @@ export default function OrderSuccessPage() {
       </div>
 
       {/* Customer Info Card */}
+      {lastOrder && (
       <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-sm space-y-4">
         <h3 className="text-sm font-bold text-[#000000] uppercase tracking-wider border-b border-[#F9FAFB] pb-2">
           Recipient Details
@@ -116,6 +179,7 @@ export default function OrderSuccessPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Back to Home CTA */}
       <div className="text-center pt-4">
