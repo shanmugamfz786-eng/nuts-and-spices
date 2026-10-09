@@ -2,8 +2,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { queryDb, memoryStore } from '../config/db.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'nuts_spices_super_secret_jwt_key_2026';
-
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined.");
+  if (process.env.NODE_ENV === 'production') process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET || 'nuts_spices_dev_secret_only';
 export const registerCustomer = async (req, res) => {
   try {
     const { name, phone, email, password } = req.body;

@@ -182,6 +182,18 @@ export const getOrderById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
+    // Enforce ownership
+    if (req.user.role !== 'admin') {
+      const userPhone = (req.user.phone || '').trim().toLowerCase();
+      const userEmail = (req.user.email || '').trim().toLowerCase();
+      const orderPhone = (order.phone || '').trim().toLowerCase();
+      const orderEmail = (order.email || '').trim().toLowerCase();
+
+      if ((userPhone && userPhone !== orderPhone) && (userEmail && userEmail !== orderEmail)) {
+        return res.status(403).json({ success: false, message: 'You are not authorized to view this order.' });
+      }
+    }
+
     res.json({
       success: true,
       order
