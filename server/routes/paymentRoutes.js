@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/create-session', authMiddleware, createPaymentSession);
-router.post('/verify', authMiddleware, verifyPayment);
+router.post('/create-session', createPaymentSession);
+router.post('/verify', verifyPayment);
 
 export default router;

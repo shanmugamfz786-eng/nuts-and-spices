@@ -23,7 +23,7 @@ export const createPaymentSession = async (req, res) => {
         customer_name: customerName || 'Guest User'
       },
       order_meta: {
-        return_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/order-success?order_id={order_id}`
+        return_url: `${process.env.FRONTEND_URL || 'https://localhost:5173'}/order-success?order_id={order_id}`
       }
     };
 
