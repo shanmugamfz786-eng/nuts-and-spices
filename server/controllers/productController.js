@@ -17,8 +17,14 @@ export const getAllProducts = async (req, res) => {
       if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
          const parsedState = JSON.parse(adminStateRows[0].setting_value);
          if (parsedState && parsedState.products && parsedState.products.length > 0) {
-            products = parsedState.products;
-         }
+              const existingIds = new Set(products.map(p => p.id));
+              for (const p of parsedState.products) {
+                if (!existingIds.has(p.id)) {
+                  products.push(p);
+                  existingIds.add(p.id);
+                }
+              }
+           }
       }
     } catch(e) {}
 

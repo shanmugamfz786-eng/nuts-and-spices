@@ -31,9 +31,22 @@ export const createOrder = async (req, res) => {
          // Merge admin state with default PRODUCTS to prevent unavailable errors
          if (parsedState && parsedState.products && parsedState.products.length > 0) {
            const adminProducts = parsedState.products;
-           // Add missing default products to dbProducts
-           const existingIds = new Set(adminProducts.map(p => p.id));
-           dbProducts = [...adminProducts, ...PRODUCTS.filter(p => !existingIds.has(p.id))];
+           // Merge admin state with both database products and default PRODUCTS
+           const existingIds = new Set(dbProducts.map(p => p.id));
+           // Add adminProducts not already in DB
+           for (const p of adminProducts) {
+             if (!existingIds.has(p.id)) {
+               dbProducts.push(p);
+               existingIds.add(p.id);
+             }
+           }
+           // Add default PRODUCTS not already in DB or admin
+           for (const p of PRODUCTS) {
+             if (!existingIds.has(p.id)) {
+               dbProducts.push(p);
+               existingIds.add(p.id);
+             }
+           }
          }
       }
     } catch(e) {
