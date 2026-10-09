@@ -5,16 +5,17 @@ import { Heart, ShoppingCart, Check, ChevronDown } from 'lucide-react';
 export default function ProductCard({ product, viewMode = 'grid' }) {
   const { addToCart, wishlist, toggleWishlist, navigate } = useCart();
   
-  if (!product || !isProductActive(product)) return null;
-
-  const defaultWeight = (product.weights && product.weights[0]) 
+  const defaultWeight = (product?.weights && product.weights[0]) 
     ? product.weights[0] 
-    : { label: '250G', price: Number(product.price) || 350, originalPrice: Math.round((Number(product.price) || 350) * 1.2) };
+    : { label: '250G', price: Number(product?.price) || 350, originalPrice: Math.round((Number(product?.price) || 350) * 1.2) };
 
   const [selectedWeight, setSelectedWeight] = useState(defaultWeight);
+  const [added, setAdded] = useState(false);
+
+  if (!product || !isProductActive(product)) return null;
+
   const activeWeight = selectedWeight || defaultWeight;
   const weightsList = Array.isArray(product.weights) && product.weights.length > 0 ? product.weights : [defaultWeight];
-  const [added, setAdded] = useState(false);
 
   const isWishlisted = wishlist.includes(product.id);
 
