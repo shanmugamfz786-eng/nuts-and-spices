@@ -1,5 +1,5 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL 
-  || (import.meta.env.PROD ? 'https://your-render-url.onrender.com/api' : '/api');
+  || ('/api');
 
 export const apiFetch = async (endpoint, options = {}) => {
   try {

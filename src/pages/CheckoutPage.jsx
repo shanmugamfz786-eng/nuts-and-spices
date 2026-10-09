@@ -83,15 +83,14 @@ export default function CheckoutPage() {
       const orderId = 'NS_' + Math.floor(100000 + Math.random() * 900000).toString();
       const token = localStorage.getItem('nuts_spices_auth_token');
       
-      const response = await fetch('/api/payment/create-session', {
+      const response = await fetch((import.meta.env.VITE_API_BASE_URL || '') + '/api/payment/create-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          orderId,
-          amount: cartTotal,
+          orderId: backendOrderId, amount: backendTotal,
           customerPhone: formData.phone,
           customerEmail: user?.email || 'guest@nutsandspices.in',
           customerName: formData.name
@@ -119,10 +118,10 @@ export default function CheckoutPage() {
           status: 'pending', // Pending payment
           timestamp: new Date().toLocaleString()
         };
-        await createNewOrder(orderDetails);
+        const orderRes = await fetch((import.meta.env.VITE_API_BASE_URL || '') + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes }) }); const orderData = await orderRes.json(); if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
         clearCart();
 
-        cashfree.checkout(checkoutOptions);
+        alert('Backend success! Redirecting to Cashfree...'); cashfree.checkout(checkoutOptions); alert('Cashfree checkout function called!');
       } else {
         alert('Failed to initialize payment: ' + (data.message || 'Unknown error'));
         setIsProcessingPayment(false);

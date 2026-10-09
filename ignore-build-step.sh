@@ -4,12 +4,18 @@
 # Exit code 1: Proceed with build (important files changed)
 # Exit code 0: Cancel build (only docs/unrelated files changed)
 
-PREV_SHA=${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}
+PREV_SHA=${VERCEL_GIT_PREVIOUS_SHA}
 CURR_SHA=${VERCEL_GIT_COMMIT_SHA:-HEAD}
+
+if [ -z "$PREV_SHA" ]; then
+  echo "No previous SHA available. Continuing build by default."
+  exit 1
+fi
 
 echo "Checking for changes between $PREV_SHA and $CURR_SHA..."
 
 git diff --quiet $PREV_SHA $CURR_SHA -- \
+  index.html \
   src/ \
   public/ \
   api/ \
@@ -19,11 +25,12 @@ git diff --quiet $PREV_SHA $CURR_SHA -- \
   vite.config.js \
   vercel.json
 
-# git diff --quiet returns 1 if there are differences, 0 if no differences
-if [ $? -eq 1 ]; then
-  echo "✅ Important files changed. Proceeding with build."
-  exit 1
-else
-  echo "🛑 No important files changed. Skipping build."
+DIFF_EXIT_CODE=$?
+
+if [ $DIFF_EXIT_CODE -eq 0 ]; then
+  echo "No important files changed. Skipping build."
   exit 0
+else
+  echo "Important files changed or diff failed. Proceeding with build."
+  exit 1
 fi

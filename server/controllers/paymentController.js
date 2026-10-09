@@ -45,7 +45,7 @@ export const createPaymentSession = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Failed to create payment session.', error: data });
     }
 
-    res.json({
+    console.log('Session created successfully!', data.payment_session_id); res.json({
       success: true,
       paymentSessionId: data.payment_session_id,
       orderId: data.order_id
@@ -92,7 +92,7 @@ export const verifyPayment = async (req, res) => {
       await queryDb('UPDATE orders SET status = ?, payment_status = ? WHERE id = ?', ['confirmed', 'paid', orderId]);
     }
 
-    res.json({
+    console.log('Session created successfully!', data.payment_session_id); res.json({
       success: true,
       isPaid: isSuccess,
       status: data.order_status
