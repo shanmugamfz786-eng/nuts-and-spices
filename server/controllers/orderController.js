@@ -40,7 +40,7 @@ export const createOrder = async (req, res) => {
     const validatedItems = [];
 
     for (const item of items) {
-      const backendProduct = dbProducts.find(p => p.id === item.id);
+      const backendProduct = dbProducts.find(p => p.id === (item.productId || item.id));
       if (!backendProduct) {
         return res.status(400).json({ success: false, message: `Product '${item.name || item.id}' is unavailable.` });
       }
