@@ -112,7 +112,7 @@ export default function AdminCustomers({ onViewOrderDetails }) {
                   {/* Customer Name */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#FAF5EF] text-[#8B3A13] border border-[#E6D7C3] font-extrabold flex items-center justify-center text-xs uppercase shadow-xs shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-[#F9FAFB] text-[#000000] border border-[#E5E7EB] font-extrabold flex items-center justify-center text-xs uppercase shadow-xs shrink-0">
                         {cust.name.charAt(0)}
                       </div>
                       <div>
@@ -133,7 +133,7 @@ export default function AdminCustomers({ onViewOrderDetails }) {
                   </td>
 
                   {/* Total Purchase Amount */}
-                  <td className="py-3.5 px-4 text-right font-black text-[#8B3A13] text-sm font-serif">
+                  <td className="py-3.5 px-4 text-right font-black text-[#000000] text-sm font-serif">
                     ₹{cust.totalPurchase.toLocaleString('en-IN')}
                   </td>
 
@@ -169,12 +169,12 @@ export default function AdminCustomers({ onViewOrderDetails }) {
       {/* CUSTOMER PROFILE MODAL & ORDER HISTORY */}
       {selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white border border-[#E6D7C3] rounded-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-auto text-gray-800 relative animate-in zoom-in-95 duration-200">
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-auto text-gray-800 relative animate-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#FAF5EF] text-[#8B3A13] border border-[#E6D7C3] flex items-center justify-center text-xl font-black shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-[#F9FAFB] text-[#000000] border border-[#E5E7EB] flex items-center justify-center text-xl font-black shadow-sm">
                   {selectedCustomer.name.charAt(0)}
                 </div>
                 <div>
@@ -206,7 +206,7 @@ export default function AdminCustomers({ onViewOrderDetails }) {
               </div>
               <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200/80">
                 <span className="text-[10px] font-bold text-gray-500 uppercase block">Total Lifetime Purchase</span>
-                <span className="font-serif font-black text-[#8B3A13] text-sm">₹{selectedCustomer.totalPurchase.toLocaleString('en-IN')}</span>
+                <span className="font-serif font-black text-[#000000] text-sm">₹{selectedCustomer.totalPurchase.toLocaleString('en-IN')}</span>
               </div>
             </div>
 

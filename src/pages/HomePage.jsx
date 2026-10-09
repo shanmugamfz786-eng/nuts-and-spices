@@ -30,7 +30,7 @@ export default function HomePage() {
     <div className="space-y-16 pb-16">
       
       {/* CINEMATIC ZOOM & CROSSFADE HERO BANNER (ONLY IMAGES - NO EXTRA OVERLAYS) */}
-      <section className="relative w-full m-0 p-0 overflow-hidden shadow-md h-[190px] sm:h-[280px] md:h-[350px] lg:h-[420px] bg-[#FAF5EF]">
+      <section className="relative w-full m-0 p-0 overflow-hidden shadow-md h-[190px] sm:h-[280px] md:h-[350px] lg:h-[420px] bg-[#F9FAFB]">
         
         {/* STACKED ZOOM & CROSSFADE BANNER SLIDES */}
         {HERO_SLIDES.map((slide, index) => {
@@ -61,11 +61,11 @@ export default function HomePage() {
         
         {/* Section Heading & Subtitle */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-[#2B1509]">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-[#000000]">
             Explore categories
           </h2>
-          <div className="w-12 h-1 bg-[#8B3A13] mx-auto rounded-full" />
-          <p className="text-xs sm:text-base font-serif italic text-[#4A3525] leading-relaxed pt-1">
+          <div className="w-12 h-1 bg-[#000000] mx-auto rounded-full" />
+          <p className="text-xs sm:text-base font-serif italic text-[#000000] leading-relaxed pt-1">
             Experience the finest selection of premium dates, exotic nuts, and artisanal wellness blends.
           </p>
         </div>
@@ -81,7 +81,7 @@ export default function HomePage() {
               className="group cursor-pointer flex flex-col items-center text-center space-y-3"
             >
               {/* Rounded Square Image Box */}
-              <div className="w-full aspect-square rounded-[28px] overflow-hidden bg-white shadow-md group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1.5 border border-[#E6D7C3]/60 relative">
+              <div className="w-full aspect-square rounded-[28px] overflow-hidden bg-white shadow-md group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1.5 border border-[#E5E7EB]/60 relative">
                 <img
                   src={cat.image || 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=600'}
                   alt={cat.name}
@@ -90,7 +90,7 @@ export default function HomePage() {
               </div>
 
               {/* Bold Uppercase Category Name Below */}
-              <h3 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#2B1509] group-hover:text-[#8B3A13] transition-colors leading-tight line-clamp-2 px-1 font-serif">
+              <h3 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#000000] group-hover:text-[#000000] transition-colors leading-tight line-clamp-2 px-1 font-serif">
                 {cat.name}
               </h3>
             </div>

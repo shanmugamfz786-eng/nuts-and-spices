@@ -8,7 +8,7 @@ export default function ComboOfferBanner() {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       {/* BANNER CONTAINER (NO BOX, INVISIBLE BG FOR CONTENT, BRIGHT IMAGE) */}
-      <div className="relative w-full rounded-[24px] sm:rounded-[36px] overflow-hidden shadow-xl border border-[#E6D7C3]/60 bg-white">
+      <div className="relative w-full rounded-[24px] sm:rounded-[36px] overflow-hidden shadow-xl border border-[#E5E7EB]/60 bg-white">
         {/* Bright Banner Image */}
         <img
           src="/images/combo_banner.jpg"
@@ -35,7 +35,7 @@ export default function ComboOfferBanner() {
               <button
                 type="button"
                 onClick={() => navigate('combo-deals')}
-                className="group inline-flex items-center gap-2.5 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full text-white text-xs sm:text-sm font-bold bg-gradient-to-r from-[#8B3A13] via-[#A04000] to-[#8B3A13] hover:from-[#A04000] hover:to-[#8B3A13] active:scale-95 shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.5)] transition-all duration-300 cursor-pointer border border-[#FAF5EF]/30"
+                className="group inline-flex items-center gap-2.5 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full text-white text-xs sm:text-sm font-bold bg-gradient-to-r from-[#000000] via-[#000000] to-[#000000] hover:from-[#000000] hover:to-[#000000] active:scale-95 shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.5)] transition-all duration-300 cursor-pointer border border-[#F9FAFB]/30"
               >
                 <span>View Special Combos</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />

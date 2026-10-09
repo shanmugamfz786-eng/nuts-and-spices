@@ -23,10 +23,10 @@ export default function AdminReviews() {
     <div className="space-y-6">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#8B3A13] via-[#A04000] to-[#B8860B] p-6 rounded-2xl text-white shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#25D366] via-[#128C7E] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
         <div>
           <h2 className="text-2xl font-black font-serif text-white tracking-wide flex items-center gap-2">
-            <Star className="w-6 h-6 text-[#FAF5EF]" />
+            <Star className="w-6 h-6 text-[#F9FAFB]" />
             ⭐ ADMIN — REVIEWS ({reviews.length})
           </h2>
           <p className="text-xs text-amber-100 mt-1">
@@ -36,11 +36,11 @@ export default function AdminReviews() {
       </div>
 
       {/* REVIEWS TABLE */}
-      <div className="bg-white border border-[#E6D7C3] rounded-2xl shadow-sm overflow-hidden text-gray-800">
+      <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden text-gray-800">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#E6D7C3] bg-[#FAF5EF]/70 text-gray-600 font-bold uppercase text-[10px] tracking-wider">
+              <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]/70 text-gray-600 font-bold uppercase text-[10px] tracking-wider">
                 <th className="py-3.5 px-4">Product Name</th>
                 <th className="py-3.5 px-4">Customer</th>
                 <th className="py-3.5 px-4 text-center">Rating</th>
@@ -66,11 +66,11 @@ export default function AdminReviews() {
 
                   {/* Rating */}
                   <td className="py-3.5 px-4 text-center">
-                    <div className="flex items-center justify-center text-[#D4AF37]">
+                    <div className="flex items-center justify-center text-[#000000]">
                       {[...Array(5)].map((_, i) => (
                         <Star 
                           key={i} 
-                          className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-[#D4AF37]' : 'text-gray-300'}`} 
+                          className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-[#000000]' : 'text-gray-300'}`} 
                         />
                       ))}
                     </div>
@@ -95,7 +95,7 @@ export default function AdminReviews() {
                       className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-lg text-[10px] font-bold cursor-pointer inline-flex items-center gap-1"
                       title="Approve Review"
                     >
-                      <CheckCircle className="w-3.5 h-3.5 text-[#8B3A13]" />
+                      <CheckCircle className="w-3.5 h-3.5 text-[#000000]" />
                       <span>Approve</span>
                     </button>
 
@@ -130,7 +130,7 @@ export default function AdminReviews() {
       {/* CUSTOM DELETE CONFIRMATION MODAL */}
       {deleteConfirmReview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs">
-          <div className="bg-white border border-[#E6D7C3] rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl my-auto text-gray-800 text-center animate-in zoom-in-95 duration-200">
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl my-auto text-gray-800 text-center animate-in zoom-in-95 duration-200">
             <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>

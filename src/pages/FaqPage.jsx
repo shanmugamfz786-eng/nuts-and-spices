@@ -48,15 +48,15 @@ export default function FaqPage() {
   };
 
   return (
-    <div className="bg-[#FAF5EF] min-h-screen py-10 sm:py-16">
+    <div className="bg-[#F9FAFB] min-h-screen py-10 sm:py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* CENTERED PAGE HEADER MATCHING USER REFERENCE SCREENSHOTS */}
         <div className="text-center space-y-2">
-          <span className="text-xs sm:text-sm font-extrabold text-[#8B3A13] uppercase tracking-widest font-serif block">
+          <span className="text-xs sm:text-sm font-extrabold text-[#000000] uppercase tracking-widest font-serif block">
             Help Center
           </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-[#8B3A13] tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-[#000000] tracking-tight">
             Frequently Asked Questions
           </h1>
           <p className="text-xs sm:text-sm text-[#8C7A6B] font-medium pt-1">
@@ -73,8 +73,8 @@ export default function FaqPage() {
                 key={item.id}
                 className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
                   isOpen 
-                    ? 'border-[#8B3A13]/60 shadow-md ring-1 ring-[#8B3A13]/20' 
-                    : 'border-[#E6D7C3] shadow-xs hover:border-[#8B3A13]/40'
+                    ? 'border-[#000000]/60 shadow-md ring-1 ring-[#000000]/20' 
+                    : 'border-[#E5E7EB] shadow-xs hover:border-[#000000]/40'
                 }`}
               >
                 {/* QUESTION ACCORDION HEADER */}
@@ -85,20 +85,20 @@ export default function FaqPage() {
                   <div className="flex items-center gap-3.5">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                       isOpen 
-                        ? 'bg-[#8B3A13] text-[#FAF5EF]' 
-                        : 'bg-[#FAF5EF] text-[#8B3A13] border border-[#E6D7C3]'
+                        ? 'bg-[#000000] text-[#F9FAFB]' 
+                        : 'bg-[#F9FAFB] text-[#000000] border border-[#E5E7EB]'
                     }`}>
                       <HelpCircle className="w-4.5 h-4.5" />
                     </div>
                     
-                    <h3 className="text-sm sm:text-base font-bold font-serif text-[#8B3A13] leading-snug">
+                    <h3 className="text-sm sm:text-base font-bold font-serif text-[#000000] leading-snug">
                       {item.question}
                     </h3>
                   </div>
 
                   <div className="text-[#8C7A6B] shrink-0">
                     {isOpen ? (
-                      <ChevronUp className="w-5 h-5 text-[#8B3A13]" />
+                      <ChevronUp className="w-5 h-5 text-[#000000]" />
                     ) : (
                       <ChevronDown className="w-5 h-5 text-[#8C7A6B]" />
                     )}
@@ -108,7 +108,7 @@ export default function FaqPage() {
                 {/* ANSWER EXPANDED PANEL */}
                 {isOpen && (
                   <div className="px-5 pb-5 pt-1">
-                    <div className="p-4 bg-[#FAF5EF]/70 rounded-xl border border-[#E6D7C3]/50 text-xs sm:text-sm text-[#4A3525] leading-relaxed font-serif">
+                    <div className="p-4 bg-[#F9FAFB]/70 rounded-xl border border-[#E5E7EB]/50 text-xs sm:text-sm text-[#000000] leading-relaxed font-serif">
                       {item.answer}
                     </div>
                   </div>

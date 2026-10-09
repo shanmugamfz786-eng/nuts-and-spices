@@ -21,19 +21,19 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-[#E6D7C3] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-1.5 px-3">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-[#E5E7EB] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-1.5 px-3">
       <div className="grid grid-cols-5 items-center text-center">
         
         {/* 1. HOME */}
         <button
           onClick={() => navigate('home')}
           className={`flex flex-col items-center justify-center py-1 transition-all cursor-pointer ${
-            isHomeActive ? 'text-[#8B3A13] font-black' : 'text-[#8C7A6B] hover:text-[#8B3A13]'
+            isHomeActive ? 'text-[#000000] font-black' : 'text-[#8C7A6B] hover:text-[#000000]'
           }`}
         >
           <div className="relative">
             {isHomeActive && (
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#8B3A13] rounded-full" />
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#000000] rounded-full" />
             )}
             <Home className={`w-5 h-5 ${isHomeActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
           </div>
@@ -46,12 +46,12 @@ export default function MobileBottomNav() {
         <button
           onClick={() => navigate('shop', { category: 'all' })}
           className={`flex flex-col items-center justify-center py-1 transition-all cursor-pointer ${
-            isShopActive ? 'text-[#8B3A13] font-black' : 'text-[#8C7A6B] hover:text-[#8B3A13]'
+            isShopActive ? 'text-[#000000] font-black' : 'text-[#8C7A6B] hover:text-[#000000]'
           }`}
         >
           <div className="relative">
             {isShopActive && (
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#8B3A13] rounded-full" />
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#000000] rounded-full" />
             )}
             <LayoutGrid className={`w-5 h-5 ${isShopActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
           </div>
@@ -64,16 +64,16 @@ export default function MobileBottomNav() {
         <button
           onClick={() => navigate('cart')}
           className={`flex flex-col items-center justify-center py-1 transition-all relative cursor-pointer ${
-            isCartActive ? 'text-[#8B3A13] font-black' : 'text-[#8C7A6B] hover:text-[#8B3A13]'
+            isCartActive ? 'text-[#000000] font-black' : 'text-[#8C7A6B] hover:text-[#000000]'
           }`}
         >
           <div className="relative">
             {isCartActive && (
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#8B3A13] rounded-full" />
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#000000] rounded-full" />
             )}
             <ShoppingBag className={`w-5 h-5 ${isCartActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
             {cartItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-[#8B3A13] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
+              <span className="absolute -top-1.5 -right-2 bg-[#000000] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
                 {cartItemCount}
               </span>
             )}
@@ -87,12 +87,12 @@ export default function MobileBottomNav() {
         <button
           onClick={handleSupportClick}
           className={`flex flex-col items-center justify-center py-1 transition-all cursor-pointer ${
-            isSupportActive ? 'text-[#8B3A13] font-black' : 'text-[#8C7A6B] hover:text-[#8B3A13]'
+            isSupportActive ? 'text-[#000000] font-black' : 'text-[#8C7A6B] hover:text-[#000000]'
           }`}
         >
           <div className="relative">
             {isSupportActive && (
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#8B3A13] rounded-full" />
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#000000] rounded-full" />
             )}
             <Headphones className={`w-5 h-5 ${isSupportActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
           </div>
@@ -105,12 +105,12 @@ export default function MobileBottomNav() {
         <button
           onClick={() => navigate(user ? 'profile' : 'login')}
           className={`flex flex-col items-center justify-center py-1 transition-all cursor-pointer ${
-            isProfileActive ? 'text-[#8B3A13] font-black' : 'text-[#8C7A6B] hover:text-[#8B3A13]'
+            isProfileActive ? 'text-[#000000] font-black' : 'text-[#8C7A6B] hover:text-[#000000]'
           }`}
         >
           <div className="relative">
             {isProfileActive && (
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#8B3A13] rounded-full" />
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#000000] rounded-full" />
             )}
             <User className={`w-5 h-5 ${isProfileActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
           </div>

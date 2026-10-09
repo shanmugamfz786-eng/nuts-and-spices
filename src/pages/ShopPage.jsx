@@ -75,7 +75,7 @@ export default function ShopPage() {
       
       {/* Search Filter Clear Tag (Only shown if search query exists) */}
       {searchFilter.trim() && (
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs font-bold text-[#8B3A13] w-fit">
+        <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs font-bold text-[#000000] w-fit">
           <span>Search: "{searchFilter}"</span>
           <button 
             onClick={() => { setSearchFilter(''); if (setSearchQuery) setSearchQuery(''); }}
@@ -90,8 +90,8 @@ export default function ShopPage() {
       <div className="flex items-center justify-between gap-3 border-b border-gray-200/70 pb-4">
         
         {/* Total Products Count */}
-        <div className="text-sm font-extrabold text-[#4A3525]">
-          Showing <span className="text-[#8B3A13]">{filtered.length}</span> Products
+        <div className="text-sm font-extrabold text-[#000000]">
+          Showing <span className="text-[#000000]">{filtered.length}</span> Products
         </div>
 
         <div className="flex items-center gap-3">
@@ -104,7 +104,7 @@ export default function ShopPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 pl-3 pr-8 appearance-none focus:outline-none focus:border-[#8B3A13] shadow-2xs cursor-pointer min-w-[130px]"
+                className="bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 pl-3 pr-8 appearance-none focus:outline-none focus:border-[#000000] shadow-2xs cursor-pointer min-w-[130px]"
               >
                 <option value="relevant">Relevant</option>
                 <option value="price-low">Price: Low to High</option>
@@ -121,7 +121,7 @@ export default function ShopPage() {
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-md transition-all cursor-pointer ${
               viewMode === 'grid'
-                ? 'bg-[#8B3A13] text-white shadow-xs'
+                ? 'bg-[#000000] text-white shadow-xs'
                 : 'text-gray-400 hover:text-gray-700'
             }`}
             title="Grid View"
@@ -132,7 +132,7 @@ export default function ShopPage() {
             onClick={() => setViewMode('list')}
             className={`p-1.5 rounded-md transition-all cursor-pointer ${
               viewMode === 'list'
-                ? 'bg-[#8B3A13] text-white shadow-xs'
+                ? 'bg-[#000000] text-white shadow-xs'
                 : 'text-gray-400 hover:text-gray-700'
             }`}
             title="List View"
@@ -149,12 +149,12 @@ export default function ShopPage() {
 
       {/* PRODUCT LIST / GRID CONTAINER */}
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-[#E6D7C3] space-y-3">
+        <div className="bg-white rounded-3xl p-12 text-center border border-[#E5E7EB] space-y-3">
           <p className="text-lg font-bold text-gray-800">No products found</p>
           <p className="text-xs text-gray-500">Try selecting a different category or clearing search filters.</p>
           <button
             onClick={() => { setActiveCategory('all'); setSearchFilter(''); }}
-            className="px-4 py-2 bg-[#8B3A13] text-white font-bold text-xs rounded-xl cursor-pointer"
+            className="px-4 py-2 bg-[#000000] text-white font-bold text-xs rounded-xl cursor-pointer"
           >
             Reset Filters
           </button>

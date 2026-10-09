@@ -27,6 +27,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminPage from './pages/AdminPage';
 import ComboDealsPage from './pages/ComboDealsPage';
+import NotFoundPage from './pages/NotFoundPage';
 import AuthModal from './components/AuthModal';
 
 import MobileBottomNav from './components/MobileBottomNav';
@@ -85,8 +86,12 @@ function MainContent() {
         return <RegisterPage />;
       case 'combo-deals':
         return <ComboDealsPage />;
-      default:
+      case 'home':
         return <HomePage />;
+      default:
+        // Exclude empty route explicitly returning Home (just in case)
+        if (!activePage || activePage === '') return <HomePage />;
+        return <NotFoundPage />;
     }
   };
 

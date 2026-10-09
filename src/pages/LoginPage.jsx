@@ -13,15 +13,15 @@ export default function LoginPage() {
   if (user) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#E6D7C3] shadow-xl text-center space-y-6">
-          <div className="w-20 h-20 bg-[#FAF5EF] border border-[#8B3A13] text-[#8B3A13] rounded-full flex items-center justify-center mx-auto text-3xl font-black font-serif shadow-inner">
+        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#E5E7EB] shadow-xl text-center space-y-6">
+          <div className="w-20 h-20 bg-[#F9FAFB] border border-[#25D366] text-[#25D366] rounded-full flex items-center justify-center mx-auto text-3xl font-black font-serif shadow-inner">
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
           <div>
-            <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest block">
+            <span className="text-xs font-bold text-[#000000] uppercase tracking-widest block">
               Gourmet Member Profile
             </span>
-            <h1 className="text-3xl font-black font-serif text-[#2B1509] mt-1">
+            <h1 className="text-3xl font-black font-serif text-[#000000] mt-1">
               Welcome Back, {user.name}!
             </h1>
             <p className="text-xs sm:text-sm text-[#8C7A6B] mt-1">
@@ -29,21 +29,21 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="bg-[#FAF5EF] p-5 rounded-2xl border border-[#E6D7C3] grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+          <div className="bg-[#F9FAFB] p-5 rounded-2xl border border-[#E5E7EB] grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
             <div>
-              <span className="text-[10px] font-extrabold uppercase text-[#8B3A13] block">Member Phone</span>
-              <span className="text-xs font-bold text-[#2B1509]">{user.phone || 'N/A'}</span>
+              <span className="text-[10px] font-extrabold uppercase text-[#000000] block">Member Phone</span>
+              <span className="text-xs font-bold text-[#000000]">{user.phone || 'N/A'}</span>
             </div>
             <div>
-              <span className="text-[10px] font-extrabold uppercase text-[#8B3A13] block">Member Email</span>
-              <span className="text-xs font-bold text-[#2B1509]">{user.email || 'N/A'}</span>
+              <span className="text-[10px] font-extrabold uppercase text-[#000000] block">Member Email</span>
+              <span className="text-xs font-bold text-[#000000]">{user.email || 'N/A'}</span>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <button
               onClick={() => navigate('shop', { category: 'all' })}
-              className="px-8 py-3.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider flex items-center gap-2 cursor-pointer"
+              className="px-8 py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider flex items-center gap-2 cursor-pointer"
             >
               <span>CONTINUE SHOPPING</span>
               <ArrowRight className="w-4 h-4" />
@@ -112,13 +112,13 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">
-      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E6D7C3]">
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E5E7EB]">
         
         {/* Login Form */}
-        <div className="p-8 sm:p-10 bg-[#FAF5EF] flex flex-col justify-center">
+        <div className="p-8 sm:p-10 bg-[#F9FAFB] flex flex-col justify-center">
           
           <div className="mb-6">
-            <h3 className="text-2xl font-black font-serif text-[#2B1509]">
+            <h3 className="text-2xl font-black font-serif text-[#000000]">
               Account Login
             </h3>
             <p className="text-xs text-[#8C7A6B] mt-1">
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
           {successMessage && (
             <div className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-4 h-4 text-[#8B3A13]" />
+              <CheckCircle2 className="w-4 h-4 text-[#25D366]" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -144,7 +144,7 @@ export default function LoginPage() {
             
             {/* Mobile / Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                 Mobile Phone or Email
               </label>
               <div className="relative">
@@ -155,7 +155,7 @@ export default function LoginPage() {
                   placeholder="Enter mobile no. or email"
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13] transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#25D366] transition-colors"
                 />
               </div>
             </div>
@@ -163,13 +163,13 @@ export default function LoginPage() {
             {/* Password */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Password
                 </label>
                 <button
                   type="button"
                   onClick={() => alert('Password reset link sent to your mobile via WhatsApp.')}
-                  className="text-[11px] font-bold text-[#8B3A13] hover:underline cursor-pointer"
+                  className="text-[11px] font-bold text-[#25D366] hover:underline cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -182,12 +182,12 @@ export default function LoginPage() {
                   placeholder="Enter password"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13] transition-colors"
+                  className="w-full pl-10 pr-10 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#25D366] transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#2B1509] cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -200,9 +200,9 @@ export default function LoginPage() {
                 type="checkbox"
                 id="login-remember"
                 defaultChecked
-                className="rounded text-[#8B3A13] focus:ring-[#8B3A13]"
+                className="rounded text-[#000000] focus:ring-[#25D366]"
               />
-              <label htmlFor="login-remember" className="text-xs font-medium text-[#4A3525]">
+              <label htmlFor="login-remember" className="text-xs font-medium text-[#000000]">
                 Remember me on this browser
               </label>
             </div>
@@ -210,7 +210,7 @@ export default function LoginPage() {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full py-3.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
+              className="w-full py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
             >
               LOGIN TO ACCOUNT
             </button>
@@ -218,12 +218,12 @@ export default function LoginPage() {
 
 
             {/* Mobile Link to Register */}
-            <div className="text-center pt-4 border-t border-[#E6D7C3]">
+            <div className="text-center pt-4 border-t border-[#E5E7EB]">
               <span className="text-xs text-[#8C7A6B]">Don't have an account? </span>
               <button
                 type="button"
                 onClick={() => navigate('register')}
-                className="text-xs font-bold text-[#8B3A13] hover:underline cursor-pointer"
+                className="text-xs font-bold text-[#25D366] hover:underline cursor-pointer"
               >
                 Register Here →
               </button>

@@ -25,15 +25,15 @@ export default function AuthPage() {
   if (user) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#E6D7C3] shadow-xl text-center space-y-6">
-          <div className="w-20 h-20 bg-[#FAF5EF] border border-[#8B3A13] text-[#8B3A13] rounded-full flex items-center justify-center mx-auto text-3xl font-black font-serif shadow-inner">
+        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#E5E7EB] shadow-xl text-center space-y-6">
+          <div className="w-20 h-20 bg-[#F9FAFB] border border-[#000000] text-[#000000] rounded-full flex items-center justify-center mx-auto text-3xl font-black font-serif shadow-inner">
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
           <div>
-            <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest block">
+            <span className="text-xs font-bold text-[#000000] uppercase tracking-widest block">
               Gourmet Member Profile
             </span>
-            <h1 className="text-3xl font-black font-serif text-[#2B1509] mt-1">
+            <h1 className="text-3xl font-black font-serif text-[#000000] mt-1">
               Welcome, {user.name}!
             </h1>
             <p className="text-xs sm:text-sm text-[#8C7A6B] mt-1">
@@ -41,21 +41,21 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <div className="bg-[#FAF5EF] p-5 rounded-2xl border border-[#E6D7C3] grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+          <div className="bg-[#F9FAFB] p-5 rounded-2xl border border-[#E5E7EB] grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
             <div>
-              <span className="text-[10px] font-extrabold uppercase text-[#8B3A13] block">Member Phone</span>
-              <span className="text-xs font-bold text-[#2B1509]">{user.phone || 'N/A'}</span>
+              <span className="text-[10px] font-extrabold uppercase text-[#000000] block">Member Phone</span>
+              <span className="text-xs font-bold text-[#000000]">{user.phone || 'N/A'}</span>
             </div>
             <div>
-              <span className="text-[10px] font-extrabold uppercase text-[#8B3A13] block">Member Email</span>
-              <span className="text-xs font-bold text-[#2B1509]">{user.email || 'N/A'}</span>
+              <span className="text-[10px] font-extrabold uppercase text-[#000000] block">Member Email</span>
+              <span className="text-xs font-bold text-[#000000]">{user.email || 'N/A'}</span>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <button
               onClick={() => navigate('shop', { category: 'all' })}
-              className="px-8 py-3.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider flex items-center gap-2"
+              className="px-8 py-3.5 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider flex items-center gap-2"
             >
               <span>CONTINUE SHOPPING</span>
               <ArrowRight className="w-4 h-4" />
@@ -123,50 +123,50 @@ export default function AuthPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E6D7C3] grid grid-cols-1 md:grid-cols-12">
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E5E7EB] grid grid-cols-1 md:grid-cols-12">
         
         {/* Left Side Branding Banner */}
-        <div className="md:col-span-5 bg-gradient-to-br from-[#8B3A13] via-[#A04000] to-[#B8860B] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#D4AF37]/30 rounded-full blur-2xl pointer-events-none" />
+        <div className="md:col-span-5 bg-gradient-to-br from-[#000000] via-[#000000] to-[#222222] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#000000]/30 rounded-full blur-2xl pointer-events-none" />
           
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#D4AF37]" />
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#D4AF37]">
+              <Sparkles className="w-5 h-5 text-[#000000]" />
+              <span className="text-xs font-extrabold uppercase tracking-widest text-[#000000]">
                 Gourmet Store
               </span>
             </div>
             <h2 className="text-3xl font-black font-serif leading-tight">
               NUTS & SPICES
             </h2>
-            <p className="text-xs text-[#E6D7C3] leading-relaxed">
+            <p className="text-xs text-[#E5E7EB] leading-relaxed">
               Log in or register to unlock instant WhatsApp orders, member rewards, and fast re-ordering of your favorite spices & nuts.
             </p>
           </div>
 
-          <div className="space-y-3 pt-8 border-t border-[#8B3A13]/60">
-            <div className="flex items-center gap-3 text-xs text-[#E6D7C3]">
-              <ShieldCheck className="w-5 h-5 text-[#D4AF37] shrink-0" />
+          <div className="space-y-3 pt-8 border-t border-[#000000]/60">
+            <div className="flex items-center gap-3 text-xs text-[#E5E7EB]">
+              <ShieldCheck className="w-5 h-5 text-[#000000] shrink-0" />
               <span>100% Secure WhatsApp Fulfilled Orders</span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-[#E6D7C3]">
-              <Sparkles className="w-5 h-5 text-[#D4AF37] shrink-0" />
+            <div className="flex items-center gap-3 text-xs text-[#E5E7EB]">
+              <Sparkles className="w-5 h-5 text-[#000000] shrink-0" />
               <span>Freshly Processed & Vacuum Packaged</span>
             </div>
           </div>
         </div>
 
         {/* Right Side Form Panel */}
-        <div className="md:col-span-7 p-8 sm:p-10 bg-[#FAF5EF]">
+        <div className="md:col-span-7 p-8 sm:p-10 bg-[#F9FAFB]">
           
           {/* Mode Tabs */}
-          <div className="flex border-b border-[#E6D7C3] pb-4 mb-6">
+          <div className="flex border-b border-[#E5E7EB] pb-4 mb-6">
             <button
               onClick={() => { setAuthMode('login'); setErrorMessage(''); }}
               className={`flex-1 text-center py-2 text-sm font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
                 authMode === 'login'
-                  ? 'border-[#8B3A13] text-[#8B3A13]'
-                  : 'border-transparent text-[#8C7A6B] hover:text-[#2B1509]'
+                  ? 'border-[#000000] text-[#000000]'
+                  : 'border-transparent text-[#8C7A6B] hover:text-[#000000]'
               }`}
             >
               Login
@@ -175,8 +175,8 @@ export default function AuthPage() {
               onClick={() => { setAuthMode('register'); setErrorMessage(''); }}
               className={`flex-1 text-center py-2 text-sm font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
                 authMode === 'register'
-                  ? 'border-[#8B3A13] text-[#8B3A13]'
-                  : 'border-transparent text-[#8C7A6B] hover:text-[#2B1509]'
+                  ? 'border-[#000000] text-[#000000]'
+                  : 'border-transparent text-[#8C7A6B] hover:text-[#000000]'
               }`}
             >
               Register
@@ -192,7 +192,7 @@ export default function AuthPage() {
 
           {successMessage && (
             <div className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-4 h-4 text-[#8B3A13]" />
+              <CheckCircle2 className="w-4 h-4 text-[#000000]" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -201,7 +201,7 @@ export default function AuthPage() {
           {authMode === 'login' && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Mobile Phone or Email
                 </label>
                 <div className="relative">
@@ -212,20 +212,20 @@ export default function AuthPage() {
                     placeholder="Enter mobile no. or email"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => alert('Password reset link sent to your mobile via WhatsApp.')}
-                    className="text-[11px] font-bold text-[#8B3A13] hover:underline cursor-pointer"
+                    className="text-[11px] font-bold text-[#000000] hover:underline cursor-pointer"
                   >
                     Forgot?
                   </button>
@@ -238,12 +238,12 @@ export default function AuthPage() {
                     placeholder="Enter password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-10 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#2B1509] cursor-pointer"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -252,7 +252,7 @@ export default function AuthPage() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
+                className="w-full py-3.5 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
               >
                 LOGIN
               </button>
@@ -263,7 +263,7 @@ export default function AuthPage() {
           {authMode === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Full Name *
                 </label>
                 <div className="relative">
@@ -274,13 +274,13 @@ export default function AuthPage() {
                     placeholder="Enter full name"
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Mobile Number *
                 </label>
                 <div className="relative">
@@ -291,13 +291,13 @@ export default function AuthPage() {
                     placeholder="10-digit mobile number"
                     value={regMobile}
                     onChange={(e) => setRegMobile(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Email Address
                 </label>
                 <div className="relative">
@@ -307,13 +307,13 @@ export default function AuthPage() {
                     placeholder="name@example.com"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Password *
                 </label>
                 <div className="relative">
@@ -324,13 +324,13 @@ export default function AuthPage() {
                     placeholder="At least 6 characters"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Confirm Password *
                 </label>
                 <div className="relative">
@@ -341,14 +341,14 @@ export default function AuthPage() {
                     placeholder="Re-enter password"
                     value={regConfirmPassword}
                     onChange={(e) => setRegConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
+                className="w-full py-3 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
               >
                 CREATE ACCOUNT
               </button>

@@ -19,11 +19,11 @@ export default function CheckoutPage() {
   if (!user) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
-        <div className="w-20 h-20 bg-[#FAF5EF] border border-[#8B3A13] text-[#8B3A13] rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner">
+        <div className="w-20 h-20 bg-[#F9FAFB] border border-[#000000] text-[#000000] rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner">
           🔒
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-black font-serif text-[#2B1509]">Login Required for Checkout</h2>
+          <h2 className="text-2xl font-black font-serif text-[#000000]">Login Required for Checkout</h2>
           <p className="text-xs sm:text-sm text-[#8C7A6B]">
             Please log in to your account or register to complete your customer details & shipping address and place your order.
           </p>
@@ -31,13 +31,13 @@ export default function CheckoutPage() {
         <div className="flex justify-center gap-4 pt-2">
           <button
             onClick={() => navigate('login')}
-            className="px-8 py-3.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer"
+            className="px-8 py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer"
           >
             LOGIN NOW
           </button>
           <button
             onClick={() => navigate('register')}
-            className="px-8 py-3.5 bg-white border border-[#8B3A13] text-[#8B3A13] font-extrabold text-xs rounded-2xl transition-all uppercase tracking-wider cursor-pointer"
+            className="px-8 py-3.5 bg-white border border-[#000000] text-[#000000] font-extrabold text-xs rounded-2xl transition-all uppercase tracking-wider cursor-pointer"
           >
             REGISTER
           </button>
@@ -49,10 +49,10 @@ export default function CheckoutPage() {
   if (cart.length === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
-        <h2 className="text-xl font-bold text-[#2B1509]">No active items to checkout</h2>
+        <h2 className="text-xl font-bold text-[#000000]">No active items to checkout</h2>
         <button
           onClick={() => navigate('shop')}
-          className="px-6 py-2.5 bg-[#8B3A13] text-white font-bold text-xs rounded-xl"
+          className="px-6 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-xs rounded-xl transition-all"
         >
           Return to Shop
         </button>
@@ -96,12 +96,12 @@ export default function CheckoutPage() {
       <div className="space-y-2">
         <button
           onClick={() => navigate('cart')}
-          className="inline-flex items-center gap-2 text-xs font-bold text-[#8B3A13] hover:underline"
+          className="inline-flex items-center gap-2 text-xs font-bold text-[#000000] hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Cart</span>
         </button>
-        <h1 className="text-2xl sm:text-3xl font-black font-serif text-[#2B1509]">
+        <h1 className="text-2xl sm:text-3xl font-black font-serif text-[#000000]">
           Customer Details & Shipping
         </h1>
         <p className="text-xs text-[#8C7A6B]">
@@ -112,9 +112,9 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6 bg-white p-6 sm:p-8 rounded-3xl border border-[#E6D7C3] shadow-md">
-          <h2 className="text-lg font-black font-serif text-[#2B1509] border-b border-[#FAF5EF] pb-3 flex items-center gap-2">
-            <User className="w-5 h-5 text-[#8B3A13]" />
+        <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6 bg-white p-6 sm:p-8 rounded-3xl border border-[#E5E7EB] shadow-md">
+          <h2 className="text-lg font-black font-serif text-[#000000] border-b border-[#F9FAFB] pb-3 flex items-center gap-2">
+            <User className="w-5 h-5 text-[#25D366]" />
             <span>Delivery Recipient Info</span>
           </h2>
 
@@ -122,7 +122,7 @@ export default function CheckoutPage() {
             
             {/* Full Name */}
             <div className="space-y-1">
-              <label className="text-xs font-extrabold text-[#2B1509] uppercase tracking-wider block">
+              <label className="text-xs font-extrabold text-[#000000] uppercase tracking-wider block">
                 Full Name *
               </label>
               <div className="relative">
@@ -132,8 +132,8 @@ export default function CheckoutPage() {
                   placeholder="e.g. Rahul Sharma"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#2B1509] bg-[#FAF5EF] rounded-xl border outline-none ${
-                    errors.name ? 'border-red-500 bg-red-50' : 'border-[#E6D7C3] focus:border-[#8B3A13]'
+                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none ${
+                    errors.name ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB] focus:border-[#000000]'
                   }`}
                 />
               </div>
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
 
             {/* Phone Number */}
             <div className="space-y-1">
-              <label className="text-xs font-extrabold text-[#2B1509] uppercase tracking-wider block">
+              <label className="text-xs font-extrabold text-[#000000] uppercase tracking-wider block">
                 WhatsApp Phone Number *
               </label>
               <div className="relative">
@@ -152,8 +152,8 @@ export default function CheckoutPage() {
                   placeholder="e.g. 9876543210"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#2B1509] bg-[#FAF5EF] rounded-xl border outline-none ${
-                    errors.phone ? 'border-red-500 bg-red-50' : 'border-[#E6D7C3] focus:border-[#8B3A13]'
+                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none ${
+                    errors.phone ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB] focus:border-[#000000]'
                   }`}
                 />
               </div>
@@ -164,7 +164,7 @@ export default function CheckoutPage() {
 
           {/* Delivery Address */}
           <div className="space-y-1">
-            <label className="text-xs font-extrabold text-[#2B1509] uppercase tracking-wider block">
+            <label className="text-xs font-extrabold text-[#000000] uppercase tracking-wider block">
               Complete Delivery Address (Door No, Street, Area) *
             </label>
             <div className="relative">
@@ -174,8 +174,8 @@ export default function CheckoutPage() {
                 placeholder="e.g. Flat 302, Green Avenue, Main Road, T. Nagar"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#2B1509] bg-[#FAF5EF] rounded-xl border outline-none ${
-                  errors.address ? 'border-red-500 bg-red-50' : 'border-[#E6D7C3] focus:border-[#8B3A13]'
+                className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none ${
+                  errors.address ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB] focus:border-[#000000]'
                 }`}
               />
             </div>
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
             
             {/* City */}
             <div className="space-y-1">
-              <label className="text-xs font-extrabold text-[#2B1509] uppercase tracking-wider block">
+              <label className="text-xs font-extrabold text-[#000000] uppercase tracking-wider block">
                 City / Town *
               </label>
               <div className="relative">
@@ -196,8 +196,8 @@ export default function CheckoutPage() {
                   placeholder="e.g. Chennai"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#2B1509] bg-[#FAF5EF] rounded-xl border outline-none ${
-                    errors.city ? 'border-red-500 bg-red-50' : 'border-[#E6D7C3] focus:border-[#8B3A13]'
+                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none ${
+                    errors.city ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB] focus:border-[#000000]'
                   }`}
                 />
               </div>
@@ -206,7 +206,7 @@ export default function CheckoutPage() {
 
             {/* Pincode */}
             <div className="space-y-1">
-              <label className="text-xs font-extrabold text-[#2B1509] uppercase tracking-wider block">
+              <label className="text-xs font-extrabold text-[#000000] uppercase tracking-wider block">
                 Pincode *
               </label>
               <div className="relative">
@@ -216,8 +216,8 @@ export default function CheckoutPage() {
                   placeholder="e.g. 600017"
                   value={formData.pincode}
                   onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#2B1509] bg-[#FAF5EF] rounded-xl border outline-none ${
-                    errors.pincode ? 'border-red-500 bg-red-50' : 'border-[#E6D7C3] focus:border-[#8B3A13]'
+                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none ${
+                    errors.pincode ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB] focus:border-[#000000]'
                   }`}
                 />
               </div>
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
 
           {/* Delivery Notes */}
           <div className="space-y-1">
-            <label className="text-xs font-extrabold text-[#2B1509] uppercase tracking-wider block">
+            <label className="text-xs font-extrabold text-[#000000] uppercase tracking-wider block">
               Special Delivery Instructions (Optional)
             </label>
             <div className="relative">
@@ -238,14 +238,14 @@ export default function CheckoutPage() {
                 placeholder="e.g. Leave package with security if unavailable"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#2B1509] bg-[#FAF5EF] rounded-xl border border-[#E6D7C3] outline-none focus:border-[#8B3A13]"
+                className="w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border border-[#E5E7EB] outline-none focus:border-[#000000]"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-4 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
           >
             <Send className="w-4 h-4" />
             <span>Place Order & Generate WhatsApp Payload</span>
@@ -253,29 +253,29 @@ export default function CheckoutPage() {
         </form>
 
         {/* Mini Cart Review */}
-        <div className="bg-white p-6 rounded-3xl border border-[#E6D7C3] shadow-md h-fit space-y-4">
-          <h3 className="text-base font-black font-serif text-[#2B1509] border-b border-[#FAF5EF] pb-3 flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4 text-[#8B3A13]" />
+        <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-md h-fit space-y-4">
+          <h3 className="text-base font-black font-serif text-[#000000] border-b border-[#F9FAFB] pb-3 flex items-center gap-2">
+            <ShoppingBag className="w-4 h-4 text-[#25D366]" />
             <span>Order Summary ({cart.length} items)</span>
           </h3>
 
-          <div className="divide-y divide-[#FAF5EF] max-h-72 overflow-y-auto pr-1 space-y-2">
+          <div className="divide-y divide-[#F9FAFB] max-h-72 overflow-y-auto pr-1 space-y-2">
             {cart.map(item => (
               <div key={item.cartItemId} className="pt-2 flex items-center justify-between text-xs">
                 <div>
-                  <p className="font-bold text-[#2B1509]">{item.name}</p>
+                  <p className="font-bold text-[#000000]">{item.name}</p>
                   <span className="text-[10px] text-[#8C7A6B]">{item.weight} x {item.quantity}</span>
                 </div>
-                <span className="font-extrabold text-[#8B3A13]">
+                <span className="font-extrabold text-[#000000]">
                   ₹{(item.price * item.quantity).toLocaleString('en-IN')}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="pt-3 border-t border-[#E6D7C3] flex items-center justify-between text-base font-black">
-            <span className="text-[#2B1509]">Total Amount:</span>
-            <span className="text-[#8B3A13]">₹{cartTotal.toLocaleString('en-IN')}</span>
+          <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-base font-black">
+            <span className="text-[#000000]">Total Amount:</span>
+            <span className="text-[#000000]">₹{cartTotal.toLocaleString('en-IN')}</span>
           </div>
         </div>
 

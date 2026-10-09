@@ -20,10 +20,10 @@ export default function AdminSettings() {
     <div className="space-y-6">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#8B3A13] via-[#A04000] to-[#B8860B] p-6 rounded-2xl text-white shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#25D366] via-[#128C7E] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
         <div>
           <h2 className="text-2xl font-black font-serif text-white tracking-wide flex items-center gap-2">
-            <Settings className="w-6 h-6 text-[#FAF5EF]" />
+            <Settings className="w-6 h-6 text-[#F9FAFB]" />
             ⚙️ ADMIN — STORE SETTINGS
           </h2>
           <p className="text-xs text-amber-100 mt-1">
@@ -45,7 +45,7 @@ export default function AdminSettings() {
             <div className="pt-2">
               <button
                 onClick={() => setIsSaved(false)}
-                className="w-full px-5 py-2.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-[#D4AF37] font-extrabold rounded-xl transition-all cursor-pointer shadow-md text-sm"
+                className="w-full px-5 py-2.5 bg-[#25D366] hover:bg-[#25D366] text-[#000000] font-extrabold rounded-xl transition-all cursor-pointer shadow-md text-sm"
               >
                 OK, Got it!
               </button>
@@ -58,13 +58,13 @@ export default function AdminSettings() {
       <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* SECTION 1: STORE IDENTITY & WHATSAPP CONFIG */}
-        <div className="bg-white border border-[#E6D7C3] rounded-2xl p-6 shadow-sm space-y-4">
-          <div className="pb-3 border-b border-[#E6D7C3] flex items-center justify-between">
-            <h3 className="text-base font-black font-serif text-[#8B3A13] flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-[#D4AF37]" />
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="pb-3 border-b border-[#E5E7EB] flex items-center justify-between">
+            <h3 className="text-base font-black font-serif text-[#000000] flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-[#000000]" />
               Store Identity & WhatsApp Connection
             </h3>
-            <span className="text-[10px] bg-amber-100 text-[#8B3A13] px-2.5 py-1 rounded-full font-extrabold border border-amber-200 uppercase">
+            <span className="text-[10px] bg-amber-100 text-[#000000] px-2.5 py-1 rounded-full font-extrabold border border-amber-200 uppercase">
               Dynamic Live Sync
             </span>
           </div>
@@ -78,22 +78,22 @@ export default function AdminSettings() {
                 required
                 value={formData.storeName}
                 onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 outline-none font-bold"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-bold"
               />
             </div>
 
             {/* WhatsApp Number */}
             <div>
-              <label className="block font-bold uppercase text-[#8B3A13] mb-1">WhatsApp Order Number *</label>
+              <label className="block font-bold uppercase text-[#000000] mb-1">WhatsApp Order Number *</label>
               <div className="relative">
-                <MessageSquare className="w-4 h-4 text-[#D4AF37] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <MessageSquare className="w-4 h-4 text-[#000000] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   required
                   value={formData.whatsappNumber}
                   onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
                   placeholder="919876543210"
-                  className="w-full bg-[#FAF5EF]/50 border border-amber-300 focus:border-[#8B3A13] rounded-xl p-3 pl-10 text-gray-900 outline-none font-mono font-bold"
+                  className="w-full bg-[#F9FAFB]/50 border border-amber-300 focus:border-[#000000] rounded-xl p-3 pl-10 text-gray-900 outline-none font-mono font-bold"
                 />
               </div>
               <p className="text-[10px] text-gray-500 mt-1">
@@ -109,16 +109,16 @@ export default function AdminSettings() {
                 value={formData.logoUrl}
                 onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
                 placeholder="https://..."
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 outline-none"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 2: CONTACT & ADDRESS */}
-        <div className="bg-white border border-[#E6D7C3] rounded-2xl p-6 shadow-sm space-y-4">
-          <h3 className="text-base font-black font-serif text-[#8B3A13] pb-3 border-b border-[#E6D7C3] flex items-center gap-2">
-            <Phone className="w-5 h-5 text-[#8B3A13]" />
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="text-base font-black font-serif text-[#000000] pb-3 border-b border-[#E5E7EB] flex items-center gap-2">
+            <Phone className="w-5 h-5 text-[#000000]" />
             Contact & Location Information
           </h3>
 
@@ -130,7 +130,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 outline-none font-bold"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-bold"
               />
             </div>
 
@@ -141,7 +141,7 @@ export default function AdminSettings() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 outline-none font-bold"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-bold"
               />
             </div>
 
@@ -152,16 +152,16 @@ export default function AdminSettings() {
                 rows={2}
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 outline-none font-medium"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-medium"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 3: DELIVERY & SHIPPING CONFIG */}
-        <div className="bg-white border border-[#E6D7C3] rounded-2xl p-6 shadow-sm space-y-4">
-          <h3 className="text-base font-black font-serif text-[#8B3A13] pb-3 border-b border-[#E6D7C3] flex items-center gap-2">
-            <Truck className="w-5 h-5 text-[#D4AF37]" />
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="text-base font-black font-serif text-[#000000] pb-3 border-b border-[#E5E7EB] flex items-center gap-2">
+            <Truck className="w-5 h-5 text-[#000000]" />
             Delivery Rates & Free Shipping Minimums
           </h3>
 
@@ -174,7 +174,7 @@ export default function AdminSettings() {
                 min="0"
                 value={formData.deliveryCharge}
                 onChange={(e) => setFormData({ ...formData, deliveryCharge: Number(e.target.value) })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
               />
             </div>
 
@@ -186,16 +186,16 @@ export default function AdminSettings() {
                 min="0"
                 value={formData.minOrderAmount}
                 onChange={(e) => setFormData({ ...formData, minOrderAmount: Number(e.target.value) })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* SECTION 4: SOCIAL MEDIA */}
-        <div className="bg-white border border-[#E6D7C3] rounded-2xl p-6 shadow-sm space-y-4">
-          <h3 className="text-base font-black font-serif text-[#8B3A13] pb-3 border-b border-[#E6D7C3] flex items-center gap-2">
-            <Share2 className="w-5 h-5 text-[#8B3A13]" />
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="text-base font-black font-serif text-[#000000] pb-3 border-b border-[#E5E7EB] flex items-center gap-2">
+            <Share2 className="w-5 h-5 text-[#000000]" />
             Social Media Handles & Links
           </h3>
 
@@ -206,7 +206,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.instagram}
                 onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 outline-none"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none"
               />
             </div>
 
@@ -216,7 +216,7 @@ export default function AdminSettings() {
                 type="text"
                 value={formData.facebook}
                 onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
-                className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-3 text-gray-900 outline-none"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none"
               />
             </div>
           </div>
@@ -226,7 +226,7 @@ export default function AdminSettings() {
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="px-8 py-3.5 bg-gradient-to-r from-[#8B3A13] to-[#D4AF37] hover:from-[#722F0F] hover:to-[#B59226] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
+            className="px-8 py-3.5 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
           >
             <Save className="w-5 h-5" />
             <span>Save & Apply Store Settings</span>

@@ -42,7 +42,7 @@ function BestSellerCard({ product }) {
         
         {/* Top Badges Stack (Left) */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
-          <span className="bg-[#8B3A13] text-[#FAF5EF] text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs font-serif border border-[#D4AF37]/40">
+          <span className="bg-[#000000] text-[#F9FAFB] text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs font-serif border border-[#000000]/40">
             BEST SELLER
           </span>
           {discountPercent > 0 && (
@@ -73,7 +73,7 @@ function BestSellerCard({ product }) {
               e.stopPropagation();
               navigate('product-details', { product });
             }}
-            className="w-7 h-7 rounded-full bg-white/95 shadow-sm border border-gray-100 flex items-center justify-center text-gray-500 hover:text-[#8B3A13] hover:scale-110 transition-all cursor-pointer opacity-90 group-hover:opacity-100"
+            className="w-7 h-7 rounded-full bg-white/95 shadow-sm border border-gray-100 flex items-center justify-center text-gray-500 hover:text-[#000000] hover:scale-110 transition-all cursor-pointer opacity-90 group-hover:opacity-100"
             title="View Details"
             aria-label="Quick View"
           >
@@ -93,7 +93,7 @@ function BestSellerCard({ product }) {
       <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2.5 bg-white">
         <div>
           {/* Product Title */}
-          <h3 className="font-serif font-bold text-gray-900 text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-[#8B3A13] transition-colors">
+          <h3 className="font-serif font-bold text-gray-900 text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-[#000000] transition-colors">
             {product.name}
           </h3>
         </div>
@@ -106,7 +106,7 @@ function BestSellerCard({ product }) {
               const w = weightsList.find(item => item.label === e.target.value);
               if (w) setSelectedWeight(w);
             }}
-            className="w-full text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg px-3 py-1.5 cursor-pointer focus:outline-none focus:border-[#8B3A13] appearance-none pr-8 shadow-2xs"
+            className="w-full text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg px-3 py-1.5 cursor-pointer focus:outline-none focus:border-[#000000] appearance-none pr-8 shadow-2xs"
           >
             {weightsList.map((w) => (
               <option key={w.label} value={w.label}>
@@ -132,8 +132,8 @@ function BestSellerCard({ product }) {
           onClick={handleAddToCart}
           className={`w-full py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:shadow-md active:scale-95 ${
             added
-              ? 'bg-[#D4AF37] text-white'
-              : 'bg-[#8B3A13] hover:bg-[#A04000] text-white'
+              ? 'bg-[#128C7E] text-white'
+              : 'bg-[#25D366] hover:bg-[#128C7E] text-white'
           }`}
         >
           {added ? (
@@ -143,7 +143,7 @@ function BestSellerCard({ product }) {
             </>
           ) : (
             <>
-              <ShoppingCart className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <ShoppingCart className="w-3.5 h-3.5 text-[#000000]" />
               <span>ADD TO CART</span>
             </>
           )}
@@ -194,12 +194,12 @@ export default function BestSellingSection() {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-2 pb-6">
       {/* Header with Subtitle "FRESH FROM HARVEST", Title "Best Selling Products", & Button "Explore All Catalog →" */}
-      <div className="flex flex-row items-end justify-between border-b border-[#E6D7C3]/60 pb-3">
+      <div className="flex flex-row items-end justify-between border-b border-[#E5E7EB]/60 pb-3">
         <div>
           <span className="text-xs font-bold uppercase tracking-widest text-[#A2834E] block font-serif">
             FRESH FROM HARVEST
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-black font-serif text-[#8B3A13] tracking-tight mt-1">
+          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-black font-serif text-[#000000] tracking-tight mt-1">
             Best Selling Products
           </h2>
         </div>
@@ -207,7 +207,7 @@ export default function BestSellingSection() {
         {/* Explore All Catalog Button */}
         <button
           onClick={handleExploreCatalog}
-          className="border border-[#8B3A13]/60 hover:border-[#8B3A13] text-[#8B3A13] hover:bg-[#8B3A13] hover:text-white transition-all font-semibold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer group"
+          className="border border-[#000000]/60 hover:border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white transition-all font-semibold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer group"
         >
           <span>Explore All Catalog</span>
           <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
@@ -220,7 +220,7 @@ export default function BestSellingSection() {
         {/* Left Scroll Button */}
         <button
           onClick={scrollLeft}
-          className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#8B3A13] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
+          className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#000000] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -240,7 +240,7 @@ export default function BestSellingSection() {
         {/* Right Scroll Button */}
         <button
           onClick={scrollRight}
-          className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#8B3A13] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
+          className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#000000] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-5 h-5" />
@@ -254,7 +254,7 @@ export default function BestSellingSection() {
             key={dot}
             className={`transition-all duration-300 rounded-full ${
               activeIndex === dot
-                ? 'w-6 h-1.5 bg-[#8B3A13]'
+                ? 'w-6 h-1.5 bg-[#000000]'
                 : 'w-2 h-1.5 bg-gray-300'
             }`}
           />

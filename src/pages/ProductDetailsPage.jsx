@@ -51,25 +51,25 @@ export default function ProductDetailsPage() {
       {/* Back Button */}
       <button
         onClick={() => navigate('shop')}
-        className="inline-flex items-center gap-2 text-xs font-bold text-[#8B3A13] hover:underline"
+        className="inline-flex items-center gap-2 text-xs font-bold text-[#000000] hover:underline"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Back to Shop</span>
       </button>
 
       {/* Main Details Card */}
-      <div className="bg-white rounded-3xl border border-[#E6D7C3] p-6 sm:p-10 shadow-lg grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 sm:p-10 shadow-lg grid grid-cols-1 lg:grid-cols-2 gap-10">
         
         {/* Left: Product Image */}
         <div className="space-y-4">
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#FAF5EF] border border-[#E6D7C3]">
+          <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#F9FAFB] border border-[#E5E7EB]">
             <img
               src={product.image}
               alt={product.name}
               className="w-full h-full object-cover"
             />
             {product.badge && (
-              <span className="absolute top-4 left-4 bg-[#8B3A13] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+              <span className="absolute top-4 left-4 bg-[#000000] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                 {product.badge}
               </span>
             )}
@@ -84,17 +84,17 @@ export default function ProductDetailsPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-[#FAF5EF] p-3 rounded-xl border border-[#E6D7C3] text-center">
+            <div className="bg-[#F9FAFB] p-3 rounded-xl border border-[#E5E7EB] text-center">
               <span className="text-[10px] font-bold text-[#8C7A6B] uppercase block">Origin</span>
-              <span className="text-xs font-bold text-[#2B1509]">{product.origin || 'India'}</span>
+              <span className="text-xs font-bold text-[#000000]">{product.origin || 'India'}</span>
             </div>
-            <div className="bg-[#FAF5EF] p-3 rounded-xl border border-[#E6D7C3] text-center">
+            <div className="bg-[#F9FAFB] p-3 rounded-xl border border-[#E5E7EB] text-center">
               <span className="text-[10px] font-bold text-[#8C7A6B] uppercase block">Shelf Life</span>
-              <span className="text-xs font-bold text-[#2B1509]">{product.shelfLife || '6 Months'}</span>
+              <span className="text-xs font-bold text-[#000000]">{product.shelfLife || '6 Months'}</span>
             </div>
-            <div className="bg-[#FAF5EF] p-3 rounded-xl border border-[#E6D7C3] text-center">
+            <div className="bg-[#F9FAFB] p-3 rounded-xl border border-[#E5E7EB] text-center">
               <span className="text-[10px] font-bold text-[#8C7A6B] uppercase block">Purity</span>
-              <span className="text-xs font-bold text-[#8B3A13]">100% Pure</span>
+              <span className="text-xs font-bold text-[#000000]">100% Pure</span>
             </div>
           </div>
         </div>
@@ -104,27 +104,27 @@ export default function ProductDetailsPage() {
           <div className="space-y-4">
             
             <div className="flex items-center gap-2">
-              <span className="text-xs font-extrabold text-[#8B3A13] uppercase tracking-wider bg-[#FAF5EF] px-3 py-1 rounded-full border border-[#E6D7C3]">
+              <span className="text-xs font-extrabold text-[#000000] uppercase tracking-wider bg-[#F9FAFB] px-3 py-1 rounded-full border border-[#E5E7EB]">
                 {product.categoryName}
               </span>
-              <div className="flex items-center gap-1 text-xs font-bold text-[#2B1509]">
-                <Star className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
+              <div className="flex items-center gap-1 text-xs font-bold text-[#000000]">
+                <Star className="w-4 h-4 fill-[#000000] text-[#000000]" />
                 <span>{product.rating}</span>
                 <span className="text-[#8C7A6B]">({product.reviews} customer reviews)</span>
               </div>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black font-serif text-[#2B1509]">
+            <h1 className="text-2xl sm:text-3xl font-black font-serif text-[#000000]">
               {product.name}
             </h1>
 
-            <p className="text-xs sm:text-sm text-[#4A3525] leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#000000] leading-relaxed">
               {product.description}
             </p>
 
             {/* Select Weight */}
-            <div className="space-y-2 pt-2 border-t border-[#FAF5EF]">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#2B1509] block">
+            <div className="space-y-2 pt-2 border-t border-[#F9FAFB]">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#000000] block">
                 Select Package Weight:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -134,8 +134,8 @@ export default function ProductDetailsPage() {
                     onClick={() => setSelectedWeight(w)}
                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
                       activeWeight.label === w.label
-                        ? 'bg-[#8B3A13] text-white border-[#8B3A13] shadow-md'
-                        : 'bg-[#FAF5EF] text-[#4A3525] border-[#E6D7C3] hover:border-[#8B3A13]'
+                        ? 'bg-[#000000] text-white border-[#000000] shadow-md'
+                        : 'bg-[#F9FAFB] text-[#000000] border-[#E5E7EB] hover:border-[#000000]'
                     }`}
                   >
                     <span>{w.label}</span>
@@ -147,23 +147,23 @@ export default function ProductDetailsPage() {
 
             {/* Quantity Selector */}
             <div className="space-y-2 pt-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#2B1509] block">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#000000] block">
                 Quantity:
               </span>
               <div className="flex items-center gap-3">
-                <div className="flex items-center border border-[#E6D7C3] rounded-xl bg-[#FAF5EF] p-1">
+                <div className="flex items-center border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] p-1">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-[#2B1509] hover:bg-[#E6D7C3] transition-colors flex items-center justify-center shadow-xs"
+                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-[#000000] hover:bg-[#E5E7EB] transition-colors flex items-center justify-center shadow-xs"
                   >
                     -
                   </button>
-                  <span className="w-12 text-center text-sm font-bold text-[#2B1509]">
+                  <span className="w-12 text-center text-sm font-bold text-[#000000]">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-[#2B1509] hover:bg-[#E6D7C3] transition-colors flex items-center justify-center shadow-xs"
+                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-[#000000] hover:bg-[#E5E7EB] transition-colors flex items-center justify-center shadow-xs"
                   >
                     +
                   </button>
@@ -173,11 +173,11 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* Dynamic Total Price */}
-            <div className="p-4 bg-[#FAF5EF] rounded-2xl border border-[#E6D7C3] flex items-center justify-between">
+            <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] flex items-center justify-between">
               <div>
                 <span className="text-xs text-[#8C7A6B] block">Total Amount:</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#8B3A13]">
+                  <span className="text-2xl font-black text-[#000000]">
                     ₹{totalPrice.toLocaleString('en-IN')}
                   </span>
                   <span className="text-xs text-[#8C7A6B] line-through">
@@ -194,14 +194,14 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="space-y-3 pt-4 border-t border-[#FAF5EF]">
+          <div className="space-y-3 pt-4 border-t border-[#F9FAFB]">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={handleAddToCart}
                 className={`py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   added 
-                    ? 'bg-[#D4AF37] text-white shadow-md' 
-                    : 'bg-[#8B3A13] hover:bg-[#A04000] text-white shadow-lg hover:shadow-xl'
+                    ? 'bg-[#128C7E] text-white shadow-md' 
+                    : 'bg-[#25D366] hover:bg-[#128C7E] text-white shadow-lg hover:shadow-xl'
                 }`}
               >
                 {added ? (
@@ -211,7 +211,7 @@ export default function ProductDetailsPage() {
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />
+                    <ShoppingBag className="w-5 h-5 text-[#000000]" />
                     <span>Add to Cart</span>
                   </>
                 )}
@@ -219,7 +219,7 @@ export default function ProductDetailsPage() {
 
               <button
                 onClick={handleQuickCheckout}
-                className="py-3.5 px-6 rounded-2xl font-bold text-sm bg-[#A04000] hover:bg-[#8B3A13] text-white transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                className="py-3.5 px-6 rounded-2xl font-bold text-sm bg-[#000000] hover:bg-[#000000] text-white transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Proceed to Cart & Checkout</span>
               </button>

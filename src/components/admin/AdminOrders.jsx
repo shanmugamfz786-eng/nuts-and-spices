@@ -368,7 +368,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                 href={`https://wa.me/${selectedOrder.phone || activeWhatsApp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#8B3A13] hover:bg-[#A04000] text-white text-xs font-semibold rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#25D366] hover:bg-[#25D366] text-white text-xs font-semibold rounded-lg transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>WhatsApp Customer</span>

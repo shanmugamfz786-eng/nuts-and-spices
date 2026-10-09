@@ -75,10 +75,10 @@ export default function AdminOffers() {
     <div className="space-y-6">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#8B3A13] via-[#A04000] to-[#B8860B] p-6 rounded-2xl text-white shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#25D366] via-[#128C7E] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
         <div>
           <h2 className="text-2xl font-black font-serif text-white tracking-wide flex items-center gap-2">
-            <Ticket className="w-6 h-6 text-[#FAF5EF]" />
+            <Ticket className="w-6 h-6 text-[#F9FAFB]" />
             🎟️ ADMIN — OFFERS & COUPONS ({offers.length})
           </h2>
           <p className="text-xs text-amber-100 mt-1">
@@ -87,9 +87,9 @@ export default function AdminOffers() {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#FAF5EF] hover:bg-white text-[#8B3A13] font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer shrink-0 transition-transform active:scale-95"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#F9FAFB] hover:bg-white text-[#25D366] font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer shrink-0 transition-transform active:scale-95"
         >
-          <Plus className="w-5 h-5 text-[#8B3A13]" />
+          <Plus className="w-5 h-5 text-[#25D366]" />
           <span>Create New Offer</span>
         </button>
       </div>
@@ -99,11 +99,11 @@ export default function AdminOffers() {
         {offers.map((off) => (
           <div 
             key={off.id}
-            className="bg-white border border-[#E6D7C3] hover:border-[#8B3A13] rounded-2xl p-6 shadow-sm space-y-4 flex flex-col justify-between relative overflow-hidden group transition-all"
+            className="bg-white border border-[#E5E7EB] hover:border-[#000000] rounded-2xl p-6 shadow-sm space-y-4 flex flex-col justify-between relative overflow-hidden group transition-all"
           >
             <div className="space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <span className="px-3 py-1 bg-amber-50 text-[#8B3A13] border border-amber-300 rounded-full text-xs font-black uppercase">
+                <span className="px-3 py-1 bg-amber-50 text-[#000000] border border-amber-300 rounded-full text-xs font-black uppercase">
                   {off.discountPercent}% DISCOUNT
                 </span>
                 <span className={`px-2.5 py-0.5 text-[10px] font-black uppercase rounded-md border ${
@@ -117,21 +117,21 @@ export default function AdminOffers() {
                 {off.name}
               </h3>
 
-              <div className="bg-[#FAF5EF]/70 p-3 rounded-xl border border-[#E6D7C3] space-y-1 text-xs text-gray-600">
+              <div className="bg-[#F9FAFB]/70 p-3 rounded-xl border border-[#E5E7EB] space-y-1 text-xs text-gray-600">
                 <div>Applicable: <strong className="text-gray-900">{off.applicableCategoryName || 'All Categories'}</strong></div>
                 <div>Min Order: <strong className="text-gray-900 font-serif">₹{off.minOrderAmount}</strong></div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#E6D7C3] flex items-center justify-between text-[11px] text-gray-500">
+            <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-gray-500">
               <div className="flex items-center gap-1 font-mono">
-                <Calendar className="w-3.5 h-3.5 text-[#8B3A13]" />
+                <Calendar className="w-3.5 h-3.5 text-[#000000]" />
                 <span>{off.startDate} to {off.endDate}</span>
               </div>
               <div className="flex gap-1">
                 <button
                   onClick={() => handleOpenEdit(off)}
-                  className="p-1.5 bg-[#FAF5EF] hover:bg-amber-100 border border-[#E6D7C3] text-gray-700 rounded-lg cursor-pointer"
+                  className="p-1.5 bg-[#F9FAFB] hover:bg-amber-100 border border-[#E5E7EB] text-gray-700 rounded-lg cursor-pointer"
                 >
                   <Edit className="w-3.5 h-3.5" />
                 </button>
@@ -152,7 +152,7 @@ export default function AdminOffers() {
       {/* CUSTOM DELETE CONFIRMATION MODAL */}
       {deleteConfirmOffer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs">
-          <div className="bg-white border border-[#E6D7C3] rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl my-auto text-gray-800 text-center animate-in zoom-in-95 duration-200">
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl my-auto text-gray-800 text-center animate-in zoom-in-95 duration-200">
             <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
@@ -184,11 +184,11 @@ export default function AdminOffers() {
       {/* CREATE / EDIT OFFER MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs">
-          <div className="bg-white border border-[#E6D7C3] rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl text-gray-800 relative">
+          <div className="bg-white border border-[#E5E7EB] rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl text-gray-800 relative">
             
-            <div className="flex items-center justify-between pb-3 border-b border-[#E6D7C3]">
-              <h3 className="text-lg font-black font-serif text-[#8B3A13] flex items-center gap-2">
-                <Ticket className="w-5 h-5 text-[#8B3A13]" />
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB]">
+              <h3 className="text-lg font-black font-serif text-[#000000] flex items-center gap-2">
+                <Ticket className="w-5 h-5 text-[#000000]" />
                 {editingOffer ? 'Edit Promotional Offer' : 'Create New Offer'}
               </h3>
               <button
@@ -208,7 +208,7 @@ export default function AdminOffers() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. 20% OFF – Premium Nuts"
-                  className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-2.5 text-gray-900 outline-none"
+                  className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none"
                 />
               </div>
 
@@ -222,7 +222,7 @@ export default function AdminOffers() {
                     required
                     value={formData.discountPercent}
                     onChange={(e) => setFormData({ ...formData, discountPercent: e.target.value })}
-                    className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-2.5 text-gray-900 outline-none font-bold"
+                    className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none font-bold"
                   />
                 </div>
                 <div>
@@ -232,7 +232,7 @@ export default function AdminOffers() {
                     min="0"
                     value={formData.minOrderAmount}
                     onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })}
-                    className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-2.5 text-gray-900 outline-none font-bold"
+                    className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none font-bold"
                   />
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default function AdminOffers() {
                 <select
                   value={formData.applicableCategory}
                   onChange={(e) => setFormData({ ...formData, applicableCategory: e.target.value })}
-                  className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-2.5 text-gray-900 outline-none"
+                  className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none"
                 >
                   {categories.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -257,7 +257,7 @@ export default function AdminOffers() {
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-2.5 text-gray-900 outline-none"
+                    className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none"
                   />
                 </div>
                 <div>
@@ -266,7 +266,7 @@ export default function AdminOffers() {
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-2.5 text-gray-900 outline-none"
+                    className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none"
                   />
                 </div>
               </div>
@@ -276,7 +276,7 @@ export default function AdminOffers() {
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-[#FAF5EF]/50 border border-[#E6D7C3] focus:border-[#8B3A13] rounded-xl p-2.5 text-gray-900 outline-none font-bold"
+                  className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none font-bold"
                 >
                   <option value="ACTIVE">ACTIVE</option>
                   <option value="SCHEDULED">SCHEDULED</option>
@@ -284,7 +284,7 @@ export default function AdminOffers() {
                 </select>
               </div>
 
-              <div className="pt-4 border-t border-[#E6D7C3] flex justify-end gap-2">
+              <div className="pt-4 border-t border-[#E5E7EB] flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -294,7 +294,7 @@ export default function AdminOffers() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#8B3A13] hover:bg-[#A04000] text-white font-extrabold uppercase rounded-xl shadow-md"
+                  className="px-5 py-2 bg-[#25D366] hover:bg-[#25D366] text-white font-extrabold uppercase rounded-xl shadow-md"
                 >
                   Save Offer
                 </button>

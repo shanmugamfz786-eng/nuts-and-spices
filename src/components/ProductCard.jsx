@@ -36,11 +36,11 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     return (
       <div 
         onClick={() => navigate('product-details', { product })}
-        className="group bg-white rounded-2xl border border-gray-200/80 hover:border-[#8B3A13]/40 shadow-xs hover:shadow-md transition-all duration-300 p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer relative"
+        className="group bg-white rounded-2xl border border-gray-200/80 hover:border-[#000000]/40 shadow-xs hover:shadow-md transition-all duration-300 p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer relative"
       >
         {/* Left Side: Product Image with Badge + Title */}
         <div className="flex items-center gap-4 sm:gap-6 min-w-0 flex-1">
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#FAF5EF]/60 shrink-0">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#F9FAFB]/60 shrink-0">
             <img
               src={product.image}
               alt={product.name}
@@ -56,7 +56,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
           </div>
 
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-gray-900 text-sm sm:text-base font-sans group-hover:text-[#8B3A13] transition-colors line-clamp-2 leading-snug">
+            <h3 className="font-bold text-gray-900 text-sm sm:text-base font-sans group-hover:text-[#000000] transition-colors line-clamp-2 leading-snug">
               {product.name}
             </h3>
             {product.categoryName && (
@@ -75,7 +75,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               const selected = weightsList.find(w => w.label === e.target.value);
               if (selected) setSelectedWeight(selected);
             }}
-            className="w-full bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-800 py-2 px-3 pr-8 appearance-none focus:outline-none focus:border-[#8B3A13] cursor-pointer shadow-2xs"
+            className="w-full bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-800 py-2 px-3 pr-8 appearance-none focus:outline-none focus:border-[#000000] cursor-pointer shadow-2xs"
           >
             {weightsList.map((w) => (
               <option key={w.label} value={w.label}>
@@ -92,7 +92,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <span className="text-[11px] text-gray-400 line-through font-sans leading-none">
               ₹{origP}.00
             </span>
-            <span className="text-base sm:text-lg font-black text-[#B8860B] font-serif leading-tight mt-0.5">
+            <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight mt-0.5">
               ₹{curP}.00
             </span>
           </div>
@@ -101,8 +101,8 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             onClick={handleAddToCart}
             className={`w-full py-2.5 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
               added 
-                ? 'bg-[#D4AF37] text-white' 
-                : 'bg-[#8B3A13] hover:bg-[#A04000] text-white'
+                ? 'bg-[#128C7E] text-white' 
+                : 'bg-[#25D366] hover:bg-[#128C7E] text-white'
             }`}
           >
             {added ? (
@@ -127,10 +127,10 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
   return (
     <div 
       onClick={() => navigate('product-details', { product })}
-      className="group bg-white rounded-2xl border border-gray-200/80 hover:border-[#8B3A13]/40 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col cursor-pointer transform hover:-translate-y-1 relative"
+      className="group bg-white rounded-2xl border border-gray-200/80 hover:border-[#000000]/40 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col cursor-pointer transform hover:-translate-y-1 relative"
     >
       {/* Product Image & Badges */}
-      <div className="relative aspect-square overflow-hidden bg-[#FAF5EF]/60">
+      <div className="relative aspect-square overflow-hidden bg-[#F9FAFB]/60">
         <img
           src={product.image}
           alt={product.name}
@@ -168,7 +168,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         
         {/* Title */}
         <div>
-          <h3 className="font-bold text-gray-900 text-xs sm:text-sm font-sans group-hover:text-[#8B3A13] transition-colors line-clamp-1 leading-snug">
+          <h3 className="font-bold text-gray-900 text-xs sm:text-sm font-sans group-hover:text-[#000000] transition-colors line-clamp-1 leading-snug">
             {product.name}
           </h3>
         </div>
@@ -181,7 +181,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               const selected = weightsList.find(w => w.label === e.target.value);
               if (selected) setSelectedWeight(selected);
             }}
-            className="w-full bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-800 py-1.5 px-3 pr-8 appearance-none focus:outline-none focus:border-[#8B3A13] cursor-pointer shadow-2xs"
+            className="w-full bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-800 py-1.5 px-3 pr-8 appearance-none focus:outline-none focus:border-[#000000] cursor-pointer shadow-2xs"
           >
             {weightsList.map((w) => (
               <option key={w.label} value={w.label}>
@@ -200,7 +200,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <span className="text-[11px] text-gray-400 line-through font-sans leading-none">
               ₹{origP}.00
             </span>
-            <span className="text-base sm:text-lg font-black text-[#B8860B] font-serif leading-tight mt-0.5">
+            <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight mt-0.5">
               ₹{curP}.00
             </span>
           </div>
@@ -210,8 +210,8 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             onClick={handleAddToCart}
             className={`w-full py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
               added 
-                ? 'bg-[#D4AF37] text-white' 
-                : 'bg-[#8B3A13] hover:bg-[#A04000] text-white'
+                ? 'bg-[#128C7E] text-white' 
+                : 'bg-[#25D366] hover:bg-[#128C7E] text-white'
             }`}
           >
             {added ? (

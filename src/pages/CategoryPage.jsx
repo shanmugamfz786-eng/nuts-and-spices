@@ -53,7 +53,7 @@ export default function CategoryPage() {
     <div className="bg-white min-h-screen pb-16 space-y-8">
       
       {/* SLIM ORIGINAL GRADIENT HEADER */}
-      <section className="relative bg-gradient-to-br from-[#8B3A13] via-[#A04000] to-[#B8860B] text-white py-6 px-4 sm:px-6 lg:px-8 shadow-md">
+      <section className="relative bg-gradient-to-br from-[#000000] via-[#000000] to-[#222222] text-white py-6 px-4 sm:px-6 lg:px-8 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <button
             onClick={() => navigate('home', { category: 'all' })}
@@ -71,18 +71,18 @@ export default function CategoryPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Controls Bar */}
-        <div className="flex justify-end pb-4 border-b border-[#E6D7C3]">
+        <div className="flex justify-end pb-4 border-b border-[#E5E7EB]">
           
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#4A3525]">
-              <SlidersHorizontal className="w-4 h-4 text-[#8B3A13]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-[#000000]">
+              <SlidersHorizontal className="w-4 h-4 text-[#000000]" />
               <span>Sort By:</span>
             </div>
 
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-white border border-[#E6D7C3] rounded-xl text-xs font-extrabold text-[#2B1509] px-3 py-2 focus:outline-none focus:border-[#8B3A13] shadow-sm cursor-pointer"
+              className="bg-white border border-[#E5E7EB] rounded-xl text-xs font-extrabold text-[#000000] px-3 py-2 focus:outline-none focus:border-[#000000] shadow-sm cursor-pointer"
             >
               <option value="featured">Featured / Popularity</option>
               <option value="price-low">Price: Low to High</option>
@@ -102,11 +102,11 @@ export default function CategoryPage() {
           </div>
         ) : (
           /* EMPTY STATE */
-          <div className="text-center py-16 px-4 bg-[#FAF5EF] rounded-3xl border border-[#E6D7C3] max-w-xl mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-full bg-[#8B3A13]/10 text-[#8B3A13] flex items-center justify-center mx-auto">
+          <div className="text-center py-16 px-4 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB] max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-full bg-[#000000]/10 text-[#000000] flex items-center justify-center mx-auto">
               <ShoppingBag className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold font-serif text-[#2B1509]">
+            <h3 className="text-xl font-bold font-serif text-[#000000]">
               No Products Found in {currentCategory.name}
             </h3>
             <p className="text-xs text-[#8C7A6B]">
@@ -114,7 +114,7 @@ export default function CategoryPage() {
             </p>
             <button
               onClick={() => navigate('categories', { category: 'all' })}
-              className="px-6 py-2.5 rounded-full bg-[#8B3A13] text-white text-xs font-bold hover:bg-[#6E2C00] transition-colors shadow-md"
+              className="px-6 py-2.5 rounded-full bg-[#000000] text-white text-xs font-bold hover:bg-[#000000] transition-colors shadow-md"
             >
               Explore Other Categories
             </button>

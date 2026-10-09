@@ -100,10 +100,10 @@ export default function AuthModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[#E6D7C3] relative flex flex-col my-auto max-h-[90vh]">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[#E5E7EB] relative flex flex-col my-auto max-h-[90vh]">
         
         {/* Header Bar */}
-        <div className="bg-gradient-to-r from-[#8B3A13] via-[#A04000] to-[#B8860B] text-white p-6 pb-5 relative shrink-0">
+        <div className="bg-gradient-to-r from-[#000000] via-[#000000] to-[#222222] text-white p-6 pb-5 relative shrink-0">
           <button
             onClick={() => setIsAuthModalOpen(false)}
             className="absolute right-4 top-4 p-1.5 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
@@ -112,15 +112,15 @@ export default function AuthModal() {
           </button>
           
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37]">
+            <Sparkles className="w-4 h-4 text-[#000000]" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#000000]">
               Nuts & Spices Gourmet Club
             </span>
           </div>
           <h2 className="text-2xl font-black font-serif tracking-tight">
             {authMode === 'login' ? 'Welcome Back!' : 'Create Account'}
           </h2>
-          <p className="text-xs text-[#E6D7C3] mt-1">
+          <p className="text-xs text-[#E5E7EB] mt-1">
             {authMode === 'login' 
               ? 'Log in to access your orders & quick WhatsApp checkout.'
               : 'Join today for exclusive gourmet offers and WhatsApp updates.'}
@@ -133,8 +133,8 @@ export default function AuthModal() {
               onClick={() => { setAuthMode('login'); setErrorMessage(''); }}
               className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 authMode === 'login'
-                  ? 'bg-[#8B3A13] text-white shadow-md'
-                  : 'text-[#E6D7C3] hover:text-white'
+                  ? 'bg-[#000000] text-white shadow-md'
+                  : 'text-[#E5E7EB] hover:text-white'
               }`}
             >
               LOGIN
@@ -145,8 +145,8 @@ export default function AuthModal() {
               onClick={() => { setAuthMode('register'); setErrorMessage(''); }}
               className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 authMode === 'register'
-                  ? 'bg-[#8B3A13] text-white shadow-md'
-                  : 'text-[#E6D7C3] hover:text-white'
+                  ? 'bg-[#000000] text-white shadow-md'
+                  : 'text-[#E5E7EB] hover:text-white'
               }`}
             >
               REGISTER
@@ -155,7 +155,7 @@ export default function AuthModal() {
         </div>
 
         {/* Form Body Container */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-4 bg-[#FAF5EF]">
+        <div className="p-6 overflow-y-auto flex-1 space-y-4 bg-[#F9FAFB]">
           
           {/* Notifications */}
           {errorMessage && (
@@ -166,7 +166,7 @@ export default function AuthModal() {
 
           {successMessage && (
             <div className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-[#8B3A13]" />
+              <CheckCircle2 className="w-4 h-4 text-[#000000]" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -177,7 +177,7 @@ export default function AuthModal() {
               
               {/* Mobile / Email Input */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Mobile Number or Email
                 </label>
                 <div className="relative">
@@ -188,7 +188,7 @@ export default function AuthModal() {
                     placeholder="Enter mobile no. or email"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13] transition-colors"
+                    className="w-full pl-10 pr-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000] transition-colors"
                   />
                 </div>
               </div>
@@ -196,13 +196,13 @@ export default function AuthModal() {
               {/* Password Input */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => alert('Password reset link sent to your mobile via WhatsApp.')}
-                    className="text-[11px] font-bold text-[#8B3A13] hover:underline cursor-pointer"
+                    className="text-[11px] font-bold text-[#000000] hover:underline cursor-pointer"
                   >
                     Forgot?
                   </button>
@@ -215,12 +215,12 @@ export default function AuthModal() {
                     placeholder="Enter password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13] transition-colors"
+                    className="w-full pl-10 pr-10 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000] transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#2B1509] cursor-pointer"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -233,9 +233,9 @@ export default function AuthModal() {
                   type="checkbox"
                   id="remember-me"
                   defaultChecked
-                  className="rounded text-[#8B3A13] focus:ring-[#8B3A13]"
+                  className="rounded text-[#000000] focus:ring-[#000000]"
                 />
-                <label htmlFor="remember-me" className="text-xs font-medium text-[#4A3525]">
+                <label htmlFor="remember-me" className="text-xs font-medium text-[#000000]">
                   Keep me signed in on this device
                 </label>
               </div>
@@ -243,7 +243,7 @@ export default function AuthModal() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
+                className="w-full py-3.5 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
               >
                 LOGIN TO ACCOUNT
               </button>
@@ -251,9 +251,9 @@ export default function AuthModal() {
               {/* Divider */}
               <div className="relative my-4 text-center">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#E6D7C3]" />
+                  <div className="w-full border-t border-[#E5E7EB]" />
                 </div>
-                <span className="relative bg-[#FAF5EF] px-3 text-[10px] font-bold text-[#8C7A6B] uppercase tracking-wider">
+                <span className="relative bg-[#F9FAFB] px-3 text-[10px] font-bold text-[#8C7A6B] uppercase tracking-wider">
                   OR QUICK ACCESS
                 </span>
               </div>
@@ -262,7 +262,7 @@ export default function AuthModal() {
               <button
                 type="button"
                 onClick={handleWhatsAppQuickLogin}
-                className="w-full py-3 bg-[#8B3A13] hover:bg-[#A04000] text-white font-bold text-xs rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 bg-[#000000] hover:bg-[#000000] text-white font-bold text-xs rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4 fill-white" />
                 <span>LOGIN WITH WHATSAPP OTP</span>
@@ -276,7 +276,7 @@ export default function AuthModal() {
               
               {/* Name */}
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Name *
                 </label>
                 <div className="relative">
@@ -287,14 +287,14 @@ export default function AuthModal() {
                     placeholder="Enter name"
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               {/* Mobile Number */}
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Mobile Phone Number *
                 </label>
                 <div className="relative">
@@ -305,14 +305,14 @@ export default function AuthModal() {
                     placeholder="10-digit mobile number"
                     value={regMobile}
                     onChange={(e) => setRegMobile(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               {/* Email Address */}
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Email Address (Optional)
                 </label>
                 <div className="relative">
@@ -322,14 +322,14 @@ export default function AuthModal() {
                     placeholder="name@example.com"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Create Password *
                 </label>
                 <div className="relative">
@@ -340,12 +340,12 @@ export default function AuthModal() {
                     placeholder="At least 6 characters"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#2B1509] cursor-pointer"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -354,7 +354,7 @@ export default function AuthModal() {
 
               {/* Confirm Password */}
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#4A3525]">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
                   Confirm Password *
                 </label>
                 <div className="relative">
@@ -365,7 +365,7 @@ export default function AuthModal() {
                     placeholder="Re-enter password"
                     value={regConfirmPassword}
                     onChange={(e) => setRegConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E6D7C3] rounded-2xl text-xs font-semibold text-[#2B1509] placeholder-[#8C7A6B] outline-none focus:border-[#8B3A13]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
@@ -377,9 +377,9 @@ export default function AuthModal() {
                   id="terms"
                   checked={agreedTerms}
                   onChange={(e) => setAgreedTerms(e.target.checked)}
-                  className="mt-0.5 rounded text-[#8B3A13] focus:ring-[#8B3A13]"
+                  className="mt-0.5 rounded text-[#000000] focus:ring-[#000000]"
                 />
-                <label htmlFor="terms" className="text-[11px] text-[#4A3525]">
+                <label htmlFor="terms" className="text-[11px] text-[#000000]">
                   I agree to Nuts & Spices Terms of Service & Privacy Policy.
                 </label>
               </div>
@@ -387,7 +387,7 @@ export default function AuthModal() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 bg-[#8B3A13] hover:bg-[#6E2C00] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
+                className="w-full py-3 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
               >
                 CREATE MY ACCOUNT
               </button>

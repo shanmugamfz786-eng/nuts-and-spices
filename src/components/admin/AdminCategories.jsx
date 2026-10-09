@@ -679,7 +679,7 @@ export default function AdminCategories() {
                 {newProdImage && (
                   <div className="flex items-center gap-2 pt-1">
                     <img src={newProdImage} alt="Preview" className="w-8 h-8 object-cover rounded-md border border-gray-200" />
-                    <span className="text-[11px] text-[#8B3A13] font-bold">Image Attached!</span>
+                    <span className="text-[11px] text-[#000000] font-bold">Image Attached!</span>
                   </div>
                 )}
 
@@ -731,7 +731,7 @@ export default function AdminCategories() {
                   setViewingCategory(null);
                   setIsAddingProdInCat(false);
                 }}
-                className="w-full py-2.5 bg-[#FAF5EF] hover:bg-gray-100 text-gray-700 font-bold rounded-xl text-xs cursor-pointer border border-[#E6D7C3] transition-all"
+                className="w-full py-2.5 bg-[#F9FAFB] hover:bg-gray-100 text-gray-700 font-bold rounded-xl text-xs cursor-pointer border border-[#E5E7EB] transition-all"
               >
                 Close Window
               </button>

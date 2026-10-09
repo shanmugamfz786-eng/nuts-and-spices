@@ -19,37 +19,37 @@ export default function SearchModal() {
 
   return (
     <div className="fixed inset-0 z-50 bg-[#3D2314]/35 backdrop-blur-sm flex items-start justify-center pt-16 px-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-[#E6D7C3]">
+      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-[#E5E7EB]">
         {/* Search Header Input */}
-        <div className="p-4 border-b border-[#E6D7C3] flex items-center gap-3 bg-[#FAF5EF]">
-          <Search className="w-5 h-5 text-[#8B3A13]" />
+        <div className="p-4 border-b border-[#E5E7EB] flex items-center gap-3 bg-[#F9FAFB]">
+          <Search className="w-5 h-5 text-[#000000]" />
           <input
             type="text"
             placeholder="Search The Product"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             autoFocus
-            className="w-full bg-transparent outline-none text-[#2B1509] placeholder-[#8C7A6B] text-base font-medium"
+            className="w-full bg-transparent outline-none text-[#000000] placeholder-[#8C7A6B] text-base font-medium"
           />
           {searchTerm && (
             <button 
               onClick={() => setSearchTerm('')} 
-              className="text-xs text-[#8C7A6B] hover:text-[#2B1509] font-medium"
+              className="text-xs text-[#8C7A6B] hover:text-[#000000] font-medium"
             >
               Clear
             </button>
           )}
           <button
             onClick={() => setIsSearchOpen(false)}
-            className="p-1 rounded-lg text-[#8C7A6B] hover:text-[#2B1509] hover:bg-[#E6D7C3]/50 transition-colors"
+            className="p-1 rounded-lg text-[#8C7A6B] hover:text-[#000000] hover:bg-[#E5E7EB]/50 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Results List */}
-        <div className="p-4 max-h-[60vh] overflow-y-auto divide-y divide-[#FAF5EF]">
-          <div className="text-xs font-bold uppercase tracking-wider text-[#8B3A13] mb-3">
+        <div className="p-4 max-h-[60vh] overflow-y-auto divide-y divide-[#F9FAFB]">
+          <div className="text-xs font-bold uppercase tracking-wider text-[#000000] mb-3">
             {searchTerm.trim() ? `Search Results (${filteredProducts.length})` : 'Popular Suggestions'}
           </div>
 
@@ -64,7 +64,7 @@ export default function SearchModal() {
               return (
                 <div 
                   key={product.id}
-                  className="py-3 flex items-center justify-between group hover:bg-[#FAF5EF] rounded-xl px-2 transition-colors cursor-pointer"
+                  className="py-3 flex items-center justify-between group hover:bg-[#F9FAFB] rounded-xl px-2 transition-colors cursor-pointer"
                   onClick={() => {
                     setIsSearchOpen(false);
                     navigate('product-details', { product });
@@ -74,13 +74,13 @@ export default function SearchModal() {
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-12 h-12 rounded-lg object-cover border border-[#E6D7C3]"
+                      className="w-12 h-12 rounded-lg object-cover border border-[#E5E7EB]"
                     />
                     <div>
-                      <h4 className="text-sm font-bold text-[#2B1509] group-hover:text-[#8B3A13] transition-colors">
+                      <h4 className="text-sm font-bold text-[#000000] group-hover:text-[#000000] transition-colors">
                         {product.name}
                       </h4>
-                      <span className="text-xs text-[#8B3A13] font-semibold">
+                      <span className="text-xs text-[#000000] font-semibold">
                         ₹{weightObj.price} / {weightObj.label}
                       </span>
                     </div>
@@ -92,12 +92,12 @@ export default function SearchModal() {
                         e.stopPropagation();
                         addToCart(product, weightObj, 1);
                       }}
-                      className="px-3 py-1.5 text-xs font-semibold bg-[#FAF5EF] text-[#8B3A13] hover:bg-[#8B3A13] hover:text-white rounded-lg transition-colors flex items-center gap-1 border border-[#E6D7C3]"
+                      className="px-3 py-1.5 text-xs font-semibold bg-[#F9FAFB] text-[#000000] hover:bg-[#000000] hover:text-white rounded-lg transition-colors flex items-center gap-1 border border-[#E5E7EB]"
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>+ Add</span>
                     </button>
-                    <ArrowRight className="w-4 h-4 text-[#8C7A6B] group-hover:text-[#8B3A13] transition-colors" />
+                    <ArrowRight className="w-4 h-4 text-[#8C7A6B] group-hover:text-[#000000] transition-colors" />
                   </div>
                 </div>
               );
@@ -106,13 +106,13 @@ export default function SearchModal() {
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-[#FAF5EF] border-t border-[#E6D7C3] text-center">
+        <div className="p-3 bg-[#F9FAFB] border-t border-[#E5E7EB] text-center">
           <button
             onClick={() => {
               setIsSearchOpen(false);
               navigate('shop', { category: 'all' });
             }}
-            className="text-xs font-bold text-[#8B3A13] hover:underline"
+            className="text-xs font-bold text-[#000000] hover:underline"
           >
             View All Products in Shop →
           </button>

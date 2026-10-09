@@ -115,13 +115,13 @@ export default function AdminPage() {
       
       {/* 1. FIXED NON-SCROLLING LEFT SIDEBAR (Warm Bright Gourmet Theme - ZERO DARK SHADES) */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#FAF5EF] text-[#4A3525] border-r border-[#E6D7C3] flex flex-col justify-between shrink-0 h-screen overflow-hidden
+        fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#F9FAFB] text-[#000000] border-r border-[#E5E7EB] flex flex-col justify-between shrink-0 h-screen overflow-hidden
         transform ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
         transition-transform duration-300 ease-in-out shadow-xl select-none
       `}>
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Top Brand Logo */}
-          <div className="p-6 flex items-center justify-between border-b border-[#E6D7C3] shrink-0">
+          <div className="p-6 flex items-center justify-between border-b border-[#E5E7EB] shrink-0">
             <div className="flex items-center gap-2.5">
               <img 
                 src="/logo.jpg" 
@@ -129,17 +129,17 @@ export default function AdminPage() {
                 className="w-10 h-10 object-contain rounded-full shadow-sm"
               />
               <div className="flex flex-col text-left">
-                <span className="text-xl font-black tracking-wider text-[#2B1509] font-serif uppercase leading-none">
+                <span className="text-xl font-black tracking-wider text-[#000000] font-serif uppercase leading-none">
                   HAJI
                 </span>
-                <span className="text-[10px] font-extrabold text-[#D4AF37] tracking-widest uppercase font-serif inline-block mt-0.5">
+                <span className="text-[10px] font-extrabold text-[#000000] tracking-widest uppercase font-serif inline-block mt-0.5">
                   NUTS & SPICES
                 </span>
               </div>
             </div>
             <button 
               onClick={() => setIsMobileSidebarOpen(false)}
-              className="lg:hidden text-[#8C7A6B] hover:text-[#8B3A13] cursor-pointer"
+              className="lg:hidden text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -157,17 +157,17 @@ export default function AdminPage() {
                   onClick={() => handleNavigateTab(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#8B3A13] text-white shadow-md'
-                      : 'text-[#6B513E] hover:text-[#8B3A13] hover:bg-[#E6D7C3]/50'
+                      ? 'bg-[#25D366] text-white shadow-md'
+                      : 'text-[#6B513E] hover:text-[#000000] hover:bg-[#E5E7EB]/50'
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#D4AF37]' : 'text-[#8C7A6B]'}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#8C7A6B]'}`} />
                     <span>{item.label}</span>
                   </div>
 
                   {item.badge && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#D4AF37] text-white">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#25D366] text-white">
                       {item.badge}
                     </span>
                   )}
@@ -178,10 +178,10 @@ export default function AdminPage() {
         </div>
 
         {/* Bottom Logout Pill Button */}
-        <div className="p-4 border-t border-[#E6D7C3] shrink-0">
+        <div className="p-4 border-t border-[#E5E7EB] shrink-0">
           <button
             onClick={logoutAdmin}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#8B3A13] hover:bg-[#A04000] text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#25D366] text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>

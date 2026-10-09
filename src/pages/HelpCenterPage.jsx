@@ -42,7 +42,7 @@ export default function HelpCenterPage() {
     <div className="bg-white min-h-screen pb-16 space-y-12">
       
       {/* PAGE HEADER BANNER (Warm Spice Gradient - ZERO DARK SHADES) */}
-      <section className="relative bg-gradient-to-br from-[#8B3A13] via-[#A04000] to-[#B8860B] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-[#D4AF37]/30">
+      <section className="relative bg-gradient-to-br from-[#000000] via-[#000000] to-[#222222] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-[#000000]/30">
         <div className="max-w-7xl mx-auto space-y-6 relative z-10">
           <button
             onClick={() => navigate('home')}
@@ -54,21 +54,21 @@ export default function HelpCenterPage() {
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-[#FAF5EF] text-[11px] font-extrabold uppercase tracking-wider border border-white/25">
-                <HelpCircle className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-[#F9FAFB] text-[11px] font-extrabold uppercase tracking-wider border border-white/25">
+                <HelpCircle className="w-3.5 h-3.5 text-[#000000]" />
                 <span>Customer Care & Support</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-black font-serif text-white tracking-wide uppercase">
                 Help Center
               </h1>
-              <p className="text-xs sm:text-sm text-[#FAF5EF] leading-relaxed font-serif">
+              <p className="text-xs sm:text-sm text-[#F9FAFB] leading-relaxed font-serif">
                 Have questions about ordering, shipping, payments, or product freshness? We're here 24/7 to assist you.
               </p>
             </div>
 
             <button
               onClick={handleWhatsAppHelp}
-              className="px-6 py-3 bg-[#D4AF37] hover:bg-[#B8860B] text-white font-extrabold text-xs rounded-2xl shadow-xl flex items-center gap-2.5 transition-transform hover:scale-105 shrink-0 cursor-pointer border border-white/20"
+              className="px-6 py-3 bg-[#000000] hover:bg-[#222222] text-white font-extrabold text-xs rounded-2xl shadow-xl flex items-center gap-2.5 transition-transform hover:scale-105 shrink-0 cursor-pointer border border-white/20"
             >
               <MessageSquare className="w-5 h-5 fill-current" />
               <span>Chat with Support on WhatsApp</span>
@@ -81,31 +81,31 @@ export default function HelpCenterPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          <div className="bg-[#FAF5EF] p-6 rounded-3xl border border-[#E6D7C3] space-y-3 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#8B3A13] text-[#D4AF37] flex items-center justify-center mx-auto shadow-md">
+          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-3 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#000000] text-[#000000] flex items-center justify-center mx-auto shadow-md">
               <Truck className="w-6 h-6" />
             </div>
-            <h3 className="font-extrabold font-serif text-[#2B1509] text-lg">Shipping & Delivery</h3>
+            <h3 className="font-extrabold font-serif text-[#000000] text-lg">Shipping & Delivery</h3>
             <p className="text-xs text-[#8C7A6B] leading-relaxed">
               Free nationwide delivery on orders over ₹3500. Track your shipment live via WhatsApp updates.
             </p>
           </div>
 
-          <div className="bg-[#FAF5EF] p-6 rounded-3xl border border-[#E6D7C3] space-y-3 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#8B3A13] text-[#D4AF37] flex items-center justify-center mx-auto shadow-md">
+          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-3 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#000000] text-[#000000] flex items-center justify-center mx-auto shadow-md">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h3 className="font-extrabold font-serif text-[#2B1509] text-lg">Freshness Guarantee</h3>
+            <h3 className="font-extrabold font-serif text-[#000000] text-lg">Freshness Guarantee</h3>
             <p className="text-xs text-[#8C7A6B] leading-relaxed">
               100% money-back freshness guarantee on all natural dates, nuts, seeds, and gourmet blends.
             </p>
           </div>
 
-          <div className="bg-[#FAF5EF] p-6 rounded-3xl border border-[#E6D7C3] space-y-3 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#8B3A13] text-[#D4AF37] flex items-center justify-center mx-auto shadow-md">
+          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-3 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#000000] text-[#000000] flex items-center justify-center mx-auto shadow-md">
               <Phone className="w-6 h-6" />
             </div>
-            <h3 className="font-extrabold font-serif text-[#2B1509] text-lg">Direct Phone Support</h3>
+            <h3 className="font-extrabold font-serif text-[#000000] text-lg">Direct Phone Support</h3>
             <p className="text-xs text-[#8C7A6B] leading-relaxed">
               Reach our customer support team directly at +91 {activeWhatsAppNumber || '9876543210'} for any queries.
             </p>
@@ -116,7 +116,7 @@ export default function HelpCenterPage() {
         {/* FREQUENTLY ASKED QUESTIONS */}
         <div className="space-y-6 max-w-4xl mx-auto">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black font-serif text-[#2B1509]">
+            <h2 className="text-2xl sm:text-3xl font-black font-serif text-[#000000]">
               Frequently Asked Questions
             </h2>
             <p className="text-xs sm:text-sm text-[#8C7A6B]">
@@ -124,18 +124,18 @@ export default function HelpCenterPage() {
             </p>
           </div>
 
-          <div className="divide-y divide-[#E6D7C3] border border-[#E6D7C3] rounded-3xl overflow-hidden bg-white shadow-sm">
+          <div className="divide-y divide-[#E5E7EB] border border-[#E5E7EB] rounded-3xl overflow-hidden bg-white shadow-sm">
             {faqs.map((faq, index) => (
               <div key={index} className="transition-colors">
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#2B1509] hover:bg-[#FAF5EF] cursor-pointer"
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#000000] hover:bg-[#F9FAFB] cursor-pointer"
                 >
                   <span className="font-serif">{faq.question}</span>
-                  <ChevronDown className={`w-5 h-5 text-[#8B3A13] shrink-0 transition-transform ${openFaq === index ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-5 h-5 text-[#000000] shrink-0 transition-transform ${openFaq === index ? 'rotate-180' : ''}`} />
                 </button>
                 {openFaq === index && (
-                  <div className="px-5 pb-5 text-xs sm:text-sm text-[#8C7A6B] leading-relaxed bg-[#FAF5EF]/50">
+                  <div className="px-5 pb-5 text-xs sm:text-sm text-[#8C7A6B] leading-relaxed bg-[#F9FAFB]/50">
                     {faq.answer}
                   </div>
                 )}

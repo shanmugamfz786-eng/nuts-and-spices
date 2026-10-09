@@ -264,9 +264,9 @@ export default function AdminProducts() {
           </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="px-4 py-2.5 bg-[#F8FAFC] border border-gray-200 text-[#4A3525] rounded-xl font-extrabold text-xs shadow-sm flex items-center gap-2 tracking-wide uppercase">
-            <Package className="w-4 h-4 text-[#8B3A13]" />
-            Total Products: <span className="text-[#8B3A13] text-sm">{products.length}</span>
+          <div className="px-4 py-2.5 bg-[#F8FAFC] border border-gray-200 text-[#000000] rounded-xl font-extrabold text-xs shadow-sm flex items-center gap-2 tracking-wide uppercase">
+            <Package className="w-4 h-4 text-[#000000]" />
+            Total Products: <span className="text-[#000000] text-sm">{products.length}</span>
           </div>
 
           <button
@@ -518,7 +518,7 @@ export default function AdminProducts() {
                 {/* 5. DYNAMIC WEIGHT & PRICE OPTIONS LIST (REPLACES BASE PRICE) */}
                 <div className="sm:col-span-2 space-y-3 bg-amber-50/40 p-4 rounded-2xl border border-amber-200/60">
                   <div className="flex items-center justify-between">
-                    <label className="block font-extrabold uppercase text-xs text-[#8B3A13]">
+                    <label className="block font-extrabold uppercase text-xs text-[#000000]">
                       Weight & Price Options *
                     </label>
                     <button
@@ -529,9 +529,9 @@ export default function AdminProducts() {
                           weightOptions: [...formData.weightOptions, { label: '', price: '' }]
                         });
                       }}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-[#8B3A13] hover:bg-[#6E2C00] text-[#D4AF37] font-extrabold text-[11px] uppercase tracking-wider rounded-lg transition-all cursor-pointer shadow-xs"
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-[#25D366] hover:bg-[#25D366] text-[#000000] font-extrabold text-[11px] uppercase tracking-wider rounded-lg transition-all cursor-pointer shadow-xs"
                     >
-                      <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <Plus className="w-3.5 h-3.5 text-[#000000]" />
                       <span>Add Weight</span>
                     </button>
                   </div>
@@ -700,7 +700,7 @@ export default function AdminProducts() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-[#8B3A13] hover:bg-[#6E2C00] text-[#D4AF37] font-extrabold rounded-xl shadow-md transition-all cursor-pointer border border-[#D4AF37]/40"
+                  className="px-6 py-2.5 bg-[#25D366] hover:bg-[#25D366] text-[#000000] font-extrabold rounded-xl shadow-md transition-all cursor-pointer border border-[#000000]/40"
                 >
                   {editingProduct ? 'Save Product Changes' : 'Create Product'}
                 </button>
