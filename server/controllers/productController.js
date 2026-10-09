@@ -73,9 +73,28 @@ export const getProductById = async (req, res) => {
          if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
             const parsedState = JSON.parse(adminStateRows[0].setting_value);
             if (parsedState && parsedState.products && parsedState.products.length > 0) {
-               product = parsedState.products.find(p => p.id === id);
-            }
-         }
+              const existingIds = new Set(products.map(p => p.id));
+              for (const p of parsedState.products) {
+                if (!existingIds.has(p.id)) {
+                  products.push(p);
+                  existingIds.add(p.id);
+                }
+              }
+           }
+        }
+        
+        const catalogStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_catalog_json']);
+        if (catalogStateRows && catalogStateRows.length > 0 && catalogStateRows[0].setting_value) {
+           const parsedCatalog = JSON.parse(catalogStateRows[0].setting_value);
+           if (parsedCatalog && parsedCatalog.products && parsedCatalog.products.length > 0) {
+              const existingIds = new Set(products.map(p => p.id));
+              for (const p of parsedCatalog.products) {
+                if (!existingIds.has(p.id)) {
+                  products.push(p);
+                  existingIds.add(p.id);
+                }
+              }
+           }
        } catch(e) {}
     }
 
