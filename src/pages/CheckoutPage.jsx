@@ -80,11 +80,15 @@ export default function CheckoutPage() {
     setIsProcessingPayment(true);
     
     try {
-      const orderRes = await fetch((import.meta.env.VITE_API_BASE_URL || '') + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes }) }); const orderData = await orderRes.json(); if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || '';
+      const orderRes = await fetch(BASE + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('nuts_spices_auth_token') || ''}` }, body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes }) }); 
+      if (!orderRes.ok && orderRes.status === 404) throw new Error('API Endpoint not found');
+      const text1 = await orderRes.text();
+      let orderData; try { orderData = JSON.parse(text1); } catch(e) { throw new Error('Backend returned HTML instead of JSON (order creation): ' + text1.substring(0, 100)); } if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
       const orderId = 'NS_' + Math.floor(100000 + Math.random() * 900000).toString();
       const token = localStorage.getItem('nuts_spices_auth_token');
       
-      const response = await fetch((import.meta.env.VITE_API_BASE_URL || '') + '/api/payment/create-session', {
+      const response = await fetch(BASE + '/api/payment/create-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +102,8 @@ export default function CheckoutPage() {
         })
       });
 
-      const data = await response.json();
+      const text2 = await response.text();
+      let data; try { data = JSON.parse(text2); } catch(e) { throw new Error('Backend returned HTML instead of JSON (payment session): ' + text2.substring(0, 100)); }
 
       if (data.success && data.paymentSessionId) {
         const cashfree = await load({
