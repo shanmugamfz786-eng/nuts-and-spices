@@ -7,26 +7,15 @@ export default function AdminDashboardPage() {
   const { user, navigate } = useCart();
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'products' | 'settings'
   const [stats, setStats] = useState({
-    totalOrders: 1,
-    totalRevenue: 940,
+    totalOrders: 0,
+    totalRevenue: 0,
     pendingOrders: 0,
-    deliveredOrders: 1,
-    productCount: 15,
-    customerCount: 2
+    deliveredOrders: 0,
+    productCount: 0,
+    customerCount: 0
   });
 
-  const [orders, setOrders] = useState([
-    {
-      id: 'NS-98124',
-      orderId: 'NS-98124',
-      customerName: 'Karthik Raja',
-      phone: '9876543210',
-      address: 'No 45, Anna Salai, T. Nagar, Chennai - 600017',
-      totalAmount: 940,
-      status: 'confirmed',
-      createdAt: new Date().toLocaleDateString()
-    }
-  ]);
+  const [orders, setOrders] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');

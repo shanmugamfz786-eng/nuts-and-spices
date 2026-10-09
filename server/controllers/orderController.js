@@ -1,4 +1,5 @@
 import { queryDb, memoryStore } from '../config/db.js';
+import { PRODUCTS } from '../../src/data/products.js';
 
 const STORE_WHATSAPP_NUMBER = process.env.STORE_WHATSAPP_NUMBER || '919876543210';
 
@@ -18,23 +19,31 @@ export const createOrder = async (req, res) => {
     const orderId = `NS-${orderNumericId}`;
 
     // Validate products and calculate total securely from backend catalog
+    let dbProducts = await queryDb('SELECT * FROM products');
+    if (!dbProducts || dbProducts.length === 0) {
+      dbProducts = memoryStore.products.length > 0 ? memoryStore.products : PRODUCTS;
+    }
+
     let subtotal = 0;
     const validatedItems = [];
 
     for (const item of items) {
-      const backendProduct = memoryStore.products.find(p => p.id === item.id);
+      const backendProduct = dbProducts.find(p => p.id === item.id);
       if (!backendProduct) {
         return res.status(400).json({ success: false, message: `Product '${item.name || item.id}' is unavailable.` });
       }
 
       // Find the specific weight/variant price
-      const variant = backendProduct.weights ? backendProduct.weights.find(w => w.label === item.weight) : null;
+      const productWeights = backendProduct.weights || backendProduct.weights_json || [];
+      const variant = productWeights.find(w => w.label === item.weight);
       let realPrice = variant ? variant.price : null;
 
       // Fallback if weights are differently structured or single price
       if (realPrice === null || realPrice === undefined) {
-         if (backendProduct.weights && backendProduct.weights.length > 0) {
-           realPrice = backendProduct.weights[0].price;
+         if (productWeights.length > 0) {
+           realPrice = productWeights[0].price;
+         } else if (backendProduct.price) {
+           realPrice = backendProduct.price;
          } else {
            return res.status(400).json({ success: false, message: `Pricing error for product '${backendProduct.name}'.` });
          }
