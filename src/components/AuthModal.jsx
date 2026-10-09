@@ -23,7 +23,7 @@ export default function AuthModal() {
 
   if (!isAuthModalOpen) return null;
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
     const id = loginIdentifier.trim();
@@ -46,17 +46,22 @@ export default function AuthModal() {
       return;
     }
 
-    setSuccessMessage('Logged in successfully!');
-    setTimeout(() => {
-      loginUser({
-        identifier: id,
-        password: loginPassword
-      });
-      setSuccessMessage('');
-    }, 600);
+    const res = await loginUser({
+      identifier: id,
+      password: loginPassword
+    });
+
+    if (res && res.success) {
+      setSuccessMessage('Logged in successfully!');
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 600);
+    } else {
+      setErrorMessage(res ? res.message : 'Invalid credentials');
+    }
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -73,16 +78,21 @@ export default function AuthModal() {
       return;
     }
 
-    setSuccessMessage('Account created successfully!');
-    setTimeout(() => {
-      registerUser({
-        name: regName.trim(),
-        phone: regMobile.trim(),
-        email: regEmail.trim() || `${regName.toLowerCase().replace(/\s+/g, '')}@nutsandspices.in`,
-        password: regPassword
-      });
-      setSuccessMessage('');
-    }, 600);
+    const res = await registerUser({
+      name: regName.trim(),
+      phone: regMobile.trim(),
+      email: regEmail.trim() || `${regName.toLowerCase().replace(/\s+/g, '')}@nutsandspices.in`,
+      password: regPassword
+    });
+
+    if (res && res.success) {
+      setSuccessMessage('Account created successfully!');
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 600);
+    } else {
+      setErrorMessage(res ? res.message : 'Registration failed');
+    }
   };
 
   const handleWhatsAppQuickLogin = () => {

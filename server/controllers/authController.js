@@ -15,10 +15,11 @@ export const registerCustomer = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Name, phone number, and password are required.' });
     }
 
-    const identifier = email || phone;
+    const identifier = email ? email.trim().toLowerCase() : phone;
+    const cleanPhone = phone ? phone.trim() : '';
 
     // Check existing
-    const existing = await queryDb('SELECT * FROM users WHERE phone = ? OR email = ?', [phone, identifier]);
+    const existing = await queryDb('SELECT * FROM users WHERE phone = ? OR LOWER(email) = ?', [cleanPhone, identifier]);
     if (existing && existing.length > 0) {
       return res.status(400).json({ success: false, message: 'An account with this phone or email already exists.' });
     }
@@ -28,14 +29,14 @@ export const registerCustomer = async (req, res) => {
 
     await queryDb(
       'INSERT INTO users (id, name, phone, email, password, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, name.trim(), phone.trim(), email ? email.trim() : `${phone}@nutsandspices.in`, hashedPassword, 'customer']
+      [userId, name.trim(), cleanPhone, email ? email.trim().toLowerCase() : `${cleanPhone}@nutsandspices.in`, hashedPassword, 'customer']
     );
 
     const userObj = {
       id: userId,
       name: name.trim(),
-      phone: phone.trim(),
-      email: email ? email.trim() : `${phone}@nutsandspices.in`,
+      phone: cleanPhone,
+      email: email ? email.trim().toLowerCase() : `${cleanPhone}@nutsandspices.in`,
       role: 'customer'
     };
 

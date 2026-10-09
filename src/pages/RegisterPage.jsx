@@ -33,7 +33,7 @@ export default function RegisterPage() {
     );
   }
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -50,16 +50,21 @@ export default function RegisterPage() {
       return;
     }
 
-    setSuccessMessage('Account registered successfully!');
-    setTimeout(() => {
-      registerUser({
-        name: regName.trim(),
-        phone: regMobile.trim(),
-        email: regEmail.trim() || `${regName.toLowerCase().replace(/\s+/g, '')}@nutsandspices.in`,
-        password: regPassword
-      });
-      navigate('home');
-    }, 600);
+    const res = await registerUser({
+      name: regName.trim(),
+      phone: regMobile.trim(),
+      email: regEmail.trim() || `${regName.toLowerCase().replace(/\s+/g, '')}@nutsandspices.in`,
+      password: regPassword
+    });
+
+    if (res && res.success) {
+      setSuccessMessage('Account registered successfully!');
+      setTimeout(() => {
+        navigate('home');
+      }, 600);
+    } else {
+      setErrorMessage(res ? res.message : 'Registration failed');
+    }
   };
 
   return (

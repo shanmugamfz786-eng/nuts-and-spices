@@ -405,26 +405,19 @@ export const CartProvider = ({ children }) => {
   };
 
 // USER AUTH HANDLERS
-  const registerUser = (userData) => {
-    const newUser = {
-      name: userData.name,
-      phone: userData.phone || userData.identifier || '',
-      email: userData.email || '',
-      password: userData.password || ''
-    };
-
-    setRegisteredUsers(prev => {
-      const filtered = prev.filter(u => 
-        !(u.phone && u.phone === newUser.phone) && 
-        !(u.email && u.email.toLowerCase() === newUser.email.toLowerCase())
-      );
-      const upd = [...filtered, newUser];
-      syncAdminStateToCloud({ registeredUsers: upd });
-      return upd;
-    });
-
-    setUser(newUser);
-    setIsAuthModalOpen(false);
+  const registerUser = async (userData) => {
+    try {
+      const { register } = await import('../api/authApi.js');
+      const res = await register(userData);
+      if (res && res.success) {
+        localStorage.setItem('nuts_spices_auth_token', res.token);
+        setUser(res.user);
+        setIsAuthModalOpen(false);
+      }
+      return res;
+    } catch (err) {
+      return { success: false, message: 'Registration failed due to network error.' };
+    }
   };
 
   const loginUser = (loginData) => {
