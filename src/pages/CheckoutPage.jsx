@@ -80,6 +80,7 @@ export default function CheckoutPage() {
     setIsProcessingPayment(true);
     
     try {
+      const orderRes = await fetch((import.meta.env.VITE_API_BASE_URL || '') + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes }) }); const orderData = await orderRes.json(); if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
       const orderId = 'NS_' + Math.floor(100000 + Math.random() * 900000).toString();
       const token = localStorage.getItem('nuts_spices_auth_token');
       
@@ -118,7 +119,7 @@ export default function CheckoutPage() {
           status: 'pending', // Pending payment
           timestamp: new Date().toLocaleString()
         };
-        const orderRes = await fetch((import.meta.env.VITE_API_BASE_URL || '') + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes }) }); const orderData = await orderRes.json(); if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
+        
         clearCart();
 
         alert('Backend success! Redirecting to Cashfree...'); cashfree.checkout(checkoutOptions); alert('Cashfree checkout function called!');
