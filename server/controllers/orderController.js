@@ -25,7 +25,7 @@ export const createOrder = async (req, res) => {
     }
 
     try {
-      const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'master_admin_state_json'");
+      const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
       if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
          const parsedState = JSON.parse(adminStateRows[0].setting_value);
          if (parsedState && parsedState.products && parsedState.products.length > 0) {
