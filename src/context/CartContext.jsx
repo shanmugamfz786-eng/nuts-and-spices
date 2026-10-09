@@ -4,7 +4,7 @@ export const isProductActive = (p) => p && p.active !== false && p.status !== 'I
 import { fetchCloudCatalog, saveCloudCatalog } from '../services/cloudDb';
 import { createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from '../api/productApi';
 import { createCategory as createCategoryApi, updateCategory as updateCategoryApi, deleteCategory as deleteCategoryApi } from '../api/categoryApi';
-import { fetchAdminStateApi, syncAdminStateApi } from '../api/index.js';
+import { API_BASE_URL, fetchAdminStateApi, syncAdminStateApi } from '../api/index.js';
 import { 
   INITIAL_STORE_SETTINGS, 
   INITIAL_ORDERS, 
@@ -620,7 +620,7 @@ export const CartProvider = ({ children }) => {
 
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       try {
-        const res = await fetch('/api/admin/sync-git', {
+        const res = await fetch(API_BASE_URL + '/admin/sync-git', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ products: prods, categories: cats })
