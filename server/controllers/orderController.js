@@ -50,7 +50,15 @@ export const createOrder = async (req, res) => {
       }
 
       // Find the specific weight/variant price
-      const productWeights = backendProduct.weights || backendProduct.weights_json || [];
+      let productWeights = backendProduct.weights || backendProduct.weights_json || [];
+      if (typeof productWeights === 'string') {
+        try {
+          productWeights = JSON.parse(productWeights);
+        } catch(e) {
+          console.error("Failed to parse productWeights", e);
+          productWeights = [];
+        }
+      }
       // Try finding variant by label AND price first (to support duplicate labels with different prices)
       let variant = productWeights.find(w => w.label === item.weight && Number(w.price) === Number(item.price));
       if (!variant) {
