@@ -2,9 +2,10 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import { CheckCircle2, MessageSquare, ArrowRight, ShoppingBag, Copy, Check } from 'lucide-react';
 import { STORE_WHATSAPP_NUMBER } from '../data/products';
+import { API_BASE_URL } from '../api/index';
 
 export default function OrderSuccessPage() {
-  const { lastOrder, getWhatsAppUrl, navigate, storeSettings } = useCart();
+  const { lastOrder, getWhatsAppUrl, navigate, storeSettings, clearCart } = useCart();
   const [copied, setCopied] = React.useState(false);
   const [paymentStatus, setPaymentStatus] = React.useState('verifying');
   const [isCashfreeCallback, setIsCashfreeCallback] = React.useState(false);
@@ -16,7 +17,7 @@ export default function OrderSuccessPage() {
       setIsCashfreeCallback(true);
       // Verify payment
       const token = localStorage.getItem('token');
-      fetch('/api/payment/verify', {
+      fetch(API_BASE_URL + '/payment/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,6 +29,7 @@ export default function OrderSuccessPage() {
       .then(data => {
         if (data.success && data.isPaid) {
           setPaymentStatus('success');
+          clearCart();
         } else {
           setPaymentStatus('failed');
         }

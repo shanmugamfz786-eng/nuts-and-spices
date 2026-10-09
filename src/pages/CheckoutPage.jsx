@@ -85,7 +85,7 @@ export default function CheckoutPage() {
       if (!orderRes.ok && orderRes.status === 404) throw new Error('API Endpoint not found');
       const text1 = await orderRes.text();
       let orderData; try { orderData = JSON.parse(text1); } catch(e) { throw new Error('Backend returned HTML instead of JSON (order creation): ' + text1.substring(0, 100)); } if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
-      const orderId = 'NS_' + Math.floor(100000 + Math.random() * 900000).toString();
+      
       const token = localStorage.getItem('nuts_spices_auth_token');
       
       const response = await fetch(BASE + '/api/payment/create-session', {
@@ -125,9 +125,9 @@ export default function CheckoutPage() {
           timestamp: new Date().toLocaleString()
         };
         
-        clearCart();
+        
 
-        alert('Backend success! Redirecting to Cashfree...'); cashfree.checkout(checkoutOptions); alert('Cashfree checkout function called!');
+        cashfree.checkout(checkoutOptions);
       } else {
         alert('Failed to initialize payment: ' + (data.message || 'Unknown error'));
         setIsProcessingPayment(false);
