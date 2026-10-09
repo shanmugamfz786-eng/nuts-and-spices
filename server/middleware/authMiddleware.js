@@ -8,11 +8,11 @@ export const authMiddleware = (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+    if (!process.env.JWT_SECRET) {
       console.error("FATAL ERROR: JWT_SECRET is not defined.");
       return res.status(500).json({ success: false, message: 'Server configuration error.' });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nuts_spices_dev_secret_only');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {

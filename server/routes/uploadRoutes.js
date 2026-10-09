@@ -1,11 +1,13 @@
 import express from 'express';
 import multer from 'multer';
 import { storage } from '../config/cloudinary.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+import { adminMiddleware } from '../middleware/adminMiddleware.js';
 
 const router = express.Router();
 const upload = multer({ storage });
 
-router.post('/', (req, res, next) => {
+router.post('/', authMiddleware, adminMiddleware, (req, res, next) => {
   console.log('--- Incoming Image Upload Request ---');
   next();
 }, upload.single('image'), (req, res) => {
@@ -26,7 +28,7 @@ router.post('/', (req, res, next) => {
   }
 });
 
-router.post('/delete', async (req, res) => {
+router.post('/delete', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { imageUrl } = req.body;
     if (!imageUrl || !imageUrl.includes('res.cloudinary.com')) {

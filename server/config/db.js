@@ -6,14 +6,14 @@ let pool = null;
 
 export const getPool = () => {
   if (!pool) {
-    const host = process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com';
-    const isTiDB = host.includes('tidbcloud.com');
+    const host = process.env.DB_HOST;
+    const isTiDB = host && host.includes('tidbcloud.com');
     const config = {
       host: host,
       port: Number(process.env.DB_PORT) || (isTiDB ? 4000 : 3306),
-      user: process.env.DB_USER || '2ufAsPLeYmcSNkD.root',
-      password: process.env.DB_PASSWORD || 'UABZuDoBgG5NcAcJ',
-      database: process.env.DB_NAME || 'nuts',
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,

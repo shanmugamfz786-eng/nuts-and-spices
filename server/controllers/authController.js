@@ -4,9 +4,9 @@ import { queryDb, memoryStore } from '../config/db.js';
 
 if (!process.env.JWT_SECRET) {
   console.error("FATAL ERROR: JWT_SECRET is not defined.");
-  if (process.env.NODE_ENV === 'production') process.exit(1);
+  process.exit(1);
 }
-const JWT_SECRET = process.env.JWT_SECRET || 'nuts_spices_dev_secret_only';
+const JWT_SECRET = process.env.JWT_SECRET;
 export const registerCustomer = async (req, res) => {
   try {
     const { name, phone, email, password } = req.body;
