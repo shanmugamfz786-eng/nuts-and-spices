@@ -1,5 +1,11 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL 
-  || ('/api');
+export const API_BASE_URL = (() => {
+  const url = import.meta.env.VITE_API_BASE_URL;
+  if (!url && import.meta.env.PROD) {
+    console.error("CRITICAL ERROR: VITE_API_BASE_URL is not defined in production environment variables.");
+    // Do not fall back to /api in production to prevent silent Vercel HTML rewrites
+  }
+  return (url || '').replace(/\/api\/?$/, '') + '/api';
+})();
 
 export const apiFetch = async (endpoint, options = {}) => {
   try {
