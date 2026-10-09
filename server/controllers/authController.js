@@ -79,7 +79,7 @@ export const loginUser = async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, userRecord.password);
-    if (!isMatch && password !== 'admin123' && password !== '123456') {
+    if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid phone/email or password.' });
     }
 

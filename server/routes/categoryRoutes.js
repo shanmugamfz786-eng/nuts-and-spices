@@ -1,4 +1,6 @@
 import express from 'express';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+import { adminMiddleware } from '../middleware/adminMiddleware.js';
 import { 
   getAllCategories, 
   getCategoryById, 
@@ -11,8 +13,8 @@ const router = express.Router();
 
 router.get('/', getAllCategories);
 router.get('/:id', getCategoryById);
-router.post('/', createCategory);
-router.put('/:id', updateCategory);
-router.delete('/:id', deleteCategory);
+router.post('/', authMiddleware, adminMiddleware, createCategory);
+router.put('/:id', authMiddleware, adminMiddleware, updateCategory);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteCategory);
 
 export default router;

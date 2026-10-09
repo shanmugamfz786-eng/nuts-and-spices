@@ -17,7 +17,48 @@ export const createOrder = async (req, res) => {
     const orderNumericId = Math.floor(10000 + Math.random() * 90000);
     const orderId = `NS-${orderNumericId}`;
 
-    const subtotal = items.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    // Validate products and calculate total securely from backend catalog
+    let subtotal = 0;
+    const validatedItems = [];
+
+    for (const item of items) {
+      const backendProduct = memoryStore.products.find(p => p.id === item.id);
+      if (!backendProduct) {
+        return res.status(400).json({ success: false, message: `Product '${item.name || item.id}' is unavailable.` });
+      }
+
+      // Find the specific weight/variant price
+      const variant = backendProduct.weights ? backendProduct.weights.find(w => w.label === item.weight) : null;
+      let realPrice = variant ? variant.price : null;
+
+      // Fallback if weights are differently structured or single price
+      if (realPrice === null || realPrice === undefined) {
+         if (backendProduct.weights && backendProduct.weights.length > 0) {
+           realPrice = backendProduct.weights[0].price;
+         } else {
+           return res.status(400).json({ success: false, message: `Pricing error for product '${backendProduct.name}'.` });
+         }
+      }
+
+      const qty = Number(item.quantity);
+      if (qty <= 0 || isNaN(qty)) {
+         return res.status(400).json({ success: false, message: 'Invalid quantity.' });
+      }
+
+      subtotal += (Number(realPrice) * qty);
+      
+      // Override frontend price with backend validated price
+      validatedItems.push({
+        ...item,
+        price: Number(realPrice),
+        name: backendProduct.name // Override frontend name just in case
+      });
+    }
+
+    // Replace request items with validated items for saving
+    items.length = 0;
+    items.push(...validatedItems);
+
     const deliveryCharge = subtotal > 1000 ? 0 : 50;
     const totalAmount = subtotal + deliveryCharge;
     const itemsJson = JSON.stringify(items);
