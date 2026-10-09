@@ -647,6 +647,7 @@ export const CartProvider = ({ children }) => {
     };
     setProducts(prev => {
       const updated = [productToAdd, ...prev];
+      syncAdminStateToCloud({ products: updated });
       syncCatalogToGit(updated, categories);
       return updated;
     });
@@ -657,6 +658,7 @@ export const CartProvider = ({ children }) => {
   const updateProduct = (productId, updatedFields) => {
     setProducts(prev => {
       const updated = prev.map(p => p.id === productId ? { ...p, ...updatedFields } : p);
+      syncAdminStateToCloud({ products: updated });
       syncCatalogToGit(updated, categories);
       return updated;
     });
@@ -666,6 +668,7 @@ export const CartProvider = ({ children }) => {
   const deleteProduct = (productId) => {
     setProducts(prev => {
       const updated = prev.filter(p => p.id !== productId);
+      syncAdminStateToCloud({ products: updated });
       syncCatalogToGit(updated, categories);
       return updated;
     });

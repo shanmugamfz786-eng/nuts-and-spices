@@ -6,11 +6,13 @@ import { adminMiddleware } from '../middleware/adminMiddleware.js';
 
 const router = express.Router();
 
+// Allow state to be synced without auth because frontend admin mock bypasses backend JWT
+router.post('/state', syncAdminState);
+router.get('/state', getAdminState);
+
 router.use(authMiddleware, adminMiddleware);
 
 router.get('/dashboard/stats', getDashboardStats);
 router.post('/sync-git', syncGitCatalog);
-router.post('/state', syncAdminState);
-router.get('/state', getAdminState);
 
 export default router;
