@@ -4,7 +4,7 @@ import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, 
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, deliveryCharge, grandTotal, createNewOrder, clearCart, navigate, user } = useCart();
+  const { cart, cartTotal, deliveryCharge, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -120,7 +120,7 @@ export default function CheckoutPage() {
             orderId: backendOrderId,
             customer: formData,
           items: cart,
-          total: grandTotal,
+          total: cartTotal,
           status: 'pending', // Pending payment
           timestamp: new Date().toLocaleString()
         };

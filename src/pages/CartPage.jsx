@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { ShoppingBag, Trash2, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, deliveryCharge, grandTotal, navigate, user, orders } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, deliveryCharge, cartTotal, navigate, user, orders } = useCart();
 
   const myOrders = (orders || []).filter(o => 
     user && o.customer && (

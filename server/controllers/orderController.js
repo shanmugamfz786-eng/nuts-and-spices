@@ -128,7 +128,7 @@ export const createOrder = async (req, res) => {
     items.length = 0;
     items.push(...validatedItems);
 
-    const deliveryCharge = subtotal > 1000 ? 0 : 50;
+    const deliveryCharge = 0;
     const totalAmount = subtotal + deliveryCharge;
     const itemsJson = JSON.stringify(items);
 
