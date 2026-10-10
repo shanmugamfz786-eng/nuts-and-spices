@@ -18,7 +18,20 @@ export const createOrder = async (req, res) => {
 
     
       // Generate secure, unpredictable Order ID (UUID)
-      const orderId = `HNS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+          // Generate sequential Order ID (HNS-001, HNS-002, etc.)
+    let orderId = 'HNS-001';
+    try {
+      const lastOrder = await queryDb('SELECT order_id FROM orders WHERE order_id LIKE "HNS-%" ORDER BY CAST(SUBSTRING(order_id, 5) AS UNSIGNED) DESC LIMIT 1');
+      if (lastOrder && lastOrder.length > 0 && lastOrder[0].order_id) {
+        const lastNum = parseInt(lastOrder[0].order_id.substring(4), 10);
+        if (!isNaN(lastNum)) {
+          orderId = `HNS-${String(lastNum + 1).padStart(3, '0')}`;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch last order ID', e);
+      orderId = `HNS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    }
 
 
     // Validate products and calculate total securely from backend catalog
