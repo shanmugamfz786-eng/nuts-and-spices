@@ -5,6 +5,7 @@ import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
   const { cart, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
+  React.useEffect(() => { if (!user) navigate('cart'); }, [user, navigate]);
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
