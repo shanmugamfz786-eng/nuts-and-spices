@@ -127,3 +127,42 @@ export const getCurrentUser = async (req, res) => {
     res.status(401).json({ success: false, message: 'Invalid or expired token.' });
   }
 };
+
+export const updateCurrentUser = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Name is required' });
+    }
+    
+    // User ID is available in req.user from authMiddleware
+    const userId = req.user.id || req.user.userId;
+    
+    // Fallback logic for updating name in TiDB
+    if (userId) {
+      await queryDb('UPDATE users SET name = ? WHERE id = ?', [name, userId]);
+    }
+
+    // Also update in memoryStore just in case
+    if (req.user.phone) {
+      const memUser = memoryStore.users.find(u => u.phone === req.user.phone);
+      if (memUser) {
+        memUser.name = name;
+      }
+    }
+    
+    // Issue a new token with updated name
+    const userPayload = { ...req.user, name };
+    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: userPayload,
+      token
+    });
+  } catch (error) {
+    console.error('Update Profile Error:', error);
+    res.status(500).json({ success: false, message: 'Server error while updating profile' });
+  }
+};

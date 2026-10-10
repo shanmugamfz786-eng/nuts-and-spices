@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { Search, Heart, ShoppingBag, User, Menu, X, LayoutGrid, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
   const { activePage, navigate, cartItemCount, wishlist, setIsSearchOpen, setSearchQuery, user, categories, products, setSelectedProduct } = useCart();
@@ -48,7 +49,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-[#F7F3E9] border-b border-[#E5E7EB] shadow-md transition-all">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-md transition-all">
         
         {/* TOP ANNOUNCEMENT BAR (SHOW ON HOME & TOP LINK PAGES) */}
         {['home', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage) && (
@@ -129,8 +130,14 @@ export default function Navbar() {
               </form>
 
               {/* INSTANT LIVE SEARCH DROPDOWN RESULTS POPUP */}
+              <AnimatePresence>
               {navSearchInput.trim().length > 0 && isSearchFocused && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-[#E5E7EB] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden z-50"
+                >
                   {searchResults.length > 0 ? (
                     <div className="divide-y divide-[#E5E7EB]/40 max-h-[380px] overflow-y-auto">
                       {searchResults.map((product) => {
@@ -191,8 +198,9 @@ export default function Navbar() {
                       <p className="text-[11px] text-[#8C7A6B]">Try searching for almonds, dates, cashew, spices, or honey.</p>
                     </div>
                   )}
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
 
             </div>
 

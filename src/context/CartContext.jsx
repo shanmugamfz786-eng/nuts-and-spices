@@ -434,6 +434,35 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const updateUserProfile = async (newName) => {
+    try {
+      const token = localStorage.getItem('nuts_spices_auth_token');
+      if (!token) return { success: false, message: 'Not authenticated' };
+
+      const res = await fetch((import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') + '/api/auth/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: newName })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUser(data.user);
+        if (data.token) {
+          localStorage.setItem('nuts_spices_auth_token', data.token);
+        }
+      }
+      return data;
+    } catch (err) {
+      // Fallback for local update if API fails
+      const updatedUser = { ...user, name: newName };
+      setUser(updatedUser);
+      return { success: true, user: updatedUser };
+    }
+  };
+
   const loginUser = (loginData) => {
     const identifier = (loginData.identifier || loginData.phone || loginData.email || '').trim().toLowerCase();
     
@@ -829,23 +858,37 @@ export const CartProvider = ({ children }) => {
     const email = (customer.email || '').trim().toLowerCase();
     const name = (customer.name || '').trim().toLowerCase();
 
-    setOrders(prev => prev.filter(o => {
-      const oPhone = (o.phone || '').trim();
-      const oName = (o.customerName || '').trim().toLowerCase();
-      const matchPhone = phone && phone !== 'n/a' && oPhone === phone;
-      const matchName = name && oName === name;
-      return !(matchPhone || matchName);
-    }));
+    let updatedOrders = [];
+    let updatedUsers = [];
 
-    setRegisteredUsers(prev => prev.filter(u => {
-      const uPhone = (u.phone || '').trim();
-      const uEmail = (u.email || '').trim().toLowerCase();
-      const uName = (u.name || '').trim().toLowerCase();
-      const matchPhone = phone && phone !== 'n/a' && uPhone === phone;
-      const matchEmail = email && uEmail && uEmail === email;
-      const matchName = name && uName === name;
-      return !(matchPhone || matchEmail || matchName);
-    }));
+    setOrders(prev => {
+      updatedOrders = prev.filter(o => {
+        const oPhone = (o.phone || '').trim();
+        const oName = (o.customerName || '').trim().toLowerCase();
+        const matchPhone = phone && phone !== 'n/a' && oPhone === phone;
+        const matchName = name && oName === name;
+        return !(matchPhone || matchName);
+      });
+      return updatedOrders;
+    });
+
+    setRegisteredUsers(prev => {
+      updatedUsers = prev.filter(u => {
+        const uPhone = (u.phone || '').trim();
+        const uEmail = (u.email || '').trim().toLowerCase();
+        const uName = (u.name || '').trim().toLowerCase();
+        const matchPhone = phone && phone !== 'n/a' && uPhone === phone;
+        const matchEmail = email && uEmail && uEmail === email;
+        const matchName = name && uName === name;
+        return !(matchPhone || matchEmail || matchName);
+      });
+      return updatedUsers;
+    });
+
+    // Sync deletion to cloud database
+    setTimeout(() => {
+      syncAdminStateToCloud({ orders: updatedOrders, registeredUsers: updatedUsers });
+    }, 100);
   };
 
   // ADMIN - SETTINGS UPDATE
@@ -907,6 +950,7 @@ export const CartProvider = ({ children }) => {
         loginUser,
         registerUser,
         logoutUser,
+        updateUserProfile,
         openAuthModal,
 
         // Admin Auth

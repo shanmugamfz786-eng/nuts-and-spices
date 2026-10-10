@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { X, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, CheckCircle2, MessageSquare } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AuthModal() {
   const { isAuthModalOpen, setIsAuthModalOpen, authMode, setAuthMode, loginUser, registerUser, loginAdmin, navigate } = useCart();
@@ -21,7 +22,6 @@ export default function AuthModal() {
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [agreedTerms, setAgreedTerms] = useState(true);
 
-  if (!isAuthModalOpen) return null;
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -109,8 +109,21 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[#E5E7EB] relative flex flex-col my-auto max-h-[90vh]">
+    <AnimatePresence>
+      {isAuthModalOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="bg-white/90 backdrop-blur-xl w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-white/40 relative flex flex-col my-auto max-h-[90vh]"
+          >
         
         {/* Header Bar */}
         <div className="bg-gradient-to-r from-[#000000] via-[#000000] to-[#222222] text-white p-6 pb-5 relative shrink-0">
@@ -406,7 +419,9 @@ export default function AuthModal() {
 
         </div>
 
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

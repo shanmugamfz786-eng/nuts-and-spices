@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart, isProductActive } from '../context/CartContext';
 import { Heart, ShoppingCart, Check, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
   const { addToCart, wishlist, toggleWishlist, navigate } = useCart();
@@ -35,9 +36,14 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
   // ==================== LIST VIEW (HORIZONTAL CARD) ====================
   if (viewMode === 'list') {
     return (
-      <div 
+      <motion.div 
+        whileHover={{ y: -4 }}
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.3 }}
         onClick={() => navigate('product-details', { product })}
-        className="group bg-white rounded-2xl border border-gray-200/80 hover:border-[#000000]/40 shadow-xs hover:shadow-md transition-all duration-300 p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer relative"
+        className="group bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200/80 hover:border-[#000000]/30 shadow-sm hover:shadow-xl transition-all duration-300 p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer relative"
       >
         {/* Left Side: Product Image with Badge + Title */}
         <div className="flex items-center gap-4 sm:gap-6 min-w-0 flex-1">
@@ -120,15 +126,20 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
           </button>
         </div>
 
-      </div>
+      </motion.div>
     );
   }
 
   // ==================== GRID VIEW (VERTICAL CARD) ====================
   return (
-    <div 
+    <motion.div 
+      whileHover={{ y: -8 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4 }}
       onClick={() => navigate('product-details', { product })}
-      className="group bg-white rounded-2xl border border-gray-200/80 hover:border-[#000000]/40 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col cursor-pointer transform hover:-translate-y-1 relative"
+      className="group bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-200/80 hover:border-[#000000]/30 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col cursor-pointer relative"
     >
       {/* Product Image & Badges */}
       <div className="relative aspect-square overflow-hidden bg-[#F9FAFB]/60">
@@ -231,6 +242,6 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }
