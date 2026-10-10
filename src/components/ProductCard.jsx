@@ -78,8 +78,8 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             }}
             className="w-full bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-800 py-2 px-3 pr-8 appearance-none focus:outline-none focus:border-[#000000] cursor-pointer shadow-2xs"
           >
-            {weightsList.map((w) => (
-              <option key={w.label} value={w.label}>
+            {weightsList.map((w, wIdx) => (
+              <option key={`${product.id}-${w.label}-${wIdx}`} value={w.label}>
                 {w.label}
               </option>
             ))}
@@ -184,8 +184,8 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             }}
             className="w-full bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-800 py-1.5 px-3 pr-8 appearance-none focus:outline-none focus:border-[#000000] cursor-pointer shadow-2xs"
           >
-            {weightsList.map((w) => (
-              <option key={w.label} value={w.label}>
+            {weightsList.map((w, wIdx) => (
+              <option key={`${product.id}-${w.label}-${wIdx}`} value={w.label}>
                 {w.label}
               </option>
             ))}

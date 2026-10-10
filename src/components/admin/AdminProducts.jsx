@@ -355,7 +355,7 @@ export default function AdminProducts() {
                       <div className="flex flex-wrap gap-1.5 max-w-xs">
                         {p.weights && p.weights.length > 0 ? (
                           p.weights.map((w, wIdx) => (
-                            <span key={wIdx} className="px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-200/60 rounded text-[10px] font-bold">
+                            <span key={`${p.id}-${w.label}-${wIdx}`} className="px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-200/60 rounded text-[10px] font-bold">
                               {w.label}: ₹{w.price}
                             </span>
                           ))

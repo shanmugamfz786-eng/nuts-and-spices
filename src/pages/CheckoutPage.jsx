@@ -117,8 +117,8 @@ export default function CheckoutPage() {
 
         // Also create the order in DB so it's pending while payment happens
         const orderDetails = {
-          orderId,
-          customer: formData,
+            orderId: backendOrderId,
+            customer: formData,
           items: cart,
           total: cartTotal,
           status: 'pending', // Pending payment

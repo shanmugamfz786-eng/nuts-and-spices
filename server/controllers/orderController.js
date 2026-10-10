@@ -53,6 +53,25 @@ export const createOrder = async (req, res) => {
       console.warn('Failed to parse admin state json', e);
     }
 
+
+      try {
+        const catalogStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_catalog_json']);
+        if (catalogStateRows && catalogStateRows.length > 0 && catalogStateRows[0].setting_value) {
+           const parsedCatalog = JSON.parse(catalogStateRows[0].setting_value);
+           if (parsedCatalog && parsedCatalog.products && parsedCatalog.products.length > 0) {
+              const existingIds = new Set(dbProducts.map(p => p.id));
+              for (const p of parsedCatalog.products) {
+                if (!existingIds.has(p.id)) {
+                  dbProducts.push(p);
+                  existingIds.add(p.id);
+                }
+              }
+           }
+        }
+      } catch(e) {
+        console.warn('Failed to parse catalog state json', e);
+      }
+
     let subtotal = 0;
     const validatedItems = [];
 

@@ -12,7 +12,7 @@ function getEndpoints() {
 
   // If testing on localhost, also push to live production server so changes show on https://nuts-spices-e-commerce.vercel.app/
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    endpoints.push('https://nuts-spices-backend.onrender.com/api/catalog'); // Updated to Render
+    endpoints.push('https://nuts-and-spices.onrender.com/api/catalog'); // Updated to Render
   }
 
   return [...new Set(endpoints)];
