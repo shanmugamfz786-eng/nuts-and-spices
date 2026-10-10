@@ -235,7 +235,12 @@ export default function CartPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {myOrders.map(order => (
-              <div key={order.orderId} className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-sm space-y-4 hover:shadow-md transition-shadow">
+              <div key={order.orderId || order.id} 
+       onClick={() => {
+         window.history.pushState({}, '', '?order_id=' + (order.orderId || order.id) + '&track=true');
+         navigate('order-success');
+       }}
+       className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-sm space-y-4 hover:shadow-md transition-shadow cursor-pointer hover:border-[#25D366]">
                 <div className="flex justify-between items-start border-b border-[#F9FAFB] pb-3">
                   <div>
                     <span className="text-[10px] font-extrabold text-[#000000] uppercase tracking-wider block">Order ID</span>

@@ -6,6 +6,7 @@ export const createOrder = (orderPayload) => apiFetch('/orders', {
 });
 
 export const getOrders = () => apiFetch('/orders');
+export const fetchOrdersApi = () => apiFetch('/orders');
 
 export const getOrderById = (id) => apiFetch(`/orders/${id}`);
 

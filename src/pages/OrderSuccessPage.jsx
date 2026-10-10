@@ -16,6 +16,24 @@ export default function OrderSuccessPage() {
     const urlOrderId = urlParams.get('order_id');
     
     if (urlOrderId) {
+      const isTrackingOnly = urlParams.get('track') === 'true';
+      if (isTrackingOnly) {
+        setPaymentStatus('success');
+        setIsCashfreeCallback(false);
+        // Only fetch order data
+        fetch(API_BASE_URL + '/orders/' + urlOrderId, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.order) {
+              const order = { ...data.order };
+              if (typeof order.items === 'string') { try { order.items = JSON.parse(order.items); } catch(e){} }
+              if (typeof order.customer === 'string') { try { order.customer = JSON.parse(order.customer); } catch(e){} }
+              order.orderId = order.id || urlOrderId;
+              setOrderData(order);
+            }
+          });
+        return;
+      }
       setIsCashfreeCallback(true);
       const token = localStorage.getItem('token');
       
@@ -123,8 +141,17 @@ export default function OrderSuccessPage() {
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto text-[#25D366] animate-bounce">
           <CheckCircle2 className="w-12 h-12" />
         </div>
-        <h1 className="text-3xl font-black font-serif text-[#000000]">Payment Successful!</h1>
-        <p className="text-[#8C7A6B]">Your order has been placed successfully.</p>
+        {new URLSearchParams(window.location.search).get('track') === 'true' ? (
+          <>
+            <h1 className="text-3xl font-black font-serif text-[#000000]">Order Tracking</h1>
+            <p className="text-[#8C7A6B]">View your order status below.</p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-3xl font-black font-serif text-[#000000]">Payment Successful!</h1>
+            <p className="text-[#8C7A6B]">Your order has been placed successfully.</p>
+          </>
+        )}
         
         {orderData && (
           <div className="inline-flex items-center gap-3 bg-[#F9FAFB] px-6 py-3 rounded-2xl border border-[#E5E7EB] mt-4">
