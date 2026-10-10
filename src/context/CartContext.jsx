@@ -362,7 +362,21 @@ export const CartProvider = ({ children }) => {
       try {
         const res = await fetchAdminStateApi();
         if (res && res.success && res.data) {
-          if (res.data.orders && res.data.orders.length > 0) setOrders(res.data.orders);
+          if (res.data.orders && res.data.orders.length > 0) {
+              setOrders(prev => {
+                const combined = [...prev, ...res.data.orders];
+                const unique = [];
+                const seen = new Set();
+                for (let o of combined) {
+                  const id = o.orderId || o.id;
+                  if (!seen.has(id)) {
+                    seen.add(id);
+                    unique.push(o);
+                  }
+                }
+                return unique;
+              });
+            }
           if (res.data.offers && res.data.offers.length > 0) setOffers(res.data.offers);
           if (res.data.reviews && res.data.reviews.length > 0) setReviews(res.data.reviews);
           if (res.data.storeSettings) setStoreSettings(res.data.storeSettings);
