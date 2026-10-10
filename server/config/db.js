@@ -98,6 +98,9 @@ function processMemoryQuery(sql, params) {
       if (queryLower.includes('where id') && params.length > 0) {
         return memoryStore.orders.filter(o => o.id === params[0] || o.orderId === params[0]);
       }
+      if (queryLower.includes('where phone') && params.length > 0) {
+        return memoryStore.orders.filter(o => o.phone === params[0] || o.email === params[0] || o.email === params[1]);
+      }
       return memoryStore.orders;
     }
   }
