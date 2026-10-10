@@ -1,29 +1,32 @@
-import React from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { CheckCircle2, MessageSquare, ArrowRight, ShoppingBag, Copy, Check } from 'lucide-react';
+import { CheckCircle2, Package, Truck, Home, ArrowRight, Copy } from 'lucide-react';
 import { STORE_WHATSAPP_NUMBER } from '../data/products';
 import { API_BASE_URL } from '../api/index';
 
 export default function OrderSuccessPage() {
   const { lastOrder, getWhatsAppUrl, navigate, storeSettings, clearCart } = useCart();
-  const [copied, setCopied] = React.useState(false);
-  const [paymentStatus, setPaymentStatus] = React.useState('verifying');
-  const [isCashfreeCallback, setIsCashfreeCallback] = React.useState(false);
+  const [orderData, setOrderData] = useState(lastOrder || null);
+  const [paymentStatus, setPaymentStatus] = useState('verifying');
+  const [isCashfreeCallback, setIsCashfreeCallback] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('order_id');
-    if (orderId) {
+    const urlOrderId = urlParams.get('order_id');
+    
+    if (urlOrderId) {
       setIsCashfreeCallback(true);
-      // Verify payment
       const token = localStorage.getItem('token');
-      fetch(API_BASE_URL + '/payment/verify', {
+      
+      // 1. Verify Payment
+      fetch(`${API_BASE_URL}/payment/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ orderId })
+        body: JSON.stringify({ orderId: urlOrderId })
       })
       .then(res => res.json())
       .then(data => {
@@ -34,10 +37,28 @@ export default function OrderSuccessPage() {
           setPaymentStatus('failed');
         }
       })
-      .catch(err => {
-        console.error(err);
-        setPaymentStatus('failed');
-      });
+      .catch(() => setPaymentStatus('failed'));
+
+      // 2. Fetch Order Data to avoid white screen crash
+      fetch(`${API_BASE_URL}/orders/${urlOrderId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.order) {
+            // Parse items if it's a string
+            const order = { ...data.order };
+            if (typeof order.items === 'string') {
+              try { order.items = JSON.parse(order.items); } catch(e) {}
+            }
+            if (typeof order.customer === 'string') {
+               try { order.customer = JSON.parse(order.customer); } catch(e) {}
+            } else if (!order.customer) {
+               order.customer = { name: order.customerName, phone: order.phone, address: order.address, city: order.city, pincode: order.pincode };
+            }
+            order.orderId = order.id || urlOrderId;
+            setOrderData(order);
+          }
+        });
+
     } else {
       setIsCashfreeCallback(false);
       setPaymentStatus('success');
@@ -61,136 +82,102 @@ export default function OrderSuccessPage() {
         </div>
         <h2 className="text-xl font-bold text-[#000000]">Payment Failed or Pending</h2>
         <p className="text-sm text-[#000000]">We could not verify your payment. If money was deducted, it will be refunded within 3-5 business days.</p>
-        <button
-          onClick={() => navigate('checkout')}
-          className="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold text-xs rounded-xl"
-        >
-          Try Again
-        </button>
+        <button onClick={() => navigate('checkout')} className="px-6 py-2.5 bg-red-500 text-white font-bold text-xs rounded-xl">Try Again</button>
       </div>
     );
   }
 
-  if (!lastOrder && !isCashfreeCallback) {
+  if (!orderData && !isCashfreeCallback) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold text-[#000000]">No recent order found</h2>
-        <button
-          onClick={() => navigate('home')}
-          className="px-6 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-xs rounded-xl"
-        >
-          Go to Home
-        </button>
+        <button onClick={() => navigate('home')} className="px-6 py-2.5 bg-[#25D366] text-white font-bold text-xs rounded-xl">Go to Home</button>
       </div>
     );
   }
 
-  const whatsappUrl = getWhatsAppUrl(lastOrder);
+  const activeWhatsAppNumber = storeSettings?.whatsappNumber || STORE_WHATSAPP_NUMBER;
+  let whatsappUrl = `https://wa.me/${activeWhatsAppNumber}`;
+  if (orderData) {
+     try {
+         whatsappUrl = getWhatsAppUrl(orderData);
+     } catch (e) {
+         console.error(e);
+     }
+  }
 
-  const handleOpenWhatsApp = () => {
-    window.open(whatsappUrl, '_blank');
-  };
+  // Tracking Status Logic (Flipkart Style)
+  const currentStatus = orderData?.status || 'pending';
+  const steps = [
+    { id: 'pending', label: 'Order Confirmed', icon: Package, done: true },
+    { id: 'processing', label: 'Packed', icon: Package, done: ['processing', 'shipped', 'delivered'].includes(currentStatus) },
+    { id: 'shipped', label: 'Shipped', icon: Truck, done: ['shipped', 'delivered'].includes(currentStatus) },
+    { id: 'delivered', label: 'Delivered', icon: Home, done: currentStatus === 'delivered' }
+  ];
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 space-y-8">
       
-      {/* Success Banner */}
-      <div className="bg-white rounded-3xl p-8 sm:p-10 border border-amber-200 shadow-xl text-center space-y-4 relative overflow-hidden">
+      {/* Success Popup Card */}
+      <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl text-center space-y-4 border border-[#E5E7EB]">
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto text-[#25D366] animate-bounce">
-          <CheckCircle2 className="w-10 h-10" />
+          <CheckCircle2 className="w-12 h-12" />
         </div>
-
-        <div className="space-y-1">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-green-800 bg-green-50 px-3 py-1 rounded-full border border-green-200">
-            {isCashfreeCallback ? 'Payment Successful & Order Saved' : 'Order Saved Successfully'}
-          </span>
-          <h1 className="text-3xl font-black font-serif text-[#000000]">
-            Order #{lastOrder?.orderId || 'Confirmed'}!
-          </h1>
-          <p className="text-xs sm:text-sm text-[#000000] max-w-md mx-auto">
-            Your payment was successful. Click the WhatsApp button below to automatically launch WhatsApp and send your order details directly to our store manager for quick dispatch.
-          </p>
-        </div>
-
-        {/* Primary WhatsApp Action CTA (Warm Gold Gourmet Tone - ZERO GREEN) */}
-        <div className="pt-4">
-          <button
-            onClick={handleOpenWhatsApp}
-            className="w-full sm:w-auto px-8 py-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-base rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 mx-auto cursor-pointer"
-          >
-            <MessageSquare className="w-6 h-6 fill-current" />
-            <span>SEND ORDER VIA WHATSAPP NOW</span>
-          </button>
-        </div>
+        <h1 className="text-3xl font-black font-serif text-[#000000]">Payment Successful!</h1>
+        <p className="text-[#8C7A6B]">Your order has been placed successfully.</p>
+        
+        {orderData && (
+          <div className="inline-flex items-center gap-3 bg-[#F9FAFB] px-6 py-3 rounded-2xl border border-[#E5E7EB] mt-4">
+            <span className="text-sm font-extrabold text-[#000000]">Order ID:</span>
+            <span className="text-base font-black text-[#25D366]">#{orderData.orderId || orderData.id}</span>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(orderData.orderId || orderData.id);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="p-1.5 hover:bg-white rounded-lg transition-colors"
+              title="Copy Order ID"
+            >
+              {copied ? <CheckCircle2 className="w-4 h-4 text-[#25D366]" /> : <Copy className="w-4 h-4 text-[#8C7A6B]" />}
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* WhatsApp Message Preview Box (Clean Warm Ivory Card - ZERO DARK SHADES) */}
-      <div className="bg-[#F9FAFB] text-[#000000] p-6 rounded-3xl border border-[#E5E7EB] space-y-4 shadow-sm">
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[#25D366]" />
-            <span className="text-xs font-bold text-[#000000] uppercase tracking-wider">
-              WhatsApp Message Preview Payload
-            </span>
-          </div>
-          <span className="text-[10px] text-[#8C7A6B]">Target: +{storeSettings?.whatsappNumber || '919876543210'}</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl font-mono text-xs text-[#000000] leading-relaxed whitespace-pre-line border border-[#E5E7EB] shadow-2xs">
-          🛒 *NUTS & SPICES - NEW ORDER*{'\n'}
-          🆔 *Order ID:* #{lastOrder.orderId}{'\n'}
-          ------------------------------------{'\n'}
-          👤 *Customer:* {lastOrder.customer.name}{'\n'}
-          📞 *Phone:* {lastOrder.customer.phone}{'\n'}
-          📍 *Address:* {lastOrder.customer.address}, {lastOrder.customer.city} - {lastOrder.customer.pincode}{'\n'}
-          {lastOrder.customer.notes ? `📝 *Notes:* ${lastOrder.customer.notes}\n` : ''}
-          ------------------------------------{'\n'}
-          📦 *Items Ordered:*{'\n'}
-          {lastOrder.items.map((item, idx) => (
-            `${idx + 1}. ${item.name} (${item.weight}) x ${item.quantity} = ₹${item.price * item.quantity}\n`
-          ))}
-          ------------------------------------{'\n'}
-          💰 *Total Amount:* ₹{lastOrder.total.toLocaleString('en-IN')}{'\n'}
-          ------------------------------------{'\n'}
-          Thank you! Please confirm order & delivery timeline.
-        </div>
-      </div>
-
-      {/* Customer Info Card */}
-      {lastOrder && (
-      <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-sm space-y-4">
-        <h3 className="text-sm font-bold text-[#000000] uppercase tracking-wider border-b border-[#F9FAFB] pb-2">
-          Recipient Details
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-[#000000]">
-          <div>
-            <span className="text-[#8C7A6B] block">Name:</span>
-            <span className="font-bold text-[#000000]">{lastOrder.customer.name}</span>
-          </div>
-          <div>
-            <span className="text-[#8C7A6B] block">Phone:</span>
-            <span className="font-bold text-[#000000]">{lastOrder.customer.phone}</span>
-          </div>
-          <div>
-            <span className="text-[#8C7A6B] block">Delivery Address:</span>
-            <span className="font-bold text-[#000000]">{lastOrder.customer.address}, {lastOrder.customer.city} - {lastOrder.customer.pincode}</span>
-          </div>
-          <div>
-            <span className="text-[#8C7A6B] block">Order Date:</span>
-            <span className="font-bold text-[#000000]">{lastOrder.timestamp}</span>
+      {/* Flipkart Style Order Tracking */}
+      {orderData && (
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-[#E5E7EB] space-y-6">
+          <h2 className="text-lg font-black font-serif text-[#000000]">Order Tracking</h2>
+          
+          <div className="relative flex justify-between items-center px-2 sm:px-8 mt-8">
+            {/* Connecting Line */}
+            <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-1 bg-gray-200 z-0"></div>
+            
+            {steps.map((step, idx) => (
+              <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500 ${step.done ? 'bg-[#25D366] text-white shadow-lg shadow-green-200' : 'bg-gray-100 text-gray-400 border-2 border-white'}`}>
+                  <step.icon className="w-5 h-5" />
+                </div>
+                <span className={`text-[10px] sm:text-xs font-bold ${step.done ? 'text-[#000000]' : 'text-gray-400'}`}>{step.label}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
       )}
 
-      {/* Back to Home CTA */}
-      <div className="text-center pt-4">
+      {/* WhatsApp Button */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-[#E5E7EB] text-center space-y-6">
+        <div className="space-y-2">
+          <h3 className="font-black text-[#000000] text-lg">Send details via WhatsApp</h3>
+          <p className="text-xs text-[#8C7A6B]">Optional: You can send your order receipt to our WhatsApp support for faster updates.</p>
+        </div>
         <button
-          onClick={() => navigate('home')}
-          className="inline-flex items-center gap-2 text-xs font-bold text-[#000000] hover:underline"
+          onClick={() => window.open(whatsappUrl, '_blank')}
+          className="w-full sm:w-auto mx-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-3.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-green-200"
         >
-          <ShoppingBag className="w-4 h-4" />
-          <span>Return to Store Front</span>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 filter brightness-0 invert" />
+          Message on WhatsApp
         </button>
       </div>
 

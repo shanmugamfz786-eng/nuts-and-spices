@@ -4,7 +4,7 @@ import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, 
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, deliveryCharge, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
+  const { cart, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
