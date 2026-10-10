@@ -190,7 +190,7 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-[#000000]">
                   <span>Doorstep Delivery Charges:</span>
-                    <span className="font-bold text-[#000000]">{deliveryCharge > 0 ? `?${deliveryCharge}` : 'FREE'}</span>
+                    <span className="font-bold text-[#000000]">FREE</span>
                 </div>
 
                 <div className="pt-3 border-t border-[#E5E7EB] flex justify-between items-baseline">

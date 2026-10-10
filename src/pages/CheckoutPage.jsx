@@ -338,7 +338,7 @@ export default function CheckoutPage() {
             
             <div className="pt-3 flex items-center justify-between text-xs font-bold text-[#8C7A6B]">
               <span>Delivery Charge:</span>
-              <span>{deliveryCharge > 0 ? `?${deliveryCharge}` : 'FREE'}</span>
+              <span>FREE</span>
             </div>
 
             <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-base font-black">
