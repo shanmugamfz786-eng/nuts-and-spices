@@ -109,7 +109,7 @@ export default function CheckoutPage() {
       }
 
       const cashfree = await load({
-        mode: "sandbox", 
+        mode: data.environment || "sandbox", 
       });
 
       await cashfree.checkout({

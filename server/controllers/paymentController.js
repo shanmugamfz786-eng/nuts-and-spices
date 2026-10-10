@@ -48,7 +48,8 @@ export const createPaymentSession = async (req, res) => {
     console.log('Session created successfully!', data.payment_session_id); res.json({
       success: true,
       paymentSessionId: data.payment_session_id,
-      orderId: data.order_id
+      orderId: data.order_id,
+      environment: process.env.CASHFREE_ENV === 'PRODUCTION' ? 'production' : 'sandbox'
     });
   } catch (error) {
     console.error('Payment Session Error:', error);
