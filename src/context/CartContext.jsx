@@ -245,6 +245,19 @@ export const CartProvider = ({ children }) => {
     localStorage.removeItem('nuts_spices_admin_logged');
   }, []);
 
+  // Fetch live orders for Admin from DB
+  useEffect(() => {
+    if (isAdminLoggedIn) {
+      import('../api/orderApi.js').then(({ fetchOrdersApi }) => {
+        fetchOrdersApi().then(res => {
+          if (res.success && res.orders) {
+            setOrders(res.orders);
+          }
+        });
+      });
+    }
+  }, [isAdminLoggedIn]);
+
   // Persist States safely without crashing on QuotaExceeded Error
   useEffect(() => {
     try { localStorage.setItem('nuts_spices_store_settings', JSON.stringify(storeSettings)); } catch (err) { console.warn('localStorage error:', err); }
@@ -791,8 +804,12 @@ export const CartProvider = ({ children }) => {
     return newOrderObj;
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    setOrders(prev => { const upd = prev.map(o => o.orderId === orderId ? { ...o, status: newStatus } : o); syncAdminStateToCloud({ orders: upd }); return upd; });
+  const updateOrderStatus = async (orderId, newStatus) => {
+    setOrders(prev => prev.map(o => (o.orderId === orderId || o.id === orderId) ? { ...o, status: newStatus } : o));
+    try {
+      const { updateOrderStatusApi } = await import('../api/orderApi.js');
+      await updateOrderStatusApi(orderId, newStatus);
+    } catch (e) { console.error('Failed to update order status in backend'); }
   };
 
   const deleteOrder = (orderId) => {
