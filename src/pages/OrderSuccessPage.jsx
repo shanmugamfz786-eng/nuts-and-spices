@@ -40,7 +40,7 @@ export default function OrderSuccessPage() {
       .catch(() => setPaymentStatus('failed'));
 
       // 2. Fetch Order Data to avoid white screen crash
-      fetch(`${API_BASE_URL}/orders/${urlOrderId}`)
+      fetch(`${API_BASE_URL}/orders/${urlOrderId}`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.order) {

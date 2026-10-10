@@ -5,12 +5,15 @@ import { ShoppingBag, Trash2, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, navigate, user, orders } = useCart();
 
-  const myOrders = (orders || []).filter(o => 
-    user && o.customer && (
-      (user.phone && o.customer.phone === user.phone) || 
-      (user.email && o.customer.email === user.email)
-    )
-  ).sort((a, b) => {
+  const guestOrderIds = JSON.parse(localStorage.getItem('guest_orders') || '[]');
+  
+  const myOrders = (orders || []).filter(o => {
+    const oPhone = o.phone || (o.customer && o.customer.phone);
+    const oEmail = o.email || (o.customer && o.customer.email);
+    const isOwner = user ? ((user.phone && oPhone === user.phone) || (user.email && oEmail === user.email)) : false;
+    const isGuestOwner = guestOrderIds.includes(o.orderId || o.id);
+    return isOwner || isGuestOwner;
+  }).sort((a, b) => {
     const da = a.timestamp ? new Date(a.timestamp).getTime() : 0;
     const db = b.timestamp ? new Date(b.timestamp).getTime() : 0;
     return db - da;
