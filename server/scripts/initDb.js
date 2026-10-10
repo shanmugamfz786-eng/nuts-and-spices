@@ -89,7 +89,11 @@ export async function initializeDatabase() {
   ];
 
   // Populate memory store seed data first
-  const adminHashedPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+  if (!adminPassword) {
+    console.warn("⚠️ INITIAL_ADMIN_PASSWORD not set in environment. Skipping admin seed.");
+  }
+  const adminHashedPassword = adminPassword ? await bcrypt.hash(adminPassword, 10) : null;
   const sampleCustomerHashed = await bcrypt.hash('123456', 10);
 
   const defaultAdmin = {
@@ -147,13 +151,15 @@ export async function initializeDatabase() {
     console.log('✅ TiDB / MySQL database tables created successfully!');
 
     // Seed Admin User in MySQL/TiDB
-    const [existingAdmin] = await pool.query('SELECT * FROM users WHERE email = ?', ['admin@nutsandspices.in']);
-    if (existingAdmin.length === 0) {
-      await pool.query(
-        'INSERT INTO users (id, name, phone, email, password, role) VALUES (?, ?, ?, ?, ?, ?)',
-        ['usr_admin', 'Gourmet Admin', '9876543210', 'admin@nutsandspices.in', adminHashedPassword, 'admin']
-      );
-      console.log('👑 Admin user seeded: admin@nutsandspices.in / admin123');
+    if (adminHashedPassword) {
+      const [existingAdmin] = await pool.query('SELECT * FROM users WHERE email = ?', ['admin@nutsandspices.in']);
+      if (existingAdmin.length === 0) {
+        await pool.query(
+          'INSERT INTO users (id, name, phone, email, password, role) VALUES (?, ?, ?, ?, ?, ?)',
+          ['usr_admin', 'Gourmet Admin', '9876543210', 'admin@nutsandspices.in', adminHashedPassword, 'admin']
+        );
+        console.log('👑 Admin user seeded from environment configuration.');
+      }
     }
 
     // Seed Categories

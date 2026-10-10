@@ -51,10 +51,13 @@ export const queryDb = async (sql, params = []) => {
     const [rows] = await dbPool.execute(sql, params);
     return rows;
   } catch (error) {
-    console.warn('⚠️ TiDB/MySQL database connection note:', error.message);
-    console.log('🔄 Executing in-memory fallback query processor...');
+    console.error('⚠️ TiDB/MySQL query error:', error.message);
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+    console.log('🔄 Development Mode: Executing in-memory fallback query processor...');
     return processMemoryQuery(sql, params);
-  };
+  }
 };
 
 function processMemoryQuery(sql, params) {

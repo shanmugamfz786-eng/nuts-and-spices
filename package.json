@@ -10,7 +10,6 @@
     "preview": "node ./node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
-    "@cashfreepayments/cashfree-js": "^1.0.7",
     "@tailwindcss/vite": "^4.3.3",
     "balanced-match": "^4.0.4",
     "bcryptjs": "^3.0.2",

@@ -8,10 +8,10 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const res = loginAdmin(email, password);
+    const res = await loginAdmin(email, password);
     if (!res.success) {
       setError(res.message || 'Invalid Email or Password');
     }

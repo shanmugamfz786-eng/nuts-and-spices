@@ -510,16 +510,24 @@ export const CartProvider = ({ children }) => {
   };
 
   // ADMIN AUTH HANDLERS
-  const loginAdmin = (emailInput, passwordInput) => {
+  const loginAdmin = async (emailInput, passwordInput) => {
     const email = (emailInput || '').trim().toLowerCase();
     const password = (passwordInput || '').trim();
 
-    if (email === 'admin702@admin.com' && password === 'yorrnutsandspices') {
-      setIsAdminLoggedIn(true);
-      return { success: true };
+    try {
+      const { login } = await import('../api/authApi.js');
+      const res = await login(email, password);
+      
+      if (res && res.success && res.user && res.user.role === 'admin') {
+        localStorage.setItem('nuts_spices_auth_token', res.token);
+        setUser(res.user);
+        setIsAdminLoggedIn(true);
+        return { success: true };
+      }
+      return { success: false, message: res?.message || 'Unauthorized or invalid credentials' };
+    } catch (error) {
+      return { success: false, message: error?.message || 'Server error during login' };
     }
-
-    return { success: false, message: 'Invalid Admin Email or Password' };
   };
 
   const logoutAdmin = () => {

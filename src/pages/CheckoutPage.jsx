@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, CreditCard } from 'lucide-react';
-import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
   const { cart, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
@@ -88,34 +87,14 @@ export default function CheckoutPage() {
       let orderData; try { orderData = JSON.parse(text1); } catch(e) { throw new Error('Backend returned HTML instead of JSON (order creation): ' + text1.substring(0, 100)); } if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
       const token = localStorage.getItem('nuts_spices_auth_token') || '';
       
-      const response = await fetch(BASE + '/api/payment/create-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          orderId: backendOrderId,
-          amount: backendTotal,
-          customerPhone: formData.phone,
-          customerEmail: user?.email || '',
-          customerName: formData.name
-        })
-      });
+      // Clear cart
+      clearCart();
 
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to create payment session');
+      // Navigate to success and open WhatsApp
+      if (orderData.whatsAppUrl) {
+        window.open(orderData.whatsAppUrl, '_blank');
       }
-
-      const cashfree = await load({
-        mode: data.environment || "sandbox", 
-      });
-
-      await cashfree.checkout({
-        paymentSessionId: data.paymentSessionId,
-        returnUrl: `${window.location.origin}/order-success?order_id={order_id}`
-      });
+      navigate('order-success', { order_id: backendOrderId, track: 'true' });
     } catch (err) {
       console.error('Payment initialization error', err);
       alert('Error initiating payment. Please try again.');

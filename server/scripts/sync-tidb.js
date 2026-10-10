@@ -1,13 +1,15 @@
 import mysql from 'mysql2/promise';
 import { CATEGORIES, PRODUCTS } from '../../src/data/products.js';
 
+import 'dotenv/config';
+
 async function syncTiDB() {
   const conn = await mysql.createConnection({
-    host: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
-    port: 4000,
-    user: '2ufAsPLeYmcSNkD.root',
-    password: 'UABZuDoBgG5NcAcJ',
-    database: 'nuts',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 4000,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     ssl: { rejectUnauthorized: false }
   });
 

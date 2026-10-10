@@ -1,5 +1,6 @@
 import { queryDb, memoryStore } from '../config/db.js';
 import { PRODUCTS } from '../../src/data/products.js';
+import crypto from 'crypto';
 
 const STORE_WHATSAPP_NUMBER = process.env.STORE_WHATSAPP_NUMBER || '919876543210';
 
@@ -16,21 +17,8 @@ export const createOrder = async (req, res) => {
     }
 
     
-      // Generate Sequential Order ID: HNS-001, HNS-002...
-      let nextNum = 1;
-      const hnsOrders = await queryDb("SELECT id FROM orders WHERE id LIKE 'HNS-%'");
-      if (hnsOrders && hnsOrders.length > 0) {
-        let maxNum = 0;
-        hnsOrders.forEach(o => {
-          const m = o.id.match(/HNS-(\d+)/);
-          if (m) {
-            const num = parseInt(m[1], 10);
-            if (num > maxNum) maxNum = num;
-          }
-        });
-        nextNum = maxNum + 1;
-      }
-      const orderId = `HNS-${nextNum.toString().padStart(3, '0')}`;
+      // Generate secure, unpredictable Order ID (UUID)
+      const orderId = `HNS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
 
     // Validate products and calculate total securely from backend catalog
