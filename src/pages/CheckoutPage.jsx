@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, CreditCard } from 'lucide-react';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
+  const { cart, cartTotal, createNewOrder, clearPurchasedItems, navigate, user } = useCart();
   React.useEffect(() => { if (!user) navigate('cart'); }, [user, navigate]);
 
   const [formData, setFormData] = useState({
@@ -75,6 +75,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isProcessingPayment) return;
     if (!validate()) return;
     
     setIsProcessingPayment(true);
@@ -87,8 +88,8 @@ export default function CheckoutPage() {
       let orderData; try { orderData = JSON.parse(text1); } catch(e) { throw new Error('Backend returned HTML instead of JSON (order creation): ' + text1.substring(0, 100)); } if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
       const token = localStorage.getItem('nuts_spices_auth_token') || '';
       
-      // Clear cart
-      clearCart();
+      // Clear purchased items
+      clearPurchasedItems(cart);
 
       // Navigate to success and open WhatsApp
       if (orderData.whatsAppUrl) {

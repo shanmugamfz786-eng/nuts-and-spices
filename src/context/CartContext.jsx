@@ -74,6 +74,16 @@ export const CartProvider = ({ children }) => {
     }
   } catch {}
 
+  // 1b. AUTHENTICATION (USER)
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
   // 2. PRODUCTS STATE (Admin Editable & Persisted in localStorage)
   const [products, setProducts] = useState(() => {
     try {
@@ -151,14 +161,38 @@ export const CartProvider = ({ children }) => {
   });
 
   // 7. CART & WISHLIST STATE
-  const [cart, setCart] = useState(() => {
+  const [cart, setCart] = useState([]);
+
+  // Load correct cart when user changes
+  useEffect(() => {
     try {
-      const saved = localStorage.getItem('nuts_spices_cart');
-      return saved ? JSON.parse(saved) : [];
+      const cartKey = user ? `nuts_spices_cart_${user.phone || user.email}` : 'nuts_spices_cart_guest';
+      const saved = localStorage.getItem(cartKey);
+      if (saved) {
+        setCart(JSON.parse(saved));
+      } else {
+        setCart([]);
+      }
     } catch {
-      return [];
+      setCart([]);
     }
-  });
+  }, [user]);
+
+  // Sync cart across multiple browser tabs
+  useEffect(() => {
+    const handleStorage = (e) => {
+      const expectedKey = user ? `nuts_spices_cart_${user.phone || user.email}` : 'nuts_spices_cart_guest';
+      if (e.key === expectedKey) {
+        try {
+          setCart(e.newValue ? JSON.parse(e.newValue) : []);
+        } catch {
+          setCart([]);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [user]);
 
   const [wishlist, setWishlist] = useState(() => {
     try {
@@ -219,15 +253,7 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('nuts_spices_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-
+  // 9. AUTHENTICATION (ADMIN)
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
     try {
       const saved = localStorage.getItem('nuts_spices_admin_logged');
@@ -284,8 +310,11 @@ export const CartProvider = ({ children }) => {
   }, [reviews]);
 
   useEffect(() => {
-    try { localStorage.setItem('nuts_spices_cart', JSON.stringify(cart)); } catch (err) { console.warn('localStorage error:', err); }
-  }, [cart]);
+    try { 
+      const cartKey = user ? `nuts_spices_cart_${user.phone || user.email}` : 'nuts_spices_cart_guest';
+      localStorage.setItem(cartKey, JSON.stringify(cart)); 
+    } catch (err) { console.warn('localStorage error:', err); }
+  }, [cart, user]);
 
   useEffect(() => {
     try { localStorage.setItem('nuts_spices_wishlist', JSON.stringify(wishlist)); } catch (err) { console.warn('localStorage error:', err); }
@@ -502,6 +531,10 @@ export const CartProvider = ({ children }) => {
 
   const logoutUser = () => {
     setUser(null);
+    setCart([]);
+    localStorage.removeItem('nuts_spices_user');
+    localStorage.removeItem('nuts_spices_cart');
+    localStorage.removeItem('nuts_spices_auth_token');
   };
 
   const openAuthModal = (mode = 'login') => {
@@ -593,6 +626,23 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = (cartItemId) => {
     setCart(prevCart => prevCart.filter(item => item.cartItemId !== cartItemId));
+  };
+
+  const clearPurchasedItems = (purchasedItems) => {
+    setCart(prevCart => {
+      let updatedCart = [...prevCart];
+      for (const pItem of purchasedItems) {
+        const index = updatedCart.findIndex(item => item.cartItemId === pItem.cartItemId);
+        if (index > -1) {
+          updatedCart[index] = { ...updatedCart[index] };
+          updatedCart[index].quantity -= pItem.quantity;
+          if (updatedCart[index].quantity <= 0) {
+            updatedCart.splice(index, 1);
+          }
+        }
+      }
+      return updatedCart;
+    });
   };
 
   const updateQuantity = (cartItemId, delta) => {
@@ -940,6 +990,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         updateQuantity,
         clearCart,
+        clearPurchasedItems,
         toggleWishlist,
         generateWhatsAppMessage,
         getWhatsAppUrl,

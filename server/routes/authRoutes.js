@@ -3,6 +3,8 @@ import rateLimit from 'express-rate-limit';
 import { registerCustomer, loginUser, getCurrentUser, updateCurrentUser, getAllUsers, deleteUser } from '../controllers/authController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
+import { adminMiddleware } from '../middleware/adminMiddleware.js';
+
 const router = express.Router();
 
 const authLimiter = rateLimit({
@@ -17,7 +19,7 @@ router.get('/me', getCurrentUser);
 router.put('/me', authMiddleware, updateCurrentUser);
 
 // Admin routes for user management
-router.get('/users', getAllUsers);
-router.delete('/users/:id', deleteUser);
+router.get('/users', authMiddleware, adminMiddleware, getAllUsers);
+router.delete('/users/:id', authMiddleware, adminMiddleware, deleteUser);
 
 export default router;

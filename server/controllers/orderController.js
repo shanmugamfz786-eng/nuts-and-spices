@@ -24,7 +24,7 @@ export const createOrder = async (req, res) => {
     // Validate products and calculate total securely from backend catalog
     let dbProducts = await queryDb('SELECT * FROM products');
     if (!dbProducts || dbProducts.length === 0) {
-      dbProducts = memoryStore.products.length > 0 ? memoryStore.products : PRODUCTS;
+      dbProducts = memoryStore.products.length > 0 ? [...memoryStore.products] : [...PRODUCTS];
     }
 
     try {
@@ -221,15 +221,56 @@ export const createOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await queryDb('SELECT * FROM orders ORDER BY created_at DESC');
-    const result = (orders && orders.length > 0) ? orders : memoryStore.orders;
+    const dbOrders = await queryDb('SELECT * FROM orders ORDER BY created_at DESC');
+    let formattedOrders = [];
+    
+    if (dbOrders && dbOrders.length > 0) {
+      formattedOrders = dbOrders.map(row => {
+        let parsedItems = [];
+        try {
+          parsedItems = typeof row.items_json === 'string' ? JSON.parse(row.items_json) : (row.items_json || []);
+        } catch(e) {
+          console.error('Failed to parse items_json for order', row.id);
+        }
+        
+        return {
+          id: row.id,
+          orderId: row.order_id || row.id,
+          customerName: row.customer_name,
+          phone: row.phone,
+          email: row.email,
+          address: row.address,
+          city: row.city,
+          state: row.state,
+          pincode: row.pincode,
+          subtotal: row.subtotal,
+          deliveryCharge: row.delivery_charge,
+          totalAmount: row.total_amount,
+          status: row.status,
+          items: parsedItems,
+          notes: row.notes,
+          createdAt: row.created_at,
+          customer: {
+            name: row.customer_name,
+            phone: row.phone,
+            email: row.email,
+            address: row.address,
+            city: row.city,
+            pincode: row.pincode
+          }
+        };
+      });
+    } else {
+      formattedOrders = memoryStore.orders;
+    }
     
     res.json({
       success: true,
-      count: result.length,
-      orders: result
+      count: formattedOrders.length,
+      orders: formattedOrders
     });
   } catch (error) {
+    console.error('Fetch orders error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch orders.' });
   }
 };
@@ -245,12 +286,45 @@ export const getOrderById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
-    // Enforce ownership
-    // Auth enforcement removed so guest users can track their orders using secure Order ID
+    let formattedOrder = order;
+    if (orders && orders.length > 0) {
+      const row = orders[0];
+      let parsedItems = [];
+      try {
+        parsedItems = typeof row.items_json === 'string' ? JSON.parse(row.items_json) : (row.items_json || []);
+      } catch(e) {}
+      
+      formattedOrder = {
+        id: row.id,
+        orderId: row.order_id || row.id,
+        customerName: row.customer_name,
+        phone: row.phone,
+        email: row.email,
+        address: row.address,
+        city: row.city,
+        state: row.state,
+        pincode: row.pincode,
+        subtotal: row.subtotal,
+        deliveryCharge: row.delivery_charge,
+        totalAmount: row.total_amount,
+        status: row.status,
+        items: parsedItems,
+        notes: row.notes,
+        createdAt: row.created_at,
+        customer: {
+          name: row.customer_name,
+          phone: row.phone,
+          email: row.email,
+          address: row.address,
+          city: row.city,
+          pincode: row.pincode
+        }
+      };
+    }
 
     res.json({
       success: true,
-      order
+      order: formattedOrder
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching order.' });
@@ -294,8 +368,46 @@ export const getMyOrders = async (req, res) => {
     }
     query += ' ORDER BY created_at DESC';
     
-    const orders = await queryDb(query, params);
-    res.json({ success: true, orders });
+    const dbOrders = await queryDb(query, params);
+    
+    let formattedOrders = [];
+    if (dbOrders && dbOrders.length > 0) {
+      formattedOrders = dbOrders.map(row => {
+        let parsedItems = [];
+        try {
+          parsedItems = typeof row.items_json === 'string' ? JSON.parse(row.items_json) : (row.items_json || []);
+        } catch(e) {}
+        
+        return {
+          id: row.id,
+          orderId: row.order_id || row.id,
+          customerName: row.customer_name,
+          phone: row.phone,
+          email: row.email,
+          address: row.address,
+          city: row.city,
+          state: row.state,
+          pincode: row.pincode,
+          subtotal: row.subtotal,
+          deliveryCharge: row.delivery_charge,
+          totalAmount: row.total_amount,
+          status: row.status,
+          items: parsedItems,
+          notes: row.notes,
+          createdAt: row.created_at,
+          customer: {
+            name: row.customer_name,
+            phone: row.phone,
+            email: row.email,
+            address: row.address,
+            city: row.city,
+            pincode: row.pincode
+          }
+        };
+      });
+    }
+
+    res.json({ success: true, orders: formattedOrders });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
