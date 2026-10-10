@@ -224,6 +224,12 @@ function processMemoryQuery(sql, params) {
       memoryStore.products = memoryStore.products.filter(p => p.id !== id);
       return { affectedRows: 1 };
     }
+
+    if (queryLower.includes('from users')) {
+      const id = params[0];
+      memoryStore.users = memoryStore.users.filter(u => u.id !== id && u.id != id);
+      return { affectedRows: 1 };
+    }
   }
 
   return [];

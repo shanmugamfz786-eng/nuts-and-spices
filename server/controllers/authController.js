@@ -54,6 +54,26 @@ export const registerCustomer = async (req, res) => {
   }
 };
 
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await queryDb('SELECT id, name, email, phone, role, created_at FROM users');
+    res.json({ success: true, users: users || memoryStore.users });
+  } catch (err) {
+    res.json({ success: true, users: memoryStore.users });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await queryDb('DELETE FROM users WHERE id = ?', [id]);
+    memoryStore.users = memoryStore.users.filter(u => u.id != id);
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete user' });
+  }
+};
+
 export const loginUser = async (req, res) => {
   try {
     const { identifier, password } = req.body;
@@ -79,7 +99,7 @@ export const loginUser = async (req, res) => {
     }
 
     if (!userRecord) {
-      return res.status(401).json({ success: false, message: 'Invalid phone/email or password.' });
+      return res.status(404).json({ success: false, message: 'User not found. Please register to create an account.' });
     }
 
     const isMatch = await bcrypt.compare(password, userRecord.password);
@@ -152,7 +172,8 @@ export const updateCurrentUser = async (req, res) => {
     }
     
     // Issue a new token with updated name
-    const userPayload = { ...req.user, name };
+    const { iat, exp, ...restUser } = req.user;
+    const userPayload = { ...restUser, name };
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({

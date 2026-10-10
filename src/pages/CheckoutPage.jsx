@@ -86,8 +86,7 @@ export default function CheckoutPage() {
       if (!orderRes.ok && orderRes.status === 404) throw new Error('API Endpoint not found');
       const text1 = await orderRes.text();
       let orderData; try { orderData = JSON.parse(text1); } catch(e) { throw new Error('Backend returned HTML instead of JSON (order creation): ' + text1.substring(0, 100)); } if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
-      
-      const token = localStorage.getItem('nuts_spices_auth_token');
+      const token = localStorage.getItem('nuts_spices_auth_token') || '';
       
       const response = await fetch(BASE + '/api/payment/create-session', {
         method: 'POST',
@@ -95,44 +94,28 @@ export default function CheckoutPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          orderId: backendOrderId, amount: backendTotal,
+        body: JSON.stringify({ 
+          orderId: backendOrderId,
+          amount: backendTotal,
           customerPhone: formData.phone,
-          customerEmail: user?.email || 'guest@nutsandspices.in',
+          customerEmail: user?.email || '',
           customerName: formData.name
         })
       });
 
-      const text2 = await response.text();
-      let data; try { data = JSON.parse(text2); } catch(e) { throw new Error('Backend returned HTML instead of JSON (payment session): ' + text2.substring(0, 100)); }
-
-      if (data.success && data.paymentSessionId) {
-        const cashfree = await load({
-          mode: 'production' // or 'sandbox'
-        });
-
-        const checkoutOptions = {
-          paymentSessionId: data.paymentSessionId,
-          redirectTarget: '_self' // redirect to return_url configured in backend
-        };
-
-        // Also create the order in DB so it's pending while payment happens
-        const orderDetails = {
-            orderId: backendOrderId,
-            customer: formData,
-          items: cart,
-          total: cartTotal,
-          status: 'pending', // Pending payment
-          timestamp: new Date().toLocaleString()
-        };
-        
-        
-
-        cashfree.checkout(checkoutOptions);
-      } else {
-        alert('Failed to initialize payment: ' + (data.message || 'Unknown error'));
-        setIsProcessingPayment(false);
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to create payment session');
       }
+
+      const cashfree = await load({
+        mode: "sandbox", 
+      });
+
+      await cashfree.checkout({
+        paymentSessionId: data.paymentSessionId,
+        returnUrl: `${window.location.origin}/order-success?order_id={order_id}`
+      });
     } catch (err) {
       console.error('Payment initialization error', err);
       alert('Error initiating payment. Please try again.');

@@ -16,6 +16,7 @@ export default function AdminDashboardPage() {
   });
 
   const [orders, setOrders] = useState([]);
+  const [allCustomers, setAllCustomers] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
@@ -73,6 +74,10 @@ export default function AdminDashboardPage() {
     if (ordersData.success && ordersData.orders) {
       setOrders(ordersData.orders);
     }
+    const customersData = await fetch(API_BASE_URL + '/auth/users').then(r => r.json()).catch(() => ({}));
+    if (customersData.success && customersData.users) {
+      setAllCustomers(customersData.users);
+    }
     setLoading(false);
   };
 
@@ -114,6 +119,24 @@ export default function AdminDashboardPage() {
       setNewProdImage('');
     }
     setTimeout(() => setStatusMessage(''), 3000);
+  };
+
+  const handleDeleteCustomer = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this user? They will have to re-register.')) return;
+    setStatusMessage('Deleting user...');
+    try {
+      const res = await fetch(API_BASE_URL + '/auth/users/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setAllCustomers(prev => prev.filter(c => c.id !== id));
+        setStatusMessage('User deleted successfully! They must sign up again to login.');
+      } else {
+        setStatusMessage('Failed to delete user.');
+      }
+    } catch (e) {
+      setStatusMessage('Error deleting user.');
+    }
+    setTimeout(() => setStatusMessage(''), 4000);
   };
 
   return (
@@ -208,6 +231,14 @@ export default function AdminDashboardPage() {
         >
           ADD PRODUCT
         </button>
+        <button
+          onClick={() => setActiveTab('customers')}
+          className={`px-5 py-2.5 rounded-2xl text-xs font-extrabold tracking-wider uppercase transition-all cursor-pointer ${
+            activeTab === 'customers' ? 'bg-[#000000] text-white shadow-md' : 'bg-white text-[#000000] border border-[#E5E7EB] hover:text-[#000000] hover:border-[#000000]'
+          }`}
+        >
+          CUSTOMERS
+        </button>
       </div>
 
       {/* TAB 1: ORDERS TABLE */}
@@ -275,6 +306,50 @@ export default function AdminDashboardPage() {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: CUSTOMERS */}
+      {activeTab === 'customers' && (
+        <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-xl overflow-hidden text-[#000000]">
+          <div className="p-6 border-b border-[#E5E7EB] bg-[#F9FAFB]">
+            <h2 className="text-xl font-black font-serif text-[#000000]">Registered Users</h2>
+            <p className="text-xs text-[#8C7A6B] mt-1">Manage registered customers. If deleted, they must sign up again to place an order.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-[#000000]">
+              <thead className="bg-[#F9FAFB] text-[#000000] uppercase font-extrabold tracking-wider border-b border-[#E5E7EB]">
+                <tr>
+                  <th className="p-4">Name</th>
+                  <th className="p-4">Contact</th>
+                  <th className="p-4">Joined Date</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E5E7EB]">
+                {allCustomers.map((c, i) => (
+                  <tr key={c.id || i} className="hover:bg-[#F9FAFB] transition-colors">
+                    <td className="p-4 font-bold text-sm text-[#000000]">{c.name || 'Guest User'}</td>
+                    <td className="p-4 space-y-0.5">
+                      <div className="text-sm text-[#000000]">📞 {c.phone}</div>
+                      {c.email && <div className="text-[11px] text-[#8C7A6B]">✉️ {c.email}</div>}
+                    </td>
+                    <td className="p-4 text-[#8C7A6B]">{c.created_at ? new Date(c.created_at).toLocaleDateString() : 'N/A'}</td>
+                    <td className="p-4">
+                      <button onClick={() => handleDeleteCustomer(c.id)} className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border border-red-200">
+                        Delete User
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {allCustomers.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="p-8 text-center text-[#8C7A6B] font-medium">No registered customers found.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

@@ -12,10 +12,11 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
 
   // Profile Edit State
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'settings'
   const [editName, setEditName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [passwordSent, setPasswordSent] = useState(false);
 
   // My Orders State
   const [myOrders, setMyOrders] = useState([]);
@@ -346,8 +347,19 @@ export default function LoginPage() {
                     {/* Security */}
                     <div>
                       <h3 className="text-xs font-black uppercase text-[#000000] tracking-wider mb-4 border-b border-[#E5E7EB] pb-2">Security</h3>
+                      
+                      {passwordSent && (
+                        <div className="bg-green-50 text-green-700 border border-green-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 mb-4">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Password reset link sent to your registered email/phone!</span>
+                        </div>
+                      )}
+
                       <button 
-                        onClick={() => alert('Password reset link has been sent to your registered email or phone number.')}
+                        onClick={() => {
+                          setPasswordSent(true);
+                          setTimeout(() => setPasswordSent(false), 3000);
+                        }}
                         className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-[#000000] font-bold text-xs rounded-xl transition-colors shadow-sm cursor-pointer"
                       >
                         Change Password
@@ -486,7 +498,7 @@ export default function LoginPage() {
     );
   }
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
     const id = loginIdentifier.trim();
@@ -508,7 +520,7 @@ export default function LoginPage() {
       return;
     }
 
-    const res = loginUser({
+    const res = await loginUser({
       identifier: id,
       password: loginPassword
     });

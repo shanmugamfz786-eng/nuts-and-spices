@@ -463,7 +463,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const loginUser = (loginData) => {
+  const loginUser = async (loginData) => {
     const identifier = (loginData.identifier || loginData.phone || loginData.email || '').trim().toLowerCase();
     
     // Bypass for WhatsApp quick login or mock logins where name is explicitly provided
@@ -473,24 +473,17 @@ export const CartProvider = ({ children }) => {
       return { success: true };
     }
 
-    const foundUser = registeredUsers.find(u => 
-      (u.phone && u.phone.toLowerCase() === identifier) ||
-      (u.email && u.email.toLowerCase() === identifier)
-    );
-
-    if (foundUser) {
-      if (foundUser.password !== loginData.password) {
-        return { success: false, message: 'Incorrect password.' };
+    try {
+      const { login } = await import('../api/authApi.js');
+      const res = await login({ identifier, password: loginData.password });
+      if (res && res.success) {
+        localStorage.setItem('nuts_spices_auth_token', res.token);
+        setUser(res.user);
+        setIsAuthModalOpen(false);
       }
-      setUser({
-        name: foundUser.name,
-        phone: foundUser.phone,
-        email: foundUser.email
-      });
-      setIsAuthModalOpen(false);
-      return { success: true };
-    } else {
-      return { success: false, message: 'User not found. Please register first.' };
+      return res;
+    } catch (err) {
+      return { success: false, message: 'Login failed due to network error.' };
     }
   };
 
