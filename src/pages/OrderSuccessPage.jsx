@@ -21,7 +21,7 @@ export default function OrderSuccessPage() {
         setPaymentStatus('success');
         setIsCashfreeCallback(false);
         // Only fetch order data
-        fetch(API_BASE_URL + '/orders/' + urlOrderId, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
+        fetch(API_BASE_URL + '/orders/' + urlOrderId, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuts_spices_auth_token') } })
           .then(res => res.json())
           .then(data => {
             if (data.success && data.order) {
@@ -35,7 +35,7 @@ export default function OrderSuccessPage() {
         return;
       }
       setIsCashfreeCallback(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('nuts_spices_auth_token');
       
       // 1. Verify Payment
       fetch(`${API_BASE_URL}/payment/verify`, {

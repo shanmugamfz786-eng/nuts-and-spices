@@ -14,10 +14,11 @@ export default function CartPage() {
     const fetchOrders = async () => {
       try {
         let fetchedOrders = [];
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('nuts_spices_auth_token');
+        const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || '';
         
         if (user && token) {
-          const res = await fetch(import.meta.env.VITE_API_URL + '/api/orders/my-orders', {
+          const res = await fetch(BASE + '/api/orders/my-orders', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
