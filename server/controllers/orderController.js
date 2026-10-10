@@ -15,8 +15,23 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cart is empty. Add products before placing order.' });
     }
 
-    const orderNumericId = Math.floor(10000 + Math.random() * 90000);
-    const orderId = `NS-${orderNumericId}`;
+    
+      // Generate Sequential Order ID: HNS-001, HNS-002...
+      let nextNum = 1;
+      const hnsOrders = await queryDb("SELECT id FROM orders WHERE id LIKE 'HNS-%'");
+      if (hnsOrders && hnsOrders.length > 0) {
+        let maxNum = 0;
+        hnsOrders.forEach(o => {
+          const m = o.id.match(/HNS-(\d+)/);
+          if (m) {
+            const num = parseInt(m[1], 10);
+            if (num > maxNum) maxNum = num;
+          }
+        });
+        nextNum = maxNum + 1;
+      }
+      const orderId = `HNS-${nextNum.toString().padStart(3, '0')}`;
+
 
     // Validate products and calculate total securely from backend catalog
     let dbProducts = await queryDb('SELECT * FROM products');
