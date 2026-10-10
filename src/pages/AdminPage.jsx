@@ -157,7 +157,7 @@ export default function AdminPage() {
                   onClick={() => handleNavigateTab(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#25D366] text-white shadow-md'
+                      ? 'bg-[#128C7E] text-white shadow-md'
                       : 'text-[#6B513E] hover:text-[#000000] hover:bg-[#E5E7EB]/50'
                   }`}
                 >
@@ -167,7 +167,7 @@ export default function AdminPage() {
                   </div>
 
                   {item.badge && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#25D366] text-white">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#128C7E] text-white">
                       {item.badge}
                     </span>
                   )}
@@ -181,7 +181,7 @@ export default function AdminPage() {
         <div className="p-4 border-t border-[#E5E7EB] shrink-0">
           <button
             onClick={logoutAdmin}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#25D366] text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#128C7E] hover:bg-[#128C7E] text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>

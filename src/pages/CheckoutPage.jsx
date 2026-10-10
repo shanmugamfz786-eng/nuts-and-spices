@@ -34,7 +34,7 @@ export default function CheckoutPage() {
         <div className="flex justify-center gap-4 pt-2">
           <button
             onClick={() => navigate('login')}
-            className="px-8 py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer"
+            className="px-8 py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer"
           >
             LOGIN NOW
           </button>
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
         <h2 className="text-xl font-bold text-[#000000]">No active items to checkout</h2>
         <button
           onClick={() => navigate('shop')}
-          className="px-6 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-xs rounded-xl transition-all"
+          className="px-6 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs rounded-xl transition-all"
         >
           Return to Shop
         </button>
@@ -148,7 +148,7 @@ export default function CheckoutPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6 bg-white p-6 sm:p-8 rounded-3xl border border-[#E5E7EB] shadow-md">
           <h2 className="text-lg font-black font-serif text-[#000000] border-b border-[#F9FAFB] pb-3 flex items-center gap-2">
-            <User className="w-5 h-5 text-[#25D366]" />
+            <User className="w-5 h-5 text-[#128C7E]" />
             <span>Delivery Recipient Info</span>
           </h2>
 
@@ -281,7 +281,7 @@ export default function CheckoutPage() {
             type="submit"
             disabled={isProcessingPayment}
             className={`w-full py-4 text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 ${
-              isProcessingPayment ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#25D366] hover:bg-[#128C7E]'
+              isProcessingPayment ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#128C7E] hover:bg-[#075E54]'
             }`}
           >
             {isProcessingPayment ? (
@@ -298,7 +298,7 @@ export default function CheckoutPage() {
         {/* Mini Cart Review */}
         <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-md h-fit space-y-4">
           <h3 className="text-base font-black font-serif text-[#000000] border-b border-[#F9FAFB] pb-3 flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4 text-[#25D366]" />
+            <ShoppingBag className="w-4 h-4 text-[#128C7E]" />
             <span>Order Summary ({cart.length} items)</span>
           </h3>
 

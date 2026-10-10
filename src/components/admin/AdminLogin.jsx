@@ -21,8 +21,8 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center p-4 relative overflow-hidden font-sans select-none">
       
       {/* Background Ambient Glow Accents */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#25D366]/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#25D366]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#128C7E]/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#128C7E]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md bg-white border border-[#E5E7EB] rounded-3xl shadow-xl p-8 relative z-10 text-gray-800">
         
@@ -83,7 +83,7 @@ export default function AdminLogin() {
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-[#25D366] hover:bg-[#25D366] text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg border border-[#000000] transition-all transform active:scale-98 mt-3 cursor-pointer"
+            className="w-full py-3.5 bg-[#128C7E] hover:bg-[#128C7E] text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg border border-[#000000] transition-all transform active:scale-98 mt-3 cursor-pointer"
           >
             Sign In To Admin Portal
           </button>

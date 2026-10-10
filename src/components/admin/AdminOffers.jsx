@@ -75,7 +75,7 @@ export default function AdminOffers() {
     <div className="space-y-6">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#25D366] via-[#128C7E] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#128C7E] via-[#075E54] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
         <div>
           <h2 className="text-2xl font-black font-serif text-white tracking-wide flex items-center gap-2">
             <Ticket className="w-6 h-6 text-[#F9FAFB]" />
@@ -87,9 +87,9 @@ export default function AdminOffers() {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#F9FAFB] hover:bg-white text-[#25D366] font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer shrink-0 transition-transform active:scale-95"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#F9FAFB] hover:bg-white text-[#128C7E] font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer shrink-0 transition-transform active:scale-95"
         >
-          <Plus className="w-5 h-5 text-[#25D366]" />
+          <Plus className="w-5 h-5 text-[#128C7E]" />
           <span>Create New Offer</span>
         </button>
       </div>
@@ -294,7 +294,7 @@ export default function AdminOffers() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#25D366] hover:bg-[#25D366] text-white font-extrabold uppercase rounded-xl shadow-md"
+                  className="px-5 py-2 bg-[#128C7E] hover:bg-[#128C7E] text-white font-extrabold uppercase rounded-xl shadow-md"
                 >
                   Save Offer
                 </button>

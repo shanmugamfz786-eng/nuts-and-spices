@@ -59,11 +59,11 @@ export default function Footer() {
     : allValidCategories.slice(0, 10);
 
   return (
-    <footer className="bg-[#25D366] text-[#000000] pt-16 pb-12 border-t-2 border-[#128C7E] relative shadow-inner">
+    <footer className="bg-[#128C7E] text-[#000000] pt-16 pb-12 border-t-2 border-[#075E54] relative shadow-inner">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* TOP SECTION: 4 COLUMNS LAYOUT MATCHING USER REFERENCE SCREENSHOT */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 pb-12 border-b border-[#128C7E]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 pb-12 border-b border-[#075E54]">
           
           {/* COL 1: BRAND LOGO, SLOGAN & CIRCULAR SOCIAL ICONS (4 COLS) */}
           <div className="lg:col-span-4 space-y-4">
@@ -123,7 +123,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp Store Support"
-                className="w-10 h-10 rounded-full border border-white/50 bg-white flex items-center justify-center text-[#25D366] hover:bg-[#25D366] hover:text-white hover:border-white transition-all duration-300 shadow-sm cursor-pointer"
+                className="w-10 h-10 rounded-full border border-white/50 bg-white flex items-center justify-center text-[#128C7E] hover:bg-[#128C7E] hover:text-white hover:border-white transition-all duration-300 shadow-sm cursor-pointer"
               >
                 <MessageCircle className="w-4.5 h-4.5 fill-current" />
               </a>
@@ -213,9 +213,9 @@ export default function Footer() {
               ACCEPTED PAYMENTS
             </span>
             <div className="flex items-center gap-1.5 opacity-95">
-              <span className="px-2 py-0.5 bg-white border border-[#128C7E] rounded text-[10px] font-bold tracking-wider text-[#25D366]">UPI</span>
-              <span className="px-2 py-0.5 bg-white border border-[#128C7E] rounded text-[10px] font-bold tracking-wider text-[#25D366]">CARD</span>
-              <span className="px-2 py-0.5 bg-white border border-[#128C7E] rounded text-[10px] font-bold tracking-wider text-[#25D366]">COD</span>
+              <span className="px-2 py-0.5 bg-white border border-[#075E54] rounded text-[10px] font-bold tracking-wider text-[#128C7E]">UPI</span>
+              <span className="px-2 py-0.5 bg-white border border-[#075E54] rounded text-[10px] font-bold tracking-wider text-[#128C7E]">CARD</span>
+              <span className="px-2 py-0.5 bg-white border border-[#075E54] rounded text-[10px] font-bold tracking-wider text-[#128C7E]">COD</span>
             </div>
           </div>
 
@@ -228,7 +228,7 @@ export default function Footer() {
         onClick={scrollToTop}
         title="Scroll to Top"
         aria-label="Scroll to Top"
-        className={`fixed bottom-20 md:bottom-8 right-5 md:right-8 z-50 w-12 h-12 rounded-full bg-white hover:bg-gray-100 text-[#25D366] flex items-center justify-center shadow-xl border border-[#128C7E] cursor-pointer transition-all duration-300 transform ${
+        className={`fixed bottom-20 md:bottom-8 right-5 md:right-8 z-50 w-12 h-12 rounded-full bg-white hover:bg-gray-100 text-[#128C7E] flex items-center justify-center shadow-xl border border-[#075E54] cursor-pointer transition-all duration-300 transform ${
           showScrollTop 
             ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto hover:-translate-y-1' 
             : 'opacity-0 scale-75 translate-y-4 pointer-events-none'

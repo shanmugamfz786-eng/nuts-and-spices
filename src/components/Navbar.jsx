@@ -53,7 +53,7 @@ export default function Navbar() {
         
         {/* TOP ANNOUNCEMENT BAR (SHOW ON HOME & TOP LINK PAGES) */}
         {['home', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage) && (
-          <div className="bg-gradient-to-r from-[#25D366] via-[#25D366] to-[#25D366] text-[#F9FAFB] text-[11px] sm:text-[12px] font-extrabold py-1.5 sm:py-2 px-4 sm:px-6 border-b border-[#25D366]/30 tracking-wider uppercase shadow-xs">
+          <div className="bg-gradient-to-r from-[#128C7E] via-[#128C7E] to-[#128C7E] text-[#F9FAFB] text-[11px] sm:text-[12px] font-extrabold py-1.5 sm:py-2 px-4 sm:px-6 border-b border-[#128C7E]/30 tracking-wider uppercase shadow-xs">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 lg:gap-8">
               
               {/* Left TV News Right-to-Left Scrolling Ticker */}
@@ -122,7 +122,7 @@ export default function Navbar() {
                   />
                   <button
                     type="submit"
-                    className="px-4.5 py-1.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-full transition-all tracking-wider uppercase shrink-0 shadow-sm cursor-pointer border border-[#25D366]"
+                    className="px-4.5 py-1.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-full transition-all tracking-wider uppercase shrink-0 shadow-sm cursor-pointer border border-[#128C7E]"
                   >
                     Search
                   </button>
@@ -328,7 +328,7 @@ export default function Navbar() {
                 />
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-[#25D366] text-white font-bold text-[10px] rounded-full tracking-wider uppercase shrink-0"
+                  className="px-4 py-1.5 bg-[#128C7E] text-white font-bold text-[10px] rounded-full tracking-wider uppercase shrink-0"
                 >
                   Search
                 </button>

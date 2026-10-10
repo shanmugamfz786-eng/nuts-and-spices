@@ -87,7 +87,7 @@ export default function OrderSuccessPage() {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold text-[#000000] animate-pulse">Verifying Payment with Cashfree...</h2>
-        <div className="w-12 h-12 border-4 border-[#25D366] border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div className="w-12 h-12 border-4 border-[#128C7E] border-t-transparent rounded-full animate-spin mx-auto"></div>
       </div>
     );
   }
@@ -109,7 +109,7 @@ export default function OrderSuccessPage() {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold text-[#000000]">No recent order found</h2>
-        <button onClick={() => navigate('home')} className="px-6 py-2.5 bg-[#25D366] text-white font-bold text-xs rounded-xl">Go to Home</button>
+        <button onClick={() => navigate('home')} className="px-6 py-2.5 bg-[#128C7E] text-white font-bold text-xs rounded-xl">Go to Home</button>
       </div>
     );
   }
@@ -138,7 +138,7 @@ export default function OrderSuccessPage() {
       
       {/* Success Popup Card */}
       <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl text-center space-y-4 border border-[#E5E7EB]">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto text-[#25D366] animate-bounce">
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto text-[#128C7E] animate-bounce">
           <CheckCircle2 className="w-12 h-12" />
         </div>
         {new URLSearchParams(window.location.search).get('track') === 'true' ? (
@@ -156,7 +156,7 @@ export default function OrderSuccessPage() {
         {orderData && (
           <div className="inline-flex items-center gap-3 bg-[#F9FAFB] px-6 py-3 rounded-2xl border border-[#E5E7EB] mt-4">
             <span className="text-sm font-extrabold text-[#000000]">Order ID:</span>
-            <span className="text-base font-black text-[#25D366]">#{orderData.orderId || orderData.id}</span>
+            <span className="text-base font-black text-[#128C7E]">#{orderData.orderId || orderData.id}</span>
             <button 
               onClick={() => {
                 navigator.clipboard.writeText(orderData.orderId || orderData.id);
@@ -166,7 +166,7 @@ export default function OrderSuccessPage() {
               className="p-1.5 hover:bg-white rounded-lg transition-colors"
               title="Copy Order ID"
             >
-              {copied ? <CheckCircle2 className="w-4 h-4 text-[#25D366]" /> : <Copy className="w-4 h-4 text-[#8C7A6B]" />}
+              {copied ? <CheckCircle2 className="w-4 h-4 text-[#128C7E]" /> : <Copy className="w-4 h-4 text-[#8C7A6B]" />}
             </button>
           </div>
         )}
@@ -183,7 +183,7 @@ export default function OrderSuccessPage() {
             
             {steps.map((step, idx) => (
               <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500 ${step.done ? 'bg-[#25D366] text-white shadow-lg shadow-green-200' : 'bg-gray-100 text-gray-400 border-2 border-white'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500 ${step.done ? 'bg-[#128C7E] text-white shadow-lg shadow-green-200' : 'bg-gray-100 text-gray-400 border-2 border-white'}`}>
                   <step.icon className="w-5 h-5" />
                 </div>
                 <span className={`text-[10px] sm:text-xs font-bold ${step.done ? 'text-[#000000]' : 'text-gray-400'}`}>{step.label}</span>
@@ -201,7 +201,7 @@ export default function OrderSuccessPage() {
         </div>
         <button
           onClick={() => window.open(whatsappUrl, '_blank')}
-          className="w-full sm:w-auto mx-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-3.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-green-200"
+          className="w-full sm:w-auto mx-auto inline-flex items-center justify-center gap-2 bg-[#128C7E] hover:bg-[#075E54] text-white px-8 py-3.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-green-200"
         >
           <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 filter brightness-0 invert" />
           Message on WhatsApp

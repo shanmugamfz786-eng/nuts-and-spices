@@ -129,7 +129,7 @@ export default function TestimonialsSection() {
         {/* HEADER & BADGE (VOICES OF TRUST) */}
         <div className="text-center space-y-3 max-w-3xl mx-auto">
           <div>
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#25D366] text-white text-[11px] sm:text-xs font-black tracking-widest uppercase rounded-full shadow-xs">
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#128C7E] text-white text-[11px] sm:text-xs font-black tracking-widest uppercase rounded-full shadow-xs">
               <Quote className="w-3.5 h-3.5 text-white" />
               <span>VOICES OF TRUST</span>
             </span>
@@ -147,7 +147,7 @@ export default function TestimonialsSection() {
           <div className="pt-2">
             <button
               onClick={() => setIsFormOpen(!isFormOpen)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-full shadow-md hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5 active:scale-95"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-full shadow-md hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5 active:scale-95"
             >
               <MessageSquarePlus className="w-4 h-4 text-white" />
               <span>{isFormOpen ? 'Close Feedback Form' : 'Write Feedback / Review'}</span>

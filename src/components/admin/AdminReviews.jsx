@@ -23,7 +23,7 @@ export default function AdminReviews() {
     <div className="space-y-6">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#25D366] via-[#128C7E] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#128C7E] via-[#075E54] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
         <div>
           <h2 className="text-2xl font-black font-serif text-white tracking-wide flex items-center gap-2">
             <Star className="w-6 h-6 text-[#F9FAFB]" />

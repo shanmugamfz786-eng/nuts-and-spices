@@ -92,7 +92,7 @@ export default function RegisterPage() {
 
           {successMessage && (
             <div className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-4 h-4 text-[#25D366]" />
+              <CheckCircle2 className="w-4 h-4 text-[#128C7E]" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -112,7 +112,7 @@ export default function RegisterPage() {
                   placeholder="Enter name"
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#25D366]"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E]"
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function RegisterPage() {
                   placeholder="10-digit mobile number"
                   value={regMobile}
                   onChange={(e) => setRegMobile(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#25D366]"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E]"
                 />
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function RegisterPage() {
                   placeholder="name@example.com"
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#25D366]"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E]"
                 />
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function RegisterPage() {
                   placeholder="At least 6 characters"
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#25D366]"
+                  className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E]"
                 />
                 <button
                   type="button"
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                   placeholder="Re-enter password"
                   value={regConfirmPassword}
                   onChange={(e) => setRegConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#25D366]"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E]"
                 />
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function RegisterPage() {
                 id="reg-terms"
                 checked={agreedTerms}
                 onChange={(e) => setAgreedTerms(e.target.checked)}
-                className="mt-0.5 rounded text-[#000000] focus:ring-[#25D366]"
+                className="mt-0.5 rounded text-[#000000] focus:ring-[#128C7E]"
               />
               <label htmlFor="reg-terms" className="text-[11px] text-[#000000]">
                 I agree to Nuts & Spices Terms of Service & Privacy Policy.
@@ -212,7 +212,7 @@ export default function RegisterPage() {
             {/* Register Submit Button */}
             <button
               type="submit"
-              className="w-full py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
+              className="w-full py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
             >
               CREATE MY ACCOUNT
             </button>
@@ -223,7 +223,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => navigate('login')}
-                className="text-xs font-bold text-[#25D366] hover:underline cursor-pointer"
+                className="text-xs font-bold text-[#128C7E] hover:underline cursor-pointer"
               >
                 Login Here →
               </button>

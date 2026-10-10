@@ -65,7 +65,7 @@ export default function CartPage() {
           </div>
           <button
             onClick={() => navigate('shop', { category: 'all' })}
-            className="px-8 py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-2xl transition-all shadow-lg text-sm inline-flex items-center gap-2 cursor-pointer"
+            className="px-8 py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold rounded-2xl transition-all shadow-lg text-sm inline-flex items-center gap-2 cursor-pointer"
           >
             <span>Explore Shop Catalog</span>
             <ArrowRight className="w-4 h-4" />
@@ -203,7 +203,7 @@ export default function CartPage() {
               </div>
 
               <div className="bg-[#F9FAFB] p-3 rounded-xl border border-[#E5E7EB] text-[11px] text-[#000000] flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#25D366] shrink-0" />
+                <ShieldCheck className="w-5 h-5 text-[#128C7E] shrink-0" />
                 <span>No advance payment needed. Confirm delivery address on next screen.</span>
               </div>
 
@@ -215,7 +215,7 @@ export default function CartPage() {
                     navigate('checkout');
                   }
                 }}
-                className="w-full py-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full py-4 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -241,7 +241,7 @@ export default function CartPage() {
          window.history.pushState({}, '', '?order_id=' + (order.orderId || order.id) + '&track=true');
          navigate('order-success');
        }}
-       className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-sm space-y-4 hover:shadow-md transition-shadow cursor-pointer hover:border-[#25D366]">
+       className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-sm space-y-4 hover:shadow-md transition-shadow cursor-pointer hover:border-[#128C7E]">
                 <div className="flex justify-between items-start border-b border-[#F9FAFB] pb-3">
                   <div>
                     <span className="text-[10px] font-extrabold text-[#000000] uppercase tracking-wider block">Order ID</span>

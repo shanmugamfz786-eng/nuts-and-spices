@@ -76,14 +76,14 @@ export default function LoginPage() {
             className="lg:col-span-1 space-y-6"
           >
             <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-lg text-center relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-[#25D366]/20 to-transparent"></div>
+              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-[#128C7E]/20 to-transparent"></div>
               
-              <div className="relative z-10 w-24 h-24 bg-white border-4 border-white shadow-md text-[#25D366] rounded-full flex items-center justify-center mx-auto text-4xl font-black font-serif mt-4 mb-4">
+              <div className="relative z-10 w-24 h-24 bg-white border-4 border-white shadow-md text-[#128C7E] rounded-full flex items-center justify-center mx-auto text-4xl font-black font-serif mt-4 mb-4">
                 {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               
               <div className="relative z-10">
-                <span className="text-[10px] font-extrabold text-[#25D366] uppercase tracking-widest bg-green-50 px-3 py-1 rounded-full inline-block mb-2">
+                <span className="text-[10px] font-extrabold text-[#128C7E] uppercase tracking-widest bg-green-50 px-3 py-1 rounded-full inline-block mb-2">
                   Premium Member
                 </span>
                 <h1 className="text-xl font-black font-serif text-[#000000]">
@@ -96,7 +96,7 @@ export default function LoginPage() {
               <div className="mt-8 space-y-2 relative z-10">
                 <button
                   onClick={() => navigate('shop', { category: 'all' })}
-                  className="w-full py-3 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-xl transition-all shadow-md uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-xl transition-all shadow-md uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Shop Now</span>
@@ -116,19 +116,19 @@ export default function LoginPage() {
                <ul className="space-y-3 text-sm font-bold text-[#8C7A6B]">
                  <li 
                    onClick={() => setActiveTab('orders')}
-                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'orders' ? 'text-[#25D366] bg-green-50' : 'hover:text-[#000000]'}`}
+                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'orders' ? 'text-[#128C7E] bg-green-50' : 'hover:text-[#000000]'}`}
                  >
                    <Package className="w-4 h-4"/> My Orders
                  </li>
                  <li 
                    onClick={() => setActiveTab('profile')}
-                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'profile' ? 'text-[#25D366] bg-green-50' : 'hover:text-[#000000]'}`}
+                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'profile' ? 'text-[#128C7E] bg-green-50' : 'hover:text-[#000000]'}`}
                  >
                    <UserIcon className="w-4 h-4"/> Profile Details
                  </li>
                  <li 
                    onClick={() => setActiveTab('settings')}
-                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'settings' ? 'text-[#25D366] bg-green-50' : 'hover:text-[#000000]'}`}
+                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'settings' ? 'text-[#128C7E] bg-green-50' : 'hover:text-[#000000]'}`}
                  >
                    <Settings className="w-4 h-4"/> Settings
                  </li>
@@ -149,7 +149,7 @@ export default function LoginPage() {
                   <div className="flex justify-between items-end mb-8 border-b border-[#E5E7EB] pb-4">
                     <div>
                       <h2 className="text-2xl font-black font-serif text-[#000000] flex items-center gap-3">
-                        <Package className="w-6 h-6 text-[#25D366]" />
+                        <Package className="w-6 h-6 text-[#128C7E]" />
                         Order History
                       </h2>
                       <p className="text-xs text-[#8C7A6B] mt-1">View and track your recent purchases.</p>
@@ -158,7 +158,7 @@ export default function LoginPage() {
               
               {loadingOrders ? (
                 <div className="flex justify-center items-center py-20">
-                  <div className="w-10 h-10 border-4 border-[#25D366] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-10 h-10 border-4 border-[#128C7E] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : myOrders.length === 0 ? (
                 <div className="bg-[#F9FAFB] p-12 rounded-3xl border border-dashed border-[#E5E7EB] text-center space-y-4">
@@ -169,7 +169,7 @@ export default function LoginPage() {
                     <h3 className="text-lg font-black text-[#000000]">No Orders Yet</h3>
                     <p className="text-sm font-medium text-[#8C7A6B] mt-1">Looks like you haven't made your first purchase.</p>
                   </div>
-                  <button onClick={() => navigate('shop')} className="px-6 py-3 bg-[#25D366] text-white font-bold text-xs rounded-xl hover:bg-[#128C7E] transition-colors shadow-md mt-4 cursor-pointer inline-flex items-center gap-2">
+                  <button onClick={() => navigate('shop')} className="px-6 py-3 bg-[#128C7E] text-white font-bold text-xs rounded-xl hover:bg-[#075E54] transition-colors shadow-md mt-4 cursor-pointer inline-flex items-center gap-2">
                     Start Shopping <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -186,7 +186,7 @@ export default function LoginPage() {
                         transition={{ delay: idx * 0.05 }}
                         key={order.id} 
                         onClick={() => setSelectedOrder(order)}
-                        className="bg-white border border-[#E5E7EB] hover:border-[#25D366] p-5 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        className="bg-white border border-[#E5E7EB] hover:border-[#128C7E] p-5 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                       >
                         <div className="flex items-center gap-4 sm:gap-6">
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
@@ -216,7 +216,7 @@ export default function LoginPage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                             {order.status}
                           </span>
-                          <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#25D366] group-hover:text-white transition-colors text-gray-400">
+                          <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#128C7E] group-hover:text-white transition-colors text-gray-400">
                             <ChevronRight className="w-4 h-4" />
                           </div>
                         </div>
@@ -231,7 +231,7 @@ export default function LoginPage() {
                   <div className="flex justify-between items-end mb-8 border-b border-[#E5E7EB] pb-4">
                     <div>
                       <h2 className="text-2xl font-black font-serif text-[#000000] flex items-center gap-3">
-                        <UserIcon className="w-6 h-6 text-[#25D366]" />
+                        <UserIcon className="w-6 h-6 text-[#128C7E]" />
                         Profile Details
                       </h2>
                       <p className="text-xs text-[#8C7A6B] mt-1">Update your personal information.</p>
@@ -256,7 +256,7 @@ export default function LoginPage() {
                         required
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#25D366] transition-colors shadow-sm"
+                        className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E] transition-colors shadow-sm"
                       />
                     </div>
 
@@ -289,7 +289,7 @@ export default function LoginPage() {
                       <button
                         type="submit"
                         disabled={isSaving}
-                        className="w-full sm:w-auto px-8 py-3.5 bg-[#25D366] hover:bg-[#128C7E] disabled:opacity-50 text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer flex justify-center items-center gap-2"
+                        className="w-full sm:w-auto px-8 py-3.5 bg-[#128C7E] hover:bg-[#075E54] disabled:opacity-50 text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer flex justify-center items-center gap-2"
                       >
                         {isSaving ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -308,7 +308,7 @@ export default function LoginPage() {
                   <div className="flex justify-between items-end mb-8 border-b border-[#E5E7EB] pb-4">
                     <div>
                       <h2 className="text-2xl font-black font-serif text-[#000000] flex items-center gap-3">
-                        <Settings className="w-6 h-6 text-[#25D366]" />
+                        <Settings className="w-6 h-6 text-[#128C7E]" />
                         Account Settings
                       </h2>
                       <p className="text-xs text-[#8C7A6B] mt-1">Manage preferences and account security.</p>
@@ -327,7 +327,7 @@ export default function LoginPage() {
                           </div>
                           <div className="relative">
                             <input type="checkbox" className="sr-only peer" defaultChecked />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#128C7E]"></div>
                           </div>
                         </label>
                         
@@ -338,7 +338,7 @@ export default function LoginPage() {
                           </div>
                           <div className="relative">
                             <input type="checkbox" className="sr-only peer" />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#128C7E]"></div>
                           </div>
                         </label>
                       </div>
@@ -455,7 +455,7 @@ export default function LoginPage() {
                         } catch(e) {}
                         
                         return items.map((item, idx) => (
-                          <div key={idx} className="p-3 bg-white border border-[#E5E7EB] rounded-xl flex items-center gap-4 hover:border-[#25D366] transition-colors shadow-sm">
+                          <div key={idx} className="p-3 bg-white border border-[#E5E7EB] rounded-xl flex items-center gap-4 hover:border-[#128C7E] transition-colors shadow-sm">
                             <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                               {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400"><Package className="w-6 h-6"/></div>}
                             </div>
@@ -464,7 +464,7 @@ export default function LoginPage() {
                               <p className="text-xs font-bold text-[#8C7A6B] mt-0.5">{item.weight} <span className="mx-1">×</span> {item.quantity}</p>
                             </div>
                             <div className="text-right shrink-0">
-                              <p className="text-sm font-black text-[#25D366]">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                              <p className="text-sm font-black text-[#128C7E]">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
                             </div>
                           </div>
                         ));
@@ -484,7 +484,7 @@ export default function LoginPage() {
                      </div>
                      <div className="flex justify-between text-base font-black pt-3 border-t border-gray-800">
                        <span>Total Amount</span>
-                       <span className="text-[#25D366]">₹{Number(selectedOrder.total_amount || selectedOrder.totalAmount || 0).toLocaleString('en-IN')}</span>
+                       <span className="text-[#128C7E]">₹{Number(selectedOrder.total_amount || selectedOrder.totalAmount || 0).toLocaleString('en-IN')}</span>
                      </div>
                   </div>
 
@@ -573,7 +573,7 @@ export default function LoginPage() {
 
           {successMessage && (
             <div className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-4 h-4 text-[#25D366]" />
+              <CheckCircle2 className="w-4 h-4 text-[#128C7E]" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -593,7 +593,7 @@ export default function LoginPage() {
                   placeholder="Enter mobile no. or email"
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#25D366] transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#128C7E] transition-colors"
                 />
               </div>
             </div>
@@ -607,7 +607,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => alert('Password reset link sent to your mobile via WhatsApp.')}
-                  className="text-[11px] font-bold text-[#25D366] hover:underline cursor-pointer"
+                  className="text-[11px] font-bold text-[#128C7E] hover:underline cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -620,7 +620,7 @@ export default function LoginPage() {
                   placeholder="Enter password"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#25D366] transition-colors"
+                  className="w-full pl-10 pr-10 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#128C7E] transition-colors"
                 />
                 <button
                   type="button"
@@ -638,7 +638,7 @@ export default function LoginPage() {
                 type="checkbox"
                 id="login-remember"
                 defaultChecked
-                className="rounded text-[#000000] focus:ring-[#25D366]"
+                className="rounded text-[#000000] focus:ring-[#128C7E]"
               />
               <label htmlFor="login-remember" className="text-xs font-medium text-[#000000]">
                 Remember me on this browser
@@ -648,7 +648,7 @@ export default function LoginPage() {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
+              className="w-full py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
             >
               LOGIN TO ACCOUNT
             </button>
@@ -661,7 +661,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => navigate('register')}
-                className="text-xs font-bold text-[#25D366] hover:underline cursor-pointer"
+                className="text-xs font-bold text-[#128C7E] hover:underline cursor-pointer"
               >
                 Register Here →
               </button>

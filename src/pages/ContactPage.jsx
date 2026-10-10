@@ -36,7 +36,7 @@ export default function ContactPage() {
       </button>
 
       {/* Page Header */}
-      <div className="bg-gradient-to-br from-[#25D366] via-[#128C7E] to-[#075E54] text-white p-8 sm:p-14 rounded-3xl space-y-3 relative overflow-hidden border border-[#128C7E] shadow-xl">
+      <div className="bg-gradient-to-br from-[#128C7E] via-[#075E54] to-[#075E54] text-white p-8 sm:p-14 rounded-3xl space-y-3 relative overflow-hidden border border-[#075E54] shadow-xl">
         <div className="absolute right-0 top-0 w-96 h-96 bg-[#000000]/25 rounded-full blur-3xl pointer-events-none" />
 
         <h1 className="text-3xl sm:text-5xl font-black font-serif text-white">
@@ -153,7 +153,7 @@ export default function ContactPage() {
 
           {submitted ? (
             <div className="p-8 bg-amber-50 border border-amber-200 rounded-2xl text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-[#25D366] mx-auto" />
+              <CheckCircle2 className="w-12 h-12 text-[#128C7E] mx-auto" />
               <h3 className="text-lg font-bold text-[#000000]">Message Sent Successfully!</h3>
               <p className="text-xs text-[#000000]">
                 Thank you for contacting NUTS & SPICES. Our team will get back to you shortly.
@@ -224,7 +224,7 @@ export default function ContactPage() {
               {/* Send Message Button */}
               <button
                 type="submit"
-                className="w-full py-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4" />
                 <span>Send Message</span>

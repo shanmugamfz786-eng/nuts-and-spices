@@ -20,7 +20,7 @@ export default function AdminSettings() {
     <div className="space-y-6">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#25D366] via-[#128C7E] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#128C7E] via-[#075E54] to-[#075E54] p-6 rounded-2xl text-white shadow-md">
         <div>
           <h2 className="text-2xl font-black font-serif text-white tracking-wide flex items-center gap-2">
             <Settings className="w-6 h-6 text-[#F9FAFB]" />
@@ -45,7 +45,7 @@ export default function AdminSettings() {
             <div className="pt-2">
               <button
                 onClick={() => setIsSaved(false)}
-                className="w-full px-5 py-2.5 bg-[#25D366] hover:bg-[#25D366] text-[#000000] font-extrabold rounded-xl transition-all cursor-pointer shadow-md text-sm"
+                className="w-full px-5 py-2.5 bg-[#128C7E] hover:bg-[#128C7E] text-[#000000] font-extrabold rounded-xl transition-all cursor-pointer shadow-md text-sm"
               >
                 OK, Got it!
               </button>
@@ -226,7 +226,7 @@ export default function AdminSettings() {
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="px-8 py-3.5 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
+            className="px-8 py-3.5 bg-gradient-to-r from-[#128C7E] to-[#075E54] hover:from-[#075E54] hover:to-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
           >
             <Save className="w-5 h-5" />
             <span>Save & Apply Store Settings</span>

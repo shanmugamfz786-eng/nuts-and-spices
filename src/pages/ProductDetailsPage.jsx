@@ -200,8 +200,8 @@ export default function ProductDetailsPage() {
                 onClick={handleAddToCart}
                 className={`py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   added 
-                    ? 'bg-[#128C7E] text-white shadow-md' 
-                    : 'bg-[#25D366] hover:bg-[#128C7E] text-white shadow-lg hover:shadow-xl'
+                    ? 'bg-[#075E54] text-white shadow-md' 
+                    : 'bg-[#128C7E] hover:bg-[#075E54] text-white shadow-lg hover:shadow-xl'
                 }`}
               >
                 {added ? (

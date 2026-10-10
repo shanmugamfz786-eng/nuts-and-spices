@@ -529,7 +529,7 @@ export default function AdminProducts() {
                           weightOptions: [...formData.weightOptions, { label: '', price: '' }]
                         });
                       }}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-[#25D366] hover:bg-[#25D366] text-[#000000] font-extrabold text-[11px] uppercase tracking-wider rounded-lg transition-all cursor-pointer shadow-xs"
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-[#128C7E] hover:bg-[#128C7E] text-[#000000] font-extrabold text-[11px] uppercase tracking-wider rounded-lg transition-all cursor-pointer shadow-xs"
                     >
                       <Plus className="w-3.5 h-3.5 text-[#000000]" />
                       <span>Add Weight</span>
@@ -700,7 +700,7 @@ export default function AdminProducts() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-[#25D366] hover:bg-[#25D366] text-[#000000] font-extrabold rounded-xl shadow-md transition-all cursor-pointer border border-[#000000]/40"
+                  className="px-6 py-2.5 bg-[#128C7E] hover:bg-[#128C7E] text-[#000000] font-extrabold rounded-xl shadow-md transition-all cursor-pointer border border-[#000000]/40"
                 >
                   {editingProduct ? 'Save Product Changes' : 'Create Product'}
                 </button>

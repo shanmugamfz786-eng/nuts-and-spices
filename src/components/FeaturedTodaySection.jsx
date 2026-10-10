@@ -41,7 +41,7 @@ function FeaturedCard({ product }) {
         
         {/* Top Badges Stack (Left) */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
-          <span className="bg-[#25D366] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs font-serif">
+          <span className="bg-[#128C7E] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-xs font-serif">
             {product.badge || 'FEATURED'}
           </span>
           {discountPercent > 0 && (
@@ -131,8 +131,8 @@ function FeaturedCard({ product }) {
           onClick={handleAddToCart}
           className={`w-full py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:shadow-md active:scale-95 ${
             added
-              ? 'bg-[#128C7E] text-white'
-              : 'bg-[#25D366] hover:bg-[#128C7E] text-white'
+              ? 'bg-[#075E54] text-white'
+              : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
           }`}
         >
           {added ? (

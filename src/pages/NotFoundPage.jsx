@@ -23,7 +23,7 @@ export default function NotFoundPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <button
             onClick={() => navigate('home')}
-            className="w-full sm:w-auto px-6 py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
           >
             <Home className="w-4 h-4" />
             <span>Go to Home</span>
@@ -31,7 +31,7 @@ export default function NotFoundPage() {
           
           <button
             onClick={() => navigate('shop', { category: 'all' })}
-            className="w-full sm:w-auto px-6 py-3.5 bg-white border border-[#25D366] text-[#25D366] hover:bg-gray-50 font-extrabold text-xs rounded-2xl transition-all shadow-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3.5 bg-white border border-[#128C7E] text-[#128C7E] hover:bg-gray-50 font-extrabold text-xs rounded-2xl transition-all shadow-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Shop Now</span>

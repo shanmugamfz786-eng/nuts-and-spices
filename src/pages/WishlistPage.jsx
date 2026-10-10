@@ -15,7 +15,7 @@ export default function WishlistPage() {
     <div className="bg-white min-h-screen pb-16 space-y-8">
       
       {/* PAGE HEADER BANNER (Warm Spice Gradient - ZERO DARK SHADES) */}
-      <section className="relative bg-gradient-to-br from-[#25D366] via-[#128C7E] to-[#075E54] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-[#128C7E]/30">
+      <section className="relative bg-gradient-to-br from-[#128C7E] via-[#075E54] to-[#075E54] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-[#075E54]/30">
         
         {/* Subtle Decorative Glow Effects */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
@@ -107,7 +107,7 @@ export default function WishlistPage() {
 
             <button
               onClick={() => navigate('shop', { category: 'all' })}
-              className="px-8 py-3 rounded-full bg-[#25D366] text-white text-xs font-black uppercase tracking-wider hover:bg-[#128C7E] transition-all shadow-md inline-flex items-center gap-2 cursor-pointer border border-[#128C7E]/30"
+              className="px-8 py-3 rounded-full bg-[#128C7E] text-white text-xs font-black uppercase tracking-wider hover:bg-[#075E54] transition-all shadow-md inline-flex items-center gap-2 cursor-pointer border border-[#075E54]/30"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Explore Products</span>
