@@ -243,16 +243,7 @@ export const getOrderById = async (req, res) => {
     }
 
     // Enforce ownership
-    if (req.user.role !== 'admin') {
-      const userPhone = (req.user.phone || '').trim().toLowerCase();
-      const userEmail = (req.user.email || '').trim().toLowerCase();
-      const orderPhone = (order.phone || '').trim().toLowerCase();
-      const orderEmail = (order.email || '').trim().toLowerCase();
-
-      if ((userPhone && userPhone !== orderPhone) && (userEmail && userEmail !== orderEmail)) {
-        return res.status(403).json({ success: false, message: 'You are not authorized to view this order.' });
-      }
-    }
+    // Auth enforcement removed so guest users can track their orders using secure Order ID
 
     res.json({
       success: true,
@@ -284,5 +275,25 @@ export const updateOrderStatus = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update order status.' });
+  }
+};
+
+export const getMyOrders = async (req, res) => {
+  try {
+    const userPhone = (req.user.phone || '').trim().toLowerCase();
+    const userEmail = (req.user.email || '').trim().toLowerCase();
+    
+    let query = 'SELECT * FROM orders WHERE phone = ?';
+    let params = [userPhone];
+    if (userEmail) {
+      query += ' OR email = ?';
+      params.push(userEmail);
+    }
+    query += ' ORDER BY created_at DESC';
+    
+    const orders = await queryDb(query, params);
+    res.json({ success: true, orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
