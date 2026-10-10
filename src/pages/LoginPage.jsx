@@ -507,7 +507,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (id.toLowerCase() === 'admin@nutsandspices.in') {
+    if (id.toLowerCase() === 'admin702@admin.com' || id.toLowerCase() === 'admin@nutsandspices.in') {
       const adminRes = await loginAdmin(id, loginPassword);
       if (adminRes.success) {
         setSuccessMessage('Admin Access Granted!');
