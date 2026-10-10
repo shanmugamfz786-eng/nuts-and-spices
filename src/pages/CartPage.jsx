@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { ShoppingBag, Trash2, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, navigate, user, orders } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, deliveryCharge, grandTotal, navigate, user, orders } = useCart();
 
   const myOrders = (orders || []).filter(o => 
     user && o.customer && (
@@ -158,7 +158,7 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-[#000000]">
                   <span>Doorstep Delivery Charges:</span>
-                  <span className="font-bold text-[#000000]">FREE</span>
+                    <span className="font-bold text-[#000000]">{deliveryCharge > 0 ? `?${deliveryCharge}` : 'FREE'}</span>
                 </div>
 
                 <div className="pt-3 border-t border-[#E5E7EB] flex justify-between items-baseline">

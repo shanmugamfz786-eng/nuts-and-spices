@@ -4,7 +4,7 @@ import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, 
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, createNewOrder, clearCart, navigate, user } = useCart();
+  const { cart, cartTotal, deliveryCharge, grandTotal, createNewOrder, clearCart, navigate, user } = useCart();
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -120,7 +120,7 @@ export default function CheckoutPage() {
             orderId: backendOrderId,
             customer: formData,
           items: cart,
-          total: cartTotal,
+          total: grandTotal,
           status: 'pending', // Pending payment
           timestamp: new Date().toLocaleString()
         };
@@ -333,7 +333,15 @@ export default function CheckoutPage() {
           </div>
 
           <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-base font-black">
-            <span className="text-[#000000]">Total Amount:</span>
+            </div>
+            
+            <div className="pt-3 flex items-center justify-between text-xs font-bold text-[#8C7A6B]">
+              <span>Delivery Charge:</span>
+              <span>{deliveryCharge > 0 ? `?${deliveryCharge}` : 'FREE'}</span>
+            </div>
+
+            <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-base font-black">
+              <span className="text-[#000000]">Grand Total:</span>
             <span className="text-[#000000]">₹{cartTotal.toLocaleString('en-IN')}</span>
           </div>
         </div>

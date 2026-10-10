@@ -565,6 +565,8 @@ export const CartProvider = ({ children }) => {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryCharge = cartTotal > 0 && cartTotal < 1000 ? 50 : 0;
+  const grandTotal = cartTotal + deliveryCharge;
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // WHATSAPP GENERATION USING DYNAMIC STORE SETTINGS
@@ -856,6 +858,8 @@ export const CartProvider = ({ children }) => {
         cart,
         wishlist,
         cartTotal,
+        deliveryCharge,
+        grandTotal,
         cartItemCount,
         addToCart,
         removeFromCart,
