@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, CreditCard } from 'lucide-react';
+import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
   const { cart, cartTotal, createNewOrder, clearPurchasedItems, navigate, user } = useCart();
@@ -88,14 +89,34 @@ export default function CheckoutPage() {
       let orderData; try { orderData = JSON.parse(text1); } catch(e) { throw new Error('Backend returned HTML instead of JSON (order creation): ' + text1.substring(0, 100)); } if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
       const token = localStorage.getItem('nuts_spices_auth_token') || '';
       
-      // Clear purchased items
+      // Clear purchased items locally
       clearPurchasedItems(cart);
 
-      // Navigate to success and open WhatsApp
-      if (orderData.whatsAppUrl) {
-        window.open(orderData.whatsAppUrl, '_blank');
+      // Initialize Cashfree Payment
+      const payRes = await fetch(BASE + '/api/payment/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: backendOrderId,
+          amount: backendTotal,
+          customerPhone: formData.phone,
+          customerEmail: user?.email || '',
+          customerName: formData.name
+        })
+      });
+
+      const payData = await payRes.json();
+      if (!payData.success) {
+        throw new Error(payData.message || 'Failed to create payment session');
       }
-      navigate('order-success', { order_id: backendOrderId, track: 'true' });
+
+      const cashfree = await load({ mode: payData.environment });
+      
+      // Navigate away to Cashfree.
+      await cashfree.checkout({
+        paymentSessionId: payData.paymentSessionId
+      });
+      
     } catch (err) {
       console.error('Payment initialization error', err);
       alert('Error initiating payment. Please try again.');
