@@ -14,3 +14,9 @@ export const updateOrderStatus = (id, status) => apiFetch(`/orders/${id}/status`
   method: 'PUT',
   body: JSON.stringify({ status })
 });
+export const updateOrderStatusApi = updateOrderStatus;
+
+export const cancelOrderApi = (id) => apiFetch(`/orders/${id}/cancel`, {
+  method: 'PUT'
+});
+

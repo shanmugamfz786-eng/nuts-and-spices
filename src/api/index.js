@@ -1,10 +1,15 @@
-export const API_BASE_URL = (() => {
+export const getBackendBaseUrl = () => {
   const url = import.meta.env.VITE_API_BASE_URL;
-  if (!url && import.meta.env.PROD) {
-    console.error("CRITICAL ERROR: VITE_API_BASE_URL is not defined in production environment variables.");
-    // Do not fall back to /api in production to prevent silent Vercel HTML rewrites
+  if (url) return url.replace(/\/api\/?$/, '');
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return 'https://nuts-and-spices.onrender.com';
   }
-  return (url || '').replace(/\/api\/?$/, '') + '/api';
+  return '';
+};
+
+export const API_BASE_URL = (() => {
+  const base = getBackendBaseUrl();
+  return base ? `${base}/api` : '/api';
 })();
 
 export const apiFetch = async (endpoint, options = {}) => {

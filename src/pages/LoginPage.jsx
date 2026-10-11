@@ -43,11 +43,54 @@ export default function LoginPage() {
     }
   };
 
+  const [cancellingOrderId, setCancellingOrderId] = useState(null);
+
+  const handleCancelDelivery = async (orderId) => {
+    if (!window.confirm(`Are you sure you want to cancel delivery for Order #${orderId}?`)) {
+      return;
+    }
+    setCancellingOrderId(orderId);
+    try {
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'https://nuts-and-spices.onrender.com'
+          : ''
+      );
+      const token = localStorage.getItem('nuts_spices_auth_token') || '';
+      const res = await fetch(`${BASE}/api/orders/${orderId}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Order delivery has been cancelled successfully.');
+        setMyOrders(prev => prev.map(o => (o.id === orderId || o.order_id === orderId || o.orderId === orderId) ? { ...o, status: 'cancelled' } : o));
+        if (selectedOrder && (selectedOrder.id === orderId || selectedOrder.order_id === orderId || selectedOrder.orderId === orderId)) {
+          setSelectedOrder(prev => ({ ...prev, status: 'cancelled' }));
+        }
+      } else {
+        alert(data.message || 'Failed to cancel order delivery');
+      }
+    } catch (err) {
+      console.error('Cancel delivery error:', err);
+      alert('Error cancelling order delivery. Please try again.');
+    } finally {
+      setCancellingOrderId(null);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       setLoadingOrders(true);
       const token = localStorage.getItem('nuts_spices_auth_token') || '';
-      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || '';
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'https://nuts-and-spices.onrender.com'
+          : ''
+      );
       fetch(BASE + '/api/orders/my-orders', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -178,7 +221,10 @@ export default function LoginPage() {
                   {myOrders.map((order, idx) => {
                     const orderDate = new Date(order.created_at || order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                     const total = Number(order.total_amount || order.totalAmount || order.total || 0).toLocaleString('en-IN');
-                    
+                    const isRefunded = (order.status || '').toLowerCase() === 'refunded';
+                    const isCancelled = (order.status || '').toLowerCase() === 'cancelled';
+                    const canCancel = (order.status || '').toLowerCase() === 'pending' || (order.status || '').toLowerCase() === 'confirmed';
+
                     return (
                       <motion.div 
                         initial={{ opacity: 0, y: 10 }}
@@ -186,10 +232,18 @@ export default function LoginPage() {
                         transition={{ delay: idx * 0.05 }}
                         key={order.id} 
                         onClick={() => setSelectedOrder(order)}
-                        className="bg-white border border-[#E5E7EB] hover:border-[#128C7E] p-5 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        className={`p-5 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4 border ${
+                          isRefunded
+                            ? 'bg-red-50/95 border-red-500 shadow-red-100 ring-2 ring-red-400/30'
+                            : isCancelled
+                            ? 'bg-gray-50/90 border-gray-300'
+                            : 'bg-white border-[#E5E7EB] hover:border-[#128C7E]'
+                        }`}
                       >
                         <div className="flex items-center gap-4 sm:gap-6">
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+                            isRefunded ? 'bg-red-200 text-red-700' :
+                            isCancelled ? 'bg-gray-200 text-gray-600' :
                             order.status === 'pending' ? 'bg-amber-100 text-amber-500' : 
                             order.status === 'delivered' ? 'bg-green-100 text-green-500' : 'bg-blue-100 text-blue-500'
                           }`}>
@@ -197,26 +251,50 @@ export default function LoginPage() {
                           </div>
                           
                           <div>
-                            <span className="text-xs font-black text-[#000000] tracking-widest font-mono block mb-1">
-                              #{order.order_id || order.orderId || order.id}
-                            </span>
-                            <p className="text-xs font-bold text-[#8C7A6B] flex items-center gap-2">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-xs font-black tracking-widest font-mono block ${isRefunded ? 'text-red-900 font-extrabold' : 'text-[#000000]'}`}>
+                                #{order.order_id || order.orderId || order.id}
+                              </span>
+                              {isRefunded && (
+                                <span className="px-2 py-0.5 bg-red-600 text-white text-[9px] font-black rounded uppercase tracking-wider">
+                                  Refunded
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-xs font-bold flex items-center gap-2 ${isRefunded ? 'text-red-700' : 'text-[#8C7A6B]'}`}>
                               {orderDate}
                               <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                              <span className="text-[#000000]">₹{total}</span>
+                              <span className={isRefunded ? 'text-red-900 font-black' : 'text-[#000000]'}>₹{total}</span>
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between sm:justify-end gap-6 sm:w-auto w-full border-t sm:border-t-0 border-[#E5E7EB] pt-4 sm:pt-0">
+                        <div className="flex items-center justify-between sm:justify-end gap-3 sm:w-auto w-full border-t sm:border-t-0 border-[#E5E7EB] pt-4 sm:pt-0">
+                          {canCancel && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCancelDelivery(order.order_id || order.orderId || order.id);
+                              }}
+                              disabled={cancellingOrderId === (order.order_id || order.orderId || order.id)}
+                              className="px-3 py-1.5 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-300 text-[11px] font-extrabold rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                              <span>{cancellingOrderId === (order.order_id || order.orderId || order.id) ? 'Cancelling...' : 'Cancel Delivery'}</span>
+                            </button>
+                          )}
                           <span className={`text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 ${
+                            isRefunded ? 'bg-red-600 text-white shadow-sm' :
+                            isCancelled ? 'bg-gray-200 text-gray-700 border border-gray-300' :
                             order.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 
                             order.status === 'delivered' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-blue-50 text-blue-700 border border-blue-200'
                           }`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                             {order.status}
                           </span>
-                          <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#128C7E] group-hover:text-white transition-colors text-gray-400">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                            isRefunded ? 'bg-red-100 text-red-600 group-hover:bg-red-600 group-hover:text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-[#128C7E] group-hover:text-white'
+                          }`}>
                             <ChevronRight className="w-4 h-4" />
                           </div>
                         </div>
@@ -417,15 +495,23 @@ export default function LoginPage() {
                   
                   {/* Status Banner */}
                   <div className={`p-4 rounded-2xl flex items-center gap-3 border ${
+                    selectedOrder.status === 'refunded' ? 'bg-red-100 border-red-400 text-red-900' :
+                    selectedOrder.status === 'cancelled' ? 'bg-gray-100 border-gray-300 text-gray-800' :
                     selectedOrder.status === 'pending' ? 'bg-amber-50 border-amber-200 text-amber-800' : 
                     selectedOrder.status === 'delivered' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-blue-50 border-blue-200 text-blue-800'
                   }`}>
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
-                      <Package className="w-5 h-5" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm shrink-0 ${
+                      selectedOrder.status === 'refunded' ? 'bg-red-600 text-white' : 'bg-white'
+                    }`}>
+                      {selectedOrder.status === 'refunded' ? <CheckCircle2 className="w-5 h-5" /> : <Package className="w-5 h-5" />}
                     </div>
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider opacity-70">Current Status</p>
-                      <p className="text-sm font-black capitalize">{selectedOrder.status}</p>
+                      <p className="text-xs font-bold uppercase tracking-wider opacity-70">
+                        {selectedOrder.status === 'refunded' ? 'Refund Status' : 'Current Status'}
+                      </p>
+                      <p className="text-sm font-black capitalize">
+                        {selectedOrder.status === 'refunded' ? 'Refunded to Customer' : selectedOrder.status}
+                      </p>
                     </div>
                   </div>
 
@@ -470,6 +556,20 @@ export default function LoginPage() {
                         ));
                       })()}
                     </div>
+
+                    {/* Cancel Delivery Button */}
+                    {(selectedOrder.status === 'pending' || selectedOrder.status === 'confirmed') && (
+                      <div className="pt-3">
+                        <button
+                          onClick={() => handleCancelDelivery(selectedOrder.order_id || selectedOrder.orderId || selectedOrder.id)}
+                          disabled={cancellingOrderId === (selectedOrder.order_id || selectedOrder.orderId || selectedOrder.id)}
+                          className="w-full py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-300 font-extrabold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs"
+                        >
+                          <X className="w-4 h-4" />
+                          <span>{cancellingOrderId === (selectedOrder.order_id || selectedOrder.orderId || selectedOrder.id) ? 'Cancelling Delivery...' : 'Cancel Delivery'}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Totals */}

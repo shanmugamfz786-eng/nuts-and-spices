@@ -15,7 +15,11 @@ export default function CartPage() {
       try {
         let fetchedOrders = [];
         const token = localStorage.getItem('nuts_spices_auth_token');
-        const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || '';
+        const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+          typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+            ? 'https://nuts-and-spices.onrender.com'
+            : ''
+        );
         
         if (user && token) {
           const res = await fetch(BASE + '/api/orders/my-orders', {
@@ -241,7 +245,7 @@ export default function CartPage() {
          window.history.pushState({}, '', '?order_id=' + (order.orderId || order.id) + '&track=true');
          navigate('order-success');
        }}
-       className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-sm space-y-4 hover:shadow-md transition-shadow cursor-pointer hover:border-[#128C7E]">
+       className={`p-5 rounded-2xl border shadow-sm space-y-4 hover:shadow-md transition-shadow cursor-pointer ${String(order.status || '').toLowerCase() === 'refunded' ? 'bg-red-50/95 border-red-500 shadow-red-100 ring-2 ring-red-400/30' : String(order.status || '').toLowerCase() === 'cancelled' ? 'bg-gray-50/90 border-gray-300' : 'bg-white border-[#E5E7EB] hover:border-[#128C7E]'}`}>
                 <div className="flex justify-between items-start border-b border-[#F9FAFB] pb-3">
                   <div>
                     <span className="text-[10px] font-extrabold text-[#000000] uppercase tracking-wider block">Order ID</span>
@@ -266,6 +270,8 @@ export default function CartPage() {
                   <div>
                     <span className="text-[10px] font-extrabold text-[#000000] uppercase tracking-wider block mb-1">Status</span>
                     <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${
+                      String(order.status || '').toLowerCase() === 'refunded' ? 'bg-red-600 text-white shadow-sm' :
+                      String(order.status || '').toLowerCase() === 'cancelled' ? 'bg-gray-200 text-gray-700' :
                       order.status === 'delivered' ? 'bg-green-100 text-green-700' : 
                       order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
                       'bg-amber-100 text-amber-700'

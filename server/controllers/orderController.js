@@ -234,7 +234,7 @@ export const createOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const dbOrders = await queryDb('SELECT * FROM orders ORDER BY created_at DESC');
+    const dbOrders = await queryDb("SELECT * FROM orders ORDER BY CASE WHEN status = 'cancelled' THEN 0 WHEN status = 'refunded' THEN 1 ELSE 2 END, created_at DESC");
     let formattedOrders = [];
     
     if (dbOrders && dbOrders.length > 0) {
@@ -423,5 +423,46 @@ export const getMyOrders = async (req, res) => {
     res.json({ success: true, orders: formattedOrders });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userEmail = req.user?.email || '';
+    const userPhone = req.user?.phone || '';
+
+    // Check if order exists (by id or order_id)
+    const orderExists = await queryDb('SELECT * FROM orders WHERE id = ? OR order_id = ?', [id, id]);
+    if (!orderExists || orderExists.length === 0) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const order = orderExists[0];
+    const cleanOrderPhone = (order.phone || '').replace(/\D/g, '').slice(-10);
+    const cleanUserPhone = userPhone.replace(/\D/g, '').slice(-10);
+    const isOwner = (userEmail && order.email && order.email.toLowerCase() === userEmail.toLowerCase()) ||
+                    (cleanUserPhone && cleanOrderPhone && cleanOrderPhone === cleanUserPhone);
+
+    if (!isOwner && req.user?.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Unauthorized to cancel this order' });
+    }
+    
+    if (order.status !== 'pending' && order.status !== 'confirmed') {
+       return res.status(400).json({ success: false, message: 'Only pending or confirmed orders can be cancelled by user' });
+    }
+
+    await queryDb('UPDATE orders SET status = ? WHERE id = ? OR order_id = ?', ['cancelled', id, id]);
+
+    // Also update in memoryStore if present
+    const memoryIdx = memoryStore.orders.findIndex(o => o.id === id || o.orderId === id);
+    if (memoryIdx !== -1) {
+      memoryStore.orders[memoryIdx].status = 'cancelled';
+    }
+
+    res.json({ success: true, message: 'Order cancelled successfully' });
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    res.status(500).json({ success: false, message: 'Failed to cancel order' });
   }
 };

@@ -11,7 +11,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [pendingStatusUpdates, setPendingStatusUpdates] = useState({});
 
-  const statusOptions = ['All Statuses', 'Pending', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED'];
+  const statusOptions = ['All Statuses', 'Pending', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
 
   const filteredOrders = orders.filter(o => {
     const statusNormalized = (o.status || '').toLowerCase();
@@ -35,6 +35,19 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     return matchesFilter && matchesSearch;
   });
 
+  // Prioritize CANCELLED orders at the top, then REFUNDED orders, then by newest
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    const aIsCancelled = (a.status || '').toLowerCase() === 'cancelled';
+    const bIsCancelled = (b.status || '').toLowerCase() === 'cancelled';
+    if (aIsCancelled && !bIsCancelled) return -1;
+    if (!aIsCancelled && bIsCancelled) return 1;
+    const aIsRefunded = (a.status || '').toLowerCase() === 'refunded';
+    const bIsRefunded = (b.status || '').toLowerCase() === 'refunded';
+    if (aIsRefunded && !bIsRefunded) return -1;
+    if (!aIsRefunded && bIsRefunded) return 1;
+    return new Date(b.date || b.created_at || b.createdAt || 0) - new Date(a.date || a.created_at || a.createdAt || 0);
+  });
+
   const getStatusBadgeStyle = (status) => {
     const s = (status || '').toUpperCase();
     switch (s) {
@@ -51,6 +64,8 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
         return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
       case 'CANCELLED':
         return 'bg-rose-100 text-rose-800 hover:bg-rose-200';
+      case 'REFUNDED':
+        return 'bg-red-600 text-white font-extrabold hover:bg-red-700 shadow-sm';
       default:
         return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
     }
@@ -136,28 +151,46 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-xs">
-              {filteredOrders.length === 0 ? (
+              {sortedOrders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
                     No orders matching your search or filter.
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((ord) => {
+                sortedOrders.map((ord) => {
                   const displayId = ord.orderId.startsWith('#') ? ord.orderId : `#${ord.orderId}`;
                   const formattedDate = formatDate(ord.date);
                   const displayCity = ord.city || ord.address || 'Location';
+                  const isCancelled = (ord.status || '').toLowerCase() === 'cancelled';
+                  const isRefunded = (ord.status || '').toLowerCase() === 'refunded';
 
                   return (
                     <tr 
                       key={ord.orderId} 
                       onClick={() => setSelectedOrder(ord)}
-                      className="hover:bg-gray-50/70 transition-colors cursor-pointer"
+                      className={`transition-colors cursor-pointer ${
+                        isCancelled ? 'bg-rose-50/60 hover:bg-rose-100/60' :
+                        isRefunded ? 'bg-red-50/40 hover:bg-red-100/40' :
+                        'hover:bg-gray-50/70'
+                      }`}
                     >
                       
                       {/* Order ID */}
                       <td className="py-4 px-6 font-bold text-[#e11d48] text-xs tracking-tight">
-                        {displayId}
+                        <div className="flex items-center gap-1.5">
+                          {displayId}
+                          {isCancelled && (
+                            <span className="px-1.5 py-0.5 bg-rose-200 text-rose-800 text-[9px] font-black rounded uppercase">
+                              Cancelled
+                            </span>
+                          )}
+                          {isRefunded && (
+                            <span className="px-1.5 py-0.5 bg-red-600 text-white text-[9px] font-black rounded uppercase">
+                              Refunded
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Customer */}
@@ -194,6 +227,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                               <option value="OUT FOR DELIVERY" className="bg-white text-gray-800">Out for Delivery</option>
                               <option value="DELIVERED" className="bg-white text-gray-800">Delivered</option>
                               <option value="CANCELLED" className="bg-white text-gray-800">Cancelled</option>
+                              <option value="REFUNDED" className="bg-white text-red-700 font-bold">REFUNDED</option>
                             </select>
                             <ChevronDown className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                           </div>
@@ -218,6 +252,24 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                       {/* Actions */}
                       <td className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-2">
+                          {isRefunded ? (
+                            <span className="px-2 py-1 bg-red-100 text-red-700 font-extrabold text-[10px] rounded-lg border border-red-300">
+                              ✓ Refunded
+                            </span>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Mark Order #${ord.orderId} as REFUNDED? Customer will see their order card turn RED.`)) {
+                                  updateOrderStatus(ord.orderId, 'refunded');
+                                }
+                              }}
+                              title="Refund Order"
+                              className="px-2.5 py-1 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 rounded-lg text-[10px] font-black transition-colors cursor-pointer"
+                            >
+                              Refund
+                            </button>
+                          )}
                           <button
                             onClick={() => setSelectedOrder(ord)}
                             title="View Order Details"
@@ -340,6 +392,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                     <option value="OUT FOR DELIVERY" className="bg-white text-gray-800">Out for Delivery</option>
                     <option value="DELIVERED" className="bg-white text-gray-800">Delivered</option>
                     <option value="CANCELLED" className="bg-white text-gray-800">Cancelled</option>
+                    <option value="REFUNDED" className="bg-white text-red-700 font-bold">REFUNDED</option>
                   </select>
                   <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                 </div>
@@ -363,16 +416,35 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex justify-between items-center pt-1">
-              <a
-                href={`https://wa.me/${selectedOrder.phone || activeWhatsApp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#128C7E] hover:bg-[#128C7E] text-white text-xs font-semibold rounded-lg transition-colors"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>WhatsApp Customer</span>
-              </a>
+            <div className="flex justify-between items-center pt-1 gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <a
+                  href={`https://wa.me/${selectedOrder.phone || activeWhatsApp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#128C7E] hover:bg-[#128C7E] text-white text-xs font-semibold rounded-lg transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>WhatsApp Customer</span>
+                </a>
+                {String(selectedOrder.status || '').toLowerCase() === 'refunded' ? (
+                  <span className="px-3 py-2 bg-red-100 text-red-700 font-extrabold text-xs rounded-lg border border-red-300">
+                    ✓ Refunded
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Mark order #${selectedOrder.orderId} as REFUNDED? Customer order card will turn RED.`)) {
+                        updateOrderStatus(selectedOrder.orderId, 'refunded');
+                        setSelectedOrder({ ...selectedOrder, status: 'refunded' });
+                      }
+                    }}
+                    className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                  >
+                    Process Refund
+                  </button>
+                )}
+              </div>
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg border border-gray-200 cursor-pointer"

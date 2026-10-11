@@ -82,20 +82,49 @@ export default function CheckoutPage() {
     setIsProcessingPayment(true);
     
     try {
-      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || '';
-      const orderRes = await fetch(BASE + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('nuts_spices_auth_token') || ''}` }, body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes }) }); 
-      if (!orderRes.ok && orderRes.status === 404) throw new Error('API Endpoint not found');
-      const text1 = await orderRes.text();
-      let orderData; try { orderData = JSON.parse(text1); } catch(e) { throw new Error('Backend returned HTML instead of JSON (order creation): ' + text1.substring(0, 100)); } if (!orderData.success) { alert(orderData.message); setIsProcessingPayment(false); return; } const backendOrderId = orderData.order.id; const backendTotal = orderData.order.totalAmount;
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'https://nuts-and-spices.onrender.com'
+          : ''
+      );
       const token = localStorage.getItem('nuts_spices_auth_token') || '';
+      const orderRes = await fetch(BASE + '/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes })
+      });
+
+      if (!orderRes.ok && orderRes.status === 404) throw new Error('Order API endpoint not found');
+      const text1 = await orderRes.text();
+      let orderData;
+      try {
+        orderData = JSON.parse(text1);
+      } catch(e) {
+        throw new Error('Backend returned invalid response during order creation');
+      }
+
+      if (!orderData.success) {
+        alert(orderData.message || 'Failed to place order');
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      const backendOrderId = orderData.order?.id || orderData.orderId;
+      const backendTotal = orderData.order?.totalAmount || cartTotal;
       
       // Clear purchased items locally
       clearPurchasedItems(cart);
 
-      // Initialize Cashfree Payment
+      // Initialize Cashfree Payment Session
       const payRes = await fetch(BASE + '/api/payment/create-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           orderId: backendOrderId,
           amount: backendTotal,
@@ -105,21 +134,38 @@ export default function CheckoutPage() {
         })
       });
 
-      const payData = await payRes.json();
-      if (!payData.success) {
-        throw new Error(payData.message || 'Failed to create payment session');
+      if (!payRes.ok) {
+        const errText = await payRes.text();
+        throw new Error(`Payment server error (${payRes.status}): ${errText.substring(0, 80)}`);
       }
 
-      const cashfree = await load({ mode: payData.environment });
-      
-      // Navigate away to Cashfree.
+      const payData = await payRes.json();
+      if (!payData.success || !payData.paymentSessionId) {
+        throw new Error(payData.message || 'Failed to obtain Cashfree payment session');
+      }
+
+      // Initialize Cashfree SDK (either preloaded in index.html or dynamic load)
+      let cashfree;
+      if (typeof window !== 'undefined' && window.Cashfree) {
+        cashfree = window.Cashfree({ mode: payData.environment || 'production' });
+      } else {
+        cashfree = await load({ mode: payData.environment || 'production' });
+      }
+
+      if (!cashfree) {
+        throw new Error('Cashfree Payment Gateway SDK failed to initialize');
+      }
+
+      // Redirect immediately to Cashfree Payment Gateway page
       await cashfree.checkout({
-        paymentSessionId: payData.paymentSessionId
+        paymentSessionId: payData.paymentSessionId,
+        returnUrl: `${window.location.origin}/order-success?order_id={order_id}`,
+        redirectTarget: "_self"
       });
       
     } catch (err) {
       console.error('Payment initialization error', err);
-      alert('Error initiating payment. Please try again.');
+      alert('Error initiating payment: ' + (err.message || 'Please try again.'));
       setIsProcessingPayment(false);
     }
   };
