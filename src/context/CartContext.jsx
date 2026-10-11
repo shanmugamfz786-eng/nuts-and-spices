@@ -267,21 +267,44 @@ export const CartProvider = ({ children }) => {
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
 
   // Clear admin session on startup so /admin always requires Login first
-  useEffect(() => {
-    localStorage.removeItem('nuts_spices_admin_logged');
-  }, []);
-
-  // Fetch live orders for Admin from DB
-  useEffect(() => {
-    if (isAdminLoggedIn) {
-      import('../api/orderApi.js').then(({ fetchOrdersApi }) => {
-        fetchOrdersApi().then(res => {
-          if (res.success && res.orders) {
-            setOrders(res.orders);
-          }
-        });
-      });
+  // Live orders fetcher from database (TiDB / Cloud Backend)
+  const refreshOrders = async () => {
+    try {
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'https://nuts-and-spices.onrender.com'
+          : ''
+      );
+      const res = await fetch(`${BASE}/api/orders`);
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.orders)) {
+        const normalized = data.orders.map(o => ({
+          ...o,
+          orderId: o.orderId || o.order_id || o.id,
+          customerName: o.customerName || o.customer_name || 'Customer',
+          total: Number(o.total || o.totalAmount || o.total_amount || 0),
+          date: o.date || o.created_at || o.createdAt,
+          status: (o.status || 'pending').toLowerCase()
+        }));
+        setOrders(normalized);
+        try { localStorage.setItem('nuts_spices_orders', JSON.stringify(normalized)); } catch {}
+        return normalized;
+      }
+    } catch (e) {
+      console.warn('Orders sync error:', e);
     }
+    return [];
+  };
+
+  // Fetch live orders automatically on mount and when admin is active
+  useEffect(() => {
+    refreshOrders();
+    const interval = setInterval(refreshOrders, 4000);
+    window.addEventListener('focus', refreshOrders);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', refreshOrders);
+    };
   }, [isAdminLoggedIn]);
 
   // Persist States safely without crashing on QuotaExceeded Error
@@ -869,15 +892,20 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateOrderStatus = async (orderId, newStatus) => {
-    setOrders(prev => prev.map(o => (o.orderId === orderId || o.id === orderId) ? { ...o, status: newStatus } : o));
+    const normalized = (newStatus || '').toLowerCase().trim();
+    setOrders(prev => prev.map(o => (o.orderId === orderId || o.id === orderId) ? { ...o, status: normalized } : o));
     try {
       const { updateOrderStatusApi } = await import('../api/orderApi.js');
-      await updateOrderStatusApi(orderId, newStatus);
+      await updateOrderStatusApi(orderId, normalized);
     } catch (e) { console.error('Failed to update order status in backend'); }
   };
 
-  const deleteOrder = (orderId) => {
-    setOrders(prev => { const upd = prev.filter(o => o.orderId !== orderId); syncAdminStateToCloud({ orders: upd }); return upd; });
+  const deleteOrder = async (orderId) => {
+    setOrders(prev => { const upd = prev.filter(o => o.orderId !== orderId && o.id !== orderId); syncAdminStateToCloud({ orders: upd }); return upd; });
+    try {
+      const { deleteOrderApi } = await import('../api/orderApi.js');
+      await deleteOrderApi(orderId);
+    } catch (e) {}
   };
 
   // ADMIN - OFFERS CRUD
@@ -1047,6 +1075,9 @@ export const CartProvider = ({ children }) => {
         toggleCategoryPremium,
 
         // Admin Order Actions
+        orders,
+        setOrders,
+        refreshOrders,
         createNewOrder,
         updateOrderStatus,
         deleteOrder,

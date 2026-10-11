@@ -1,19 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { 
   Search, Trash2, Eye, Phone, MapPin, 
-  Calendar, X, MessageSquare, ChevronDown, Check
+  Calendar, X, MessageSquare, ChevronDown, Check, RefreshCw
 } from 'lucide-react';
 
 export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
-  const { orders, updateOrderStatus, deleteOrder, storeSettings } = useCart();
+  const { orders, updateOrderStatus, deleteOrder, storeSettings, refreshOrders } = useCart();
   const [activeFilter, setActiveFilter] = useState('All Statuses');
   const [searchTerm, setSearchTerm] = useState('');
   const [pendingStatusUpdates, setPendingStatusUpdates] = useState({});
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Fetch fresh orders on component mount
+  useEffect(() => {
+    if (refreshOrders) {
+      setLoadingOrders(true);
+      refreshOrders().finally(() => setLoadingOrders(false));
+    }
+  }, []);
+
+  const handleManualRefresh = async () => {
+    if (refreshOrders) {
+      setLoadingOrders(true);
+      await refreshOrders();
+      setLoadingOrders(false);
+    }
+  };
 
   const statusOptions = ['All Statuses', 'Pending', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
 
-  const filteredOrders = orders.filter(o => {
+  // Normalize order items for consistent rendering
+  const normalizedOrders = (orders || []).map(o => ({
+    ...o,
+    orderId: o.orderId || o.order_id || o.id || 'N/A',
+    customerName: o.customerName || o.customer_name || 'Customer',
+    phone: o.phone || '',
+    city: o.city || o.address || 'Chennai',
+    address: o.address || '',
+    date: o.date || o.created_at || o.createdAt,
+    total: Number(o.total !== undefined ? o.total : (o.totalAmount || o.total_amount || 0)),
+    status: (o.status || 'pending').toLowerCase()
+  }));
+
+  const filteredOrders = normalizedOrders.filter(o => {
     const statusNormalized = (o.status || '').toLowerCase();
     const filterNormalized = activeFilter.toLowerCase();
     
@@ -45,7 +75,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     const bIsRefunded = (b.status || '').toLowerCase() === 'refunded';
     if (aIsRefunded && !bIsRefunded) return -1;
     if (!aIsRefunded && bIsRefunded) return 1;
-    return new Date(b.date || b.created_at || b.createdAt || 0) - new Date(a.date || a.created_at || a.createdAt || 0);
+    return new Date(b.date || 0) - new Date(a.date || 0);
   });
 
   const getStatusBadgeStyle = (status) => {
@@ -79,16 +109,13 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
   };
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return '19 Sept 2026';
-    if (dateStr.includes('Sept') || dateStr.includes('Jan') || dateStr.includes('Oct') || dateStr.includes('Aug')) {
-      return dateStr;
-    }
+    if (!dateStr) return 'Recent';
     try {
       const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
+      if (isNaN(d.getTime())) return String(dateStr);
       return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     } catch {
-      return dateStr;
+      return String(dateStr);
     }
   };
 
@@ -99,9 +126,19 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
       
       {/* HEADER WITH TITLE & CONTROLS */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-          Manage Orders
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+            Manage Orders
+          </h1>
+          <button
+            onClick={handleManualRefresh}
+            disabled={loadingOrders}
+            className="p-1.5 hover:bg-gray-200/70 rounded-lg text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+            title="Refresh Orders"
+          >
+            <RefreshCw className={`w-4 h-4 ${loadingOrders ? 'animate-spin text-[#128C7E]' : ''}`} />
+          </button>
+        </div>
 
         <div className="flex items-center gap-3">
           {/* Search Box */}
@@ -130,6 +167,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               <option value="OUT FOR DELIVERY">Out for Delivery</option>
               <option value="DELIVERED">Delivered</option>
               <option value="CANCELLED">Cancelled</option>
+              <option value="REFUNDED">Refunded</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -151,7 +189,16 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-xs">
-              {sortedOrders.length === 0 ? (
+              {loadingOrders && sortedOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-[#128C7E]" />
+                      <span>Loading orders from database...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : sortedOrders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
                     No orders matching your search or filter.
@@ -159,27 +206,28 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                 </tr>
               ) : (
                 sortedOrders.map((ord) => {
-                  const displayId = ord.orderId.startsWith('#') ? ord.orderId : `#${ord.orderId}`;
+                  const displayId = String(ord.orderId).startsWith('#') ? ord.orderId : `#${ord.orderId}`;
                   const formattedDate = formatDate(ord.date);
                   const displayCity = ord.city || ord.address || 'Location';
                   const isCancelled = (ord.status || '').toLowerCase() === 'cancelled';
                   const isRefunded = (ord.status || '').toLowerCase() === 'refunded';
+                  const currentStatus = pendingStatusUpdates[ord.orderId] || ord.status || 'pending';
 
                   return (
                     <tr 
                       key={ord.orderId} 
                       onClick={() => setSelectedOrder(ord)}
                       className={`transition-colors cursor-pointer ${
-                        isCancelled ? 'bg-rose-50/60 hover:bg-rose-100/60' :
-                        isRefunded ? 'bg-red-50/40 hover:bg-red-100/40' :
+                        isCancelled ? 'bg-rose-50/70 hover:bg-rose-100/70' :
+                        isRefunded ? 'bg-red-50/60 hover:bg-red-100/60' :
                         'hover:bg-gray-50/70'
                       }`}
                     >
                       
                       {/* Order ID */}
                       <td className="py-4 px-6 font-bold text-[#e11d48] text-xs tracking-tight">
-                        <div className="flex items-center gap-1.5">
-                          {displayId}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span>{displayId}</span>
                           {isCancelled && (
                             <span className="px-1.5 py-0.5 bg-rose-200 text-rose-800 text-[9px] font-black rounded uppercase">
                               Cancelled
@@ -216,22 +264,22 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                         <div className="flex items-center gap-2">
                           <div className="relative inline-block">
                             <select
-                              value={pendingStatusUpdates[ord.orderId] || ord.status}
+                              value={currentStatus.toLowerCase()}
                               onChange={(e) => setPendingStatusUpdates({ ...pendingStatusUpdates, [ord.orderId]: e.target.value })}
-                              className={`appearance-none text-[11px] font-semibold rounded-md pl-3 pr-6 py-1 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(pendingStatusUpdates[ord.orderId] || ord.status)}`}
+                              className={`appearance-none text-[11px] font-semibold rounded-md pl-3 pr-6 py-1 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(currentStatus)}`}
                             >
-                              <option value="Pending" className="bg-white text-gray-800">Pending</option>
-                              <option value="NEW" className="bg-white text-gray-800">NEW</option>
-                              <option value="CONFIRMED" className="bg-white text-gray-800">Confirmed</option>
-                              <option value="PREPARING" className="bg-white text-gray-800">Preparing</option>
-                              <option value="OUT FOR DELIVERY" className="bg-white text-gray-800">Out for Delivery</option>
-                              <option value="DELIVERED" className="bg-white text-gray-800">Delivered</option>
-                              <option value="CANCELLED" className="bg-white text-gray-800">Cancelled</option>
-                              <option value="REFUNDED" className="bg-white text-red-700 font-bold">REFUNDED</option>
+                              <option value="pending" className="bg-white text-gray-800">Pending</option>
+                              <option value="new" className="bg-white text-gray-800">NEW</option>
+                              <option value="confirmed" className="bg-white text-gray-800">Confirmed</option>
+                              <option value="preparing" className="bg-white text-gray-800">Preparing</option>
+                              <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
+                              <option value="delivered" className="bg-white text-gray-800">Delivered</option>
+                              <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
+                              <option value="refunded" className="bg-white text-red-700 font-bold">REFUNDED</option>
                             </select>
                             <ChevronDown className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                           </div>
-                          {pendingStatusUpdates[ord.orderId] && pendingStatusUpdates[ord.orderId] !== ord.status && (
+                          {pendingStatusUpdates[ord.orderId] && pendingStatusUpdates[ord.orderId].toLowerCase() !== (ord.status || '').toLowerCase() && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -381,27 +429,28 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <select
-                    value={pendingStatusUpdates[selectedOrder.orderId] || selectedOrder.status}
+                    value={(pendingStatusUpdates[selectedOrder.orderId] || selectedOrder.status || 'pending').toLowerCase()}
                     onChange={(e) => setPendingStatusUpdates({ ...pendingStatusUpdates, [selectedOrder.orderId]: e.target.value })}
                     className={`appearance-none text-xs font-bold rounded-lg pl-3 pr-7 py-2 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(pendingStatusUpdates[selectedOrder.orderId] || selectedOrder.status)}`}
                   >
-                    <option value="Pending" className="bg-white text-gray-800">Pending</option>
-                    <option value="NEW" className="bg-white text-gray-800">NEW</option>
-                    <option value="CONFIRMED" className="bg-white text-gray-800">Confirmed</option>
-                    <option value="PREPARING" className="bg-white text-gray-800">Preparing</option>
-                    <option value="OUT FOR DELIVERY" className="bg-white text-gray-800">Out for Delivery</option>
-                    <option value="DELIVERED" className="bg-white text-gray-800">Delivered</option>
-                    <option value="CANCELLED" className="bg-white text-gray-800">Cancelled</option>
-                    <option value="REFUNDED" className="bg-white text-red-700 font-bold">REFUNDED</option>
+                    <option value="pending" className="bg-white text-gray-800">Pending</option>
+                    <option value="new" className="bg-white text-gray-800">NEW</option>
+                    <option value="confirmed" className="bg-white text-gray-800">Confirmed</option>
+                    <option value="preparing" className="bg-white text-gray-800">Preparing</option>
+                    <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
+                    <option value="delivered" className="bg-white text-gray-800">Delivered</option>
+                    <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
+                    <option value="refunded" className="bg-white text-red-700 font-bold">REFUNDED</option>
                   </select>
                   <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                 </div>
-                {pendingStatusUpdates[selectedOrder.orderId] && pendingStatusUpdates[selectedOrder.orderId] !== selectedOrder.status && (
+                {pendingStatusUpdates[selectedOrder.orderId] && pendingStatusUpdates[selectedOrder.orderId].toLowerCase() !== (selectedOrder.status || '').toLowerCase() && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      updateOrderStatus(selectedOrder.orderId, pendingStatusUpdates[selectedOrder.orderId]);
-                      setSelectedOrder({ ...selectedOrder, status: pendingStatusUpdates[selectedOrder.orderId] });
+                      const targetStatus = pendingStatusUpdates[selectedOrder.orderId].toLowerCase();
+                      updateOrderStatus(selectedOrder.orderId, targetStatus);
+                      setSelectedOrder({ ...selectedOrder, status: targetStatus });
                       const newPending = { ...pendingStatusUpdates };
                       delete newPending[selectedOrder.orderId];
                       setPendingStatusUpdates(newPending);

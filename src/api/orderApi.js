@@ -20,3 +20,7 @@ export const cancelOrderApi = (id) => apiFetch(`/orders/${id}/cancel`, {
   method: 'PUT'
 });
 
+export const deleteOrderApi = (id) => apiFetch(`/orders/${id}`, {
+  method: 'DELETE'
+});
+

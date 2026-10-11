@@ -259,9 +259,11 @@ export const getAllOrders = async (req, res) => {
           subtotal: row.subtotal,
           deliveryCharge: row.delivery_charge,
           totalAmount: row.total_amount,
-          status: row.status,
+          total: Number(row.total_amount) || 0,
+          status: (row.status || 'pending').toLowerCase(),
           items: parsedItems,
           notes: row.notes,
+          date: row.created_at,
           createdAt: row.created_at,
           customer: {
             name: row.customer_name,
@@ -285,6 +287,18 @@ export const getAllOrders = async (req, res) => {
   } catch (error) {
     console.error('Fetch orders error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch orders.' });
+  }
+};
+
+export const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await queryDb('DELETE FROM orders WHERE id = ? OR order_id = ?', [id, id]);
+    memoryStore.orders = memoryStore.orders.filter(o => o.id !== id && o.orderId !== id);
+    res.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Delete order error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete order' });
   }
 };
 
@@ -320,9 +334,11 @@ export const getOrderById = async (req, res) => {
         subtotal: row.subtotal,
         deliveryCharge: row.delivery_charge,
         totalAmount: row.total_amount,
-        status: row.status,
+        total: Number(row.total_amount) || 0,
+        status: (row.status || 'pending').toLowerCase(),
         items: parsedItems,
         notes: row.notes,
+        date: row.created_at,
         createdAt: row.created_at,
         customer: {
           name: row.customer_name,
@@ -349,19 +365,20 @@ export const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const allowedStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
-    if (!status || !allowedStatuses.includes(status)) {
+    const normalizedStatus = (status || '').toLowerCase().trim();
+    const allowedStatuses = ['pending', 'new', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'];
+    if (!normalizedStatus || !allowedStatuses.includes(normalizedStatus)) {
       return res.status(400).json({ success: false, message: 'Invalid status. Allowed: ' + allowedStatuses.join(', ') });
     }
 
-    await queryDb('UPDATE orders SET status = ? WHERE id = ? OR order_id = ?', [status, id, id]);
+    await queryDb('UPDATE orders SET status = ? WHERE id = ? OR order_id = ?', [normalizedStatus, id, id]);
 
     const memOrder = memoryStore.orders.find(o => o.id === id || o.orderId === id);
-    if (memOrder) memOrder.status = status;
+    if (memOrder) memOrder.status = normalizedStatus;
 
     res.json({
       success: true,
-      message: `Order status updated to ${status}`
+      message: `Order status updated to ${normalizedStatus}`
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update order status.' });
