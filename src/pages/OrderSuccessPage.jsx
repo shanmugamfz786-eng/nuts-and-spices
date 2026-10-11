@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { CheckCircle2, Package, Truck, Home, ArrowRight, Copy } from 'lucide-react';
 import { STORE_WHATSAPP_NUMBER } from '../data/products';
@@ -193,18 +193,19 @@ export default function OrderSuccessPage() {
         </div>
       )}
 
-      {/* WhatsApp Button */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-[#E5E7EB] text-center space-y-6">
-        <div className="space-y-2">
-          <h3 className="font-black text-[#000000] text-lg">Send details via WhatsApp</h3>
-          <p className="text-xs text-[#8C7A6B]">Optional: You can send your order receipt to our WhatsApp support for faster updates.</p>
-        </div>
+      {/* Action Navigation Buttons */}
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-2">
         <button
-          onClick={() => window.open(whatsappUrl, '_blank')}
-          className="w-full sm:w-auto mx-auto inline-flex items-center justify-center gap-2 bg-[#128C7E] hover:bg-[#075E54] text-white px-8 py-3.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-green-200"
+          onClick={() => navigate('shop')}
+          className="w-full sm:w-auto px-8 py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer"
         >
-          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 filter brightness-0 invert" />
-          Message on WhatsApp
+          Continue Shopping
+        </button>
+        <button
+          onClick={() => navigate('login')}
+          className="w-full sm:w-auto px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#000000] font-extrabold text-xs rounded-2xl transition-all border border-[#E5E7EB] uppercase tracking-wider cursor-pointer"
+        >
+          View My Orders
         </button>
       </div>
 
