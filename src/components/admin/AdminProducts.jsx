@@ -1,10 +1,10 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { useCart, isProductActive } from '../../context/CartContext';
-import { Package, Plus, Search, Edit, Trash2, X, Upload, Star } from 'lucide-react';
+import { Package, Plus, Search, Edit, Trash2, X, Upload } from 'lucide-react';
 import { API_BASE_URL } from '../../api';
 
 export default function AdminProducts() {
-  const { products, categories, addProduct, updateProduct, deleteProduct, toggleProductStatus, setAdminTab } = useCart();
+  const { products, categories, addProduct, updateProduct, deleteProduct, toggleProductStatus } = useCart();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -99,43 +99,7 @@ export default function AdminProducts() {
     setIsModalOpen(true);
   };
 
-  const compressImageFile = (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e) => {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 600;
-          const MAX_HEIGHT = 600;
-          let width = img.width;
-          let height = img.height;
 
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = Math.round(width);
-          canvas.height = Math.round(height);
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', 0.8));
-        };
-        img.onerror = () => resolve(e.target.result);
-      };
-      reader.onerror = () => resolve('');
-    });
-  };
 
   const handleQuickImageUpload = (productId) => {
     setQuickUploadProductId(productId);
@@ -338,9 +302,13 @@ export default function AdminProducts() {
                     {/* 1. Image */}
                     <td className="py-3.5 px-4">
                       <img 
-                        src={p.image} 
+                        src={p.image || '/logo.jpg'} 
                         alt={p.name} 
                         className="w-10 h-10 rounded-lg object-cover border border-gray-200 bg-gray-50 shrink-0" 
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/logo.jpg';
+                        }}
                       />
                     </td>
 

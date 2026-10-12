@@ -1,9 +1,7 @@
 export const getBackendBaseUrl = () => {
   const url = import.meta.env.VITE_API_BASE_URL;
   if (url) return url.replace(/\/api\/?$/, '');
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-    return 'https://nuts-and-spices.onrender.com';
-  }
+  // When deployed on Vercel, Render, or any same-origin host, relative path routes /api cleanly
   return '';
 };
 

@@ -12,6 +12,12 @@ import { initializeDatabase } from './scripts/initDb.js';
 import { queryDb } from './config/db.js';
 import { CATEGORIES, PRODUCTS } from '../src/data/products.js';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 
 const app = express();
@@ -26,16 +32,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    // Allow vercel preview deployments dynamically if needed, or stick to strict:
-    if (origin.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-    return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+    // Permissive CORS to allow custom live domains, Vercel preview URLs, and localhost
+    return callback(null, true);
   },
   credentials: true
 }));

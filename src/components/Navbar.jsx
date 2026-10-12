@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { Search, Heart, ShoppingBag, User, Menu, X, LayoutGrid, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +10,30 @@ export default function Navbar() {
   const [navSearchInput, setNavSearchInput] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef(null);
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(() => {
+    const hasAnnouncement = ['home', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage);
+    return hasAnnouncement ? 104 : 64;
+  });
+
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    let resizeObserver;
+    if (headerRef.current && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(updateHeight);
+      resizeObserver.observe(headerRef.current);
+    }
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
+  }, [activePage]);
 
   const safeCategories = categories || [];
   const subCategories = safeCategories.filter(c => c.id !== 'all');
@@ -49,7 +73,10 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-md transition-all">
+      <header
+        ref={headerRef}
+        className="fixed top-0 left-0 right-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-md transition-all"
+      >
         
         {/* TOP ANNOUNCEMENT BAR (SHOW ON HOME & TOP LINK PAGES) */}
         {['home', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage) && (
@@ -384,6 +411,9 @@ export default function Navbar() {
         </div>
       </header>
 
+      {/* Dynamic layout spacer so page content never overlaps fixed header */}
+      <div style={{ height: `${headerHeight}px` }} className="w-full shrink-0" aria-hidden="true" />
+
       {/* 3-LINE HAMBURGER RIGHT SIDE DRAWER OVERLAY */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex justify-end h-screen w-screen overflow-hidden">
@@ -471,6 +501,20 @@ export default function Navbar() {
                   )}
                 </span>
                 <ChevronRight className="w-5 h-5 text-[#8C7A6B] group-hover:text-[#000000] group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {/* Special Combo Deals */}
+              <button
+                onClick={() => { setIsMobileMenuOpen(false); navigate('combo-deals'); }}
+                className="w-full text-left py-4 flex items-center justify-between text-base font-extrabold font-serif text-[#000000] hover:text-[#128C7E] transition-colors group cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <span>Special Combo Deals</span>
+                  <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    🔥 FESTIVE
+                  </span>
+                </span>
+                <ChevronRight className="w-5 h-5 text-[#8C7A6B] group-hover:text-[#128C7E] group-hover:translate-x-1 transition-transform" />
               </button>
 
               {/* Exclusive Offers */}

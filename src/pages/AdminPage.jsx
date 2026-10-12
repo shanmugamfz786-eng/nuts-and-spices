@@ -13,10 +13,12 @@ import AdminReviews from '../components/admin/AdminReviews';
 import AdminSettings from '../components/admin/AdminSettings';
 import AdminFeaturedProducts from '../components/admin/AdminFeaturedProducts';
 import AdminBestSellingProducts from '../components/admin/AdminBestSellingProducts';
+import AdminCombos from '../components/admin/AdminCombos';
 
 import { 
   LayoutDashboard, Package, Layers, ShoppingBag, 
-  Users, Image as ImageIcon, FileText, Settings, LogOut, Store, Menu, X, Star, Award
+  Users, Image as ImageIcon, FileText, Settings, LogOut, Store, Menu, X, Star, Award,
+  Search, ArrowUpRight, Plus, RefreshCw, Gift
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -25,42 +27,75 @@ export default function AdminPage() {
     logoutAdmin, 
     navigate, 
     orders, 
-    reviews, 
+    products,
     adminTab, 
-    setAdminTab 
+    setAdminTab,
+    refreshOrders
   } = useCart();
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState(null);
-
-  React.useEffect(() => {
-    if (!isAdminLoggedIn) {
-      navigate('home');
-    }
-  }, [isAdminLoggedIn, navigate]);
+  const [globalSearch, setGlobalSearch] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   if (!isAdminLoggedIn) {
-    return null;
+    return <AdminLogin />;
   }
 
-  const newOrdersCount = orders.filter(o => o.status === 'NEW' || o.status === 'PENDING').length;
+  // Count pending/new orders safely
+  const pendingOrdersCount = (orders || []).filter(o => {
+    const s = (o.status || '').toLowerCase();
+    return s === 'pending' || s === 'new';
+  }).length;
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'customers', label: 'Customer', icon: Users },
-    { id: 'orders', label: 'Orders', icon: ShoppingBag, badge: newOrdersCount > 0 ? newOrdersCount : null },
-    { id: 'categories', label: 'Categories', icon: Layers },
-    { id: 'products', label: 'Products', icon: Package },
-    { id: 'featured', label: 'Featured', icon: Star },
-    { id: 'bestselling', label: 'Best Selling', icon: Award },
-    { id: 'banners', label: 'Banners', icon: ImageIcon },
-    { id: 'blogs', label: 'Blogs', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings }
+  const lowStockCount = (products || []).filter(p => (p.stock !== undefined && p.stock <= 10)).length;
+
+  // Grouped Navigation Structure
+  const navSections = [
+    {
+      group: 'OPERATIONS',
+      items: [
+        { id: 'dashboard', label: 'Overview Dashboard', icon: LayoutDashboard },
+        { id: 'orders', label: 'Consignment Orders', icon: ShoppingBag, badge: pendingOrdersCount > 0 ? pendingOrdersCount : null, badgeColor: 'bg-amber-500' },
+        { id: 'customers', label: 'Patron Customers', icon: Users }
+      ]
+    },
+    {
+      group: 'CATALOG & INVENTORY',
+      items: [
+        { id: 'products', label: 'Products & Stock', icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : null, badgeColor: 'bg-rose-500' },
+        { id: 'categories', label: 'Product Categories', icon: Layers },
+        { id: 'featured', label: 'Featured Showcase', icon: Star },
+        { id: 'bestselling', label: 'Top Bestsellers', icon: Award }
+      ]
+    },
+    {
+      group: 'MARKETING & CONTENT',
+      items: [
+        { id: 'combos', label: 'Special Combo Deals', icon: Gift, badge: 'HOT', badgeColor: 'bg-amber-500' },
+        { id: 'banners', label: 'Promo Banners & Offers', icon: ImageIcon },
+        { id: 'blogs', label: 'Patron Reviews & Blogs', icon: FileText }
+      ]
+    },
+    {
+      group: 'SYSTEM CONTROL',
+      items: [
+        { id: 'settings', label: 'Store & ERP Settings', icon: Settings }
+      ]
+    }
   ];
 
   const handleNavigateTab = (tabId) => {
     setAdminTab(tabId);
     setIsMobileSidebarOpen(false);
+  };
+
+  const handleManualSync = async () => {
+    setIsRefreshing(true);
+    if (refreshOrders) {
+      await refreshOrders();
+    }
+    setTimeout(() => setIsRefreshing(false), 800);
   };
 
   const renderAdminTabContent = () => {
@@ -99,6 +134,8 @@ export default function AdminPage() {
         return <AdminFeaturedProducts />;
       case 'bestselling':
         return <AdminBestSellingProducts />;
+      case 'combos':
+        return <AdminCombos />;
       case 'banners':
         return <AdminOffers />;
       case 'blogs':
@@ -111,88 +148,123 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="h-screen w-full bg-[#F8FAFC] text-gray-800 flex font-sans overflow-hidden">
+    <div className="h-screen w-full bg-[#F3F4F6] text-gray-900 flex font-sans overflow-hidden">
       
-      {/* 1. FIXED NON-SCROLLING LEFT SIDEBAR (Warm Bright Gourmet Theme - ZERO DARK SHADES) */}
+      {/* 1. ULTRA-PROFESSIONAL ENTERPRISE SIDEBAR */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#F9FAFB] text-[#000000] border-r border-[#E5E7EB] flex flex-col justify-between shrink-0 h-screen overflow-hidden
+        fixed lg:static inset-y-0 left-0 z-40 w-72 bg-[#0F172A] text-white flex flex-col justify-between shrink-0 h-screen overflow-hidden
         transform ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
-        transition-transform duration-300 ease-in-out shadow-xl select-none
+        transition-transform duration-300 ease-in-out shadow-2xl select-none border-r border-slate-800
       `}>
         <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Top Brand Logo */}
-          <div className="p-6 flex items-center justify-between border-b border-[#E5E7EB] shrink-0">
-            <div className="flex items-center gap-2.5">
-              <img 
-                src="/logo.jpg" 
-                alt="Haji Nuts & Spices Logo" 
-                className="w-10 h-10 object-contain rounded-full shadow-sm"
-              />
+          
+          {/* Brand Header */}
+          <div className="p-5 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/60 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img 
+                  src="/logo.jpg" 
+                  alt="Haji Nuts & Spices Logo" 
+                  className="w-10 h-10 object-contain rounded-xl shadow-md border border-slate-700 bg-white"
+                />
+                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#0F172A] rounded-full" />
+              </div>
               <div className="flex flex-col text-left">
-                <span className="text-xl font-black tracking-wider text-[#000000] font-serif uppercase leading-none">
-                  HAJI
+                <span className="text-base font-black tracking-wider text-white font-serif uppercase leading-tight flex items-center gap-1.5">
+                  <span>HAJI GOURMET</span>
                 </span>
-                <span className="text-[10px] font-extrabold text-[#000000] tracking-widest uppercase font-serif inline-block mt-0.5">
-                  NUTS & SPICES
+                <span className="text-[10px] font-mono font-bold text-emerald-400 tracking-widest uppercase">
+                  ENTERPRISE ERP 2.0
                 </span>
               </div>
             </div>
+            
             <button 
               onClick={() => setIsMobileSidebarOpen(false)}
-              className="lg:hidden text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
+              className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Navigation Links (Fits screen without scrolling) */}
-          <nav className="px-3 py-4 space-y-1.5 flex-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = adminTab === item.id;
+          {/* System Telemetry Pill */}
+          <div className="px-5 py-2.5 bg-slate-950/40 border-b border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-400 shrink-0">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>TiDB Cloud Active</span>
+            </span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase">CHENNAI DC</span>
+          </div>
 
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavigateTab(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-[#128C7E] text-white shadow-md'
-                      : 'text-[#6B513E] hover:text-[#000000] hover:bg-[#E5E7EB]/50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3.5">
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#8C7A6B]'}`} />
-                    <span>{item.label}</span>
-                  </div>
+          {/* Grouped Navigation Links */}
+          <nav className="px-3 py-4 space-y-6 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
+            {navSections.map((section, sIdx) => (
+              <div key={sIdx} className="space-y-1">
+                <span className="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1.5">
+                  {section.group}
+                </span>
 
-                  {item.badge && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#128C7E] text-white">
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = adminTab === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNavigateTab(item.id)}
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-[#128C7E] text-white shadow-md shadow-[#128C7E]/25 font-black ring-1 ring-emerald-400/30'
+                          : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+
+                      {item.badge && (
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black font-mono text-white ${item.badgeColor || 'bg-slate-700'}`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
+
         </div>
 
-        {/* Bottom Logout Pill Button */}
-        <div className="p-4 border-t border-[#E5E7EB] shrink-0">
-          <button
-            onClick={logoutAdmin}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#128C7E] hover:bg-[#128C7E] text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
+        {/* Bottom Administrator Profile Card */}
+        <div className="p-4 border-t border-slate-800/80 bg-slate-900/40 shrink-0 space-y-2">
+          <div className="flex items-center justify-between bg-slate-800/60 p-2.5 rounded-2xl border border-slate-700/50">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-[#128C7E] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
+                ADM
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-black text-white truncate">Sowcarpet Operations</p>
+                <p className="text-[10px] text-emerald-400 font-mono truncate">Super Administrator</p>
+              </div>
+            </div>
+
+            <button
+              onClick={logoutAdmin}
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-lg transition-colors cursor-pointer"
+              title="Sign Out of Admin Console"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Backdrop overlay for mobile sidebar */}
       {isMobileSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-[#3D2314]/30 backdrop-blur-xs z-30 lg:hidden" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 lg:hidden" 
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
@@ -200,33 +272,53 @@ export default function AdminPage() {
       {/* 2. RIGHT MAIN CONTENT CANVAS (INDEPENDENT SCROLL) */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         
-        {/* Top Navbar */}
-        <header className="bg-white h-16 border-b border-gray-200/80 px-6 sm:px-8 flex items-center justify-between shrink-0 shadow-xs sticky top-0 z-20">
-          <div className="flex items-center gap-3">
+        {/* Top Executive Header Bar */}
+        <header className="bg-white h-16 border-b border-gray-200 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs sticky top-0 z-20">
+          
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer"
+              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-xl cursor-pointer"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-sm font-semibold text-gray-800">
-              Welcome, Admin
-            </span>
+
+            {/* Breadcrumb Title */}
+            <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-500">
+              <span className="text-gray-400">Portal</span>
+              <span>/</span>
+              <span className="text-black font-extrabold capitalize">{adminTab.replace('-', ' ')}</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Center Search Bar */}
+          <div className="hidden md:flex items-center relative w-72 max-w-xs">
+            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input 
+              type="text"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              placeholder="Search catalog, order #, patron..."
+              className="w-full bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl pl-9 pr-3 py-1.5 text-xs text-black placeholder-gray-400 outline-none transition-colors"
+            />
+          </div>
+
+          {/* Right Action Icons */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Storefront External Link Button */}
             <button
               onClick={() => navigate('home')}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-extrabold rounded-full border border-amber-200 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
             >
-              <Store className="w-4 h-4 text-amber-600" />
-              <span>Back to Storefront</span>
+              <Store className="w-3.5 h-3.5 text-amber-700" />
+              <span className="hidden sm:inline">Storefront</span>
+              <ArrowUpRight className="w-3 h-3 text-amber-700" />
             </button>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-6 sm:p-8">
+        <main className="flex-1 p-4 sm:p-8 bg-[#F8FAFC]">
           {renderAdminTabContent()}
         </main>
 
@@ -235,5 +327,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-

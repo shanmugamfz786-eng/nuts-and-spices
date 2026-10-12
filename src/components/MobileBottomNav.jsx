@@ -11,14 +11,8 @@ export default function MobileBottomNav() {
   const isHomeActive = activePage === 'home';
   const isShopActive = activePage === 'shop' || activePage === 'categories' || activePage === 'category';
   const isCartActive = activePage === 'cart';
-  const isSupportActive = activePage === 'contact';
+  const isSupportActive = activePage === 'contact' || activePage === 'help';
   const isProfileActive = activePage === 'login' || activePage === 'register' || activePage === 'profile';
-
-  const handleSupportClick = () => {
-    const defaultMsg = encodeURIComponent("Hello! I have a inquiry about NUTS & SPICES products.");
-    const waUrl = `https://wa.me/${activeWhatsAppNumber || '919876543210'}?text=${defaultMsg}`;
-    window.open(waUrl, '_blank');
-  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-[#E5E7EB] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-1.5 px-3">
@@ -85,7 +79,7 @@ export default function MobileBottomNav() {
 
         {/* 4. SUPPORT */}
         <button
-          onClick={handleSupportClick}
+          onClick={() => navigate('contact')}
           className={`flex flex-col items-center justify-center py-1 transition-all cursor-pointer ${
             isSupportActive ? 'text-[#000000] font-black' : 'text-[#8C7A6B] hover:text-[#000000]'
           }`}

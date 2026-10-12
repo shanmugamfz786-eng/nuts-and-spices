@@ -1,14 +1,10 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
-import { ShoppingBag, Trash2, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Trash2, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, navigate, user, orders, setIsAuthModalOpen } = useCart();
-
-  
-  
+  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, navigate, user, orders } = useCart();
   const [realOrders, setRealOrders] = React.useState([]);
-  const [isLoadingOrders, setIsLoadingOrders] = React.useState(true);
 
   React.useEffect(() => {
     const fetchOrders = async () => {
@@ -33,8 +29,6 @@ export default function CartPage() {
         setRealOrders(fetchedOrders.sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0)));
       } catch (e) {
         console.error(e);
-      } finally {
-        setIsLoadingOrders(false);
       }
     };
     fetchOrders();
@@ -242,8 +236,7 @@ export default function CartPage() {
             {myOrders.map(order => (
               <div key={order.orderId || order.id} 
        onClick={() => {
-         window.history.pushState({}, '', '?order_id=' + (order.orderId || order.id) + '&track=true');
-         navigate('order-success');
+         navigate('order-details', { order, orderId: order.orderId || order.id });
        }}
        className={`p-5 rounded-2xl border shadow-sm space-y-4 hover:shadow-md transition-shadow cursor-pointer ${String(order.status || '').toLowerCase() === 'refunded' ? 'bg-red-50/95 border-red-500 shadow-red-100 ring-2 ring-red-400/30' : String(order.status || '').toLowerCase() === 'cancelled' ? 'bg-gray-50/90 border-gray-300' : 'bg-white border-[#E5E7EB] hover:border-[#128C7E]'}`}>
                 <div className="flex justify-between items-start border-b border-[#F9FAFB] pb-3">

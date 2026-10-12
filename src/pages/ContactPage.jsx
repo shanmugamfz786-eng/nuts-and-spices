@@ -24,23 +24,23 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 space-y-6 sm:space-y-12 pb-24 sm:pb-12">
       
       {/* Back Button */}
       <button
         onClick={() => navigate('home')}
-        className="inline-flex items-center gap-2 text-xs font-bold text-[#000000] hover:underline"
+        className="inline-flex items-center gap-2 text-xs font-bold text-[#000000] hover:underline cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Return to Home</span>
       </button>
 
       {/* Page Header */}
-      <div className="bg-gradient-to-br from-[#128C7E] via-[#075E54] to-[#075E54] text-white p-8 sm:p-14 rounded-3xl space-y-3 relative overflow-hidden border border-[#075E54] shadow-xl">
+      <div className="bg-gradient-to-br from-[#128C7E] via-[#075E54] to-[#075E54] text-white p-6 sm:p-14 rounded-2xl sm:rounded-3xl space-y-2.5 sm:space-y-3 relative overflow-hidden border border-[#075E54] shadow-xl">
         <div className="absolute right-0 top-0 w-96 h-96 bg-[#000000]/25 rounded-full blur-3xl pointer-events-none" />
 
-        <h1 className="text-3xl sm:text-5xl font-black font-serif text-white">
-          Get In Touch
+        <h1 className="text-2xl sm:text-5xl font-black font-serif text-white">
+          Customer Support & Contact
         </h1>
         <p className="text-xs sm:text-base text-[#E5E7EB] max-w-xl">
           Have a question about our products, custom bulk orders, or corporate gifting? We'd love to hear from you.

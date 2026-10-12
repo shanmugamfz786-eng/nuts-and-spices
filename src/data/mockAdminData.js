@@ -225,3 +225,198 @@ export const INITIAL_REVIEWS = [
     status: 'APPROVED'
   }
 ];
+
+export const INITIAL_COMBO_DEALS = [
+  {
+    id: 'combo-royal-01',
+    name: 'Royal Mughal Imperial Dry Fruit Hamper',
+    category: 'gift-hampers',
+    categoryLabel: 'Royal Gift Hampers',
+    badge: '👑 FESTIVE BESTSELLER',
+    badgeColor: 'bg-amber-500 text-white',
+    rating: 4.9,
+    reviewsCount: 168,
+    status: 'ACTIVE',
+    description: 'Handcrafted luxury gift presentation packed with jumbo California almonds, royal whole cashews, Iranian roasted pistachios and rich Arabian dates. Includes greeting card & brass satin ribbon.',
+    items: [
+      '250g Jumbo California Almonds (Badam)',
+      '250g W240 Royal Whole Cashews (Kaju)',
+      '250g Roasted Salted Iranian Pistachios (Pista)',
+      '250g Arabian Safawi Royal Dates',
+      'Complimentary Handcrafted Gift Box'
+    ],
+    weights: [
+      { label: '1 KG ROYAL BOX', price: 1449, originalPrice: 1899 },
+      { label: '2 KG GRAND HAMPER', price: 2799, originalPrice: 3699 }
+    ],
+    image: '/images/combo_banner.jpg',
+    fastDelivery: true
+  },
+  {
+    id: 'combo-immunity-02',
+    name: 'Kashmir Saffron & Superfoods Immunity Elixir',
+    category: 'wellness',
+    categoryLabel: 'Health & Wellness',
+    badge: '⚡ IMMUNITY SHIELD',
+    badgeColor: 'bg-emerald-600 text-white',
+    rating: 5.0,
+    reviewsCount: 94,
+    status: 'ACTIVE',
+    description: 'Pure certified Kashmiri Mongra saffron combined with fragrant green cardamom, organic mamra almonds, and walnut kernels for maximum vitality and glowing health.',
+    items: [
+      '1g Pure Kashmir Mongra Saffron (Kesar)',
+      '50g Royal Green Cardamom (Elaichi)',
+      '250g Kashmiri Mamra High-Oil Almonds',
+      '250g Organic Akhrot (Kashmiri Walnut Kernels)'
+    ],
+    weights: [
+      { label: 'STANDARD BOOSTER PACK', price: 1299, originalPrice: 1650 },
+      { label: 'DOUBLE REFILL PACK', price: 2499, originalPrice: 3199 }
+    ],
+    image: '/images/products/product_1.jpg',
+    fastDelivery: true
+  },
+  {
+    id: 'combo-biryani-03',
+    name: 'South Indian Grand Biryani & Royal Masala Kit',
+    category: 'spices',
+    categoryLabel: 'Masterchef Spices',
+    badge: '🌶️ CHEF SIGNATURE',
+    badgeColor: 'bg-rose-600 text-white',
+    rating: 4.8,
+    reviewsCount: 120,
+    status: 'ACTIVE',
+    description: 'Authentic Sowcarpet aromatic whole spice kit. Handpicked direct from Western Ghats and Malabar plantations for restaurant-style fragrant biryanis and royal curries.',
+    items: [
+      '100g Zanzibar Extra Aromatic Cloves (Lavang)',
+      '100g Star Anise (Chakra Phool)',
+      '100g Tellicherry Bold Black Pepper',
+      '100g Ceylon Cinnamon Sticks (Dalchini)',
+      '50g Green Cardamom Extra Large',
+      '200g Kashmiri Bright Degi Mirch'
+    ],
+    weights: [
+      { label: 'MASTER CHEF 6-PIECE KIT (650G)', price: 749, originalPrice: 999 },
+      { label: 'RESTAURANT MEGA PACK (1.3 KG)', price: 1399, originalPrice: 1899 }
+    ],
+    image: '/images/products/product_6.jpg',
+    fastDelivery: true
+  },
+  {
+    id: 'combo-energy-04',
+    name: 'Daily Energy & Workout Power Snack Pack',
+    category: 'wellness',
+    categoryLabel: 'Health & Wellness',
+    badge: '💪 DAILY POWER',
+    badgeColor: 'bg-blue-600 text-white',
+    rating: 4.9,
+    reviewsCount: 88,
+    status: 'ACTIVE',
+    description: 'The ultimate wholesome fuel pack for active professionals, students, and fitness enthusiasts. High in protein, natural dietary fiber, and healthy omega fatty acids.',
+    items: [
+      '500g Crunchy California Almonds',
+      '250g Seedless Afghan Black Kishmish',
+      '200g Roasted 5-Seeds Trail Mix (Chia, Pumpkin, Flax, Sunflower)',
+      '250g Royal Medjool Soft Dates'
+    ],
+    weights: [
+      { label: '1.2 KG MONTHLY PACK', price: 949, originalPrice: 1250 },
+      { label: '2.4 KG FAMILY FITNESS PACK', price: 1799, originalPrice: 2399 }
+    ],
+    image: '/images/products/product_2.jpg',
+    fastDelivery: true
+  },
+  {
+    id: 'combo-potli-05',
+    name: 'Festive Celebration Dry Fruit Potli (Set of 4)',
+    category: 'gift-hampers',
+    categoryLabel: 'Royal Gift Hampers',
+    badge: '🎉 CELEBRATION SPECIAL',
+    badgeColor: 'bg-amber-600 text-white',
+    rating: 4.9,
+    reviewsCount: 142,
+    status: 'ACTIVE',
+    description: 'Four elegant traditional velvet embroidered potli drawstring pouches filled with premium grade dry fruits. Ready for wedding return favors and festive gifting.',
+    items: [
+      '150g Roasted Salted Cashews in Golden Potli',
+      '150g California Roasted Almonds in Red Potli',
+      '150g Afghan Kishmish in Emerald Potli',
+      '150g Salted Pistachios in Royal Blue Potli'
+    ],
+    weights: [
+      { label: 'SET OF 4 POTLIS (600G)', price: 899, originalPrice: 1199 },
+      { label: 'SET OF 8 POTLIS (1.2 KG)', price: 1699, originalPrice: 2299 }
+    ],
+    image: '/images/products/product_5.jpg',
+    fastDelivery: false
+  },
+  {
+    id: 'combo-snacks-06',
+    name: 'Gourmet Roasted & Flavoured Snacking Trio',
+    category: 'budget',
+    categoryLabel: 'Under ₹999 Deals',
+    badge: '🍿 CRUNCHY SNACK',
+    badgeColor: 'bg-purple-600 text-white',
+    rating: 4.8,
+    reviewsCount: 76,
+    status: 'ACTIVE',
+    description: 'Zero oil roasted premium nuts coated with lip-smacking gourmet spices. Perfect for evening tea, office breaks, and weekend gatherings.',
+    items: [
+      '200g Spicy Peri-Peri Whole Cashews',
+      '200g Smoked Barbecue Roasted Almonds',
+      '200g Himalayan Pink Salt Crunchy Pistachios'
+    ],
+    weights: [
+      { label: 'TRIO PACK (600G)', price: 799, originalPrice: 1050 },
+      { label: 'MEGA TRIO PACK (1.2 KG)', price: 1499, originalPrice: 1999 }
+    ],
+    image: '/images/products/product_11.jpg',
+    fastDelivery: true
+  },
+  {
+    id: 'combo-sweet-07',
+    name: 'Sowcarpet Royal Sweet & Kheer Essentials',
+    category: 'budget',
+    categoryLabel: 'Under ₹999 Deals',
+    badge: '🍨 SWEET DELIGHTS',
+    badgeColor: 'bg-amber-700 text-white',
+    rating: 4.9,
+    reviewsCount: 65,
+    status: 'ACTIVE',
+    description: 'Traditional ingredients specially handpicked for festive payasam, halwa, kheer, and authentic royal Indian sweets with unforgettable rich aroma.',
+    items: [
+      '250g Kashmiri Snow White Walnut Kernels',
+      '100g Charoli / Chironji Seeds',
+      '50g Extra Fragrant Green Cardamom Powder',
+      '100g Silver-Cut Slivers of Pista & Badam'
+    ],
+    weights: [
+      { label: 'DESSERT MASTER PACK (500G)', price: 849, originalPrice: 1150 }
+    ],
+    image: '/images/products/product_14.jpg',
+    fastDelivery: true
+  },
+  {
+    id: 'combo-budget-08',
+    name: 'Student & Office Pocket Energy Duo',
+    category: 'budget',
+    categoryLabel: 'Under ₹999 Deals',
+    badge: '⚡ VALUE PACK',
+    badgeColor: 'bg-teal-700 text-white',
+    rating: 4.7,
+    reviewsCount: 114,
+    status: 'ACTIVE',
+    description: 'A pocket-friendly, high-nutrition essential pairing of California raw almonds and naturally sweet Afghan green kishmish.',
+    items: [
+      '250g California Raw Crunchy Almonds',
+      '250g Natural Afghan Long Green Kishmish'
+    ],
+    weights: [
+      { label: '500G POCKET DUO', price: 499, originalPrice: 650 },
+      { label: '1 KG COMBO DUO', price: 899, originalPrice: 1200 }
+    ],
+    image: '/images/products/product_4.jpg',
+    fastDelivery: true
+  }
+];
+

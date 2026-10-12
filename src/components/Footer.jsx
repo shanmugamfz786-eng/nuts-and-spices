@@ -146,6 +146,12 @@ export default function Footer() {
                 <button onClick={() => navigate('shop', { category: 'all' })} className="hover:text-gray-900 hover:font-bold transition-all cursor-pointer">Shop</button>
               </li>
               <li>
+                <button onClick={() => navigate('combo-deals')} className="hover:text-gray-900 hover:font-bold transition-all cursor-pointer flex items-center gap-1.5">
+                  <span>Special Combo Deals</span>
+                  <span className="text-[9px] bg-amber-400 text-black px-1.5 py-0.5 rounded font-extrabold uppercase">Hot</span>
+                </button>
+              </li>
+              <li>
                 <button onClick={() => navigate('bulk-orders')} className="hover:text-gray-900 hover:font-bold transition-all cursor-pointer">Bulk Orders</button>
               </li>
               <li>

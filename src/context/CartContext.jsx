@@ -1,16 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { PRODUCTS, CATEGORIES, STORE_WHATSAPP_NUMBER, CATALOG_VERSION } from '../data/products';
-export const isProductActive = (p) => p && p.active !== false && p.status !== 'Inactive';
 import { fetchCloudCatalog, saveCloudCatalog } from '../services/cloudDb';
 import { createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from '../api/productApi';
 import { createCategory as createCategoryApi, updateCategory as updateCategoryApi, deleteCategory as deleteCategoryApi } from '../api/categoryApi';
 import { API_BASE_URL, fetchAdminStateApi, syncAdminStateApi } from '../api/index.js';
+import { login as loginAuthApi, register as registerAuthApi } from '../api/authApi.js';
+import { updateOrderStatusApi, deleteOrderApi } from '../api/orderApi.js';
 import { 
   INITIAL_STORE_SETTINGS, 
   INITIAL_ORDERS, 
   INITIAL_OFFERS, 
-  INITIAL_REVIEWS 
+  INITIAL_REVIEWS,
+  INITIAL_COMBO_DEALS
 } from '../data/mockAdminData';
+
+export const isProductActive = (p) => p && p.active !== false && p.status !== 'Inactive';
 
 const CartContext = createContext();
 
@@ -160,6 +164,25 @@ export const CartProvider = ({ children }) => {
     }
   });
 
+  // 6.5 COMBO DEALS & ACCESS CONTROL (Admin Editable & Live Managed)
+  const [comboDeals, setComboDeals] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_combo_deals');
+      return saved ? JSON.parse(saved) : INITIAL_COMBO_DEALS;
+    } catch {
+      return INITIAL_COMBO_DEALS;
+    }
+  });
+
+  const [isCombosPageEnabled, setIsCombosPageEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_combos_enabled');
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+
   // 7. CART & WISHLIST STATE
   const [cart, setCart] = useState([]);
 
@@ -223,6 +246,7 @@ export const CartProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [lastOrder, setLastOrder] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Sync initial URL pathname and handle browser back/forward buttons
   useEffect(() => {
@@ -331,6 +355,14 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     try { localStorage.setItem('nuts_spices_reviews', JSON.stringify(reviews)); } catch (err) { console.warn('localStorage error:', err); }
   }, [reviews]);
+
+  useEffect(() => {
+    try { localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(comboDeals)); } catch (err) { console.warn('localStorage error:', err); }
+  }, [comboDeals]);
+
+  useEffect(() => {
+    try { localStorage.setItem('nuts_spices_combos_enabled', JSON.stringify(isCombosPageEnabled)); } catch (err) { console.warn('localStorage error:', err); }
+  }, [isCombosPageEnabled]);
 
   useEffect(() => {
     try { 
@@ -486,8 +518,7 @@ export const CartProvider = ({ children }) => {
 // USER AUTH HANDLERS
   const registerUser = async (userData) => {
     try {
-      const { register } = await import('../api/authApi.js');
-      const res = await register(userData);
+      const res = await registerAuthApi(userData);
       if (res && res.success) {
         localStorage.setItem('nuts_spices_auth_token', res.token);
         setUser(res.user);
@@ -539,8 +570,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const { login } = await import('../api/authApi.js');
-      const res = await login({ identifier, password: loginData.password });
+      const res = await loginAuthApi({ identifier, password: loginData.password });
       if (res && res.success) {
         localStorage.setItem('nuts_spices_auth_token', res.token);
         setUser(res.user);
@@ -577,8 +607,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const { login } = await import('../api/authApi.js');
-      const res = await login(email, password);
+      const res = await loginAuthApi({ identifier: email, password });
       
       if (res && res.success && res.user && res.user.role === 'admin') {
         localStorage.setItem('nuts_spices_auth_token', res.token);
@@ -607,6 +636,9 @@ export const CartProvider = ({ children }) => {
     if (params.adminTab) {
       setAdminTab(params.adminTab);
     }
+    if (params.order) {
+      setSelectedOrder(params.openCancel ? { ...params.order, openCancel: true } : params.order);
+    }
     setActivePage(page);
 
     // Update browser URL bar
@@ -615,6 +647,10 @@ export const CartProvider = ({ children }) => {
         window.history.pushState({}, '', '/admin');
       } else if (page === 'home') {
         window.history.pushState({}, '', '/');
+      } else if (page === 'order-details' && (params.order?.id || params.order?.order_id || params.order?.orderId || params.orderId)) {
+        const oId = params.order?.order_id || params.order?.orderId || params.order?.id || params.orderId;
+        const cancelQuery = params.openCancel ? '&action=cancel' : '';
+        window.history.pushState({}, '', `/order-details?order_id=${oId}${cancelQuery}`);
       } else {
         window.history.pushState({}, '', `/${page}`);
       }
@@ -894,16 +930,15 @@ export const CartProvider = ({ children }) => {
   const updateOrderStatus = async (orderId, newStatus) => {
     const normalized = (newStatus || '').toLowerCase().trim();
     setOrders(prev => prev.map(o => (o.orderId === orderId || o.id === orderId) ? { ...o, status: normalized } : o));
+    setSelectedOrder(prev => (prev && (prev.orderId === orderId || prev.order_id === orderId || prev.id === orderId)) ? { ...prev, status: normalized } : prev);
     try {
-      const { updateOrderStatusApi } = await import('../api/orderApi.js');
       await updateOrderStatusApi(orderId, normalized);
-    } catch (e) { console.error('Failed to update order status in backend'); }
+    } catch (e) { console.error('Failed to update order status in backend', e); }
   };
 
   const deleteOrder = async (orderId) => {
     setOrders(prev => { const upd = prev.filter(o => o.orderId !== orderId && o.id !== orderId); syncAdminStateToCloud({ orders: upd }); return upd; });
     try {
-      const { deleteOrderApi } = await import('../api/orderApi.js');
       await deleteOrderApi(orderId);
     } catch (e) {}
   };
@@ -924,6 +959,41 @@ export const CartProvider = ({ children }) => {
 
   const deleteOffer = (offerId) => {
     setOffers(prev => { const upd = prev.filter(off => off.id !== offerId); syncAdminStateToCloud({ offers: upd }); return upd; });
+  };
+
+  // ADMIN - COMBO DEALS CRUD & ACCESS CONTROL
+  const addComboDeal = (comboData) => {
+    const newCombo = {
+      id: `combo-${Date.now()}`,
+      status: 'ACTIVE',
+      rating: 4.9,
+      reviewsCount: 1,
+      fastDelivery: true,
+      ...comboData
+    };
+    setComboDeals(prev => { const upd = [newCombo, ...prev]; syncAdminStateToCloud({ comboDeals: upd }); return upd; });
+    return newCombo;
+  };
+
+  const updateComboDeal = (comboId, updatedFields) => {
+    setComboDeals(prev => { const upd = prev.map(c => c.id === comboId ? { ...c, ...updatedFields } : c); syncAdminStateToCloud({ comboDeals: upd }); return upd; });
+  };
+
+  const deleteComboDeal = (comboId) => {
+    setComboDeals(prev => { const upd = prev.filter(c => c.id !== comboId); syncAdminStateToCloud({ comboDeals: upd }); return upd; });
+  };
+
+  const toggleComboStatus = (comboId) => {
+    setComboDeals(prev => {
+      const upd = prev.map(c => c.id === comboId ? { ...c, status: c.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' } : c);
+      syncAdminStateToCloud({ comboDeals: upd });
+      return upd;
+    });
+  };
+
+  const toggleCombosPageEnabled = (val) => {
+    setIsCombosPageEnabled(val);
+    syncAdminStateToCloud({ isCombosPageEnabled: val });
   };
 
   // ADMIN - REVIEWS CRUD
@@ -1041,6 +1111,8 @@ export const CartProvider = ({ children }) => {
         setIsSearchOpen,
         lastOrder,
         setLastOrder,
+        selectedOrder,
+        setSelectedOrder,
         navigate,
 
         // User Auth
@@ -1075,7 +1147,6 @@ export const CartProvider = ({ children }) => {
         toggleCategoryPremium,
 
         // Admin Order Actions
-        orders,
         setOrders,
         refreshOrders,
         createNewOrder,
@@ -1086,6 +1157,15 @@ export const CartProvider = ({ children }) => {
         addOffer,
         updateOffer,
         deleteOffer,
+
+        // Admin Combo Deals Actions & Access Control
+        comboDeals,
+        isCombosPageEnabled,
+        addComboDeal,
+        updateComboDeal,
+        deleteComboDeal,
+        toggleComboStatus,
+        toggleCombosPageEnabled,
 
         // Admin Review Actions
         addReview,

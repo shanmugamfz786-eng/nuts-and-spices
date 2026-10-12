@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { Mail, Lock, Eye, EyeOff, Sparkles, CheckCircle2, MessageSquare, ArrowRight, ShieldCheck, UserPlus, Package, ChevronRight, X, LogOut, ShoppingBag, Settings, User as UserIcon } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, Package, ChevronRight, X, LogOut, ShoppingBag, Settings, User as UserIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
-  const { user, loginUser, logoutUser, navigate, loginAdmin, updateUserProfile } = useCart();
+  const { user, loginUser, loginAdmin, logoutUser, navigate, updateUserProfile } = useCart();
   const [showPassword, setShowPassword] = useState(false);
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -12,7 +12,13 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
 
   // Profile Edit State
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'settings'
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('tab') === 'orders') return 'orders';
+    }
+    return 'profile';
+  });
   const [editName, setEditName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -21,7 +27,6 @@ export default function LoginPage() {
   // My Orders State
   const [myOrders, setMyOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -43,44 +48,7 @@ export default function LoginPage() {
     }
   };
 
-  const [cancellingOrderId, setCancellingOrderId] = useState(null);
 
-  const handleCancelDelivery = async (orderId) => {
-    if (!window.confirm(`Are you sure you want to cancel delivery for Order #${orderId}?`)) {
-      return;
-    }
-    setCancellingOrderId(orderId);
-    try {
-      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
-        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-          ? 'https://nuts-and-spices.onrender.com'
-          : ''
-      );
-      const token = localStorage.getItem('nuts_spices_auth_token') || '';
-      const res = await fetch(`${BASE}/api/orders/${orderId}/cancel`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Order delivery has been cancelled successfully.');
-        setMyOrders(prev => prev.map(o => (o.id === orderId || o.order_id === orderId || o.orderId === orderId) ? { ...o, status: 'cancelled' } : o));
-        if (selectedOrder && (selectedOrder.id === orderId || selectedOrder.order_id === orderId || selectedOrder.orderId === orderId)) {
-          setSelectedOrder(prev => ({ ...prev, status: 'cancelled' }));
-        }
-      } else {
-        alert(data.message || 'Failed to cancel order delivery');
-      }
-    } catch (err) {
-      console.error('Cancel delivery error:', err);
-      alert('Error cancelling order delivery. Please try again.');
-    } finally {
-      setCancellingOrderId(null);
-    }
-  };
 
   useEffect(() => {
     if (user) {
@@ -109,14 +77,102 @@ export default function LoginPage() {
 
   if (user) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-2 pb-20 sm:py-10">
+        
+        {/* MOBILE EXCLUSIVE HEADER & SEGMENTED TABS (< lg) */}
+        <div className="block lg:hidden mb-4 space-y-2.5">
+          {/* Compact Luxury Patron Card */}
+          <div className="bg-gradient-to-br from-[#128C7E] via-[#075E54] to-[#075E54] text-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-md relative overflow-hidden border border-[#075E54]/40">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="flex items-center justify-between gap-2.5 relative z-10">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="w-11 h-11 rounded-xl bg-white text-[#128C7E] shadow-md flex items-center justify-center text-lg font-black font-serif shrink-0 border border-white/40">
+                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-sm sm:text-base font-black font-serif text-white truncate">
+                    {user.name}
+                  </h1>
+                  <p className="text-[11px] text-[#F9FAFB]/90 font-medium truncate mt-0.5">
+                    {user.phone || user.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => navigate('shop', { category: 'all' })}
+                  title="Shop Gourmet Catalog"
+                  className="p-2 rounded-xl bg-white/15 hover:bg-white/25 text-white transition-colors cursor-pointer border border-white/25 shadow-xs"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={logoutUser}
+                  title="Log Out"
+                  className="p-2 rounded-xl bg-white/15 hover:bg-rose-500/80 text-white transition-colors cursor-pointer border border-white/25 shadow-xs"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* iOS / Luxury Segmented Tab Navigation Control */}
+          <div className="bg-gray-100 p-1 rounded-2xl flex border border-gray-200/80 shadow-inner">
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex-1 py-2 px-1 rounded-xl text-[11px] sm:text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                activeTab === 'profile'
+                  ? 'bg-white text-[#128C7E] shadow-sm ring-1 ring-black/5'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              <UserIcon className="w-3.5 h-3.5 shrink-0" />
+              <span>Profile</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex-1 py-2 px-1 rounded-xl text-[11px] sm:text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                activeTab === 'orders'
+                  ? 'bg-white text-[#128C7E] shadow-sm ring-1 ring-black/5'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              <Package className="w-3.5 h-3.5 shrink-0" />
+              <span>Orders</span>
+              {myOrders.length > 0 && (
+                <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                  activeTab === 'orders' ? 'bg-[#128C7E] text-white' : 'bg-gray-200 text-gray-700'
+                }`}>
+                  {myOrders.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex-1 py-2 px-1 rounded-xl text-[11px] sm:text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                activeTab === 'settings'
+                  ? 'bg-white text-[#128C7E] shadow-sm ring-1 ring-black/5'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              <Settings className="w-3.5 h-3.5 shrink-0" />
+              <span>Settings</span>
+            </button>
+          </div>
+        </div>
+
+        {/* DESKTOP 4-COLUMN GRID / TABLET */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
-          {/* SIDEBAR: USER INFO */}
+          {/* DESKTOP SIDEBAR: USER INFO (Visible on lg screens only) */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-1 space-y-6"
+            className="hidden lg:block lg:col-span-1 space-y-6"
           >
             <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-lg text-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-[#128C7E]/20 to-transparent"></div>
@@ -126,9 +182,6 @@ export default function LoginPage() {
               </div>
               
               <div className="relative z-10">
-                <span className="text-[10px] font-extrabold text-[#128C7E] uppercase tracking-widest bg-green-50 px-3 py-1 rounded-full inline-block mb-2">
-                  Premium Member
-                </span>
                 <h1 className="text-xl font-black font-serif text-[#000000]">
                   {user.name}
                 </h1>
@@ -154,48 +207,48 @@ export default function LoginPage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-md hidden lg:block">
-               <h3 className="text-sm font-black font-serif text-[#000000] mb-4">Account Features</h3>
-               <ul className="space-y-3 text-sm font-bold text-[#8C7A6B]">
-                 <li 
-                   onClick={() => setActiveTab('orders')}
-                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'orders' ? 'text-[#128C7E] bg-green-50' : 'hover:text-[#000000]'}`}
-                 >
-                   <Package className="w-4 h-4"/> My Orders
-                 </li>
+            <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-md">
+               <h3 className="text-xs sm:text-sm font-black font-serif text-[#000000] mb-3">Account Features</h3>
+               <ul className="flex flex-col gap-2 text-xs sm:text-sm font-bold text-[#8C7A6B]">
                  <li 
                    onClick={() => setActiveTab('profile')}
-                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'profile' ? 'text-[#128C7E] bg-green-50' : 'hover:text-[#000000]'}`}
+                   className={`flex items-center gap-2.5 cursor-pointer p-2.5 rounded-xl transition-all ${activeTab === 'profile' ? 'text-[#128C7E] bg-green-50 shadow-2xs font-black' : 'hover:text-[#000000] hover:bg-gray-50'}`}
                  >
-                   <UserIcon className="w-4 h-4"/> Profile Details
+                   <UserIcon className="w-4 h-4 shrink-0"/> Profile Details
+                 </li>
+                 <li 
+                   onClick={() => setActiveTab('orders')}
+                   className={`flex items-center gap-2.5 cursor-pointer p-2.5 rounded-xl transition-all ${activeTab === 'orders' ? 'text-[#128C7E] bg-green-50 shadow-2xs font-black' : 'hover:text-[#000000] hover:bg-gray-50'}`}
+                 >
+                   <Package className="w-4 h-4 shrink-0"/> My Orders
                  </li>
                  <li 
                    onClick={() => setActiveTab('settings')}
-                   className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${activeTab === 'settings' ? 'text-[#128C7E] bg-green-50' : 'hover:text-[#000000]'}`}
+                   className={`flex items-center gap-2.5 cursor-pointer p-2.5 rounded-xl transition-all ${activeTab === 'settings' ? 'text-[#128C7E] bg-green-50 shadow-2xs font-black' : 'hover:text-[#000000] hover:bg-gray-50'}`}
                  >
-                   <Settings className="w-4 h-4"/> Settings
+                   <Settings className="w-4 h-4 shrink-0"/> Settings
                  </li>
                </ul>
             </div>
           </motion.div>
 
-          {/* MAIN CONTENT: MY ORDERS */}
+          {/* MAIN CONTENT AREA */}
           <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             className="lg:col-span-3"
           >
-            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E5E7EB] shadow-lg h-full">
+            <div className="bg-white rounded-3xl p-4 sm:p-10 border border-[#E5E7EB] shadow-md sm:shadow-lg h-auto lg:h-full">
               
               {activeTab === 'orders' ? (
                 <>
-                  <div className="flex justify-between items-end mb-8 border-b border-[#E5E7EB] pb-4">
+                  <div className="flex justify-between items-end mb-6 sm:mb-8 border-b border-[#E5E7EB] pb-3 sm:pb-4">
                     <div>
-                      <h2 className="text-2xl font-black font-serif text-[#000000] flex items-center gap-3">
-                        <Package className="w-6 h-6 text-[#128C7E]" />
+                      <h2 className="text-xl sm:text-2xl font-black font-serif text-[#000000] flex items-center gap-2.5">
+                        <Package className="w-5 h-5 sm:w-6 sm:h-6 text-[#128C7E]" />
                         Order History
                       </h2>
-                      <p className="text-xs text-[#8C7A6B] mt-1">View and track your recent purchases.</p>
+                      <p className="text-xs text-[#8C7A6B] mt-0.5">View and track your recent purchases.</p>
                     </div>
                   </div>
               
@@ -231,7 +284,7 @@ export default function LoginPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.05 }}
                         key={order.id} 
-                        onClick={() => setSelectedOrder(order)}
+                        onClick={() => navigate('order-details', { order, orderId: order.order_id || order.orderId || order.id })}
                         className={`p-5 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4 border ${
                           isRefunded
                             ? 'bg-red-50/95 border-red-500 shadow-red-100 ring-2 ring-red-400/30'
@@ -274,13 +327,16 @@ export default function LoginPage() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleCancelDelivery(order.order_id || order.orderId || order.id);
+                                navigate('order-details', { 
+                                  order, 
+                                  orderId: order.order_id || order.orderId || order.id, 
+                                  openCancel: true 
+                                });
                               }}
-                              disabled={cancellingOrderId === (order.order_id || order.orderId || order.id)}
                               className="px-3 py-1.5 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-300 text-[11px] font-extrabold rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
                             >
                               <X className="w-3.5 h-3.5" />
-                              <span>{cancellingOrderId === (order.order_id || order.orderId || order.id) ? 'Cancelling...' : 'Cancel Delivery'}</span>
+                              <span>Cancel Delivery</span>
                             </button>
                           )}
                           <span className={`text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 ${
@@ -306,27 +362,27 @@ export default function LoginPage() {
                 </>
               ) : activeTab === 'profile' ? (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="flex justify-between items-end mb-8 border-b border-[#E5E7EB] pb-4">
+                  <div className="flex justify-between items-end mb-4 sm:mb-8 border-b border-[#E5E7EB] pb-2.5 sm:pb-4">
                     <div>
-                      <h2 className="text-2xl font-black font-serif text-[#000000] flex items-center gap-3">
-                        <UserIcon className="w-6 h-6 text-[#128C7E]" />
+                      <h2 className="text-lg sm:text-2xl font-black font-serif text-[#000000] flex items-center gap-2">
+                        <UserIcon className="w-4 h-4 sm:w-6 sm:h-6 text-[#128C7E]" />
                         Profile Details
                       </h2>
-                      <p className="text-xs text-[#8C7A6B] mt-1">Update your personal information.</p>
+                      <p className="text-[11px] sm:text-xs text-[#8C7A6B] mt-0.5">Update your personal contact information.</p>
                     </div>
                   </div>
 
-                  <form onSubmit={handleUpdateProfile} className="max-w-md space-y-5">
+                  <form onSubmit={handleUpdateProfile} className="max-w-md space-y-3.5 sm:space-y-5">
                     
                     {saveSuccess && (
-                      <div className="bg-green-50 text-green-700 border border-green-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 mb-4">
+                      <div className="bg-green-50 text-green-700 border border-green-200 text-xs font-bold p-3 rounded-2xl flex items-center gap-2 mb-3">
                         <CheckCircle2 className="w-4 h-4" />
                         <span>Profile updated successfully!</span>
                       </div>
                     )}
 
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
+                    <div className="space-y-1 sm:space-y-1.5">
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000]">
                         Full Name
                       </label>
                       <input
@@ -334,40 +390,40 @@ export default function LoginPage() {
                         required
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E] transition-colors shadow-sm"
+                        className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-white border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E] transition-colors shadow-xs"
                       />
                     </div>
 
-                    <div className="space-y-1.5 opacity-60 pointer-events-none">
-                      <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
+                    <div className="space-y-1 sm:space-y-1.5 opacity-60">
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000]">
                         Mobile Number
                       </label>
                       <input
                         type="text"
                         value={user.phone}
                         readOnly
-                        className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none"
+                        className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-semibold text-[#000000] outline-none cursor-not-allowed"
                       />
-                      <p className="text-[10px] text-[#8C7A6B] mt-1">Phone number cannot be changed.</p>
+                      <p className="text-[10px] text-[#8C7A6B] mt-0.5 sm:mt-1">Phone number cannot be changed.</p>
                     </div>
 
-                    <div className="space-y-1.5 opacity-60 pointer-events-none">
-                      <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
+                    <div className="space-y-1 sm:space-y-1.5 opacity-60">
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000]">
                         Email Address
                       </label>
                       <input
                         type="email"
                         value={user.email || ''}
                         readOnly
-                        className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none"
+                        className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-semibold text-[#000000] outline-none cursor-not-allowed"
                       />
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-2 sm:pt-4">
                       <button
                         type="submit"
                         disabled={isSaving}
-                        className="w-full sm:w-auto px-8 py-3.5 bg-[#128C7E] hover:bg-[#075E54] disabled:opacity-50 text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer flex justify-center items-center gap-2"
+                        className="w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-3.5 bg-[#128C7E] hover:bg-[#075E54] disabled:opacity-50 text-white font-extrabold text-xs rounded-xl sm:rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer flex justify-center items-center gap-2"
                       >
                         {isSaving ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -383,13 +439,13 @@ export default function LoginPage() {
                 </div>
               ) : activeTab === 'settings' ? (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="flex justify-between items-end mb-8 border-b border-[#E5E7EB] pb-4">
+                  <div className="flex justify-between items-end mb-6 sm:mb-8 border-b border-[#E5E7EB] pb-3 sm:pb-4">
                     <div>
-                      <h2 className="text-2xl font-black font-serif text-[#000000] flex items-center gap-3">
-                        <Settings className="w-6 h-6 text-[#128C7E]" />
+                      <h2 className="text-xl sm:text-2xl font-black font-serif text-[#000000] flex items-center gap-2.5">
+                        <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-[#128C7E]" />
                         Account Settings
                       </h2>
-                      <p className="text-xs text-[#8C7A6B] mt-1">Manage preferences and account security.</p>
+                      <p className="text-xs text-[#8C7A6B] mt-0.5">Manage preferences and account security.</p>
                     </div>
                   </div>
 
@@ -465,134 +521,7 @@ export default function LoginPage() {
           </motion.div>
         </div>
 
-        {/* ORDER DETAILS MODAL */}
-        <AnimatePresence>
-          {selectedOrder && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
-              <motion.div 
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-3xl w-full max-w-lg overflow-hidden border border-[#E5E7EB] max-h-[90vh] flex flex-col shadow-2xl"
-              >
-                
-                <div className="bg-gradient-to-r from-[#F9FAFB] to-white p-6 border-b border-[#E5E7EB] flex justify-between items-center shrink-0">
-                  <div>
-                    <h3 className="font-black text-xl text-[#000000]">Order Summary</h3>
-                    <p className="text-xs text-[#8C7A6B] font-mono mt-1">#{selectedOrder.order_id || selectedOrder.orderId || selectedOrder.id}</p>
-                  </div>
-                  <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors bg-white border border-[#E5E7EB] shadow-sm">
-                    <X className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
 
-                <div className="p-6 overflow-y-auto flex-1 space-y-8">
-                  
-                  {/* Status Banner */}
-                  <div className={`p-4 rounded-2xl flex items-center gap-3 border ${
-                    selectedOrder.status === 'refunded' ? 'bg-red-100 border-red-400 text-red-900' :
-                    selectedOrder.status === 'cancelled' ? 'bg-gray-100 border-gray-300 text-gray-800' :
-                    selectedOrder.status === 'pending' ? 'bg-amber-50 border-amber-200 text-amber-800' : 
-                    selectedOrder.status === 'delivered' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-blue-50 border-blue-200 text-blue-800'
-                  }`}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm shrink-0 ${
-                      selectedOrder.status === 'refunded' ? 'bg-red-600 text-white' : 'bg-white'
-                    }`}>
-                      {selectedOrder.status === 'refunded' ? <CheckCircle2 className="w-5 h-5" /> : <Package className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider opacity-70">
-                        {selectedOrder.status === 'refunded' ? 'Refund Status' : 'Current Status'}
-                      </p>
-                      <p className="text-sm font-black capitalize">
-                        {selectedOrder.status === 'refunded' ? 'Refunded to Customer' : selectedOrder.status}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Shipping Info */}
-                  <div>
-                    <h4 className="text-[10px] font-extrabold uppercase text-[#8C7A6B] tracking-wider mb-3">Delivery Address</h4>
-                    <div className="bg-gray-50 border border-[#E5E7EB] rounded-2xl p-4">
-                      <p className="font-black text-[#000000] text-sm mb-1">{selectedOrder.customer_name || selectedOrder.customerName}</p>
-                      <p className="text-xs text-[#6B5A4B] leading-relaxed">{selectedOrder.address}</p>
-                      <p className="text-xs text-[#6B5A4B] leading-relaxed">{selectedOrder.city}, {selectedOrder.state || 'Tamil Nadu'} - {selectedOrder.pincode}</p>
-                      <div className="mt-3 pt-3 border-t border-[#E5E7EB] flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-[#8C7A6B] uppercase">Phone:</span>
-                        <span className="text-xs font-mono font-bold text-[#000000]">{selectedOrder.phone}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Items */}
-                  <div>
-                    <h4 className="text-[10px] font-extrabold uppercase text-[#8C7A6B] tracking-wider mb-3">Items Ordered</h4>
-                    <div className="space-y-3">
-                      {(() => {
-                        let items = [];
-                        try {
-                          items = typeof selectedOrder.items_json === 'string' ? JSON.parse(selectedOrder.items_json) 
-                                : (typeof selectedOrder.items === 'string' ? JSON.parse(selectedOrder.items) : selectedOrder.items) || [];
-                        } catch(e) {}
-                        
-                        return items.map((item, idx) => (
-                          <div key={idx} className="p-3 bg-white border border-[#E5E7EB] rounded-xl flex items-center gap-4 hover:border-[#128C7E] transition-colors shadow-sm">
-                            <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                              {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400"><Package className="w-6 h-6"/></div>}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-black text-[#000000] truncate">{item.name}</p>
-                              <p className="text-xs font-bold text-[#8C7A6B] mt-0.5">{item.weight} <span className="mx-1">×</span> {item.quantity}</p>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className="text-sm font-black text-[#128C7E]">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
-                            </div>
-                          </div>
-                        ));
-                      })()}
-                    </div>
-
-                    {/* Cancel Delivery Button */}
-                    {(selectedOrder.status === 'pending' || selectedOrder.status === 'confirmed') && (
-                      <div className="pt-3">
-                        <button
-                          onClick={() => handleCancelDelivery(selectedOrder.order_id || selectedOrder.orderId || selectedOrder.id)}
-                          disabled={cancellingOrderId === (selectedOrder.order_id || selectedOrder.orderId || selectedOrder.id)}
-                          className="w-full py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-300 font-extrabold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs"
-                        >
-                          <X className="w-4 h-4" />
-                          <span>{cancellingOrderId === (selectedOrder.order_id || selectedOrder.orderId || selectedOrder.id) ? 'Cancelling Delivery...' : 'Cancel Delivery'}</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Totals */}
-                  <div className="bg-[#000000] text-white p-5 rounded-2xl space-y-3 shadow-lg">
-                     <div className="flex justify-between text-xs font-medium text-gray-400">
-                       <span>Subtotal</span>
-                       <span>₹{Number(selectedOrder.subtotal || 0).toLocaleString('en-IN')}</span>
-                     </div>
-                     <div className="flex justify-between text-xs font-medium text-gray-400">
-                       <span>Delivery Charge</span>
-                       <span>₹{Number(selectedOrder.delivery_charge || selectedOrder.deliveryCharge || 0).toLocaleString('en-IN')}</span>
-                     </div>
-                     <div className="flex justify-between text-base font-black pt-3 border-t border-gray-800">
-                       <span>Total Amount</span>
-                       <span className="text-[#128C7E]">₹{Number(selectedOrder.total_amount || selectedOrder.totalAmount || 0).toLocaleString('en-IN')}</span>
-                     </div>
-                  </div>
-
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
       </div>
     );
@@ -635,18 +564,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleWhatsAppQuickLogin = () => {
-    setSuccessMessage('Authenticating via WhatsApp...');
-    setTimeout(() => {
-      loginUser({
-        name: 'WhatsApp Member',
-        identifier: '9876543210',
-        email: 'whatsapp@nutsandspices.in',
-        phone: '9876543210'
-      });
-      navigate('home');
-    }, 600);
-  };
+
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">

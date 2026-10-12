@@ -3,7 +3,9 @@ import { useCart } from '../context/CartContext';
 import { ArrowRight } from 'lucide-react';
 
 export default function ComboOfferBanner() {
-  const { navigate } = useCart();
+  const { navigate, isCombosPageEnabled = true } = useCart();
+
+  if (!isCombosPageEnabled) return null;
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

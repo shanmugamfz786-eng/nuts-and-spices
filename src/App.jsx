@@ -13,6 +13,7 @@ import ProductDetailsPage from './pages/ProductDetailsPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
+import OrderDetailsPage from './pages/OrderDetailsPage';
 import OffersPage from './pages/OffersPage';
 import AboutUsPage from './pages/AboutUsPage';
 import ContactPage from './pages/ContactPage';
@@ -62,6 +63,10 @@ function MainContent() {
         return <CheckoutPage />;
       case 'order-success':
         return <OrderSuccessPage />;
+      case 'order-details':
+      case 'order-track':
+      case 'order-tracking':
+        return <OrderDetailsPage />;
       case 'offers':
         return <OffersPage />;
       case 'about':
@@ -99,7 +104,7 @@ function MainContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white overflow-x-clip w-full max-w-full">
+    <div className="min-h-screen flex flex-col bg-white w-full max-w-full">
       <Navbar />
       <main className="flex-1 pb-16 md:pb-0">
         {renderPage()}
@@ -112,10 +117,64 @@ function MainContent() {
   );
 }
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center p-6 text-center">
+          <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200 shadow-xl space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto text-2xl font-bold">
+              🌿
+            </div>
+            <h2 className="text-xl font-black font-serif text-slate-900">
+              Something went wrong
+            </h2>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              We encountered an unexpected display glitch. Please reload the page or return to the homepage.
+            </p>
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="w-full py-3 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs rounded-xl shadow-md transition-colors cursor-pointer"
+              >
+                Reload Page
+              </button>
+              <button
+                type="button"
+                onClick={() => { window.location.href = '/'; }}
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              >
+                Go to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
-    <CartProvider>
-      <MainContent />
-    </CartProvider>
+    <ErrorBoundary>
+      <CartProvider>
+        <MainContent />
+      </CartProvider>
+    </ErrorBoundary>
   );
 }
