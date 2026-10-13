@@ -29,20 +29,45 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
     };
   });
 
-  const confirmedOrders = normalizedOrders.filter(o => 
+  // Filter orders dynamically based on selectedTimeRange
+  const now = new Date();
+  const filteredOrders = normalizedOrders.filter(o => {
+    if (selectedTimeRange === 'All') return true;
+    if (!o.date) return true;
+    const orderDate = new Date(o.date);
+    if (isNaN(orderDate.getTime())) return true;
+
+    if (selectedTimeRange === 'Today') {
+      return orderDate.toDateString() === now.toDateString();
+    }
+    if (selectedTimeRange === '7d') {
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return orderDate >= sevenDaysAgo;
+    }
+    if (selectedTimeRange === '30d') {
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return orderDate >= thirtyDaysAgo;
+    }
+    return true;
+  });
+
+  const confirmedOrders = filteredOrders.filter(o => 
     ['confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'].includes(o.statusNorm)
   );
-  const pendingOrders = normalizedOrders.filter(o => 
+  const pendingOrders = filteredOrders.filter(o => 
     ['pending', 'new'].includes(o.statusNorm)
   );
-  const deliveredOrders = normalizedOrders.filter(o => o.statusNorm === 'delivered');
-  const cancelledOrders = normalizedOrders.filter(o => o.statusNorm === 'cancelled' || o.statusNorm === 'refunded');
+  const deliveredOrders = filteredOrders.filter(o => o.statusNorm === 'delivered');
+  const cancelledOrders = filteredOrders.filter(o => o.statusNorm === 'cancelled' || o.statusNorm === 'refunded');
 
-  const totalGrossSales = normalizedOrders.reduce((sum, o) => sum + o.totalVal, 0);
+  const totalGrossSales = filteredOrders.reduce((sum, o) => sum + o.totalVal, 0);
   const confirmedSales = confirmedOrders.reduce((sum, o) => sum + o.totalVal, 0);
-  const activeProductsCount = products.length > 0 ? products.length : 127;
-  const avgOrderValue = normalizedOrders.length > 0 ? Math.round(totalGrossSales / normalizedOrders.length) : 0;
+  const activeProductsCount = (products || []).length;
+  const avgOrderValue = filteredOrders.length > 0 ? Math.round(totalGrossSales / filteredOrders.length) : 0;
   const lowStockProducts = (products || []).filter(p => (p.stock !== undefined && p.stock <= 15));
+  const fulfillmentRate = filteredOrders.length > 0 
+    ? Math.round(((deliveredOrders.length + confirmedOrders.length) / filteredOrders.length) * 100) 
+    : 100;
 
   const handleCopy = (id) => {
     navigator.clipboard.writeText(String(id));
@@ -108,16 +133,45 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
     }
   };
 
-  // 7-Day Performance Sample Bars (Interactive Visual)
-  const WEEKLY_DATA = [
-    { day: 'Mon', revenue: Math.max(1200, Math.round(totalGrossSales * 0.12)), orders: 4, height: '45%' },
-    { day: 'Tue', revenue: Math.max(1800, Math.round(totalGrossSales * 0.18)), orders: 7, height: '65%' },
-    { day: 'Wed', revenue: Math.max(1500, Math.round(totalGrossSales * 0.15)), orders: 5, height: '52%' },
-    { day: 'Thu', revenue: Math.max(2400, Math.round(totalGrossSales * 0.22)), orders: 9, height: '80%' },
-    { day: 'Fri', revenue: Math.max(2800, Math.round(totalGrossSales * 0.28)), orders: 11, height: '95%' },
-    { day: 'Sat', revenue: Math.max(3200, Math.round(totalGrossSales * 0.32)), orders: 14, height: '100%' },
-    { day: 'Sun (Today)', revenue: Math.max(2100, Math.round(totalGrossSales * 0.20)), orders: 8, height: '70%', isToday: true }
-  ];
+  // Real-Time 7-Day Performance Bars (Calculated from real active ledger)
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+
+  const rawWeeklyData = last7Days.map((dayDate, idx) => {
+    const dayStart = new Date(dayDate);
+    const dayEnd = new Date(dayDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const dayOrders = normalizedOrders.filter(o => {
+      if (!o.date) return false;
+      const od = new Date(o.date);
+      return od >= dayStart && od <= dayEnd;
+    });
+
+    const dayRevenue = dayOrders.reduce((sum, o) => sum + o.totalVal, 0);
+    const isToday = idx === 6;
+    const dayName = isToday ? `${daysOfWeek[dayDate.getDay()]} (Today)` : daysOfWeek[dayDate.getDay()];
+
+    return {
+      day: dayName,
+      revenue: dayRevenue,
+      orders: dayOrders.length,
+      isToday
+    };
+  });
+
+  const maxRevenueInWeek = Math.max(...rawWeeklyData.map(d => d.revenue), 1);
+  const WEEKLY_DATA = rawWeeklyData.map(d => ({
+    ...d,
+    height: d.revenue > 0 ? `${Math.max(12, Math.round((d.revenue / maxRevenueInWeek) * 100))}%` : '8%'
+  }));
+
+  const peakDay = [...WEEKLY_DATA].sort((a, b) => b.revenue - a.revenue)[0];
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto font-sans">
@@ -132,7 +186,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
             </h1>
           </div>
           <p className="text-xs text-gray-500 font-medium">
-            Haji Nuts & Spices Sowcarpet Central Hub • Real-Time ERP Telemetry
+            Haji Nuts & Spices Operations Central Hub • Real-Time Order & Sales Telemetry
           </p>
         </div>
 
@@ -192,7 +246,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
 
           <div className="relative z-10 mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
             <span className="text-emerald-700 font-extrabold flex items-center gap-1 text-[11px]">
-              <ArrowUpRight className="w-3.5 h-3.5" /> +16.4% this cycle
+              <ArrowUpRight className="w-3.5 h-3.5" /> {confirmedOrders.length} confirmed orders
             </span>
             <span className="text-gray-400 text-[10px]">AOV: ₹{avgOrderValue}</span>
           </div>
@@ -211,7 +265,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
                 Total Consignments
               </span>
               <div className="text-2xl sm:text-3xl font-black font-mono text-black">
-                {normalizedOrders.length}
+                {filteredOrders.length}
               </div>
             </div>
 
@@ -256,7 +310,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
 
           <div className="relative z-10 mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
             <span className="text-gray-500 font-bold text-[11px]">
-              Sowcarpet Fresh Stock
+              Live Store Inventory
             </span>
             {lowStockProducts.length > 0 ? (
               <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black">
@@ -281,7 +335,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
                 Fulfillment Health
               </span>
               <div className="text-2xl sm:text-3xl font-black font-mono text-purple-700">
-                99.4%
+                {fulfillmentRate}%
               </div>
             </div>
 
@@ -292,9 +346,9 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
 
           <div className="relative z-10 mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
             <span className="text-purple-700 font-bold text-[11px]">
-              Air Express Velocity
+              {deliveredOrders.length} Delivered
             </span>
-            <span className="text-gray-400 text-[10px]">BlueDart / Haji Express</span>
+            <span className="text-gray-400 text-[10px]">{confirmedOrders.length} In Transit</span>
           </div>
         </div>
 
@@ -312,7 +366,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
                 <span>Weekly Revenue & Order Velocity</span>
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                Daily sales movement across Chennai and South India express deliveries
+                Real-time daily sales and order volume computed directly from live bookings
               </p>
             </div>
 
@@ -328,7 +382,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
             {WEEKLY_DATA.map((item, idx) => (
               <div key={idx} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
                 <div className="text-[10px] font-mono font-bold text-gray-400 group-hover:text-black transition-colors">
-                  ₹{item.revenue}
+                  ₹{item.revenue.toLocaleString('en-IN')}
                 </div>
                 
                 <div 
@@ -348,8 +402,8 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
           </div>
 
           <div className="pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-gray-500">
-            <span>Peak Day: Saturday (₹3,200+ confirmed)</span>
-            <span className="font-bold text-emerald-700">✓ 100% ERP Reconciliation Automated</span>
+            <span>Peak Day: {peakDay ? `${peakDay.day} (₹${peakDay.revenue.toLocaleString('en-IN')})` : 'N/A'}</span>
+            <span className="font-bold text-emerald-700">✓ Live Database Ledger Synchronized</span>
           </div>
         </div>
 
@@ -367,26 +421,34 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
           {/* Visual Multi-Segment Bar */}
           <div className="space-y-4">
             <div className="h-3.5 w-full bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
-              <div 
-                className="bg-emerald-500 h-full transition-all" 
-                style={{ width: `${Math.max(15, (deliveredOrders.length / (normalizedOrders.length || 1)) * 100)}%` }} 
-                title="Delivered"
-              />
-              <div 
-                className="bg-blue-500 h-full transition-all" 
-                style={{ width: `${Math.max(25, (confirmedOrders.length / (normalizedOrders.length || 1)) * 100)}%` }} 
-                title="In Transit"
-              />
-              <div 
-                className="bg-amber-400 h-full transition-all" 
-                style={{ width: `${Math.max(20, (pendingOrders.length / (normalizedOrders.length || 1)) * 100)}%` }} 
-                title="Pending"
-              />
-              <div 
-                className="bg-rose-400 h-full transition-all" 
-                style={{ width: `${Math.max(10, (cancelledOrders.length / (normalizedOrders.length || 1)) * 100)}%` }} 
-                title="Cancelled"
-              />
+              {deliveredOrders.length > 0 && (
+                <div 
+                  className="bg-emerald-500 h-full transition-all" 
+                  style={{ width: `${(deliveredOrders.length / (filteredOrders.length || 1)) * 100}%` }} 
+                  title={`Delivered: ${deliveredOrders.length}`}
+                />
+              )}
+              {confirmedOrders.length > 0 && (
+                <div 
+                  className="bg-blue-500 h-full transition-all" 
+                  style={{ width: `${(confirmedOrders.length / (filteredOrders.length || 1)) * 100}%` }} 
+                  title={`Confirmed / In Transit: ${confirmedOrders.length}`}
+                />
+              )}
+              {pendingOrders.length > 0 && (
+                <div 
+                  className="bg-amber-400 h-full transition-all" 
+                  style={{ width: `${(pendingOrders.length / (filteredOrders.length || 1)) * 100}%` }} 
+                  title={`Pending: ${pendingOrders.length}`}
+                />
+              )}
+              {cancelledOrders.length > 0 && (
+                <div 
+                  className="bg-rose-400 h-full transition-all" 
+                  style={{ width: `${(cancelledOrders.length / (filteredOrders.length || 1)) * 100}%` }} 
+                  title={`Cancelled: ${cancelledOrders.length}`}
+                />
+              )}
             </div>
 
             {/* Legend Grid */}
@@ -473,7 +535,11 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {normalizedOrders.slice(0, 6).map((ord) => (
+              {[...normalizedOrders].sort((a, b) => {
+                const da = a.date ? new Date(a.date).getTime() : 0;
+                const db = b.date ? new Date(b.date).getTime() : 0;
+                return db - da;
+              }).slice(0, 6).map((ord) => (
                 <tr key={ord.orderId || ord.id} className="hover:bg-gray-50/70 transition-colors group">
                   
                   {/* Order ID */}
