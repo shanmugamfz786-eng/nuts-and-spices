@@ -23,6 +23,7 @@ import {
   Filter
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE_URL } from '../../api';
 
 export default function AdminCategories() {
   const { 
@@ -61,6 +62,7 @@ export default function AdminCategories() {
 
   // Device File Upload Refs
   const [quickUploadCategoryId, setQuickUploadCategoryId] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
   // Delete Confirm Modal State
@@ -157,7 +159,37 @@ export default function AdminCategories() {
   const handleFileChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        alert('File size exceeds 20MB limit. Please choose a smaller image.');
+        if (e.target) e.target.value = '';
+        return;
+      }
       try {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const res = await fetch(`${API_BASE_URL}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        
+        let finalImageUrl = (data && data.success && data.imageUrl) ? data.imageUrl : null;
+        if (!finalImageUrl) {
+          finalImageUrl = await compressImageFile(file);
+        }
+
+        if (finalImageUrl) {
+          if (quickUploadCategoryId) {
+            updateCategory(quickUploadCategoryId, { image: finalImageUrl });
+            setQuickUploadCategoryId(null);
+          } else {
+            setCategoryImage(finalImageUrl);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to upload category image to Cloudinary, fallback to local compressor:', err);
         const compressedBase64 = await compressImageFile(file);
         if (compressedBase64) {
           if (quickUploadCategoryId) {
@@ -167,8 +199,8 @@ export default function AdminCategories() {
             setCategoryImage(compressedBase64);
           }
         }
-      } catch (err) {
-        console.error('Failed to process image:', err);
+      } finally {
+        setUploadingImage(false);
       }
     }
     if (e.target) e.target.value = '';
@@ -715,14 +747,15 @@ export default function AdminCategories() {
                     />
                     <button
                       type="button"
+                      disabled={uploadingImage}
                       onClick={() => {
                         setQuickUploadCategoryId(null);
                         if (fileInputRef.current) fileInputRef.current.click();
                       }}
-                      className="px-3.5 py-3 bg-emerald-50 hover:bg-emerald-100 text-[#128C7E] border border-emerald-200 rounded-xl font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shrink-0"
+                      className="px-3.5 py-3 bg-emerald-50 hover:bg-emerald-100 text-[#128C7E] border border-emerald-200 rounded-xl font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shrink-0 disabled:opacity-50"
                     >
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>Upload</span>
+                      <Upload className={`w-3.5 h-3.5 ${uploadingImage ? 'animate-bounce' : ''}`} />
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload'}</span>
                     </button>
                   </div>
 
@@ -804,8 +837,24 @@ export default function AdminCategories() {
               onChange={async (e) => {
                 const f = e.target.files && e.target.files[0];
                 if (f) {
-                  const base64 = await compressImageFile(f);
-                  if (base64) setNewProdImage(base64);
+                  try {
+                    const formData = new FormData();
+                    formData.append('image', f);
+                    const res = await fetch(`${API_BASE_URL}/upload`, {
+                      method: 'POST',
+                      body: formData
+                    });
+                    const data = await res.json();
+                    if (data && data.success && data.imageUrl) {
+                      setNewProdImage(data.imageUrl);
+                    } else {
+                      const base64 = await compressImageFile(f);
+                      if (base64) setNewProdImage(base64);
+                    }
+                  } catch (err) {
+                    const base64 = await compressImageFile(f);
+                    if (base64) setNewProdImage(base64);
+                  }
                 }
                 if (e.target) e.target.value = '';
               }}

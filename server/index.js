@@ -193,8 +193,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
-// Only listen on port if run directly as the main script (never when imported by api/index.js or Vercel)
-const isServerDirectRun = Boolean(process.argv[1] && (process.argv[1].endsWith('server\\index.js') || process.argv[1].endsWith('server/index.js')));
+// Only listen on port if run directly as the main script or hosted on Render/standard hosts (never when imported by Vercel serverless)
+const isServerDirectRun = Boolean(
+  process.env.RENDER ||
+  (!process.env.VERCEL && process.argv[1] && (
+    process.argv[1].endsWith('server\\index.js') || 
+    process.argv[1].endsWith('server/index.js') ||
+    process.argv[1].endsWith('index.js')
+  ))
+);
 if (isServerDirectRun) {
   app.listen(PORT, async () => {
     console.log(`\n🚀 HAJI NUTS & SPICES Backend running on http://localhost:${PORT}`);

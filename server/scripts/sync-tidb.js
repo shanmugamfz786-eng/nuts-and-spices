@@ -15,6 +15,15 @@ async function syncTiDB() {
 
   console.log('Connected to TiDB Cloud!');
 
+  // Upgrade image columns & settings to LONGTEXT
+  try {
+    await conn.execute("ALTER TABLE categories MODIFY COLUMN image LONGTEXT");
+    await conn.execute("ALTER TABLE products MODIFY COLUMN image LONGTEXT");
+    await conn.execute("ALTER TABLE settings MODIFY COLUMN setting_value LONGTEXT");
+  } catch (err) {
+    console.warn('Note modifying columns:', err.message);
+  }
+
   // 1. Remove unwanted test categories
   await conn.execute("DELETE FROM categories WHERE id IN ('cross-browser-sync', 'all')");
 

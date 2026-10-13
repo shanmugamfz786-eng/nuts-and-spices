@@ -13,7 +13,7 @@ export default function CartPage() {
         const token = localStorage.getItem('nuts_spices_auth_token');
         const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
           typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-            ? 'https://nuts-and-spices.onrender.com'
+            ? 'https://nuts-and-spices-dqzp.onrender.com'
             : ''
         );
         

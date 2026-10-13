@@ -20,7 +20,7 @@ export async function initializeDatabase() {
     `CREATE TABLE IF NOT EXISTS categories (
       id VARCHAR(50) PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
-      image TEXT,
+      image LONGTEXT,
       description TEXT,
       status VARCHAR(20) DEFAULT 'active',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -34,7 +34,7 @@ export async function initializeDatabase() {
       badge VARCHAR(50),
       rating DECIMAL(3,2) DEFAULT 5.0,
       reviews_count INT DEFAULT 0,
-      image TEXT,
+      image LONGTEXT,
       weights_json JSON,
       description TEXT,
       origin VARCHAR(100),
@@ -84,7 +84,7 @@ export async function initializeDatabase() {
 
     `CREATE TABLE IF NOT EXISTS settings (
       setting_key VARCHAR(50) PRIMARY KEY,
-      setting_value TEXT NOT NULL
+      setting_value LONGTEXT NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
   ];
 

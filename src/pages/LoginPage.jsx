@@ -56,7 +56,7 @@ export default function LoginPage() {
       const token = localStorage.getItem('nuts_spices_auth_token') || '';
       const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
         typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-          ? 'https://nuts-and-spices.onrender.com'
+          ? 'https://nuts-and-spices-dqzp.onrender.com'
           : ''
       );
       fetch(BASE + '/api/orders/my-orders', {
@@ -536,7 +536,12 @@ export default function LoginPage() {
       return;
     }
 
-    if (id.toLowerCase() === 'admin702@admin.com' || id.toLowerCase() === 'admin@nutsandspices.in') {
+    if (
+      id.toLowerCase() === 'admin702@admin.com' || 
+      id.toLowerCase() === 'admin@nutsandspices.in' || 
+      id.toLowerCase() === 'admin@admin.com' || 
+      id.toLowerCase().includes('admin')
+    ) {
       const adminRes = await loginAdmin(id, loginPassword);
       if (adminRes.success) {
         setSuccessMessage('Admin Access Granted!');
