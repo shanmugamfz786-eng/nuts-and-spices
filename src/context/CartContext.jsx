@@ -68,14 +68,11 @@ export const CartProvider = ({ children }) => {
     }).filter(Boolean);
   };
 
-  // Auto-sync catalog version to clear old stale localStorage cache on returning devices
+  // Clean up any stale legacy localStorage catalog cache
   try {
-    const savedVersion = localStorage.getItem('nuts_spices_catalog_version');
-    if (savedVersion !== CATALOG_VERSION + '_featured') {
-      localStorage.removeItem('nuts_spices_products');
-      localStorage.removeItem('nuts_spices_categories');
-      localStorage.setItem('nuts_spices_catalog_version', CATALOG_VERSION + '_featured');
-    }
+    localStorage.removeItem('nuts_spices_products');
+    localStorage.removeItem('nuts_spices_categories');
+    localStorage.removeItem('nuts_spices_combo_deals');
   } catch {}
 
   // 1b. AUTHENTICATION (USER)
@@ -88,13 +85,13 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // 2. PRODUCTS STATE (Admin Editable & Persisted in localStorage)
+  // 2. PRODUCTS STATE (Session Cached: 1-time backend load, instant page switches, auto-clears on tab close)
   const [products, setProducts] = useState(() => {
     try {
-      const saved = localStorage.getItem('nuts_spices_products');
+      const saved = sessionStorage.getItem('nuts_spices_products');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return sanitizeProductList(parsed);
         }
       }
@@ -102,13 +99,13 @@ export const CartProvider = ({ children }) => {
     return PRODUCTS;
   });
 
-  // 3. CATEGORIES STATE (Admin Editable & Persisted in localStorage)
+  // 3. CATEGORIES STATE (Session Cached: 1-time backend load, instant page switches, auto-clears on tab close)
   const [categories, setCategories] = useState(() => {
     try {
-      const saved = localStorage.getItem('nuts_spices_categories');
+      const saved = sessionStorage.getItem('nuts_spices_categories');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed.map(c => ({
             ...c,
             isPremium: c.isPremium !== undefined ? c.isPremium : (c.id !== 'all')
@@ -164,10 +161,10 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // 6.5 COMBO DEALS & ACCESS CONTROL (Admin Editable & Live Managed)
+  // 6.5 COMBO DEALS & ACCESS CONTROL (Session Cached)
   const [comboDeals, setComboDeals] = useState(() => {
     try {
-      const saved = localStorage.getItem('nuts_spices_combo_deals');
+      const saved = sessionStorage.getItem('nuts_spices_combo_deals');
       return saved ? JSON.parse(saved) : INITIAL_COMBO_DEALS;
     } catch {
       return INITIAL_COMBO_DEALS;
@@ -337,11 +334,11 @@ export const CartProvider = ({ children }) => {
   }, [storeSettings]);
 
   useEffect(() => {
-    try { localStorage.setItem('nuts_spices_products', JSON.stringify(products)); } catch (err) { console.warn('localStorage error:', err); }
+    try { sessionStorage.setItem('nuts_spices_products', JSON.stringify(products)); } catch (err) { console.warn('sessionStorage error:', err); }
   }, [products]);
 
   useEffect(() => {
-    try { localStorage.setItem('nuts_spices_categories', JSON.stringify(categories)); } catch (err) { console.warn('localStorage error:', err); }
+    try { sessionStorage.setItem('nuts_spices_categories', JSON.stringify(categories)); } catch (err) { console.warn('sessionStorage error:', err); }
   }, [categories]);
 
   useEffect(() => {
@@ -357,7 +354,7 @@ export const CartProvider = ({ children }) => {
   }, [reviews]);
 
   useEffect(() => {
-    try { localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(comboDeals)); } catch (err) { console.warn('localStorage error:', err); }
+    try { sessionStorage.setItem('nuts_spices_combo_deals', JSON.stringify(comboDeals)); } catch (err) { console.warn('sessionStorage error:', err); }
   }, [comboDeals]);
 
   useEffect(() => {
@@ -421,22 +418,30 @@ export const CartProvider = ({ children }) => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Realtime Cloud Catalog Sync for ALL devices (Phones, Laptops, Browsers)
+  // Realtime Cloud Catalog Sync (1-Time Session Cache: fast page switches, 0 repeated backend calls, clears on exit)
   useEffect(() => {
     let isMounted = true;
     const loadCloudData = async () => {
+      // If already loaded in this active browser session, skip network request completely
+      try {
+        if (sessionStorage.getItem('nuts_spices_catalog_loaded') === 'true') {
+          return;
+        }
+      } catch {}
+
       try {
         const cloudData = await fetchCloudCatalog();
         if (cloudData && isMounted) {
-          if (Array.isArray(cloudData.products)) {
+          if (Array.isArray(cloudData.products) && cloudData.products.length > 0) {
             const sanitized = sanitizeProductList(cloudData.products);
             setProducts(sanitized);
-            try { localStorage.setItem('nuts_spices_products', JSON.stringify(sanitized)); } catch {}
+            try { sessionStorage.setItem('nuts_spices_products', JSON.stringify(sanitized)); } catch {}
           }
-          if (Array.isArray(cloudData.categories)) {
+          if (Array.isArray(cloudData.categories) && cloudData.categories.length > 0) {
             setCategories(cloudData.categories);
-            try { localStorage.setItem('nuts_spices_categories', JSON.stringify(cloudData.categories)); } catch {}
+            try { sessionStorage.setItem('nuts_spices_categories', JSON.stringify(cloudData.categories)); } catch {}
           }
+          try { sessionStorage.setItem('nuts_spices_catalog_loaded', 'true'); } catch {}
         }
       } catch (err) {
         console.warn('Cloud catalog fetch error:', err);
@@ -444,13 +449,8 @@ export const CartProvider = ({ children }) => {
     };
 
     loadCloudData();
-    // Refresh catalog gently every 60 seconds (or on tab focus) instead of aggressive 2s polling
-    const interval = setInterval(loadCloudData, 60000);
-    window.addEventListener('focus', loadCloudData);
     return () => {
       isMounted = false;
-      clearInterval(interval);
-      window.removeEventListener('focus', loadCloudData);
     };
   }, []);
 
@@ -494,8 +494,11 @@ export const CartProvider = ({ children }) => {
     setReviews(INITIAL_REVIEWS);
     setStoreSettings(INITIAL_STORE_SETTINGS);
 
-    localStorage.setItem('nuts_spices_products', JSON.stringify(PRODUCTS));
-    localStorage.setItem('nuts_spices_categories', JSON.stringify(CATEGORIES));
+    try {
+      sessionStorage.setItem('nuts_spices_products', JSON.stringify(PRODUCTS));
+      sessionStorage.setItem('nuts_spices_categories', JSON.stringify(CATEGORIES));
+      sessionStorage.removeItem('nuts_spices_catalog_loaded');
+    } catch {}
     localStorage.setItem('nuts_spices_orders', JSON.stringify(INITIAL_ORDERS));
     localStorage.setItem('nuts_spices_offers', JSON.stringify(INITIAL_OFFERS));
     localStorage.setItem('nuts_spices_reviews', JSON.stringify(INITIAL_REVIEWS));
