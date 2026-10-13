@@ -10,11 +10,12 @@ export default function AdminOffers() {
 
   const [formData, setFormData] = useState({
     name: '',
+    code: 'HAJI20',
     discountPercent: 20,
     applicableCategory: 'nuts-dry-fruits',
     minOrderAmount: 999,
     startDate: '2026-09-01',
-    endDate: '2026-09-30',
+    endDate: '2026-11-30',
     status: 'ACTIVE'
   });
 
@@ -22,11 +23,12 @@ export default function AdminOffers() {
     setEditingOffer(null);
     setFormData({
       name: '20% OFF – Premium Nuts',
+      code: 'HAJI20',
       discountPercent: 20,
       applicableCategory: 'nuts-dry-fruits',
       minOrderAmount: 999,
       startDate: '2026-09-01',
-      endDate: '2026-09-30',
+      endDate: '2026-11-30',
       status: 'ACTIVE'
     });
     setIsModalOpen(true);
@@ -36,11 +38,12 @@ export default function AdminOffers() {
     setEditingOffer(off);
     setFormData({
       name: off.name,
+      code: off.code || `HAJI${off.discountPercent || 20}`,
       discountPercent: off.discountPercent,
       applicableCategory: off.applicableCategory || 'nuts-dry-fruits',
       minOrderAmount: off.minOrderAmount || 500,
       startDate: off.startDate || '2026-09-01',
-      endDate: off.endDate || '2026-09-30',
+      endDate: off.endDate || '2026-11-30',
       status: off.status || 'ACTIVE'
     });
     setIsModalOpen(true);
@@ -50,9 +53,11 @@ export default function AdminOffers() {
     e.preventDefault();
     const catObj = categories.find(c => c.id === formData.applicableCategory);
     const categoryName = catObj ? catObj.name : 'All Products';
+    const cleanCode = (formData.code || `HAJI${formData.discountPercent}`).trim().toUpperCase();
 
     const payload = {
       name: formData.name,
+      code: cleanCode,
       discountPercent: Number(formData.discountPercent),
       applicableCategory: formData.applicableCategory,
       applicableCategoryName: categoryName,
@@ -116,6 +121,13 @@ export default function AdminOffers() {
               <h3 className="text-lg font-black font-serif text-gray-900 tracking-wide leading-snug">
                 {off.name}
               </h3>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">Coupon Code:</span>
+                <span className="px-2.5 py-0.5 bg-amber-50 border border-dashed border-amber-400 rounded-md font-mono text-xs font-black text-amber-900">
+                  {off.code || `HAJI${off.discountPercent}`}
+                </span>
+              </div>
 
               <div className="bg-[#F9FAFB]/70 p-3 rounded-xl border border-[#E5E7EB] space-y-1 text-xs text-gray-600">
                 <div>Applicable: <strong className="text-gray-900">{off.applicableCategoryName || 'All Categories'}</strong></div>
@@ -209,6 +221,18 @@ export default function AdminOffers() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. 20% OFF – Premium Nuts"
                   className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase text-gray-700 mb-1">Coupon Code *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  placeholder="e.g. HAJI20, DIWALI15"
+                  className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-2.5 text-gray-900 outline-none font-mono font-bold uppercase"
                 />
               </div>
 

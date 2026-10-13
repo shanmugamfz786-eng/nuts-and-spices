@@ -150,36 +150,39 @@ export const INITIAL_ORDERS = [
 export const INITIAL_OFFERS = [
   {
     id: 'off-01',
+    code: 'HAJI20',
     name: '20% OFF – Premium Nuts',
     discountPercent: 20,
     applicableCategory: 'nuts-dry-fruits',
     applicableCategoryName: 'Nuts & Dry Fruits',
     minOrderAmount: 999,
     startDate: '2026-09-01',
-    endDate: '2026-09-30',
+    endDate: '2026-11-30',
     status: 'ACTIVE'
   },
   {
     id: 'off-02',
+    code: 'DATES15',
     name: '15% OFF – Royal Dates Harvest',
     discountPercent: 15,
     applicableCategory: 'dates',
     applicableCategoryName: 'Dates',
     minOrderAmount: 500,
     startDate: '2026-09-10',
-    endDate: '2026-10-15',
+    endDate: '2026-11-15',
     status: 'ACTIVE'
   },
   {
     id: 'off-03',
+    code: 'SPICE25',
     name: 'Festive Gourmet Spice Combo 25% OFF',
     discountPercent: 25,
     applicableCategory: 'masala',
     applicableCategoryName: 'Masala & Spices',
     minOrderAmount: 750,
     startDate: '2026-10-01',
-    endDate: '2026-10-31',
-    status: 'SCHEDULED'
+    endDate: '2026-11-30',
+    status: 'ACTIVE'
   }
 ];
 

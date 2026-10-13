@@ -255,6 +255,18 @@ export default function Navbar() {
                 </button>
 
                 <button
+                  onClick={() => navigate('offers')}
+                  className={`text-xs sm:text-sm font-extrabold uppercase tracking-widest transition-colors relative flex items-center gap-1.5 ${
+                    activePage === 'offers' ? 'text-[#128C7E]' : 'text-gray-600 hover:text-black'
+                  }`}
+                >
+                  <span>OFFERS</span>
+                  <span className="px-1.5 py-0.5 bg-amber-400 text-gray-950 font-black text-[9px] rounded-full uppercase tracking-tight shadow-xs">
+                    DEALS
+                  </span>
+                </button>
+
+                <button
                   onClick={() => navigate('about')}
                   className={`text-xs sm:text-sm font-extrabold uppercase tracking-widest transition-colors ${
                     activePage === 'about' ? 'text-black' : 'text-gray-600 hover:text-black'
@@ -520,10 +532,15 @@ export default function Navbar() {
               {/* Exclusive Offers */}
               <button
                 onClick={() => { setIsMobileMenuOpen(false); navigate('offers'); }}
-                className="w-full text-left py-4 flex items-center justify-between text-base font-extrabold font-serif text-[#000000] hover:text-[#000000] transition-colors group cursor-pointer"
+                className="w-full text-left py-4 flex items-center justify-between text-base font-extrabold font-serif text-[#000000] hover:text-[#128C7E] transition-colors group cursor-pointer"
               >
-                <span>Exclusive Offers</span>
-                <ChevronRight className="w-5 h-5 text-[#8C7A6B] group-hover:text-[#000000] group-hover:translate-x-1 transition-transform" />
+                <span className="flex items-center gap-2">
+                  <span>Exclusive Offers & Coupons</span>
+                  <span className="bg-[#128C7E] text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    🎟️ VOUCHERS
+                  </span>
+                </span>
+                <ChevronRight className="w-5 h-5 text-[#8C7A6B] group-hover:text-[#128C7E] group-hover:translate-x-1 transition-transform" />
               </button>
 
             </div>
