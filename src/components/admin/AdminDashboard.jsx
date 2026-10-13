@@ -634,9 +634,8 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
         
         {/* Quick Management Shortcuts */}
         <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-xs space-y-4">
-          <h4 className="text-sm font-black uppercase text-gray-500 tracking-wider flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>Store Operations Shortcuts</span>
+          <h4 className="text-sm font-black uppercase text-gray-500 tracking-wider">
+            Store Operations Shortcuts
           </h4>
 
           <div className="grid grid-cols-2 gap-3">
