@@ -237,27 +237,15 @@ export default function AdminPage() {
 
         </div>
 
-        {/* Bottom Administrator Profile Card */}
-        <div className="p-4 border-t border-slate-800/80 bg-slate-900/40 shrink-0 space-y-2">
-          <div className="flex items-center justify-between bg-slate-800/60 p-2.5 rounded-2xl border border-slate-700/50">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-[#128C7E] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
-                ADM
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-black text-white truncate">Sowcarpet Operations</p>
-                <p className="text-[10px] text-emerald-400 font-mono truncate">Super Administrator</p>
-              </div>
-            </div>
-
-            <button
-              onClick={logoutAdmin}
-              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-lg transition-colors cursor-pointer"
-              title="Sign Out of Admin Console"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Bottom Logout Button */}
+        <div className="p-4 border-t border-slate-800/80 bg-slate-900/40 shrink-0">
+          <button
+            onClick={logoutAdmin}
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-slate-800/80 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 border border-slate-700/50 hover:border-rose-500/30 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
