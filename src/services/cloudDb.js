@@ -10,7 +10,7 @@ function getEndpoints() {
   const endpoints = [];
   endpoints.push(`${API_BASE_URL}/catalog`);
 
-  // If testing on localhost, also push to live production server so changes show on https://nuts-spices-e-commerce.vercel.app/
+  // If testing on localhost, also push to live production server so changes show on https://www.hajinutsandspices.com/
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     endpoints.push('https://nuts-and-spices-dqzp.onrender.com/api/catalog'); // Updated to Render
   }
