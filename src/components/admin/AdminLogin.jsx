@@ -83,11 +83,21 @@ export default function AdminLogin() {
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-[#128C7E] hover:bg-[#128C7E] text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg border border-[#000000] transition-all transform active:scale-98 mt-3 cursor-pointer"
+            className="w-full py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all transform active:scale-98 mt-3 cursor-pointer"
           >
             Sign In To Admin Portal
           </button>
         </form>
+
+        <div className="mt-6 text-center pt-4 border-t border-[#E5E7EB]">
+          <button
+            type="button"
+            onClick={() => navigate('home')}
+            className="text-xs font-bold text-gray-500 hover:text-black transition-colors cursor-pointer"
+          >
+            ← Return to Store Home
+          </button>
+        </div>
 
       </div>
     </div>

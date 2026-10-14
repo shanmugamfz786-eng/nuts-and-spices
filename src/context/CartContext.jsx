@@ -63,17 +63,12 @@ export const CartProvider = ({ children }) => {
         price: basePrice,
         weights: validWeights,
         status: activeState ? 'Active' : 'Inactive',
-        active: activeState
+        active: activeState,
+        isFeaturedToday: p.isFeaturedToday === true || p.is_featured_today === 1,
+        isBestSelling: p.isBestSelling === true || p.is_best_selling === 1
       };
     }).filter(Boolean);
   };
-
-  // Clean up any stale legacy localStorage catalog cache
-  try {
-    localStorage.removeItem('nuts_spices_products');
-    localStorage.removeItem('nuts_spices_categories');
-    localStorage.removeItem('nuts_spices_combo_deals');
-  } catch {}
 
   // 1b. AUTHENTICATION (USER)
   const [user, setUser] = useState(() => {
@@ -85,10 +80,10 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // 2. PRODUCTS STATE (Session Cached: 1-time backend load, instant page switches, auto-clears on tab close)
+  // 2. PRODUCTS STATE (Hydrate from localStorage or sessionStorage with fallback to master PRODUCTS)
   const [products, setProducts] = useState(() => {
     try {
-      const saved = sessionStorage.getItem('nuts_spices_products');
+      const saved = localStorage.getItem('nuts_spices_products') || sessionStorage.getItem('nuts_spices_products');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -297,8 +292,10 @@ export const CartProvider = ({ children }) => {
           : ''
       );
       const token = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
-      const headers = { 'Accept': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (!token || !token.startsWith('eyJ')) {
+        return [];
+      }
+      const headers = { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` };
       const res = await fetch(`${BASE}/api/orders`, { headers });
       const data = await res.json();
       if (data && data.success && Array.isArray(data.orders)) {
@@ -320,10 +317,11 @@ export const CartProvider = ({ children }) => {
     return [];
   };
 
-  // Fetch live orders automatically on mount and when admin is active
+  // Fetch live orders automatically on mount ONLY when admin is active
   useEffect(() => {
+    if (!isAdminLoggedIn) return;
     refreshOrders();
-    const interval = setInterval(refreshOrders, 4000);
+    const interval = setInterval(refreshOrders, 10000);
     window.addEventListener('focus', refreshOrders);
     return () => {
       clearInterval(interval);
@@ -337,7 +335,10 @@ export const CartProvider = ({ children }) => {
   }, [storeSettings]);
 
   useEffect(() => {
-    try { sessionStorage.setItem('nuts_spices_products', JSON.stringify(products)); } catch (err) { console.warn('sessionStorage error:', err); }
+    try { 
+      sessionStorage.setItem('nuts_spices_products', JSON.stringify(products));
+      localStorage.setItem('nuts_spices_products', JSON.stringify(products));
+    } catch (err) { console.warn('storage error:', err); }
   }, [products]);
 
   useEffect(() => {
@@ -712,6 +713,20 @@ export const CartProvider = ({ children }) => {
 
   const logoutAdmin = () => {
     setIsAdminLoggedIn(false);
+    try {
+      localStorage.removeItem('nuts_spices_admin_auth');
+      localStorage.removeItem('nuts_spices_admin_logged');
+      // If the current logged-in user is admin, clear that as well
+      if (user && user.role === 'admin') {
+        setUser(null);
+        localStorage.removeItem('nuts_spices_user');
+        localStorage.removeItem('nuts_spices_auth_token');
+      }
+    } catch {}
+    setActivePage('home');
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '/');
+    }
   };
 
   // NAVIGATION & ROUTING
@@ -979,9 +994,13 @@ export const CartProvider = ({ children }) => {
 
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       try {
+        const token = localStorage.getItem('nuts_spices_auth_token');
         const res = await fetch(API_BASE_URL + '/admin/sync-git', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
           body: JSON.stringify({ products: prods, categories: cats })
         });
         const data = await res.json();

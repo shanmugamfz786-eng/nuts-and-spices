@@ -28,6 +28,10 @@ export default function CategoryPage() {
       const pCat = (p.category || '').toLowerCase().trim();
       const pCatName = (p.categoryName || '').toLowerCase().trim();
 
+      if (cId === 'featured-today' || cId === 'featured') {
+        return p.isFeaturedToday === true || p.is_featured_today === 1;
+      }
+
       return (
         pCat === cId ||
         pCat === cName ||

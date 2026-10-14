@@ -32,6 +32,15 @@ export default function ShopPage() {
       return matchesSearch;
     }
 
+    if (activeCategory === 'featured-today' || activeCategory === 'featured') {
+      const isFeatured = p.isFeaturedToday === true || p.is_featured_today === 1;
+      const matchesSearch = !searchFilter.trim() || 
+                            p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                            (p.categoryName || '').toLowerCase().includes(searchFilter.toLowerCase()) ||
+                            (p.description || '').toLowerCase().includes(searchFilter.toLowerCase());
+      return isFeatured && matchesSearch;
+    }
+
     const catObj = (categories || []).find(c => c.id === activeCategory);
     const cId = (activeCategory || '').toLowerCase().trim();
     const cName = catObj ? (catObj.name || '').toLowerCase().trim() : cId;

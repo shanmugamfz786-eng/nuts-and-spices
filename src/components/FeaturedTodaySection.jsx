@@ -142,7 +142,7 @@ function FeaturedCard({ product }) {
             </>
           ) : (
             <>
-              <ShoppingCart className="w-3.5 h-3.5 text-[#000000]" />
+              <ShoppingCart className="w-3.5 h-3.5 text-white" />
               <span>ADD TO CART</span>
             </>
           )}

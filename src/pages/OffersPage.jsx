@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
 import { INITIAL_OFFERS } from '../data/mockAdminData';
+import { PRODUCTS } from '../data/products';
 import { 
   Ticket, 
   Tag, 
@@ -22,7 +23,15 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OffersPage() {
-  const { offers: cartOffers = [], categories = [], applyCoupon, navigate } = useCart();
+  const { 
+    offers: cartOffers = [], 
+    categories = [], 
+    products: cartProducts = [], 
+    addToCart, 
+    applyCoupon, 
+    navigate 
+  } = useCart();
+  const allProducts = (cartProducts && cartProducts.length > 0) ? cartProducts : PRODUCTS;
   const offers = (cartOffers && cartOffers.length > 0) ? cartOffers : INITIAL_OFFERS;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,11 +85,31 @@ export default function OffersPage() {
     }, 2800);
   };
 
-  // Direct Apply to Cart
+  // Direct Add to Cart with matching product & coupon applied
   const handleApplyToCart = (offer) => {
-    const res = applyCoupon(offer);
+    // 1. Find a product matching this offer's category (or fallback to first product)
+    const targetCat = offer.applicableCategory;
+    let matchedProduct = allProducts.find(p => 
+      p && (p.category === targetCat || p.categoryId === targetCat)
+    );
+    if (!matchedProduct) {
+      matchedProduct = allProducts[0];
+    }
+
+    if (matchedProduct && addToCart) {
+      // Pick appropriate weight variant or default
+      const weightObj = (matchedProduct.weights && matchedProduct.weights.length > 0)
+        ? matchedProduct.weights[0]
+        : { label: 'Standard', price: matchedProduct.price || 500, originalPrice: matchedProduct.originalPrice || 600 };
+      
+      addToCart(matchedProduct, weightObj, 1);
+    }
+
+    // 2. Apply the offer coupon
+    applyCoupon(offer);
     setAppliedId(offer.id);
-    setToastNotice(`🎉 ${res.message}`);
+    setToastNotice(`🎉 Added ${matchedProduct?.name || 'Item'} to cart with ${offer.discountPercent}% OFF coupon!`);
+    
     setTimeout(() => {
       setAppliedId(null);
       setToastNotice('');
@@ -205,32 +234,32 @@ export default function OffersPage() {
         )}
       </AnimatePresence>
 
-      {/* 3. FILTER & SEARCH CONTROL BAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-9 relative z-20">
-        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl border border-[#E5E7EB] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* 3. SEARCH & CATEGORY FILTER CONTROL BAR (Directly Below Hero Section) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 relative z-20">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-md border border-[#E5E7EB] space-y-4">
           
-          {/* Search Box */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          {/* Prominent Search Box */}
+          <div className="relative w-full">
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search offers by name, dry fruits, spices, or dates..."
-              className="w-full pl-10 pr-16 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20 rounded-xl text-xs text-[#000000] placeholder:text-gray-400 outline-none transition-all"
+              className="w-full pl-11 pr-20 py-3 bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20 rounded-2xl text-xs sm:text-sm text-[#000000] placeholder:text-gray-400 outline-none transition-all shadow-inner"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-400 hover:text-black cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 hover:text-black cursor-pointer bg-gray-200/70 hover:bg-gray-300 rounded-lg px-2 py-1 transition-all"
               >
                 Clear
               </button>
             )}
           </div>
 
-          {/* Category Filter Pills (Active Only removed cleanly) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-1 border-t border-gray-100">
             <button
               onClick={() => setSelectedCategory('all')}
               className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
@@ -396,12 +425,12 @@ export default function OffersPage() {
                         {isApplied ? (
                           <>
                             <Check className="w-3.5 h-3.5" />
-                            <span>Applied!</span>
+                            <span>Added to Cart!</span>
                           </>
                         ) : (
                           <>
-                            <Zap className="w-3.5 h-3.5 text-white fill-white" />
-                            <span>Apply Offer</span>
+                            <ShoppingBag className="w-3.5 h-3.5 text-white" />
+                            <span>Add to Cart</span>
                           </>
                         )}
                       </button>

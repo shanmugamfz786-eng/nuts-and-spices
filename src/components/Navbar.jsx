@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { Search, Heart, ShoppingBag, User, Menu, X, LayoutGrid, ChevronRight } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Menu, X, LayoutGrid, ChevronRight, Sparkles, Gift, Tag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
@@ -59,6 +59,17 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Lock body scroll when Category Drawer or Mobile Menu is open
+  useEffect(() => {
+    if (isCategoryDrawerOpen || isMobileMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isCategoryDrawerOpen, isMobileMenuOpen]);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (navSearchInput.trim()) {
@@ -109,25 +120,32 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4">
             
-            {/* 1. LEFT: BRAND LOGO WITH IMAGE */}
-            <div className="flex items-center shrink-0">
+            {/* 1. LEFT: BRAND LOGO WITH IMAGE (Click image to open Categories Drawer) */}
+            <div className="flex items-center shrink-0 gap-2 sm:gap-3">
               <button 
-                onClick={() => navigate('home')}
-                className="flex items-center gap-2 sm:gap-3 focus:outline-none cursor-pointer group"
+                type="button"
+                onClick={() => setIsCategoryDrawerOpen(true)}
+                title="Browse All Categories"
+                className="focus:outline-none cursor-pointer group rounded-full p-0.5 hover:ring-2 hover:ring-[#128C7E] transition-all"
               >
                 <img 
                   src="/logo.jpg" 
                   alt="Haji Nuts & Spices Logo" 
                   className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full shadow-sm group-hover:scale-105 transition-transform"
                 />
-                <div className="flex flex-col text-left">
-                  <span className="text-base sm:text-xl font-black tracking-wider text-black font-serif uppercase leading-none">
-                    HAJI
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] font-extrabold text-black tracking-widest uppercase font-serif inline-block mt-0.5">
-                    NUTS & SPICES
-                  </span>
-                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('home')}
+                className="flex flex-col text-left focus:outline-none cursor-pointer group"
+              >
+                <span className="text-base sm:text-xl font-black tracking-wider text-black font-serif uppercase leading-none group-hover:text-[#128C7E] transition-colors">
+                  HAJI
+                </span>
+                <span className="text-[10px] sm:text-[11px] font-extrabold text-black tracking-widest uppercase font-serif inline-block mt-0.5 group-hover:text-[#128C7E] transition-colors">
+                  NUTS & SPICES
+                </span>
               </button>
             </div>
 
@@ -254,17 +272,7 @@ export default function Navbar() {
                   SHOP
                 </button>
 
-                <button
-                  onClick={() => navigate('offers')}
-                  className={`text-xs sm:text-sm font-extrabold uppercase tracking-widest transition-colors relative flex items-center gap-1.5 ${
-                    activePage === 'offers' ? 'text-[#128C7E]' : 'text-gray-600 hover:text-black'
-                  }`}
-                >
-                  <span>OFFERS</span>
-                  <span className="px-1.5 py-0.5 bg-amber-400 text-gray-950 font-black text-[9px] rounded-full uppercase tracking-tight shadow-xs">
-                    DEALS
-                  </span>
-                </button>
+
 
                 <button
                   onClick={() => navigate('about')}
@@ -562,66 +570,178 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* FULL HEIGHT LEFT SIDE CATEGORY DRAWER OVERLAY */}
+      {/* FULL HEIGHT LEFT SIDE PROFESSIONAL CATEGORY & DEALS DRAWER OVERLAY */}
       {isCategoryDrawerOpen && (
         <div className="fixed inset-0 z-50 flex h-screen w-screen overflow-hidden">
-          {/* Soft Warm Backdrop Overlay */}
+          {/* Soft Backdrop Overlay */}
           <div 
-            className="fixed inset-0 bg-[#3D2314]/35 backdrop-blur-xs transition-opacity animate-in fade-in duration-300"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-300"
             onClick={() => setIsCategoryDrawerOpen(false)}
           />
 
-          {/* Side Drawer Content Panel */}
-          <div className="relative w-80 max-w-[85vw] bg-white h-screen shadow-2xl flex flex-col z-50 animate-in slide-in-from-left duration-300 border-r border-[#E5E7EB]">
+          {/* Luxury Executive Side Drawer Panel */}
+          <div className="relative w-84 sm:w-96 max-w-[90vw] bg-white h-screen shadow-2xl flex flex-col z-50 animate-in slide-in-from-left duration-300 border-r border-[#E5E7EB]">
             
-            {/* Drawer Header */}
-            <div className="p-5 border-b border-[#E5E7EB] flex items-center justify-between bg-[#F9FAFB] shrink-0">
-              <h2 className="text-xl font-extrabold font-serif tracking-wider text-[#000000] uppercase">
-                CATEGORIES
-              </h2>
+            {/* 1. Brand Header */}
+            <div className="p-5 bg-gradient-to-r from-[#128C7E] to-[#075E54] text-white flex items-center justify-between shrink-0 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-white p-0.5 shadow-sm shrink-0">
+                  <img src="/logo.jpg" alt="Logo" className="w-full h-full object-contain rounded-full" />
+                </div>
+                <div>
+                  <h2 className="text-base font-black font-serif tracking-wider uppercase leading-tight">
+                    Haji Nuts & Spices
+                  </h2>
+                  <span className="text-[10px] font-extrabold text-emerald-200 tracking-widest uppercase block mt-0.5">
+                    Gourmet Catalog & Deals
+                  </span>
+                </div>
+              </div>
+              
               <button
+                type="button"
                 onClick={() => setIsCategoryDrawerOpen(false)}
-                className="p-1 text-[#8C7A6B] hover:text-[#000000] rounded-lg transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                title="Close drawer"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Category List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[#E5E7EB]/50 py-2 min-h-0 bg-white">
-              {subCategories.map((cat) => (
+            {/* 2. Scrollable Body with Isolated Scrolling */}
+            <div className="flex-1 overflow-y-auto overscroll-contain divide-y divide-gray-100 min-h-0 bg-[#FDFBF7]/40">
+              
+              {/* SPECIAL SPOTLIGHT: COMBOS & OFFERS SECTION */}
+              <div className="p-4 space-y-2.5 bg-white">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#128C7E] block">
+                  Exclusive Deals & Privileges
+                </span>
+
+                {/* Combo Deals Card */}
                 <button
-                  key={cat.id}
+                  type="button"
                   onClick={() => {
                     setIsCategoryDrawerOpen(false);
-                    navigate('category', { category: cat.id });
+                    navigate('combo-deals');
                   }}
-                  className="w-full text-left px-5 py-3.5 text-xs font-bold text-[#000000] hover:bg-[#F9FAFB] flex items-center justify-between group transition-colors cursor-pointer"
+                  className="w-full text-left p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-100/70 border border-amber-200/90 hover:border-amber-400 shadow-xs hover:shadow-md transition-all group flex items-center justify-between cursor-pointer"
                 >
-                  <span className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full overflow-hidden border border-[#E5E7EB] group-hover:border-[#000000] shadow-xs shrink-0 transition-all bg-[#F9FAFB]">
-                      <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                    </span>
-                    <span className="text-xs sm:text-sm font-bold text-[#000000] group-hover:text-[#000000]">
-                      {cat.name}
-                    </span>
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-[#8C7A6B] group-hover:text-[#000000] group-hover:translate-x-1 transition-transform" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                      <Gift className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-gray-950 font-serif">
+                          Special Combo Deals
+                        </span>
+                        <span className="px-1.5 py-0.2 bg-amber-500 text-white font-black text-[9px] rounded-md uppercase">
+                          SAVE 35%
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-amber-900/80 font-medium mt-0.5">
+                        Luxury gift hampers, health & biryani kits
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-amber-700 group-hover:translate-x-1 transition-transform shrink-0" />
                 </button>
-              ))}
+
+                {/* Gourmet Offers Card */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCategoryDrawerOpen(false);
+                    navigate('offers');
+                  }}
+                  className="w-full text-left p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/70 border border-emerald-200/90 hover:border-[#128C7E] shadow-xs hover:shadow-md transition-all group flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#128C7E] text-white flex items-center justify-center shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                      <Tag className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-gray-950 font-serif">
+                          Gourmet Vouchers & Offers
+                        </span>
+                        <span className="px-1.5 py-0.2 bg-[#075E54] text-white font-black text-[9px] rounded-md uppercase">
+                          ACTIVE
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-emerald-900/80 font-medium mt-0.5">
+                        Harvest discount codes & seasonal coupons
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#128C7E] group-hover:translate-x-1 transition-transform shrink-0" />
+                </button>
+              </div>
+
+              {/* ALL PRODUCT CATEGORIES SECTION */}
+              <div className="py-3 bg-white">
+                <div className="px-5 pb-2 pt-1 flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Product Categories ({subCategories.length})
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-400">
+                    Select to browse
+                  </span>
+                </div>
+
+                <div className="space-y-0.5">
+                  {subCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        setIsCategoryDrawerOpen(false);
+                        navigate('category', { category: cat.id });
+                      }}
+                      className="w-full text-left px-5 py-3 hover:bg-[#F9FAFB] flex items-center justify-between group transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl overflow-hidden border border-[#E5E7EB] group-hover:border-[#128C7E] shadow-2xs shrink-0 transition-all bg-[#F9FAFB]">
+                          <img 
+                            src={cat.image} 
+                            alt={cat.name} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-gray-900 group-hover:text-[#128C7E] transition-colors truncate font-serif">
+                          {cat.name}
+                        </span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#128C7E] group-hover:translate-x-1 transition-transform shrink-0 ml-2" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
 
-            {/* Drawer Footer */}
-            <div className="p-4 bg-[#F9FAFB] border-t border-[#E5E7EB] text-center shrink-0">
+            {/* 3. Drawer Footer */}
+            <div className="p-4 bg-gray-50 border-t border-[#E5E7EB] space-y-2 shrink-0">
               <button
+                type="button"
                 onClick={() => {
                   setIsCategoryDrawerOpen(false);
                   navigate('shop', { category: 'all' });
                 }}
-                className="text-xs font-extrabold text-[#000000] hover:underline cursor-pointer"
+                className="w-full py-2.5 px-4 bg-gray-900 hover:bg-black text-white text-xs font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
               >
-                View Full Shop Catalog →
+                <span>View Full Shop Catalog</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
+
+              <div className="flex items-center justify-center gap-3 text-[10px] font-semibold text-gray-500 pt-1">
+                <span className="flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  100% Pure Origin
+                </span>
+                <span>•</span>
+                <span>Pan-India Delivery</span>
+              </div>
             </div>
 
           </div>

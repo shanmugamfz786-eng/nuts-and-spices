@@ -161,70 +161,75 @@ export default function ProductDetailsPage() {
             </p>
 
             {/* Select Weight */}
-            <div className="space-y-2 pt-2 border-t border-[#F9FAFB]">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#000000] block">
+            <div className="space-y-2 pt-2 border-t border-gray-100">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-black block">
                 Select Package Weight:
               </span>
               <div className="flex flex-wrap gap-2">
-                {safeWeights.map((w, i) => (
-                  <button
-                    key={product.id + '-' + w.label + '-' + i}
-                    onClick={() => setSelectedWeight(w)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                      activeWeight === w
-                        ? 'bg-[#000000] text-white border-[#000000] shadow-md'
-                        : 'bg-[#F9FAFB] text-[#000000] border-[#E5E7EB] hover:border-[#000000]'
-                    }`}
-                  >
-                    <span>{w.label}</span>
-                    <span className="ml-1.5 font-normal text-[11px] opacity-80">₹{w.price}</span>
-                  </button>
-                ))}
+                {safeWeights.map((w, i) => {
+                  const isSelected = activeWeight === w;
+                  return (
+                    <button
+                      key={product.id + '-' + w.label + '-' + i}
+                      onClick={() => setSelectedWeight(w)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#128C7E] text-white border-[#128C7E] shadow-sm'
+                          : 'bg-white text-gray-800 border-gray-300 hover:border-[#128C7E] hover:bg-emerald-50/50'
+                      }`}
+                    >
+                      <span>{w.label}</span>
+                      <span className={`ml-1.5 font-normal text-[11px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                        ₹{w.price}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Quantity Selector */}
             <div className="space-y-2 pt-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#000000] block">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-black block">
                 Quantity:
               </span>
               <div className="flex items-center gap-3">
-                <div className="flex items-center border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] p-1">
+                <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50 p-1">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-[#000000] hover:bg-[#E5E7EB] transition-colors flex items-center justify-center shadow-xs"
+                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-gray-800 hover:bg-gray-100 transition-colors flex items-center justify-center shadow-2xs cursor-pointer"
                   >
                     -
                   </button>
-                  <span className="w-12 text-center text-sm font-bold text-[#000000]">
+                  <span className="w-12 text-center text-sm font-bold text-gray-950">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-[#000000] hover:bg-[#E5E7EB] transition-colors flex items-center justify-center shadow-xs"
+                    className="w-8 h-8 rounded-lg bg-white font-bold text-base text-gray-800 hover:bg-gray-100 transition-colors flex items-center justify-center shadow-2xs cursor-pointer"
                   >
                     +
                   </button>
                 </div>
-                <span className="text-xs text-[#8C7A6B]">In stock & ready to ship</span>
+                <span className="text-xs text-gray-500 font-medium">In stock & ready to ship</span>
               </div>
             </div>
 
             {/* Dynamic Total Price */}
-            <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] flex items-center justify-between">
+            <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex items-center justify-between">
               <div>
-                <span className="text-xs text-[#8C7A6B] block">Total Amount:</span>
+                <span className="text-xs text-gray-500 block">Total Amount:</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#000000]">
+                  <span className="text-2xl font-black text-[#128C7E] font-serif">
                     ₹{totalPrice.toLocaleString('en-IN')}
                   </span>
-                  <span className="text-xs text-[#8C7A6B] line-through">
+                  <span className="text-xs text-gray-400 line-through font-mono">
                     ₹{originalTotalPrice.toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
 
-              <span className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-md">
+              <span className="text-xs font-bold text-emerald-800 bg-emerald-100/80 border border-emerald-200 px-3 py-1 rounded-full">
                 Free Express Delivery Eligible
               </span>
             </div>
@@ -232,24 +237,24 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="space-y-3 pt-4 border-t border-[#F9FAFB]">
+          <div className="space-y-3 pt-4 border-t border-gray-100">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={handleAddToCart}
-                className={`py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                className={`py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg active:scale-95 ${
                   added 
-                    ? 'bg-[#075E54] text-white shadow-md' 
-                    : 'bg-[#128C7E] hover:bg-[#075E54] text-white shadow-lg hover:shadow-xl'
+                    ? 'bg-[#075E54] text-white' 
+                    : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
                 }`}
               >
                 {added ? (
                   <>
-                    <Check className="w-5 h-5" />
+                    <Check className="w-5 h-5 text-white" />
                     <span>Added to Cart!</span>
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="w-5 h-5 text-[#000000]" />
+                    <ShoppingBag className="w-5 h-5 text-white" />
                     <span>Add to Cart</span>
                   </>
                 )}
@@ -257,7 +262,7 @@ export default function ProductDetailsPage() {
 
               <button
                 onClick={handleQuickCheckout}
-                className="py-3.5 px-6 rounded-2xl font-bold text-sm bg-[#000000] hover:bg-[#000000] text-white transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                className="py-3.5 px-6 rounded-2xl font-bold text-sm bg-gray-950 hover:bg-black text-white transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
                 <span>Proceed to Cart & Checkout</span>
               </button>
