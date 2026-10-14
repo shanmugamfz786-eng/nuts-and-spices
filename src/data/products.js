@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v8_1791194017161';
+export const CATALOG_VERSION = 'v8_restored_original_images_2026';
 
 export const CATEGORIES = [
   {

@@ -59,7 +59,7 @@ export const CartProvider = ({ children }) => {
         name: p.name || 'Gourmet Item',
         category: p.category || 'nuts-dry-fruits',
         categoryName: p.categoryName || 'NUTS & DRY FRUITS',
-        image: p.image || seedProductImageMap.get(p.id) || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
+        image: seedProductImageMap.get(p.id) || p.image || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
         price: basePrice,
         weights: validWeights,
         status: activeState ? 'Active' : 'Inactive',
@@ -83,6 +83,15 @@ export const CartProvider = ({ children }) => {
   // 2. PRODUCTS STATE (Hydrate from localStorage or sessionStorage with fallback to master PRODUCTS)
   const [products, setProducts] = useState(() => {
     try {
+      const storedVer = localStorage.getItem('nuts_spices_catalog_version');
+      if (storedVer !== CATALOG_VERSION) {
+        localStorage.removeItem('nuts_spices_products');
+        sessionStorage.removeItem('nuts_spices_products');
+        sessionStorage.removeItem('nuts_spices_categories');
+        sessionStorage.removeItem('nuts_spices_catalog_loaded');
+        localStorage.setItem('nuts_spices_catalog_version', CATALOG_VERSION);
+        return PRODUCTS;
+      }
       const saved = localStorage.getItem('nuts_spices_products') || sessionStorage.getItem('nuts_spices_products');
       if (saved) {
         const parsed = JSON.parse(saved);
