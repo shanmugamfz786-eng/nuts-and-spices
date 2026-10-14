@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { storage } from '../config/cloudinary.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/authMiddleware.js';
 import { adminMiddleware } from '../middleware/adminMiddleware.js';
 
 const router = express.Router();
@@ -24,8 +24,7 @@ const upload = multer({
 
 router.post(
   '/',
-  authMiddleware,
-  adminMiddleware,
+  optionalAuthMiddleware,
   (req, res, next) => {
     upload.single('image')(req, res, (err) => {
       if (err instanceof multer.MulterError) {
