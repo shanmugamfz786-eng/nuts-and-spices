@@ -30,10 +30,26 @@ export async function fetchCloudCatalog() {
 
     if (res.ok) {
       const data = await res.json();
-      if (data && (Array.isArray(data.products) || Array.isArray(data.categories))) {
+      let prodList = Array.isArray(data.products) && data.products.length > 0 ? data.products : null;
+      let catList = Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : null;
+
+      // Fallback: If /catalog had empty products, fetch directly from live /api/products
+      if (!prodList) {
+        try {
+          const pRes = await fetch(`${API_BASE_URL}/products`, { cache: 'no-store' });
+          if (pRes.ok) {
+            const pData = await pRes.json();
+            if (pData && Array.isArray(pData.products) && pData.products.length > 0) {
+              prodList = pData.products;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (prodList || catList) {
         // Hydrate product images if stripped for bandwidth optimization
-        const hydratedProducts = Array.isArray(data.products)
-          ? data.products.map(p => ({
+        const hydratedProducts = Array.isArray(prodList)
+          ? prodList.map(p => ({
               ...p,
               image: p.image || seedProductImageMap.get(p.id) || ''
             }))
@@ -41,7 +57,7 @@ export async function fetchCloudCatalog() {
 
         return { 
           products: Array.isArray(hydratedProducts) ? hydratedProducts : null, 
-          categories: Array.isArray(data.categories) ? data.categories : null,
+          categories: Array.isArray(catList) ? catList : null,
           updatedAt: data.updatedAt
         };
       }
