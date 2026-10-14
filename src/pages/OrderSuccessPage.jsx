@@ -14,6 +14,9 @@ export default function OrderSuccessPage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlOrderId = urlParams.get('order_id');
+    const guestPhone = (lastOrder?.phone || lastOrder?.customer?.phone || localStorage.getItem('last_order_phone') || '').replace(/\D/g, '');
+    const phone4 = urlParams.get('phone4') || (guestPhone ? guestPhone.slice(-4) : '');
+    const phone4Query = phone4 ? `?phone4=${encodeURIComponent(phone4)}` : '';
     
     if (urlOrderId) {
       const isTrackingOnly = urlParams.get('track') === 'true';
@@ -21,7 +24,7 @@ export default function OrderSuccessPage() {
         setPaymentStatus('success');
         setIsCashfreeCallback(false);
         // Only fetch order data
-        fetch(API_BASE_URL + '/orders/' + urlOrderId, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuts_spices_auth_token') } })
+        fetch(API_BASE_URL + '/orders/' + urlOrderId + phone4Query, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuts_spices_auth_token') } })
           .then(res => res.json())
           .then(data => {
             if (data.success && data.order) {
@@ -44,7 +47,7 @@ export default function OrderSuccessPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ orderId: urlOrderId })
+        body: JSON.stringify({ orderId: urlOrderId, phone4 })
       })
       .then(res => res.json())
       .then(data => {
@@ -58,7 +61,7 @@ export default function OrderSuccessPage() {
       .catch(() => setPaymentStatus('failed'));
 
       // 2. Fetch Order Data to avoid white screen crash
-      fetch(`${API_BASE_URL}/orders/${urlOrderId}`, { headers: { 'Authorization': `Bearer ${token}` } })
+      fetch(`${API_BASE_URL}/orders/${urlOrderId}${phone4Query}`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.order) {

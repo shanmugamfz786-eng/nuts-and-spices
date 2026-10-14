@@ -6,6 +6,14 @@ export default function SearchModal() {
   const { products, isSearchOpen, setIsSearchOpen, navigate, addToCart } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
 
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsSearchOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setIsSearchOpen]);
+
   if (!isSearchOpen) return null;
 
   const activeProducts = (products || []).filter(isProductActive);

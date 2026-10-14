@@ -1,6 +1,7 @@
 import { queryDb, memoryStore } from '../config/db.js';
 import { PRODUCTS } from '../../src/data/products.js';
 import { INITIAL_OFFERS, INITIAL_STORE_SETTINGS } from '../../src/data/mockAdminData.js';
+import { calculateItemsSubtotal, calculateCouponDiscount, calculateOrderTotals } from '../utils/pricing.js';
 import crypto from 'crypto';
 
 const STORE_WHATSAPP_NUMBER = process.env.STORE_WHATSAPP_NUMBER || '919876543210';
@@ -21,21 +22,27 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Too many items in order. Maximum 50 items allowed.' });
     }
 
-    
-      // Generate secure, unpredictable Order ID (UUID)
-          // Generate sequential Order ID (HNS-001, HNS-002, etc.)
-    let orderId = 'HNS-001';
-    try {
-      const lastOrder = await queryDb('SELECT order_id FROM orders WHERE order_id LIKE "HNS-%" ORDER BY CAST(SUBSTRING(order_id, 5) AS UNSIGNED) DESC LIMIT 1');
-      if (lastOrder && lastOrder.length > 0 && lastOrder[0].order_id) {
-        const lastNum = parseInt(lastOrder[0].order_id.substring(4), 10);
-        if (!isNaN(lastNum)) {
-          orderId = `HNS-${String(lastNum + 1).padStart(3, '0')}`;
-        }
+    // Generate non-sequential, unpredictable Order ID (HNS-XXXXXXXX with 8 random uppercase alphanumeric chars)
+    let orderId = '';
+    const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // omit ambiguous 0, O, 1, I
+    let collisionAttempts = 0;
+
+    while (!orderId && collisionAttempts < 5) {
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        const randIndex = crypto.randomInt(0, charset.length);
+        code += charset[randIndex];
       }
-    } catch (e) {
-      console.warn('Could not fetch last order ID', e);
-      orderId = `HNS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+      const candidate = `HNS-${code}`;
+      const existing = await queryDb('SELECT id FROM orders WHERE id = ? OR order_id = ? LIMIT 1', [candidate, candidate]);
+      if (!existing || existing.length === 0) {
+        orderId = candidate;
+      }
+      collisionAttempts++;
+    }
+
+    if (!orderId) {
+      orderId = `HNS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
     }
 
 
@@ -93,149 +100,73 @@ export const createOrder = async (req, res) => {
         console.warn('Failed to parse catalog state json', e);
       }
 
+    // 1. Calculate and validate items against catalog (strict variant existence check)
     let subtotal = 0;
-    const validatedItems = [];
-
-    for (const item of items) {
-      const backendProduct = dbProducts.find(p => p.id === (item.productId || item.id));
-      if (!backendProduct) {
-        return res.status(400).json({ success: false, message: `Product '${item.name || item.id}' is unavailable.` });
-      }
-
-      // Find the specific weight/variant price
-      let productWeights = backendProduct.weights || backendProduct.weights_json || [];
-      if (typeof productWeights === 'string') {
-        try {
-          productWeights = JSON.parse(productWeights);
-        } catch(e) {
-          console.error("Failed to parse productWeights", e);
-          productWeights = [];
-        }
-      }
-      // Try finding variant by label AND price first (to support duplicate labels with different prices)
-      let variant = productWeights.find(w => w.label === item.weight && Number(w.price) === Number(item.price));
-      if (!variant) {
-        variant = productWeights.find(w => w.label === item.weight);
-      }
-      let realPrice = variant ? variant.price : null;
-
-      // Fallback if weights are differently structured or single price
-      if (realPrice === null || realPrice === undefined) {
-         if (productWeights.length > 0) {
-           realPrice = productWeights[0].price;
-         } else if (backendProduct.price) {
-           realPrice = backendProduct.price;
-         } else {
-           return res.status(400).json({ success: false, message: `Pricing error for product '${backendProduct.name}'.` });
-         }
-      }
-
-      const qty = Number(item.quantity);
-      if (qty <= 0 || isNaN(qty) || !Number.isInteger(qty) || qty > 100) {
-         return res.status(400).json({ success: false, message: `Invalid quantity for '${backendProduct.name}'. Quantity must be between 1 and 100.` });
-      }
-
-      subtotal += (Number(realPrice) * qty);
-      
-      // Override frontend price with backend validated price
-      validatedItems.push({
-        ...item,
-        price: Number(realPrice),
-        name: backendProduct.name // Override frontend name just in case
-      });
+    let validatedItems = [];
+    try {
+      const itemsCalc = calculateItemsSubtotal(items, dbProducts);
+      subtotal = itemsCalc.subtotal;
+      validatedItems = itemsCalc.validatedItems;
+    } catch (err) {
+      return res.status(400).json({ success: false, message: err.message });
     }
 
     // Replace request items with validated items for saving
     items.length = 0;
     items.push(...validatedItems);
 
-    // Ignore any client-sent discountAmount entirely and validate couponCode strictly on server
-    let discountAmount = 0;
-    const rawCouponCode = typeof req.body.couponCode === 'string' ? req.body.couponCode.trim().toUpperCase() : '';
+    // 2. Fetch live active offers & store settings
+    let serverOffers = INITIAL_OFFERS;
+    let storeSettings = INITIAL_STORE_SETTINGS;
 
-    if (rawCouponCode) {
-      // 1. Fetch live active offers from master_admin_state_json in settings, falling back to INITIAL_OFFERS
-      let serverOffers = INITIAL_OFFERS;
-      try {
-        const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
-        if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
-          const parsed = JSON.parse(adminStateRows[0].setting_value);
-          if (parsed && Array.isArray(parsed.offers) && parsed.offers.length > 0) {
-            serverOffers = parsed.offers;
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to parse admin offers state for coupon validation', e);
-      }
-
-      const matchingOffer = serverOffers.find(o => {
-        const oCode = (o.code || `HAJI${o.discountPercent}`).trim().toUpperCase();
-        return oCode === rawCouponCode;
-      });
-
-      if (!matchingOffer) {
-        return res.status(400).json({ success: false, message: `Coupon code '${rawCouponCode}' is invalid.` });
-      }
-
-      if (matchingOffer.status && matchingOffer.status !== 'ACTIVE') {
-        return res.status(400).json({ success: false, message: `Coupon '${rawCouponCode}' is inactive or expired.` });
-      }
-
-      // Check date validity if start/end dates exist
-      const todayStr = new Date().toISOString().split('T')[0];
-      if (matchingOffer.startDate && todayStr < matchingOffer.startDate) {
-        return res.status(400).json({ success: false, message: `Coupon '${rawCouponCode}' is not active yet.` });
-      }
-      if (matchingOffer.endDate && todayStr > matchingOffer.endDate) {
-        return res.status(400).json({ success: false, message: `Coupon '${rawCouponCode}' has expired.` });
-      }
-
-      const minSpend = Number(matchingOffer.minOrderAmount) || 0;
-      if (subtotal < minSpend) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `Minimum order value of ₹${minSpend} required for coupon '${rawCouponCode}'. (Current: ₹${subtotal})` 
-        });
-      }
-
-      // Compute discount based on category restriction if applicable
-      const applicableCat = matchingOffer.applicableCategory;
-      let eligibleSubtotal = subtotal;
-
-      if (applicableCat && applicableCat !== 'all') {
-        eligibleSubtotal = validatedItems
-          .filter(it => it.categoryId === applicableCat || it.category === applicableCat)
-          .reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity)), 0);
-
-        if (eligibleSubtotal === 0) {
-          return res.status(400).json({ 
-            success: false, 
-            message: `Coupon '${rawCouponCode}' is only valid on ${matchingOffer.applicableCategoryName || 'eligible'} items.` 
-          });
-        }
-      }
-
-      const discountPct = Number(matchingOffer.discountPercent) || 0;
-      discountAmount = Math.max(0, Math.round((eligibleSubtotal * discountPct) / 100));
-    }
-
-    // Determine delivery charge server-side from settings
-    let deliveryCharge = 0;
     try {
       const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
       if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
         const parsed = JSON.parse(adminStateRows[0].setting_value);
+        if (parsed && Array.isArray(parsed.offers) && parsed.offers.length > 0) {
+          serverOffers = parsed.offers;
+        }
         if (parsed && parsed.storeSettings) {
-          const freeThreshold = Number(parsed.storeSettings.freeDeliveryThreshold) || 1499;
-          const standardCharge = Number(parsed.storeSettings.standardDeliveryFee) || 0;
-          deliveryCharge = (subtotal >= freeThreshold) ? 0 : standardCharge;
+          storeSettings = parsed.storeSettings;
         }
       }
-    } catch {}
+    } catch (e) {
+      console.warn('Failed to parse admin offers state for coupon validation', e);
+    }
 
-    const totalAmount = Math.max(0, subtotal - discountAmount + deliveryCharge);
-    const itemsJson = JSON.stringify(items);
+    // Check past customer orders for one-time coupon redemption rules
+    let pastOrders = [];
+    try {
+      pastOrders = await queryDb('SELECT notes, status FROM orders WHERE phone = ?', [customer.phone]);
+    } catch (e) {}
 
+    let discountAmount = 0;
+    try {
+      const couponCalc = calculateCouponDiscount({
+        couponCode: req.body.couponCode,
+        subtotal,
+        validatedItems,
+        serverOffers,
+        customerPhone: customer.phone,
+        pastCustomerOrders: pastOrders
+      });
+      discountAmount = couponCalc.discountAmount;
+    } catch (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+
+    // 3. Compute final totals
+    const totals = calculateOrderTotals({
+      subtotal,
+      discountAmount,
+      storeSettings
+    });
+
+    const deliveryCharge = totals.deliveryCharge;
+    const totalAmount = totals.totalAmount;
+    const itemsJson = JSON.stringify(validatedItems);
+
+    const rawCouponCode = req.body.couponCode ? req.body.couponCode.trim().toUpperCase() : '';
     const fullNotes = [notes, rawCouponCode ? `Coupon Applied: ${rawCouponCode} (-₹${discountAmount})` : '']
       .filter(Boolean)
       .join(' | ');
@@ -368,7 +299,7 @@ export const getAllOrders = async (req, res) => {
         };
       });
     } else {
-      formattedOrders = memoryStore.orders;
+      formattedOrders = process.env.NODE_ENV !== 'production' ? memoryStore.orders : [];
     }
     
     res.json({
@@ -378,6 +309,9 @@ export const getAllOrders = async (req, res) => {
     });
   } catch (error) {
     console.error('Fetch orders error:', error);
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({ success: false, message: 'Database service unavailable' });
+    }
     res.status(500).json({ success: false, message: 'Failed to fetch orders.' });
   }
 };
@@ -444,12 +378,13 @@ export const getOrderById = async (req, res) => {
     }
 
     let isAuthorized = false;
+    const orderPhone = (formattedOrder.phone || '').replace(/\D/g, '').slice(-10);
+    const orderEmail = (formattedOrder.email || '').toLowerCase().trim();
+
     if (req.user) {
       const userRole = (req.user.role || '').toLowerCase();
       const userPhone = (req.user.phone || '').replace(/\D/g, '').slice(-10);
       const userEmail = (req.user.email || '').toLowerCase().trim();
-      const orderPhone = (formattedOrder.phone || '').replace(/\D/g, '').slice(-10);
-      const orderEmail = (formattedOrder.email || '').toLowerCase().trim();
 
       if (userRole === 'admin') {
         isAuthorized = true;
@@ -460,30 +395,40 @@ export const getOrderById = async (req, res) => {
       }
     }
 
-    // If not authorized (guest lookup or non-owner), return only minimal safe tracking payload
-    if (!isAuthorized) {
-      const safeMinimalOrder = {
-        id: formattedOrder.id,
-        orderId: formattedOrder.orderId,
-        status: formattedOrder.status,
-        items: formattedOrder.items,
-        totalAmount: formattedOrder.totalAmount,
-        total: formattedOrder.total,
-        createdAt: formattedOrder.createdAt,
-        date: formattedOrder.date,
-        deliveryCharge: formattedOrder.deliveryCharge,
-        subtotal: formattedOrder.subtotal
-      };
-
+    // If caller is an authorized user (owner or admin), return full order
+    if (isAuthorized) {
       return res.json({
         success: true,
-        order: safeMinimalOrder
+        order: formattedOrder
       });
     }
 
-    res.json({
+    // For unauthenticated / guest tracking, require phone4 matching the last 4 digits of order phone
+    const phone4 = (req.query.phone4 || req.body?.phone4 || '').toString().trim();
+    if (!phone4 || !orderPhone.endsWith(phone4)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized. For guest order tracking, please provide the last 4 digits of your phone number (e.g. ?phone4=1234).'
+      });
+    }
+
+    // Minimal safe tracking payload: no customer full address, phone or email
+    const safeMinimalOrder = {
+      id: formattedOrder.id,
+      orderId: formattedOrder.orderId,
+      status: formattedOrder.status,
+      items: formattedOrder.items,
+      totalAmount: formattedOrder.totalAmount,
+      total: formattedOrder.total,
+      createdAt: formattedOrder.createdAt,
+      date: formattedOrder.date,
+      deliveryCharge: formattedOrder.deliveryCharge,
+      subtotal: formattedOrder.subtotal
+    };
+
+    return res.json({
       success: true,
-      order: formattedOrder
+      order: safeMinimalOrder
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching order.' });
@@ -496,12 +441,45 @@ export const updateOrderStatus = async (req, res) => {
     const { status } = req.body;
 
     const normalizedStatus = (status || '').toLowerCase().trim();
-    const allowedStatuses = ['pending', 'new', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'];
-    if (!normalizedStatus || !allowedStatuses.includes(normalizedStatus)) {
-      return res.status(400).json({ success: false, message: 'Invalid status. Allowed: ' + allowedStatuses.join(', ') });
+    const validTransitions = {
+      pending: ['confirmed', 'cancelled'],
+      new: ['confirmed', 'cancelled'],
+      confirmed: ['preparing', 'shipped', 'cancelled', 'refunded'],
+      preparing: ['shipped', 'cancelled', 'refunded'],
+      shipped: ['out for delivery', 'delivered', 'refunded'],
+      'out for delivery': ['delivered', 'refunded'],
+      delivered: ['refunded'],
+      cancelled: [],
+      refunded: []
+    };
+
+    const orders = await queryDb('SELECT * FROM orders WHERE id = ? OR order_id = ? LIMIT 1', [id, id]);
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    const currentOrder = orders[0];
+    const currentStatus = (currentOrder.status || 'pending').toLowerCase().trim();
+
+    // Idempotent update: same status returns success
+    if (currentStatus === normalizedStatus) {
+      return res.json({ success: true, message: `Order is already ${normalizedStatus}` });
     }
 
-    await queryDb('UPDATE orders SET status = ? WHERE id = ? OR order_id = ?', [normalizedStatus, id, id]);
+    const allowedNext = validTransitions[currentStatus] || [];
+    if (!allowedNext.includes(normalizedStatus)) {
+      return res.status(409).json({
+        success: false,
+        message: `Invalid order status transition from '${currentStatus}' to '${normalizedStatus}'. Allowed next: ${allowedNext.join(', ') || 'None'}`
+      });
+    }
+
+    // If order was paid and is cancelled/refunded, update payment_status accordingly
+    let paymentStatusUpdateSql = '';
+    if ((normalizedStatus === 'cancelled' || normalizedStatus === 'refunded') && currentOrder.payment_status === 'paid') {
+      paymentStatusUpdateSql = ", payment_status = 'refund_pending'";
+    }
+
+    await queryDb(`UPDATE orders SET status = ? ${paymentStatusUpdateSql} WHERE id = ? OR order_id = ?`, [normalizedStatus, id, id]);
 
     const memOrder = memoryStore.orders.find(o => o.id === id || o.orderId === id);
     if (memOrder) memOrder.status = normalizedStatus;
@@ -596,18 +574,31 @@ export const cancelOrder = async (req, res) => {
     }
     
     if (order.status !== 'pending' && order.status !== 'confirmed') {
-       return res.status(400).json({ success: false, message: 'Only pending or confirmed orders can be cancelled by user' });
+       return res.status(400).json({ success: false, message: 'Only pending or confirmed orders can be cancelled' });
     }
 
-    await queryDb('UPDATE orders SET status = ? WHERE id = ? OR order_id = ?', ['cancelled', id, id]);
+    let paymentStatusSql = '';
+    if (order.payment_status === 'paid') {
+      paymentStatusSql = ", payment_status = 'refund_pending'";
+    }
+
+    await queryDb(`UPDATE orders SET status = 'cancelled' ${paymentStatusSql} WHERE id = ? OR order_id = ?`, [id, id]);
 
     // Also update in memoryStore if present
     const memoryIdx = memoryStore.orders.findIndex(o => o.id === id || o.orderId === id);
     if (memoryIdx !== -1) {
       memoryStore.orders[memoryIdx].status = 'cancelled';
+      if (order.payment_status === 'paid') {
+        memoryStore.orders[memoryIdx].payment_status = 'refund_pending';
+      }
     }
 
-    res.json({ success: true, message: 'Order cancelled successfully' });
+    res.json({
+      success: true,
+      message: order.payment_status === 'paid'
+        ? 'Order cancelled successfully. Refund has been initiated.'
+        : 'Order cancelled successfully'
+    });
   } catch (error) {
     console.error('Cancel order error:', error);
     res.status(500).json({ success: false, message: 'Failed to cancel order' });

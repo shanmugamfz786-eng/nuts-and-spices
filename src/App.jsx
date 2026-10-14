@@ -1,38 +1,51 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { CartProvider, useCart } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SearchModal from './components/SearchModal';
 
-// Pages
+// Core pages (loaded immediately for snappy UX)
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
-import CategoryPage from './pages/CategoryPage';
-import CategoriesPage from './pages/CategoriesPage';
-import ProductDetailsPage from './pages/ProductDetailsPage';
 import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import OrderSuccessPage from './pages/OrderSuccessPage';
-import OrderDetailsPage from './pages/OrderDetailsPage';
-import OffersPage from './pages/OffersPage';
-import AboutUsPage from './pages/AboutUsPage';
-import ContactPage from './pages/ContactPage';
-import WishlistPage from './pages/WishlistPage';
-import HelpCenterPage from './pages/HelpCenterPage';
-import BulkOrdersPage from './pages/BulkOrdersPage';
-import ShippingPolicyPage from './pages/ShippingPolicyPage';
-import ReturnsRefundsPage from './pages/ReturnsRefundsPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
-import FaqPage from './pages/FaqPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import AdminPage from './pages/AdminPage';
-import ComboDealsPage from './pages/ComboDealsPage';
-import NotFoundPage from './pages/NotFoundPage';
-import AuthModal from './components/AuthModal';
 
+// Lazy-loaded pages (code split for reduced initial bundle)
+const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+const CategoriesPage = lazy(() => import('./pages/CategoriesPage'));
+const ProductDetailsPage = lazy(() => import('./pages/ProductDetailsPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
+const OrderDetailsPage = lazy(() => import('./pages/OrderDetailsPage'));
+const OffersPage = lazy(() => import('./pages/OffersPage'));
+const AboutUsPage = lazy(() => import('./pages/AboutUsPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const WishlistPage = lazy(() => import('./pages/WishlistPage'));
+const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage'));
+const BulkOrdersPage = lazy(() => import('./pages/BulkOrdersPage'));
+const ShippingPolicyPage = lazy(() => import('./pages/ShippingPolicyPage'));
+const ReturnsRefundsPage = lazy(() => import('./pages/ReturnsRefundsPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsAndConditionsPage = lazy(() => import('./pages/TermsAndConditionsPage'));
+const FaqPage = lazy(() => import('./pages/FaqPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const ComboDealsPage = lazy(() => import('./pages/ComboDealsPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+import AuthModal from './components/AuthModal';
 import MobileBottomNav from './components/MobileBottomNav';
+
+function PageLoadingFallback() {
+  return (
+    <div className="min-h-[50vh] flex flex-col items-center justify-center py-20 px-4">
+      <div className="w-12 h-12 border-3 border-amber-600/20 border-t-amber-600 rounded-full animate-spin mb-4" />
+      <span className="text-xs font-bold text-slate-500 tracking-wider uppercase font-serif">
+        Haji Nuts & Spices
+      </span>
+    </div>
+  );
+}
 
 function MainContent() {
   const cartContext = useCart() || {};
@@ -40,7 +53,11 @@ function MainContent() {
 
   // If in Admin Panel mode, render standalone AdminPage layout
   if (activePage === 'admin') {
-    return <AdminPage />;
+    return (
+      <Suspense fallback={<PageLoadingFallback />}>
+        <AdminPage />
+      </Suspense>
+    );
   }
 
   const renderPage = () => {
@@ -107,7 +124,9 @@ function MainContent() {
     <div className="min-h-screen flex flex-col bg-white w-full max-w-full">
       <Navbar />
       <main className="flex-1 pb-16 md:pb-0">
-        {renderPage()}
+        <Suspense fallback={<PageLoadingFallback />}>
+          {renderPage()}
+        </Suspense>
       </main>
       <SearchModal />
       <AuthModal />

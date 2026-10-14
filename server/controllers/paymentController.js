@@ -1,6 +1,37 @@
 import crypto from 'crypto';
 import { queryDb } from '../config/db.js';
 
+/**
+ * Check if the caller is authorized to operate on this order (for payment session creation & verification).
+ * If authenticated token is provided, must be admin or order owner (matching phone/email).
+ * If guest, must provide phone4 matching the last 4 digits of order phone.
+ */
+function isOrderPaymentAuthorized(order, req) {
+  const orderPhone = (order.phone || '').replace(/\D/g, '').slice(-10);
+  const orderEmail = (order.email || '').toLowerCase().trim();
+
+  // If JWT authenticated user is attached
+  if (req.user) {
+    const role = (req.user.role || '').toLowerCase();
+    if (role === 'admin') return true;
+
+    const userPhone = (req.user.phone || '').replace(/\D/g, '').slice(-10);
+    const userEmail = (req.user.email || '').toLowerCase().trim();
+
+    if (userPhone && orderPhone && userPhone === orderPhone) return true;
+    if (userEmail && orderEmail && userEmail === orderEmail) return true;
+    return false;
+  }
+
+  // For guest checkout verification, require phone4 matching last 4 digits of order phone
+  const phone4 = (req.body?.phone4 || req.query?.phone4 || '').toString().trim();
+  if (phone4 && orderPhone.endsWith(phone4)) {
+    return true;
+  }
+
+  return false;
+}
+
 export const createPaymentSession = async (req, res) => {
   try {
     const { orderId } = req.body;
@@ -17,6 +48,11 @@ export const createPaymentSession = async (req, res) => {
 
     const order = orders[0];
 
+    // Ownership check (or guest phone4 proof)
+    if (!isOrderPaymentAuthorized(order, req)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized: phone4 or login matching order is required.' });
+    }
+
     // Reject if order is already paid or cancelled
     if (order.payment_status === 'paid') {
       return res.status(400).json({ success: false, message: 'Order is already paid.' });
@@ -30,24 +66,16 @@ export const createPaymentSession = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid order amount.' });
     }
 
-    let customerDetails = {
-      name: order.customer_name || 'Guest User',
-      phone: order.customer_phone || '9999999999',
-      email: order.customer_email || 'guest@nutsandspices.in'
-    };
+    // Correct schema columns: customer_name, phone, email
+    const rawPhone = order.phone || '';
+    const cleanPhone = String(rawPhone).replace(/\D/g, '').slice(-10) || '9999999999';
+    const customerName = (order.customer_name || 'Guest User').trim();
+    const customerEmail = (order.email && order.email.includes('@')) 
+      ? order.email.trim() 
+      : `${cleanPhone}@nutsandspices.in`;
 
-    if (order.customer_json) {
-      try {
-        const parsed = JSON.parse(order.customer_json);
-        if (parsed.name) customerDetails.name = parsed.name;
-        if (parsed.phone) customerDetails.phone = parsed.phone;
-        if (parsed.email) customerDetails.email = parsed.email;
-      } catch (e) {
-        // use fallback fields
-      }
-    }
-
-    const cleanPhone = String(customerDetails.phone).replace(/\D/g, '') || '9999999999';
+    // Stable customer ID derived from phone
+    const customerId = `cust_${cleanPhone}`;
     const frontendBaseUrl = (process.env.FRONTEND_URL || 'https://www.hajinutsandspices.com').split(',')[0].trim();
 
     const apiUrl = process.env.CASHFREE_ENV === 'PRODUCTION' 
@@ -59,10 +87,10 @@ export const createPaymentSession = async (req, res) => {
       order_amount: totalAmount.toFixed(2),
       order_currency: 'INR',
       customer_details: {
-        customer_id: cleanPhone,
-        customer_phone: cleanPhone.slice(-10),
-        customer_email: customerDetails.email || 'guest@nutsandspices.in',
-        customer_name: customerDetails.name || 'Guest User'
+        customer_id: customerId,
+        customer_phone: cleanPhone,
+        customer_email: customerEmail,
+        customer_name: customerName
       },
       order_meta: {
         return_url: `${frontendBaseUrl}/order-success?order_id={order_id}`
@@ -114,9 +142,26 @@ export const verifyPayment = async (req, res) => {
     }
     const dbOrder = orders[0];
 
+    // Ownership check (or guest phone4 proof)
+    if (!isOrderPaymentAuthorized(dbOrder, req)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized: phone4 or login matching order is required.' });
+    }
+
+    // If order is already paid, return isPaid: true immediately without second UPDATE
+    if (dbOrder.payment_status === 'paid') {
+      return res.json({
+        success: true,
+        isPaid: true,
+        status: 'PAID',
+        message: 'Order already marked as paid'
+      });
+    }
+
+    // Use encoded string of dbOrder.id (same ID used at creation)
+    const encodedOrderId = encodeURIComponent(String(dbOrder.id));
     const apiUrl = process.env.CASHFREE_ENV === 'PRODUCTION' 
-      ? `https://api.cashfree.com/pg/orders/${orderId}` 
-      : `https://sandbox.cashfree.com/pg/orders/${orderId}`;
+      ? `https://api.cashfree.com/pg/orders/${encodedOrderId}` 
+      : `https://sandbox.cashfree.com/pg/orders/${encodedOrderId}`;
 
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -167,7 +212,9 @@ export const verifyPayment = async (req, res) => {
 
 /**
  * Cashfree Webhook Handler
- * Verifies signature using CASHFREE_SECRET_KEY, timestamp and rawBody.
+ * Verifies signature using CASHFREE_SECRET_KEY, timestamp, raw Buffer body, and crypto.timingSafeEqual.
+ * Reject timestamps older than 5 minutes (replay protection).
+ * Idempotent: returns 200 quickly if already processed.
  */
 export const handleCashfreeWebhook = async (req, res) => {
   try {
@@ -184,16 +231,32 @@ export const handleCashfreeWebhook = async (req, res) => {
       return res.status(400).send('Missing webhook signature or timestamp headers');
     }
 
-    // req.body contains raw Buffer from express.raw()
-    const rawBody = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : (typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    // Reject timestamps older than 5 minutes (300 seconds)
+    const tsNum = parseInt(timestamp, 10);
+    const nowSec = Math.floor(Date.now() / 1000);
+    // Support either second or millisecond timestamps from Cashfree
+    const parsedTsSec = tsNum > 100000000000 ? Math.floor(tsNum / 1000) : tsNum;
+    if (isNaN(parsedTsSec) || Math.abs(nowSec - parsedTsSec) > 300) {
+      return res.status(400).send('Webhook timestamp expired or invalid');
+    }
 
-    // Cashfree signature verification: HMAC SHA256 of (timestamp + rawBody)
+    // REQUIRE Buffer.isBuffer(req.body) - never allow JSON.stringify fallback
+    if (!Buffer.isBuffer(req.body)) {
+      return res.status(400).send('Raw body buffer required for webhook verification');
+    }
+
+    const rawBody = req.body.toString('utf8');
+
+    // Expected signature: HMAC SHA256 of (timestamp + rawBody)
     const expectedSignature = crypto
       .createHmac('sha256', secretKey)
       .update(timestamp + rawBody)
       .digest('base64');
 
-    if (signature !== expectedSignature) {
+    const signatureBuf = Buffer.from(signature, 'utf8');
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+
+    if (signatureBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(signatureBuf, expectedBuf)) {
       console.warn('Cashfree webhook signature mismatch');
       return res.status(401).send('Invalid signature');
     }
@@ -205,7 +268,7 @@ export const handleCashfreeWebhook = async (req, res) => {
       return res.status(400).send('Invalid JSON payload');
     }
 
-    const { data, type } = payload || {};
+    const { data } = payload || {};
     const order = data?.order || data;
     const payment = data?.payment;
 
@@ -220,6 +283,12 @@ export const handleCashfreeWebhook = async (req, res) => {
       const dbOrders = await queryDb('SELECT * FROM orders WHERE id = ? OR order_id = ? LIMIT 1', [orderId, orderId]);
       if (dbOrders && dbOrders.length > 0) {
         const dbOrder = dbOrders[0];
+
+        // Idempotency: if already paid, return 200 immediately
+        if (dbOrder.payment_status === 'paid') {
+          return res.status(200).json({ status: 'OK', message: 'Already processed' });
+        }
+
         const amountMatches = !orderAmount || Math.abs(parseFloat(orderAmount) - parseFloat(dbOrder.total_amount)) < 0.01;
 
         if (isPaid && amountMatches) {

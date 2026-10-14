@@ -152,7 +152,7 @@ describe('Security and Reliability Test Suite', () => {
 
       const res = await request(app)
         .post('/api/payment/verify')
-        .send({ orderId: testOrderId });
+        .send({ orderId: testOrderId, phone4: '3210' });
 
       expect(res.status).toBe(200);
       expect(res.body.isPaid).toBe(false);

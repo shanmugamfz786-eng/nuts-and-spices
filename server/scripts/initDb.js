@@ -58,6 +58,7 @@ export async function initializeDatabase() {
       delivery_charge DECIMAL(10,2) DEFAULT 0,
       total_amount DECIMAL(10,2) NOT NULL,
       status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+      payment_status ENUM('pending', 'paid', 'failed', 'refund_pending', 'refunded') DEFAULT 'pending',
       items_json JSON NOT NULL,
       notes TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -153,6 +154,22 @@ export async function initializeDatabase() {
     for (const sql of schemaStatements) {
       await pool.query(sql);
     }
+
+    // Safe idempotent migration for payment_status column if table already existed without it
+    try {
+      const [cols] = await pool.query(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'orders' AND COLUMN_NAME = 'payment_status'"
+      );
+      if (!cols || cols.length === 0) {
+        await pool.query(
+          "ALTER TABLE orders ADD COLUMN payment_status ENUM('pending', 'paid', 'failed', 'refund_pending', 'refunded') DEFAULT 'pending'"
+        );
+        console.log("🛠️ Migrated orders table: added payment_status column.");
+      }
+    } catch (migrationErr) {
+      console.warn("Notice on payment_status migration:", migrationErr.message);
+    }
+
     console.log('✅ TiDB / MySQL database tables created successfully!');
 
     // Seed Admin User in MySQL/TiDB

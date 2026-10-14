@@ -131,8 +131,12 @@ export default function CheckoutPage() {
       const backendOrderId = orderData.order?.id || orderData.orderId;
       const backendTotal = orderData.order?.totalAmount || cartTotal;
       
-      // Clear purchased items locally
-      clearPurchasedItems(cart);
+      // Store phone for guest lookup
+      if (formData.phone) {
+        localStorage.setItem('last_order_phone', formData.phone);
+      }
+
+      const phone4 = (formData.phone || '').replace(/\D/g, '').slice(-4);
 
       // Initialize Cashfree Payment Session
       const payRes = await fetch(BASE + '/api/payment/create-session', {
@@ -143,10 +147,7 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           orderId: backendOrderId,
-          amount: backendTotal,
-          customerPhone: formData.phone,
-          customerEmail: user?.email || '',
-          customerName: formData.name
+          phone4
         })
       });
 
@@ -175,7 +176,7 @@ export default function CheckoutPage() {
       // Redirect immediately to Cashfree Payment Gateway page
       await cashfree.checkout({
         paymentSessionId: payData.paymentSessionId,
-        returnUrl: `${window.location.origin}/order-success?order_id={order_id}`,
+        returnUrl: `${window.location.origin}/order-success?order_id={order_id}&phone4=${phone4}`,
         redirectTarget: "_self"
       });
       

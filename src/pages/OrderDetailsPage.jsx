@@ -45,6 +45,18 @@ export default function OrderDetailsPage() {
   const [instructionsSaved, setInstructionsSaved] = useState(false);
   const [showAuditLogs, setShowAuditLogs] = useState(true);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsCancelModalOpen(false);
+        setIsInvoiceModalOpen(false);
+        setIsFeedbackModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Extract order ID from params or URL if not directly in state
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -87,7 +99,13 @@ export default function OrderDetailsPage() {
               ? 'https://nuts-and-spices-dqzp.onrender.com'
               : ''
           );
-          const res = await fetch(`${BASE}/api/orders/${targetId}`);
+          const token = localStorage.getItem('nuts_spices_auth_token');
+          const guestPhone = (localStorage.getItem('last_order_phone') || '').replace(/\D/g, '');
+          const phone4Param = guestPhone ? `?phone4=${guestPhone.slice(-4)}` : '';
+
+          const res = await fetch(`${BASE}/api/orders/${targetId}${phone4Param}`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
           const data = await res.json();
           if (data && data.success && data.order) {
             setOrderData(data.order);

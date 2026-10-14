@@ -22,6 +22,14 @@ export default function AuthModal() {
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [agreedTerms, setAgreedTerms] = useState(true);
 
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsAuthModalOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setIsAuthModalOpen]);
+
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();

@@ -3,11 +3,18 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { queryDb, memoryStore } from '../config/db.js';
 
-if (!process.env.JWT_SECRET) {
-  console.error("FATAL ERROR: JWT_SECRET is not defined.");
-  process.exit(1);
-}
-const JWT_SECRET = process.env.JWT_SECRET;
+export const normalizeIdentifier = (input) => {
+  if (!input || typeof input !== 'string') return '';
+  const trimmed = input.trim();
+  // If it looks like a phone number (e.g. starts with +91, contains dashes, spaces or 10+ digits)
+  const digitsOnly = trimmed.replace(/\D/g, '');
+  if (digitsOnly.length >= 10 && (trimmed.startsWith('+') || !trimmed.includes('@'))) {
+    return digitsOnly.slice(-10);
+  }
+  return trimmed.toLowerCase();
+};
+
+const getJwtSecret = () => process.env.JWT_SECRET || 'fallback_development_secret_do_not_use_in_prod';
 
 export const registerCustomer = async (req, res) => {
   try {
@@ -22,7 +29,7 @@ export const registerCustomer = async (req, res) => {
     }
 
     // Phone format: 10-digit Indian mobile number
-    const cleanPhone = String(phone).replace(/\D/g, '').slice(-10);
+    const cleanPhone = normalizeIdentifier(phone);
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit Indian mobile number.' });
     }
@@ -65,7 +72,7 @@ export const registerCustomer = async (req, res) => {
       role: 'customer'
     };
 
-    const token = jwt.sign(userObj, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(userObj, getJwtSecret(), { expiresIn: '7d' });
 
     res.status(201).json({
       success: true,
@@ -82,8 +89,11 @@ export const registerCustomer = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const users = await queryDb('SELECT id, name, email, phone, role, created_at FROM users');
-    res.json({ success: true, users: users || memoryStore.users });
+    res.json({ success: true, users: users || (process.env.NODE_ENV !== 'production' ? memoryStore.users : []) });
   } catch (err) {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({ success: false, message: 'Database service unavailable' });
+    }
     res.json({ success: true, users: memoryStore.users });
   }
 };
@@ -107,29 +117,33 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Mobile number/email and password are required.' });
     }
 
-    const cleanIdentifier = identifier.trim().toLowerCase();
+    const normalized = normalizeIdentifier(identifier);
+    const rawTrimmed = identifier.trim().toLowerCase();
 
-    // Query DB or fallback
+    // Query DB with both normalized phone/email and raw format for backward compatibility
     let userRecord = null;
-    const users = await queryDb('SELECT * FROM users WHERE LOWER(phone) = ? OR LOWER(email) = ?', [cleanIdentifier, cleanIdentifier]);
+    const users = await queryDb(
+      'SELECT * FROM users WHERE phone = ? OR LOWER(phone) = ? OR LOWER(email) = ? OR LOWER(email) = ? LIMIT 1',
+      [normalized, rawTrimmed, normalized, rawTrimmed]
+    );
 
     if (users && users.length > 0) {
       userRecord = users[0];
     } else {
       // Check memory store for admin/customer
       userRecord = memoryStore.users.find(u =>
-        (u.phone && u.phone.toLowerCase() === cleanIdentifier) ||
-        (u.email && u.email.toLowerCase() === cleanIdentifier)
+        (u.phone && (u.phone === normalized || u.phone.toLowerCase() === rawTrimmed)) ||
+        (u.email && (u.email.toLowerCase() === normalized || u.email.toLowerCase() === rawTrimmed))
       );
     }
 
     if (!userRecord) {
-      return res.status(404).json({ success: false, message: 'User not found. Please register to create an account.' });
+      return res.status(401).json({ success: false, message: 'Invalid mobile number/email or password.' });
     }
 
     const isMatch = await bcrypt.compare(password, userRecord.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid phone/email or password.' });
+      return res.status(401).json({ success: false, message: 'Invalid mobile number/email or password.' });
     }
 
     const userPayload = {
@@ -140,7 +154,7 @@ export const loginUser = async (req, res) => {
       role: userRecord.role
     };
 
-    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(userPayload, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({
       success: true,
@@ -162,7 +176,7 @@ export const getCurrentUser = async (req, res) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
 
     res.json({
       success: true,
@@ -199,7 +213,7 @@ export const updateCurrentUser = async (req, res) => {
     // Issue a new token with updated name
     const { iat, exp, ...restUser } = req.user;
     const userPayload = { ...restUser, name };
-    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(userPayload, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({
       success: true,

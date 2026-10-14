@@ -23,14 +23,42 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 
+import pinoHttp from 'pino-http';
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security headers
-app.use(helmet());
+// Enable trust proxy for reverse proxies (Render / Cloudflare) so rate limiters see true client IPs
+app.set('trust proxy', 1);
+
+// Standard HTTP security headers with relaxed CSP for Cashfree SDK and Cloudinary images
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://sdk.cashfree.com", "https://cdn.jsdelivr.net"],
+      connectSrc: ["'self'", "https://api.cashfree.com", "https://sandbox.cashfree.com", "https://*.onrender.com", "https://*.vercel.app"],
+      imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com", "https://images.unsplash.com", "https://*.cashfree.com"],
+      frameSrc: ["'self'", "https://sdk.cashfree.com", "https://api.cashfree.com", "https://sandbox.cashfree.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"]
+    }
+  },
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Request logging (PII and passwords excluded from logs)
+if (process.env.NODE_ENV !== 'test') {
+  app.use(pinoHttp({
+    serializers: {
+      req: (req) => ({ method: req.method, url: req.url, id: req.id }),
+      res: (res) => ({ statusCode: res.statusCode })
+    }
+  }));
+}
 
 // CORS configuration
-const envFrontendUrls = (process.env.FRONTEND_URL || '')
+const envFrontendUrls = (process.env.FRONTEND_URL || 'https://www.hajinutsandspices.com,https://hajinutsandspices.com')
   .split(',')
   .map(url => url.trim().replace(/\/$/, ''))
   .filter(Boolean);
@@ -39,8 +67,6 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
   'http://localhost:3000',
-  'https://www.hajinutsandspices.com',
-  'https://hajinutsandspices.com',
   ...envFrontendUrls
 ];
 
@@ -73,9 +99,15 @@ app.use(cors({
   credentials: true
 }));
 
+import { validateEnv } from './config/env.js';
+import { handleCashfreeWebhook } from './controllers/paymentController.js';
+
 // Route-specific parser for admin state & catalog sync before global 1MB limit
 app.use('/api/admin/state', express.json({ limit: '20mb' }));
 app.use('/api/catalog', express.json({ limit: '20mb' }));
+
+// Mount Cashfree Webhook directly BEFORE any general JSON body parser so req.body is a raw Buffer
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleCashfreeWebhook);
 
 // Global body limit lowered to 1mb
 app.use(express.json({ limit: '1mb' }));
@@ -245,10 +277,21 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Error Handling Middleware
+// 404 Handler for undefined API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ success: false, message: `Route ${req.method} ${req.originalUrl} not found` });
+});
+
+// Central Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error('Unhandled Server Error:', err);
-  res.status(500).json({ success: false, message: 'Internal server error' });
+  const statusCode = err.status || err.statusCode || 500;
+  console.error(`Unhandled Error [${req.method} ${req.url}]:`, err.message);
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  return res.status(statusCode).json({
+    success: false,
+    message: isProduction && statusCode === 500 ? 'Internal server error' : err.message
+  });
 });
 
 // Only listen on port if run directly as the main script or hosted on Render/standard hosts (never when imported by Vercel serverless)
@@ -261,6 +304,12 @@ const isServerDirectRun = Boolean(
   ))
 );
 if (isServerDirectRun) {
+  try {
+    validateEnv();
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
   app.listen(PORT, async () => {
     console.log(`\n🚀 HAJI NUTS & SPICES Backend running on http://localhost:${PORT}`);
     console.log(`🔌 Database Engine: TiDB / MySQL Compatible`);

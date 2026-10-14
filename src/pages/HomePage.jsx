@@ -49,6 +49,9 @@ export default function HomePage() {
                   isActive ? 'scale-110' : 'scale-100'
                 }`}
                 draggable={false}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
               />
             </div>
           );

@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useCart } from '../context/CartContext';
 
-// Admin Views
+// Admin Views (lazy loaded to prevent monolithic bundle)
 import AdminLogin from '../components/admin/AdminLogin';
-import AdminDashboard from '../components/admin/AdminDashboard';
-import AdminProducts from '../components/admin/AdminProducts';
-import AdminCategories from '../components/admin/AdminCategories';
-import AdminOrders from '../components/admin/AdminOrders';
-import AdminCustomers from '../components/admin/AdminCustomers';
-import AdminOffers from '../components/admin/AdminOffers';
-import AdminReviews from '../components/admin/AdminReviews';
-import AdminSettings from '../components/admin/AdminSettings';
-import AdminFeaturedProducts from '../components/admin/AdminFeaturedProducts';
-import AdminBestSellingProducts from '../components/admin/AdminBestSellingProducts';
-import AdminCombos from '../components/admin/AdminCombos';
+const AdminDashboard = lazy(() => import('../components/admin/AdminDashboard'));
+const AdminProducts = lazy(() => import('../components/admin/AdminProducts'));
+const AdminCategories = lazy(() => import('../components/admin/AdminCategories'));
+const AdminOrders = lazy(() => import('../components/admin/AdminOrders'));
+const AdminCustomers = lazy(() => import('../components/admin/AdminCustomers'));
+const AdminOffers = lazy(() => import('../components/admin/AdminOffers'));
+const AdminReviews = lazy(() => import('../components/admin/AdminReviews'));
+const AdminSettings = lazy(() => import('../components/admin/AdminSettings'));
+const AdminFeaturedProducts = lazy(() => import('../components/admin/AdminFeaturedProducts'));
+const AdminBestSellingProducts = lazy(() => import('../components/admin/AdminBestSellingProducts'));
+const AdminCombos = lazy(() => import('../components/admin/AdminCombos'));
 
 import { 
   LayoutDashboard, Package, Layers, ShoppingBag, 
@@ -307,7 +307,13 @@ export default function AdminPage() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-8 bg-[#F8FAFC]">
-          {renderAdminTabContent()}
+          <Suspense fallback={
+            <div className="min-h-[400px] flex items-center justify-center">
+              <RefreshCw className="w-8 h-8 text-[#128C7E] animate-spin" />
+            </div>
+          }>
+            {renderAdminTabContent()}
+          </Suspense>
         </main>
 
       </div>

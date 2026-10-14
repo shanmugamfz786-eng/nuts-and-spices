@@ -1,18 +1,8 @@
-export const getBackendBaseUrl = () => {
-  const url = import.meta.env.VITE_API_BASE_URL;
-  if (url) return url.replace(/\/api\/?$/, '');
-  // When running on live deployment (Vercel, custom domain), fallback to live Render backend
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-    return 'https://nuts-and-spices-dqzp.onrender.com';
-  }
-  return '';
-};
+import { CONFIG } from '../config.js';
 
-export const API_BASE_URL = (() => {
-  const base = getBackendBaseUrl();
-  return base ? `${base}/api` : '/api';
-})();
+export const getBackendBaseUrl = () => CONFIG.API_BASE_URL;
 
+export const API_BASE_URL = `${CONFIG.API_BASE_URL}/api`;
 export const apiFetch = async (endpoint, options = {}) => {
   try {
     const token = localStorage.getItem('nuts_spices_auth_token');
@@ -29,6 +19,13 @@ export const apiFetch = async (endpoint, options = {}) => {
       ...options,
       headers
     });
+
+    if (response.status === 401 && token) {
+      localStorage.removeItem('nuts_spices_auth_token');
+      localStorage.removeItem('nuts_spices_user');
+      localStorage.removeItem('nuts_spices_admin_auth');
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('auth-expired'));
+    }
 
     const data = await response.json();
     return data;
