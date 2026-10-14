@@ -1,27 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
-import { Search, Award, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Search, Award, ArrowLeft, CheckCircle2, Save, Loader2 } from 'lucide-react';
 
 export default function AdminBestSellingProducts() {
-  const { products, updateProduct, setAdminTab } = useCart();
+  const { products, batchUpdateProducts, setAdminTab } = useCart();
   const [bestsellingSearchTerm, setBestsellingSearchTerm] = useState('');
   const [notification, setNotification] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const showNotification = (msg) => {
-    setNotification(msg);
+  // Local selection map: productId -> boolean
+  const [selectedMap, setSelectedMap] = useState({});
+
+  useEffect(() => {
+    if (Array.isArray(products) && products.length > 0) {
+      const initialMap = {};
+      products.forEach(p => {
+        initialMap[p.id] = !!p.isBestSelling;
+      });
+      setSelectedMap(initialMap);
+    }
+  }, [products]);
+
+  const showNotification = (msg, type = 'success') => {
+    setNotification({ msg, type });
     setTimeout(() => {
       setNotification(null);
-    }, 3000);
+    }, 4000);
   };
 
-  const handleToggle = async (product) => {
-    const nextState = !product.isBestSelling;
-    await updateProduct(product.id, { isBestSelling: nextState });
+  const handleCheckboxChange = (productId) => {
+    setSelectedMap(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
+  };
 
-    if (nextState) {
-      showNotification(`"${product.name}" added to Best Sellers! Live on all devices.`);
-    } else {
-      showNotification(`"${product.name}" removed from Best Sellers.`);
+  const handleSaveAll = async () => {
+    setIsSaving(true);
+    try {
+      const updatedProducts = products.map(p => ({
+        ...p,
+        isBestSelling: !!selectedMap[p.id]
+      }));
+
+      const res = await batchUpdateProducts(updatedProducts);
+      if (res && res.success !== false) {
+        const count = Object.values(selectedMap).filter(Boolean).length;
+        showNotification(`Saved! ${count} best selling products are now live across all devices.`);
+      } else {
+        showNotification('Failed to save. Please try again.', 'error');
+      }
+    } catch (err) {
+      showNotification('Error saving changes.', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -30,17 +62,21 @@ export default function AdminBestSellingProducts() {
            (p.id && p.id.toLowerCase().includes(bestsellingSearchTerm.toLowerCase()));
   });
 
+  const selectedCount = Object.values(selectedMap).filter(Boolean).length;
+
   return (
     <div className="relative space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-6 pb-20 md:pb-6 px-4 sm:px-6 md:px-8">
       {/* Toast Notification Popup */}
       {notification && (
-        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-gray-700 animate-in fade-in slide-in-from-top-4 duration-300">
-          <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0" />
-          <span className="text-sm font-bold tracking-wide">{notification}</span>
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border animate-in fade-in slide-in-from-top-4 duration-300 ${
+          notification.type === 'error' ? 'bg-red-900 text-white border-red-700' : 'bg-gray-900 text-white border-gray-700'
+        }`}>
+          <CheckCircle2 className={`w-5 h-5 shrink-0 ${notification.type === 'error' ? 'text-red-400' : 'text-emerald-400'}`} />
+          <span className="text-sm font-bold tracking-wide">{notification.msg}</span>
         </div>
       )}
 
-      <div className="flex items-center justify-between bg-white p-4 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs shrink-0">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setAdminTab('products')}
@@ -49,13 +85,38 @@ export default function AdminBestSellingProducts() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-3">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Manage Top Sellers
-              </h1>
-            </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+              Manage Top Sellers
+            </h1>
+            <p className="text-xs font-semibold text-gray-500 mt-0.5">
+              Select products and click Save to publish live to all devices
+            </p>
           </div>
+        </div>
+
+        {/* Top Save Button */}
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+            {selectedCount} Selected
+          </span>
+          <button
+            onClick={handleSaveAll}
+            disabled={isSaving}
+            className="flex items-center gap-2 bg-[#128C7E] hover:bg-[#0e7065] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving to All Devices...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save Changes</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -88,11 +149,11 @@ export default function AdminBestSellingProducts() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 pl-2 border-l border-gray-100 ml-2">
-                  {p.isBestSelling && <span className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase hidden sm:block shrink-0">Best Selling</span>}
+                  {selectedMap[p.id] && <span className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase hidden sm:block shrink-0">Best Selling</span>}
                   <input 
                     type="checkbox" 
-                    checked={!!p.isBestSelling}
-                    onChange={() => handleToggle(p)}
+                    checked={!!selectedMap[p.id]}
+                    onChange={() => handleCheckboxChange(p.id)}
                     className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600 bg-gray-100 border-gray-300 rounded-md focus:ring-amber-500 cursor-pointer shrink-0"
                   />
                 </div>
