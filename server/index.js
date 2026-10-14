@@ -11,7 +11,10 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import { initializeDatabase } from './scripts/initDb.js';
 import { queryDb } from './config/db.js';
 import { CATEGORIES, PRODUCTS } from '../src/data/products.js';
+import { authMiddleware } from './middleware/authMiddleware.js';
+import { adminMiddleware } from './middleware/adminMiddleware.js';
 
+import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,29 +26,80 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middlewares
+// Security headers
+app.use(helmet());
+
+// CORS configuration
+const envFrontendUrls = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map(url => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+  'http://localhost:3000',
+  'https://www.hajinutsandspices.com',
+  'https://hajinutsandspices.com',
+  ...envFrontendUrls
+];
+
+const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEWS === 'true';
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Permissive CORS to allow custom live domains, Vercel preview URLs, and localhost
-    return callback(null, true);
+    // Allow requests with no origin (curl, mobile apps, webhooks, server-to-server)
+    if (!origin) return callback(null, true);
+
+    const normalizedOrigin = origin.replace(/\/$/, '');
+
+    // Check strict allowlist
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    // Allow localhost/127.0.0.1 in non-production environments
+    if (process.env.NODE_ENV !== 'production' && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow Vercel preview URLs only if explicitly enabled via env flag
+    if (allowVercelPreviews && /^https:\/\/[a-zA-Z0-9_-]+\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS policy does not allow access from origin ${origin}`));
   },
   credentials: true
 }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Route-specific parser for admin state & catalog sync before global 1MB limit
+app.use('/api/admin/state', express.json({ limit: '20mb' }));
+app.use('/api/catalog', express.json({ limit: '20mb' }));
+
+// Global body limit lowered to 1mb
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 // Health Check Endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'online',
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'down';
+  let dbError = null;
+
+  try {
+    const pool = (await import('./config/db.js')).getPool();
+    await pool.query('SELECT 1');
+    dbStatus = 'up';
+  } catch (err) {
+    dbError = err.message;
+  }
+
+  const isHealthy = dbStatus === 'up';
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'online' : 'degraded',
     store: 'HAJI NUTS & SPICES Gourmet Backend',
-    database: 'TiDB / MySQL Compatible',
+    database: dbStatus,
+    ...(dbError && { error: dbError }),
     timestamp: new Date().toISOString()
   });
 });
@@ -107,11 +161,6 @@ export const syncServerCatalog = async (products, categories) => {
       if (Array.isArray(inMemoryCatalog.products)) memoryStore.products = [...inMemoryCatalog.products];
       if (Array.isArray(inMemoryCatalog.categories)) memoryStore.categories = [...inMemoryCatalog.categories];
     } catch {}
-
-    // Save to /tmp filesystem for Vercel Lambda container reuse
-    try {
-      fs.writeFileSync('/tmp/master_catalog.json', catalogJson);
-    } catch {}
   } catch (err) {
     console.warn('DB catalog sync note:', err.message);
   }
@@ -169,13 +218,22 @@ app.get('/api/catalog', async (req, res) => {
   });
 });
 
-app.post('/api/catalog', async (req, res) => {
+app.post('/api/catalog', authMiddleware, adminMiddleware, async (req, res) => {
   const { products, categories } = req.body || {};
-  if (Array.isArray(products) && Array.isArray(categories)) {
-    await syncServerCatalog(products, categories);
-    return res.json({ success: true, message: 'Catalog updated across all devices successfully' });
+  if (!Array.isArray(products) || !Array.isArray(categories)) {
+    return res.status(400).json({ success: false, message: 'Invalid payload: products and categories must be arrays' });
   }
-  return res.status(400).json({ success: false, message: 'Invalid payload' });
+
+  // Cap array lengths to sensible limits to prevent payload bombs
+  if (products.length > 500 || categories.length > 100) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Payload exceeds allowed limits (max 500 products, 100 categories)' 
+    });
+  }
+
+  await syncServerCatalog(products, categories);
+  return res.json({ success: true, message: 'Catalog updated across all devices successfully' });
 });
 
 // API Routes

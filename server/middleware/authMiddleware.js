@@ -20,3 +20,21 @@ export const authMiddleware = (req, res, next) => {
     return res.status(401).json({ success: false, message: 'Invalid or expired authentication token.' });
   }
 };
+
+export const optionalAuthMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    if (process.env.JWT_SECRET) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+    }
+  } catch (error) {
+    // Ignore invalid tokens for optional auth and treat as unauthenticated
+  }
+  next();
+};

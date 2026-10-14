@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { queryDb, memoryStore } from '../config/db.js';
@@ -7,6 +8,7 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 const JWT_SECRET = process.env.JWT_SECRET;
+
 export const registerCustomer = async (req, res) => {
   try {
     const { name, phone, email, password } = req.body;
@@ -15,28 +17,51 @@ export const registerCustomer = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Name, phone number, and password are required.' });
     }
 
-    const identifier = email ? email.trim().toLowerCase() : phone;
-    const cleanPhone = phone ? phone.trim() : '';
+    if (typeof name !== 'string' || name.trim().length < 2) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid name (at least 2 characters).' });
+    }
 
-    // Check existing
-    const existing = await queryDb('SELECT * FROM users WHERE phone = ? OR LOWER(email) = ?', [cleanPhone, identifier]);
+    // Phone format: 10-digit Indian mobile number
+    const cleanPhone = String(phone).replace(/\D/g, '').slice(-10);
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit Indian mobile number.' });
+    }
+
+    // Password format: minimum 8 characters
+    if (typeof password !== 'string' || password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long.' });
+    }
+
+    // Email format (if provided)
+    let cleanEmail = `${cleanPhone}@nutsandspices.in`;
+    if (email && typeof email === 'string' && email.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+      }
+      cleanEmail = email.trim().toLowerCase();
+    }
+
+    // Check existing phone or email
+    const existing = await queryDb('SELECT id FROM users WHERE phone = ? OR LOWER(email) = ? LIMIT 1', [cleanPhone, cleanEmail]);
     if (existing && existing.length > 0) {
       return res.status(400).json({ success: false, message: 'An account with this phone or email already exists.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = `usr_${Date.now()}`;
+    const userId = `usr_${crypto.randomUUID()}`;
 
+    // Force role to 'customer' - never allow clients to set their own role
     await queryDb(
       'INSERT INTO users (id, name, phone, email, password, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, name.trim(), cleanPhone, email ? email.trim().toLowerCase() : `${cleanPhone}@nutsandspices.in`, hashedPassword, 'customer']
+      [userId, name.trim(), cleanPhone, cleanEmail, hashedPassword, 'customer']
     );
 
     const userObj = {
       id: userId,
       name: name.trim(),
       phone: cleanPhone,
-      email: email ? email.trim().toLowerCase() : `${cleanPhone}@nutsandspices.in`,
+      email: cleanEmail,
       role: 'customer'
     };
 

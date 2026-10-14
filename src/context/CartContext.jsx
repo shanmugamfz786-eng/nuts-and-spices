@@ -296,7 +296,10 @@ export const CartProvider = ({ children }) => {
           ? 'https://nuts-and-spices-dqzp.onrender.com'
           : ''
       );
-      const res = await fetch(`${BASE}/api/orders`);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
+      const headers = { 'Accept': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(`${BASE}/api/orders`, { headers });
       const data = await res.json();
       if (data && data.success && Array.isArray(data.orders)) {
         const normalized = data.orders.map(o => ({

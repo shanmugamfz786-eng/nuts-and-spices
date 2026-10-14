@@ -1,5 +1,6 @@
 import { queryDb, memoryStore } from '../config/db.js';
 import { PRODUCTS } from '../../src/data/products.js';
+import { INITIAL_OFFERS, INITIAL_STORE_SETTINGS } from '../../src/data/mockAdminData.js';
 import crypto from 'crypto';
 
 const STORE_WHATSAPP_NUMBER = process.env.STORE_WHATSAPP_NUMBER || '919876543210';
@@ -12,8 +13,12 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Missing required customer details (name, phone, address, city, pincode).' });
     }
 
-    if (!items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty. Add products before placing order.' });
+    }
+
+    if (items.length > 50) {
+      return res.status(400).json({ success: false, message: 'Too many items in order. Maximum 50 items allowed.' });
     }
 
     
@@ -126,8 +131,8 @@ export const createOrder = async (req, res) => {
       }
 
       const qty = Number(item.quantity);
-      if (qty <= 0 || isNaN(qty)) {
-         return res.status(400).json({ success: false, message: 'Invalid quantity.' });
+      if (qty <= 0 || isNaN(qty) || !Number.isInteger(qty) || qty > 100) {
+         return res.status(400).json({ success: false, message: `Invalid quantity for '${backendProduct.name}'. Quantity must be between 1 and 100.` });
       }
 
       subtotal += (Number(realPrice) * qty);
@@ -144,15 +149,94 @@ export const createOrder = async (req, res) => {
     items.length = 0;
     items.push(...validatedItems);
 
-    // Process discount from coupon if sent
-    const discountAmount = Math.max(0, Number(req.body.discountAmount) || 0);
-    const couponCode = (req.body.couponCode || '').trim();
+    // Ignore any client-sent discountAmount entirely and validate couponCode strictly on server
+    let discountAmount = 0;
+    const rawCouponCode = typeof req.body.couponCode === 'string' ? req.body.couponCode.trim().toUpperCase() : '';
 
-    const deliveryCharge = 0;
+    if (rawCouponCode) {
+      // 1. Fetch live active offers from master_admin_state_json in settings, falling back to INITIAL_OFFERS
+      let serverOffers = INITIAL_OFFERS;
+      try {
+        const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
+        if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
+          const parsed = JSON.parse(adminStateRows[0].setting_value);
+          if (parsed && Array.isArray(parsed.offers) && parsed.offers.length > 0) {
+            serverOffers = parsed.offers;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse admin offers state for coupon validation', e);
+      }
+
+      const matchingOffer = serverOffers.find(o => {
+        const oCode = (o.code || `HAJI${o.discountPercent}`).trim().toUpperCase();
+        return oCode === rawCouponCode;
+      });
+
+      if (!matchingOffer) {
+        return res.status(400).json({ success: false, message: `Coupon code '${rawCouponCode}' is invalid.` });
+      }
+
+      if (matchingOffer.status && matchingOffer.status !== 'ACTIVE') {
+        return res.status(400).json({ success: false, message: `Coupon '${rawCouponCode}' is inactive or expired.` });
+      }
+
+      // Check date validity if start/end dates exist
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (matchingOffer.startDate && todayStr < matchingOffer.startDate) {
+        return res.status(400).json({ success: false, message: `Coupon '${rawCouponCode}' is not active yet.` });
+      }
+      if (matchingOffer.endDate && todayStr > matchingOffer.endDate) {
+        return res.status(400).json({ success: false, message: `Coupon '${rawCouponCode}' has expired.` });
+      }
+
+      const minSpend = Number(matchingOffer.minOrderAmount) || 0;
+      if (subtotal < minSpend) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Minimum order value of ₹${minSpend} required for coupon '${rawCouponCode}'. (Current: ₹${subtotal})` 
+        });
+      }
+
+      // Compute discount based on category restriction if applicable
+      const applicableCat = matchingOffer.applicableCategory;
+      let eligibleSubtotal = subtotal;
+
+      if (applicableCat && applicableCat !== 'all') {
+        eligibleSubtotal = validatedItems
+          .filter(it => it.categoryId === applicableCat || it.category === applicableCat)
+          .reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity)), 0);
+
+        if (eligibleSubtotal === 0) {
+          return res.status(400).json({ 
+            success: false, 
+            message: `Coupon '${rawCouponCode}' is only valid on ${matchingOffer.applicableCategoryName || 'eligible'} items.` 
+          });
+        }
+      }
+
+      const discountPct = Number(matchingOffer.discountPercent) || 0;
+      discountAmount = Math.max(0, Math.round((eligibleSubtotal * discountPct) / 100));
+    }
+
+    // Determine delivery charge server-side from settings
+    let deliveryCharge = 0;
+    try {
+      const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
+      if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
+        const parsed = JSON.parse(adminStateRows[0].setting_value);
+        if (parsed && parsed.storeSettings) {
+          const freeThreshold = Number(parsed.storeSettings.freeDeliveryThreshold) || 1499;
+          const standardCharge = Number(parsed.storeSettings.standardDeliveryFee) || 0;
+          deliveryCharge = (subtotal >= freeThreshold) ? 0 : standardCharge;
+        }
+      }
+    } catch {}
+
     const totalAmount = Math.max(0, subtotal - discountAmount + deliveryCharge);
     const itemsJson = JSON.stringify(items);
 
-    const fullNotes = [notes, couponCode ? `Coupon Applied: ${couponCode} (-₹${discountAmount})` : '']
+    const fullNotes = [notes, rawCouponCode ? `Coupon Applied: ${rawCouponCode} (-₹${discountAmount})` : '']
       .filter(Boolean)
       .join(' | ');
 
@@ -357,6 +441,44 @@ export const getOrderById = async (req, res) => {
           pincode: row.pincode
         }
       };
+    }
+
+    let isAuthorized = false;
+    if (req.user) {
+      const userRole = (req.user.role || '').toLowerCase();
+      const userPhone = (req.user.phone || '').replace(/\D/g, '').slice(-10);
+      const userEmail = (req.user.email || '').toLowerCase().trim();
+      const orderPhone = (formattedOrder.phone || '').replace(/\D/g, '').slice(-10);
+      const orderEmail = (formattedOrder.email || '').toLowerCase().trim();
+
+      if (userRole === 'admin') {
+        isAuthorized = true;
+      } else if (userPhone && orderPhone && userPhone === orderPhone) {
+        isAuthorized = true;
+      } else if (userEmail && orderEmail && userEmail === orderEmail) {
+        isAuthorized = true;
+      }
+    }
+
+    // If not authorized (guest lookup or non-owner), return only minimal safe tracking payload
+    if (!isAuthorized) {
+      const safeMinimalOrder = {
+        id: formattedOrder.id,
+        orderId: formattedOrder.orderId,
+        status: formattedOrder.status,
+        items: formattedOrder.items,
+        totalAmount: formattedOrder.totalAmount,
+        total: formattedOrder.total,
+        createdAt: formattedOrder.createdAt,
+        date: formattedOrder.date,
+        deliveryCharge: formattedOrder.deliveryCharge,
+        subtotal: formattedOrder.subtotal
+      };
+
+      return res.json({
+        success: true,
+        order: safeMinimalOrder
+      });
     }
 
     res.json({

@@ -94,7 +94,6 @@ export async function initializeDatabase() {
     console.warn("⚠️ INITIAL_ADMIN_PASSWORD not set in environment. Skipping admin seed.");
   }
   const adminHashedPassword = adminPassword ? await bcrypt.hash(adminPassword, 10) : null;
-  const sampleCustomerHashed = await bcrypt.hash('123456', 10);
 
   const defaultAdmin = {
     id: 'usr_admin',
@@ -106,20 +105,26 @@ export async function initializeDatabase() {
     createdAt: new Date()
   };
 
-  const sampleCustomer = {
-    id: 'usr_customer_1',
-    name: 'Karthik Raja',
-    phone: '9876543210',
-    email: 'karthik@nutsandspices.in',
-    password: sampleCustomerHashed,
-    role: 'customer',
-    createdAt: new Date()
-  };
+  memoryStore.users = defaultAdmin.password ? [defaultAdmin] : [];
 
-  memoryStore.users = [defaultAdmin, sampleCustomer];
+  // Seed sample customer with default '123456' password ONLY in local development
+  if (process.env.NODE_ENV !== 'production') {
+    const sampleCustomerHashed = await bcrypt.hash('123456', 10);
+    const sampleCustomer = {
+      id: 'usr_customer_1',
+      name: 'Karthik Raja',
+      phone: '9876543210',
+      email: 'karthik@nutsandspices.in',
+      password: sampleCustomerHashed,
+      role: 'customer',
+      createdAt: new Date()
+    };
+    memoryStore.users.push(sampleCustomer);
+  }
+
   memoryStore.categories = CATEGORIES;
   memoryStore.products = PRODUCTS;
-  memoryStore.orders = [
+  memoryStore.orders = process.env.NODE_ENV !== 'production' ? [
     {
       id: 'NS-98124',
       orderId: 'NS-98124',
@@ -141,7 +146,7 @@ export async function initializeDatabase() {
       notes: 'Please pack in eco-friendly gift wrap.',
       createdAt: new Date()
     }
-  ];
+  ] : [];
 
   try {
     const pool = getPool();

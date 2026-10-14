@@ -51,8 +51,13 @@ export const queryDb = async (sql, params = []) => {
     const [rows] = await dbPool.execute(sql, params);
     return rows;
   } catch (error) {
-    console.warn('⚠️ TiDB/MySQL query note:', error.message);
-    // Graceful fallback to in-memory store so live storefront & admin never throw 500 error screens
+    console.error('Database query error:', error.message);
+    if (process.env.NODE_ENV === 'production') {
+      // In production, do NOT fall back to memoryStore: fail loudly so operators know DB is unreachable/failing
+      throw error;
+    }
+    // Graceful fallback ONLY for local development / testing
+    console.warn('⚠️ Falling back to local development in-memory store.');
     return processMemoryQuery(sql, params);
   }
 };
@@ -95,11 +100,16 @@ function processMemoryQuery(sql, params) {
     }
 
     if (queryLower.includes('from orders')) {
-      if (queryLower.includes('where id') && params.length > 0) {
-        return memoryStore.orders.filter(o => o.id === params[0] || o.orderId === params[0]);
-      }
-      if (queryLower.includes('where phone') && params.length > 0) {
-        return memoryStore.orders.filter(o => o.phone === params[0] || o.email === params[0] || o.email === params[1]);
+      if (params.length > 0) {
+        if (queryLower.includes('where id') || queryLower.includes('order_id')) {
+          return memoryStore.orders.filter(o => 
+            o.id === params[0] || o.orderId === params[0] || o.order_id === params[0] ||
+            (params.length > 1 && (o.id === params[1] || o.orderId === params[1] || o.order_id === params[1]))
+          );
+        }
+        if (queryLower.includes('where phone')) {
+          return memoryStore.orders.filter(o => o.phone === params[0] || o.email === params[0] || o.email === params[1]);
+        }
       }
       return memoryStore.orders;
     }

@@ -72,10 +72,16 @@ export async function saveCloudCatalog(products, categories) {
     });
 
     const endpoints = getEndpoints();
+    const token = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
+    const headers = { 
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+
     const savePromises = endpoints.map(url =>
       fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: payload
       }).catch(err => {
         console.warn(`saveCloudCatalog POST ${url} note:`, err.message);
