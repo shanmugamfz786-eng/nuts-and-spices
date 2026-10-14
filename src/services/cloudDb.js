@@ -97,6 +97,7 @@ export async function saveCloudCatalog(products, categories) {
       'Authorization': `Bearer ${token}`
     };
 
+    const endpoints = getEndpoints();
     const savePromises = endpoints.map(url =>
       fetch(url, {
         method: 'POST',

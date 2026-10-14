@@ -421,7 +421,34 @@ export const CartProvider = ({ children }) => {
         const cloudData = await fetchCloudCatalog();
         if (cloudData && isMounted) {
           if (Array.isArray(cloudData.products) && cloudData.products.length > 0) {
-            const sanitized = sanitizeProductList(cloudData.products);
+            // Build a map of cloud flags keyed by product id
+            const cloudFlagMap = {};
+            cloudData.products.forEach(cp => {
+              if (cp && cp.id) cloudFlagMap[cp.id] = cp;
+            });
+
+            // Merge cloud flags onto the FULL seed product list so admin always sees ALL products
+            const merged = PRODUCTS.map(seedP => {
+              const cloudP = cloudFlagMap[seedP.id];
+              if (cloudP) {
+                return {
+                  ...seedP,
+                  ...cloudP,
+                  // Always preserve local seed image
+                  image: seedProductImageMap.get(seedP.id) || seedP.image || cloudP.image || '',
+                };
+              }
+              return seedP;
+            });
+
+            // Also include any cloud-only products (added via admin) not in seed
+            cloudData.products.forEach(cp => {
+              if (cp && cp.id && !PRODUCTS.find(p => p.id === cp.id)) {
+                merged.push(cp);
+              }
+            });
+
+            const sanitized = sanitizeProductList(merged);
             setProducts(sanitized);
             try { 
               sessionStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
@@ -1039,6 +1066,25 @@ export const CartProvider = ({ children }) => {
     return { success: true };
   };
 
+  const batchUpdateProducts = async (updatedProductsList) => {
+    if (!Array.isArray(updatedProductsList)) return { success: false };
+    
+    // 1. Update state immediately
+    setProducts(updatedProductsList);
+
+    try {
+      // 2. Persist to TiDB Cloud & Vercel API
+      await saveCloudCatalog(updatedProductsList, categories);
+
+      // 3. Backup sync to admin state
+      syncAdminStateToCloud({ products: updatedProductsList }).catch(() => {});
+      return { success: true };
+    } catch (e) {
+      console.warn('Batch update products error:', e);
+      return { success: false, error: e.message };
+    }
+  };
+
   const deleteProduct = (productId) => {
     setProducts(prev => {
       const updated = prev.filter(p => p.id !== productId);
@@ -1348,6 +1394,7 @@ export const CartProvider = ({ children }) => {
         syncCatalogToGit,
         addProduct,
         updateProduct,
+        batchUpdateProducts,
         deleteProduct,
         toggleProductStatus,
 
