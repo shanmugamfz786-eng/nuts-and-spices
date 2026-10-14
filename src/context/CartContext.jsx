@@ -80,28 +80,8 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // 2. PRODUCTS STATE (Hydrate from localStorage or sessionStorage with fallback to master PRODUCTS)
-  const [products, setProducts] = useState(() => {
-    try {
-      const storedVer = localStorage.getItem('nuts_spices_catalog_version');
-      if (storedVer !== CATALOG_VERSION) {
-        localStorage.removeItem('nuts_spices_products');
-        sessionStorage.removeItem('nuts_spices_products');
-        sessionStorage.removeItem('nuts_spices_categories');
-        sessionStorage.removeItem('nuts_spices_catalog_loaded');
-        localStorage.setItem('nuts_spices_catalog_version', CATALOG_VERSION);
-        return PRODUCTS;
-      }
-      const saved = localStorage.getItem('nuts_spices_products') || sessionStorage.getItem('nuts_spices_products');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return sanitizeProductList(parsed);
-        }
-      }
-    } catch {}
-    return PRODUCTS;
-  });
+  // 2. PRODUCTS STATE (Master catalog initialized from seed PRODUCTS, dynamically updated live from TiDB Cloud)
+  const [products, setProducts] = useState(() => sanitizeProductList(PRODUCTS));
 
   // 3. CATEGORIES STATE (Session Cached: 1-time backend load, instant page switches, auto-clears on tab close)
   const [categories, setCategories] = useState(() => {
