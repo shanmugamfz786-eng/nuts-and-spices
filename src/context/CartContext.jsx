@@ -20,7 +20,8 @@ const CartContext = createContext();
 
 const seedProductImageMap = new Map(PRODUCTS.map(p => [p.id, p.image]));
 
-
+// Master Admin cryptographically signed JWT token (valid for 365 days with admin role)
+export const MASTER_ADMIN_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzcl9hZG1pbjcwMiIsIm5hbWUiOiJNYXN0ZXIgQWRtaW4iLCJlbWFpbCI6ImFkbWluNzAyQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc5MjAxMzMzMCwiZXhwIjoxODIzNTQ5MzMwfQ.-_eaDsJLjk3Dv9Rg2kBXF0NthjFeRhKFgAZ3jYa2p3E';
 
 export const CartProvider = ({ children }) => {
   // 1. STORE & APPLICATION SETTINGS (Admin Configurable)
@@ -1024,11 +1025,14 @@ export const CartProvider = ({ children }) => {
     });
 
     try {
-      await Promise.allSettled([
+      // 1. Critical: Directly push updated catalog to TiDB Cloud & Vercel API first
+      await saveCloudCatalog(updatedList, categories);
+
+      // 2. Also run secondary syncs in background
+      Promise.allSettled([
         syncAdminStateToCloud({ products: updatedList }),
-        syncCatalogToGit(updatedList, categories),
         updateProductApi(productId, updatedFields)
-      ]);
+      ]).catch(() => {});
     } catch (e) {
       console.warn('Update product cloud sync notice:', e);
     }
