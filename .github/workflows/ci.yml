@@ -40,7 +40,7 @@ jobs:
       # 2. Backend Checks
       - name: Install Backend Dependencies
         working-directory: ./server
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Test Backend with Coverage
         working-directory: ./server
