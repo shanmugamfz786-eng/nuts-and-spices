@@ -64,8 +64,8 @@ export const CartProvider = ({ children }) => {
         weights: validWeights,
         status: activeState ? 'Active' : 'Inactive',
         active: activeState,
-        isFeaturedToday: p.isFeaturedToday === true || p.is_featured_today === 1,
-        isBestSelling: p.isBestSelling === true || p.is_best_selling === 1
+        isFeaturedToday: p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1',
+        isBestSelling: p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1'
       };
     }).filter(Boolean);
   };
@@ -431,16 +431,10 @@ export const CartProvider = ({ children }) => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Realtime Cloud Catalog Sync (1-Time Session Cache: fast page switches, 0 repeated backend calls, clears on exit)
+  // Realtime Cloud Catalog Sync (Fetches live product states from TiDB so changes reflect instantly across all devices)
   useEffect(() => {
     let isMounted = true;
     const loadCloudData = async () => {
-      // If already loaded in this active browser session, skip network request completely
-      try {
-        if (sessionStorage.getItem('nuts_spices_catalog_loaded') === 'true') {
-          return;
-        }
-      } catch {}
 
       try {
         const cloudData = await fetchCloudCatalog();
@@ -448,13 +442,18 @@ export const CartProvider = ({ children }) => {
           if (Array.isArray(cloudData.products) && cloudData.products.length > 0) {
             const sanitized = sanitizeProductList(cloudData.products);
             setProducts(sanitized);
-            try { sessionStorage.setItem('nuts_spices_products', JSON.stringify(sanitized)); } catch {}
+            try { 
+              sessionStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
+              localStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
+            } catch {}
           }
           if (Array.isArray(cloudData.categories) && cloudData.categories.length > 0) {
             setCategories(cloudData.categories);
-            try { sessionStorage.setItem('nuts_spices_categories', JSON.stringify(cloudData.categories)); } catch {}
+            try { 
+              sessionStorage.setItem('nuts_spices_categories', JSON.stringify(cloudData.categories));
+              localStorage.setItem('nuts_spices_categories', JSON.stringify(cloudData.categories));
+            } catch {}
           }
-          try { sessionStorage.setItem('nuts_spices_catalog_loaded', 'true'); } catch {}
         }
       } catch (err) {
         console.warn('Cloud catalog fetch error:', err);
