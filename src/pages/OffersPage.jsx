@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
+import { INITIAL_OFFERS } from '../data/mockAdminData';
 import { 
   Ticket, 
   Tag, 
@@ -21,7 +22,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OffersPage() {
-  const { offers = [], categories = [], applyCoupon, navigate } = useCart();
+  const { offers: cartOffers = [], categories = [], applyCoupon, navigate } = useCart();
+  const offers = (cartOffers && cartOffers.length > 0) ? cartOffers : INITIAL_OFFERS;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState(null);
