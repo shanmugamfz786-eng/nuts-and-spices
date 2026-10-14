@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { PRODUCTS, CATEGORIES, STORE_WHATSAPP_NUMBER, CATALOG_VERSION } from '../data/products';
 import { fetchCloudCatalog, saveCloudCatalog } from '../services/cloudDb';
 import { createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from '../api/productApi';
@@ -822,10 +822,113 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  // 7. COUPON / OFFER APPLICATION STATE
+  const [appliedCoupon, setAppliedCoupon] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_applied_coupon');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  // Calculate discount amount from applied coupon
+  const discountAmount = useMemo(() => {
+    if (!appliedCoupon || cartTotal === 0) return 0;
+    
+    // Check min order threshold
+    const minOrder = Number(appliedCoupon.minOrderAmount) || 0;
+    if (cartTotal < minOrder) return 0;
+
+    // Check category eligibility if specified
+    const applicableCat = appliedCoupon.applicableCategory;
+    let eligibleSubtotal = cartTotal;
+
+    if (applicableCat && applicableCat !== 'all') {
+      eligibleSubtotal = cart
+        .filter(item => item.categoryId === applicableCat || item.category === applicableCat)
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
+      
+      if (eligibleSubtotal === 0) return 0;
+    }
+
+    const pct = Number(appliedCoupon.discountPercent) || 0;
+    return Math.round((eligibleSubtotal * pct) / 100);
+  }, [appliedCoupon, cartTotal, cart]);
+
   const deliveryCharge = 0;
-  const grandTotal = cartTotal;
+  const grandTotal = Math.max(0, cartTotal - discountAmount + deliveryCharge);
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Apply Coupon Function
+  const applyCoupon = (codeOrOffer) => {
+    const searchCode = typeof codeOrOffer === 'string' ? codeOrOffer.trim().toUpperCase() : (codeOrOffer.code || '').trim().toUpperCase();
+    if (!searchCode) {
+      return { success: false, message: 'Please enter a valid coupon code.' };
+    }
+
+    const foundOffer = offers.find(o => {
+      const oCode = (o.code || `HAJI${o.discountPercent}`).trim().toUpperCase();
+      return oCode === searchCode;
+    });
+
+    if (!foundOffer) {
+      return { success: false, message: `Coupon code "${searchCode}" is invalid.` };
+    }
+
+    if (foundOffer.status && foundOffer.status !== 'ACTIVE') {
+      return { success: false, message: `Coupon "${searchCode}" has expired or is inactive.` };
+    }
+
+    const minSpend = Number(foundOffer.minOrderAmount) || 0;
+    if (cartTotal < minSpend) {
+      return {
+        success: false,
+        message: `Minimum order of ₹${minSpend.toLocaleString('en-IN')} required for coupon "${searchCode}". (Current: ₹${cartTotal.toLocaleString('en-IN')})`
+      };
+    }
+
+    // Check category restriction if applicable
+    if (foundOffer.applicableCategory && foundOffer.applicableCategory !== 'all') {
+      const hasCatItem = cart.some(item => item.categoryId === foundOffer.applicableCategory || item.category === foundOffer.applicableCategory);
+      if (!hasCatItem) {
+        return {
+          success: false,
+          message: `Coupon "${searchCode}" is only applicable for ${foundOffer.applicableCategoryName || 'specific category'} products.`
+        };
+      }
+    }
+
+    const couponObj = {
+      id: foundOffer.id,
+      code: searchCode,
+      name: foundOffer.name,
+      discountPercent: Number(foundOffer.discountPercent) || 0,
+      minOrderAmount: minSpend,
+      applicableCategory: foundOffer.applicableCategory,
+      applicableCategoryName: foundOffer.applicableCategoryName
+    };
+
+    setAppliedCoupon(couponObj);
+    try {
+      localStorage.setItem('nuts_spices_applied_coupon', JSON.stringify(couponObj));
+    } catch {}
+
+    return { 
+      success: true, 
+      message: `Coupon "${searchCode}" applied! Enjoy ${foundOffer.discountPercent}% OFF.`,
+      coupon: couponObj 
+    };
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    try {
+      localStorage.removeItem('nuts_spices_applied_coupon');
+    } catch {}
+  };
 
   // WHATSAPP GENERATION USING DYNAMIC STORE SETTINGS
   const activeWhatsAppNumber = storeSettings.whatsappNumber || STORE_WHATSAPP_NUMBER;
@@ -1173,6 +1276,10 @@ export const CartProvider = ({ children }) => {
         cart,
         wishlist,
         cartTotal,
+        appliedCoupon,
+        discountAmount,
+        applyCoupon,
+        removeCoupon,
         deliveryCharge,
         grandTotal,
         cartItemCount,

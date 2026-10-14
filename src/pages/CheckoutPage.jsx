@@ -4,7 +4,17 @@ import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, 
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, createNewOrder, clearPurchasedItems, navigate, user } = useCart();
+  const { 
+    cart, 
+    cartTotal, 
+    appliedCoupon, 
+    discountAmount, 
+    grandTotal, 
+    createNewOrder, 
+    clearPurchasedItems, 
+    navigate, 
+    user 
+  } = useCart();
   React.useEffect(() => { if (!user) navigate('cart'); }, [user, navigate]);
 
   const [formData, setFormData] = useState({
@@ -94,7 +104,13 @@ export default function CheckoutPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ customer: formData, items: cart, notes: formData.notes })
+        body: JSON.stringify({ 
+          customer: formData, 
+          items: cart, 
+          notes: formData.notes,
+          couponCode: appliedCoupon?.code || '',
+          discountAmount: discountAmount || 0
+        })
       });
 
       if (!orderRes.ok && orderRes.status === 404) throw new Error('Order API endpoint not found');
@@ -336,7 +352,7 @@ export default function CheckoutPage() {
             ) : (
               <>
                 <CreditCard className="w-4 h-4" />
-                <span>Pay ₹{cartTotal.toLocaleString('en-IN')} Securely</span>
+                <span>Pay ₹{grandTotal.toLocaleString('en-IN')} Securely</span>
               </>
             )}
           </button>
@@ -363,17 +379,35 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-base font-black">
+          <div className="pt-3 border-t border-[#E5E7EB] space-y-2 text-xs">
+            <div className="flex items-center justify-between text-[#8C7A6B]">
+              <span>Items Total:</span>
+              <span className="font-bold text-[#000000]">₹{cartTotal.toLocaleString('en-IN')}</span>
             </div>
-            
-            <div className="pt-3 flex items-center justify-between text-xs font-bold text-[#8C7A6B]">
+
+            {discountAmount > 0 && (
+              <div className="flex items-center justify-between text-emerald-700 font-bold bg-emerald-50 p-2 rounded-xl border border-emerald-200">
+                <span>Coupon Applied ({appliedCoupon?.code}):</span>
+                <span>- ₹{discountAmount.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-[#8C7A6B]">
               <span>Delivery Charge:</span>
-              <span>FREE</span>
+              <span className="font-bold text-emerald-700">FREE</span>
             </div>
 
             <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-base font-black">
               <span className="text-[#000000]">Grand Total:</span>
-            <span className="text-[#000000]">₹{cartTotal.toLocaleString('en-IN')}</span>
+              <div className="text-right">
+                {discountAmount > 0 && (
+                  <span className="text-xs text-gray-400 line-through block font-medium">
+                    ₹{cartTotal.toLocaleString('en-IN')}
+                  </span>
+                )}
+                <span className="text-[#000000] text-xl">₹{grandTotal.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
           </div>
         </div>
 

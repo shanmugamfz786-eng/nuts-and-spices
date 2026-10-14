@@ -145,6 +145,11 @@ class ErrorBoundary extends React.Component {
             <p className="text-xs text-slate-500 leading-relaxed">
               We encountered an unexpected display glitch. Please reload the page or return to the homepage.
             </p>
+            {this.state.error?.message && (
+              <div className="p-3 bg-red-50 text-red-700 text-left rounded-xl text-[11px] font-mono overflow-auto max-h-24 border border-red-200">
+                {this.state.error.message}
+              </div>
+            )}
             <div className="pt-2 flex flex-col gap-2">
               <button
                 type="button"

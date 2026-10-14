@@ -4,7 +4,7 @@ import { PRODUCTS } from '../data/products';
 import { ArrowLeft, Star, ShoppingBag, ShieldCheck, Truck, RefreshCw, Heart, Check, MessageSquare } from 'lucide-react';
 
 export default function ProductDetailsPage() {
-  const { selectedProduct, products, addToCart, wishlist, toggleWishlist, navigate } = useCart();
+  const { selectedProduct, products, addToCart, wishlist, toggleWishlist, navigate, reviews = [], addReview, user } = useCart();
   
   const activeProds = (products || []).filter(isProductActive);
   const product = (selectedProduct && isProductActive(selectedProduct))
@@ -17,6 +17,44 @@ export default function ProductDetailsPage() {
   const [selectedWeight, setSelectedWeight] = useState(safeWeights[0] || defaultWeight);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+
+  // Review states
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewerName, setReviewerName] = useState(user?.name || '');
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+
+  // Filter reviews matching current product or store
+  const matchingReviews = reviews.filter(r => {
+    if (r.status && r.status === 'HIDDEN') return false;
+    if (r.productId && product?.id) return r.productId === product.id;
+    if (r.productName && product?.name) return r.productName.toLowerCase().includes(product.name.toLowerCase()) || product.name.toLowerCase().includes(r.productName.toLowerCase());
+    return true;
+  });
+
+  const handleSubmitReview = (e) => {
+    e.preventDefault();
+    if (!reviewerName.trim() || !reviewComment.trim()) return;
+
+    addReview({
+      customerName: reviewerName,
+      name: reviewerName,
+      comment: reviewComment,
+      quote: reviewComment,
+      rating: reviewRating,
+      productId: product?.id || '',
+      productName: product?.name || 'Gourmet Selection',
+      tag: 'Verified Purchase'
+    });
+
+    setReviewSuccess(true);
+    setReviewComment('');
+    setTimeout(() => {
+      setReviewSuccess(false);
+      setShowReviewForm(false);
+    }, 2000);
+  };
 
   React.useEffect(() => {
     if (product) {
@@ -226,6 +264,173 @@ export default function ProductDetailsPage() {
             </div>
           </div>
 
+        </div>
+
+      </div>
+
+      {/* CUSTOMER REVIEWS & RATING SECTION */}
+      <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 sm:p-10 shadow-lg space-y-8">
+        
+        {/* Header & Rating Summary */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-6">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-[#128C7E] rounded-full text-xs font-bold uppercase tracking-wider">
+              <Star className="w-3.5 h-3.5 fill-[#128C7E]" />
+              <span>Verified Patron Ratings</span>
+            </div>
+            <h2 className="text-2xl font-black font-serif text-black">
+              Customer Reviews ({matchingReviews.length})
+            </h2>
+            <p className="text-xs text-gray-500">
+              Real feedback from customers who purchased {product.name}.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowReviewForm(!showReviewForm)}
+            className="px-6 py-3 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 self-start md:self-auto"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>{showReviewForm ? 'Close Form' : 'Write a Review'}</span>
+          </button>
+        </div>
+
+        {/* Write Review Form */}
+        {showReviewForm && (
+          <form onSubmit={handleSubmitReview} className="bg-[#FAF7F2] p-5 sm:p-6 rounded-2xl border border-amber-200/80 space-y-4 animate-in fade-in duration-300">
+            <h3 className="font-serif font-black text-base text-black">Share Your Gourmet Experience</h3>
+            
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-700 block">Your Rating</label>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    className="p-1 cursor-pointer focus:outline-none transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className={`w-6 h-6 ${
+                        star <= reviewRating
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="text-xs font-bold text-gray-600 ml-2">
+                  {reviewRating === 5 ? 'Excellent 5/5' : `${reviewRating} / 5`}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 block">Your Name</label>
+                <input
+                  type="text"
+                  required
+                  value={reviewerName}
+                  onChange={(e) => setReviewerName(e.target.value)}
+                  placeholder="e.g. Ramesh K."
+                  className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-xl text-xs outline-none focus:border-[#128C7E]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 block">Review Comment</label>
+                <input
+                  type="text"
+                  required
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Tell us about the freshness, aroma, or packaging..."
+                  className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-xl text-xs outline-none focus:border-[#128C7E]"
+                />
+              </div>
+            </div>
+
+            {reviewSuccess && (
+              <p className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>Thank you! Your review has been submitted and posted successfully.</span>
+              </p>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowReviewForm(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-bold rounded-xl cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow cursor-pointer active:scale-95"
+              >
+                Submit Review
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Reviews List */}
+        <div className="space-y-4">
+          {matchingReviews.length === 0 ? (
+            <div className="text-center py-10 bg-[#F9FAFB] rounded-2xl border border-gray-200 space-y-2">
+              <div className="text-3xl">⭐</div>
+              <p className="text-sm font-bold text-gray-800">Be the first to review this product!</p>
+              <p className="text-xs text-gray-500">Order today and share your authentic feedback with our community.</p>
+            </div>
+          ) : (
+            matchingReviews.map((rev) => (
+              <div
+                key={rev.id}
+                className="p-5 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] hover:border-gray-300 transition-colors space-y-2"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#128C7E] text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs">
+                      {(rev.customerName || rev.name || 'C')[0]}
+                    </div>
+                    <div>
+                      <span className="font-bold text-black text-xs block">
+                        {rev.customerName || rev.name}
+                      </span>
+                      <span className="text-[10px] text-gray-400">
+                        {rev.date || 'Verified Buyer'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Rating Stars */}
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-3.5 h-3.5 ${
+                          s <= (Number(rev.rating) || 5)
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-700 leading-relaxed pt-1">
+                  "{rev.comment || rev.quote}"
+                </p>
+
+                <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 font-bold">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  <span>Verified Purchase</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
       </div>

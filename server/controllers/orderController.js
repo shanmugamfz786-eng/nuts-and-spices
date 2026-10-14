@@ -144,9 +144,17 @@ export const createOrder = async (req, res) => {
     items.length = 0;
     items.push(...validatedItems);
 
+    // Process discount from coupon if sent
+    const discountAmount = Math.max(0, Number(req.body.discountAmount) || 0);
+    const couponCode = (req.body.couponCode || '').trim();
+
     const deliveryCharge = 0;
-    const totalAmount = subtotal + deliveryCharge;
+    const totalAmount = Math.max(0, subtotal - discountAmount + deliveryCharge);
     const itemsJson = JSON.stringify(items);
+
+    const fullNotes = [notes, couponCode ? `Coupon Applied: ${couponCode} (-₹${discountAmount})` : '']
+      .filter(Boolean)
+      .join(' | ');
 
     await queryDb(
       `INSERT INTO orders 
@@ -167,7 +175,7 @@ export const createOrder = async (req, res) => {
         totalAmount,
         'pending',
         itemsJson,
-        notes || ''
+        fullNotes
       ]
     );
 

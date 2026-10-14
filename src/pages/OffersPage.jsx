@@ -6,34 +6,29 @@ import {
   Copy, 
   Check, 
   ArrowRight, 
-  ArrowLeft, 
   Calendar, 
-  Sparkles, 
-  Clock, 
-  ShoppingBag, 
   Percent, 
   ShieldCheck, 
   Gift, 
   Search, 
   Share2, 
   CheckCircle2, 
-  Zap,
-  HelpCircle,
-  Truck,
-  Flame,
-  Filter
+  Zap, 
+  Truck, 
+  Sparkles,
+  ShoppingBag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OffersPage() {
-  const { offers = [], categories = [], navigate } = useCart();
+  const { offers = [], categories = [], applyCoupon, navigate } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeOnly, setActiveOnly] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
-  const [copiedNotice, setCopiedNotice] = useState('');
+  const [appliedId, setAppliedId] = useState(null);
+  const [toastNotice, setToastNotice] = useState('');
 
-  // Extract unique categories from active offers
+  // Extract unique categories from offers
   const offerCategories = useMemo(() => {
     const cats = new Set();
     offers.forEach(off => {
@@ -42,18 +37,12 @@ export default function OffersPage() {
     return Array.from(cats);
   }, [offers]);
 
-  // Filtered offers list
+  // Filtered offers list (without Active Only button)
   const filteredOffers = useMemo(() => {
     return offers.filter(off => {
-      // Category filter
       if (selectedCategory !== 'all' && off.applicableCategory !== selectedCategory) {
         return false;
       }
-      // Active filter
-      if (activeOnly && off.status !== 'ACTIVE') {
-        return false;
-      }
-      // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const code = (off.code || `HAJI${off.discountPercent}`).toLowerCase();
@@ -63,9 +52,9 @@ export default function OffersPage() {
       }
       return true;
     });
-  }, [offers, selectedCategory, activeOnly, searchQuery]);
+  }, [offers, selectedCategory, searchQuery]);
 
-  // Highest discount among active offers
+  // Highest discount among offers
   const maxDiscount = useMemo(() => {
     if (!offers.length) return 25;
     return Math.max(...offers.map(o => Number(o.discountPercent) || 0), 20);
@@ -78,11 +67,23 @@ export default function OffersPage() {
       navigator.clipboard.writeText(code);
     }
     setCopiedId(offer.id);
-    setCopiedNotice(`Voucher code "${code}" copied to clipboard!`);
+    setToastNotice(`Coupon "${code}" copied to clipboard!`);
     setTimeout(() => {
       setCopiedId(null);
-      setCopiedNotice('');
+      setToastNotice('');
     }, 2800);
+  };
+
+  // Direct Apply to Cart
+  const handleApplyToCart = (offer) => {
+    const res = applyCoupon(offer);
+    setAppliedId(offer.id);
+    setToastNotice(`🎉 ${res.message}`);
+    setTimeout(() => {
+      setAppliedId(null);
+      setToastNotice('');
+      navigate('cart');
+    }, 1200);
   };
 
   // Share deal
@@ -96,116 +97,115 @@ export default function OffersPage() {
         text: text,
         url: window.location.href,
       }).catch(() => {});
-    } else {
-      if (navigator?.clipboard?.writeText) {
-        navigator.clipboard.writeText(text);
-        setCopiedId(offer.id);
-        setCopiedNotice('Deal shared link copied to clipboard!');
-        setTimeout(() => {
-          setCopiedId(null);
-          setCopiedNotice('');
-        }, 2800);
-      }
+    } else if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+      setToastNotice('Deal link copied to clipboard!');
+      setTimeout(() => setToastNotice(''), 2500);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#2D241E] pb-24 selection:bg-[#128C7E] selection:text-white">
+    <div className="min-h-screen bg-[#FDFBF7] text-[#000000] pb-28">
       
-      {/* 1. TOP BREADCRUMB & VIP BANNER */}
-      <div className="bg-[#075E54] text-white pt-8 pb-14 px-4 sm:px-6 relative overflow-hidden shadow-md">
-        {/* Subtle background glow & decorative circles */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#128C7E]/40 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. BRAND SIGNATURE HERO BANNER (#128C7E & #075E54) */}
+      <section className="relative bg-gradient-to-br from-[#128C7E] via-[#075E54] to-[#075E54] text-white pt-10 sm:pt-14 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-[#075E54]/40">
+        
+        {/* Glow Spheres & Grain Elements */}
+        <div className="absolute -top-32 -right-32 w-[30rem] h-[30rem] bg-[#128C7E]/40 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-[30rem] h-[30rem] bg-[#075E54]/60 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08)_1px,_transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
 
-        <div className="max-w-6xl mx-auto relative z-10 space-y-6">
+        <div className="max-w-7xl mx-auto relative z-10 space-y-6">
           
-          {/* Breadcrumb Navigation */}
-          <div className="flex items-center gap-2 text-xs text-amber-200/80 font-semibold uppercase tracking-wider">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#F9FAFB]/90">
             <button 
               onClick={() => navigate('home')} 
               className="hover:text-white transition-colors cursor-pointer"
             >
               Home
             </button>
-            <span>/</span>
-            <span className="text-white">Exclusive Offers & Coupons</span>
-          </div>
+            <span className="text-white/40">/</span>
+            <span className="text-white font-bold">Gourmet Offers & Privileges</span>
+          </nav>
 
-          {/* Hero Header */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400/20 border border-amber-300/40 rounded-full text-amber-300 text-xs font-black tracking-widest uppercase">
-                <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                <span>Sowcarpet Heritage Privileges</span>
+          {/* Hero Content Row */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/15 border border-white/25 rounded-full text-white text-xs font-black tracking-widest uppercase backdrop-blur-sm shadow-inner">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Harvest Festive Deals & Coupons</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-white tracking-tight leading-tight">
+              
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-white tracking-tight leading-[1.15]">
                 Exclusive Gourmet Vouchers & Offers
               </h1>
-              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed max-w-xl">
-                Enjoy special harvest discounts on royal California almonds, Kashmir saffron, Iranian pistachios, and Arabian dates. Copy any active voucher code and apply it during checkout.
+              
+              <p className="text-xs sm:text-sm text-[#F9FAFB]/90 leading-relaxed max-w-xl font-normal">
+                Enjoy special harvest discounts on royal California almonds, Kashmir saffron, Iranian pistachios, and Arabian dates. Copy any active voucher code or apply instantly to your cart.
               </p>
             </div>
 
             {/* Quick Stat Highlights */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 shrink-0">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-center">
-                <div className="text-2xl font-black text-amber-300 font-serif">{offers.length}</div>
-                <div className="text-[10px] uppercase font-bold text-emerald-100 tracking-wider">Active Deals</div>
+            <div className="grid grid-cols-3 gap-3 shrink-0 lg:w-96">
+              <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-center shadow-lg transition-transform hover:-translate-y-1">
+                <div className="text-2xl sm:text-3xl font-black text-white font-serif">{offers.length}</div>
+                <div className="text-[10px] uppercase font-bold text-[#F9FAFB] tracking-wider mt-0.5">Active Deals</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-center">
-                <div className="text-2xl font-black text-amber-300 font-serif">Up to {maxDiscount}%</div>
-                <div className="text-[10px] uppercase font-bold text-emerald-100 tracking-wider">Max Savings</div>
+              
+              <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-center shadow-lg transition-transform hover:-translate-y-1">
+                <div className="text-2xl sm:text-3xl font-black text-white font-serif">Up to {maxDiscount}%</div>
+                <div className="text-[10px] uppercase font-bold text-[#F9FAFB] tracking-wider mt-0.5">Max Savings</div>
               </div>
-              <div className="col-span-2 sm:col-span-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-center">
-                <div className="text-2xl font-black text-amber-300 font-serif">100%</div>
-                <div className="text-[10px] uppercase font-bold text-emerald-100 tracking-wider">Fresh & Pure</div>
+              
+              <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-center shadow-lg transition-transform hover:-translate-y-1">
+                <div className="text-2xl sm:text-3xl font-black text-white font-serif">100%</div>
+                <div className="text-[10px] uppercase font-bold text-[#F9FAFB] tracking-wider mt-0.5">Certified Pure</div>
               </div>
             </div>
-
           </div>
 
           {/* Quick Perks Strip */}
-          <div className="pt-4 border-t border-white/15 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-emerald-100">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="pt-6 border-t border-white/15 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold text-[#F9FAFB]">
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-white shrink-0" />
               <span>Authentic Certified Grade</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>Free Delivery on ₹1,499+</span>
+            <div className="flex items-center gap-2.5">
+              <Truck className="w-4 h-4 text-white shrink-0" />
+              <span>Free Doorstep Delivery</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>Instant Voucher Redemption</span>
+            <div className="flex items-center gap-2.5">
+              <Zap className="w-4 h-4 text-white shrink-0" />
+              <span>Instant Cart Deduction</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Gift className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>Festive Packaging Available</span>
+            <div className="flex items-center gap-2.5">
+              <Gift className="w-4 h-4 text-white shrink-0" />
+              <span>Festive Luxury Hampers</span>
             </div>
           </div>
 
         </div>
-      </div>
+      </section>
 
-      {/* 2. FLOATING NOTICE / COPIED TOAST */}
+      {/* 2. FLOATING NOTICE / TOAST */}
       <AnimatePresence>
-        {copiedNotice && (
+        {toastNotice && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#128C7E] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-400/50 backdrop-blur-md text-xs font-bold"
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-[#075E54] text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-[#128C7E] backdrop-blur-md text-xs font-bold"
           >
-            <CheckCircle2 className="w-5 h-5 text-amber-300" />
-            <span>{copiedNotice}</span>
+            <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
+            <span>{toastNotice}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* 3. FILTER & SEARCH CONTROL BAR */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-6">
-        <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-lg border border-[#E5E7EB] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-9 relative z-20">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl border border-[#E5E7EB] flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           {/* Search Box */}
           <div className="relative flex-1">
@@ -214,20 +214,20 @@ export default function OffersPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search vouchers by coupon code, nuts, dates, or spice..."
-              className="w-full pl-10 pr-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20 rounded-2xl text-xs text-gray-800 placeholder-gray-400 outline-none transition-all"
+              placeholder="Search offers by name, dry fruits, spices, or dates..."
+              className="w-full pl-10 pr-16 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20 rounded-xl text-xs text-[#000000] placeholder:text-gray-400 outline-none transition-all"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-400 hover:text-black cursor-pointer"
               >
                 Clear
               </button>
             )}
           </div>
 
-          {/* Category Filter Pills */}
+          {/* Category Filter Pills (Active Only removed cleanly) */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
             <button
               onClick={() => setSelectedCategory('all')}
@@ -237,7 +237,7 @@ export default function OffersPage() {
                   : 'bg-[#F9FAFB] hover:bg-gray-100 text-gray-700 border border-[#E5E7EB]'
               }`}
             >
-              All Offers ({offers.length})
+              All Deals ({offers.length})
             </button>
             
             {offerCategories.map((catId) => {
@@ -259,92 +259,75 @@ export default function OffersPage() {
             })}
           </div>
 
-          {/* Active Only Toggle */}
-          <button
-            onClick={() => setActiveOnly(!activeOnly)}
-            className={`px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 border transition-all cursor-pointer shrink-0 ${
-              activeOnly 
-                ? 'bg-amber-100 text-amber-900 border-amber-300' 
-                : 'bg-white text-gray-600 border-[#E5E7EB] hover:bg-gray-50'
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${activeOnly ? 'bg-amber-600' : 'bg-gray-400'}`} />
-            <span>Active Only</span>
-          </button>
-
         </div>
       </div>
 
-      {/* 4. OFFERS VOUCHER CARDS GRID */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-10">
+      {/* 4. PREMIUM TICKET COUPONS GRID */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         
         {filteredOffers.length === 0 ? (
           /* Empty State */
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-12 text-center max-w-lg mx-auto shadow-sm space-y-4 my-8">
-            <div className="w-16 h-16 bg-amber-50 text-amber-700 rounded-full flex items-center justify-center mx-auto text-2xl border border-amber-200">
+          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-12 text-center max-w-md mx-auto shadow-sm space-y-4 my-12">
+            <div className="w-16 h-16 bg-[#128C7E]/10 text-[#128C7E] rounded-full flex items-center justify-center mx-auto text-3xl border border-[#128C7E]/20 shadow-inner">
               🎟️
             </div>
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-gray-900 font-serif">No Matching Offers Found</h3>
+              <h3 className="text-lg font-bold text-black font-serif">No Vouchers Found</h3>
               <p className="text-xs text-gray-500">
                 {searchQuery || selectedCategory !== 'all' 
-                  ? 'Try adjusting your search terms or category filter to discover available deals.' 
-                  : 'New harvest promotional vouchers are being prepared! Explore our special festive combo packs.'}
+                  ? 'No offers match your current filter. Try resetting your search.' 
+                  : 'New promotional discount codes are being prepared!'}
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
-              <button
-                onClick={() => { setSelectedCategory('all'); setSearchQuery(''); setActiveOnly(false); }}
-                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl cursor-pointer"
-              >
-                Reset All Filters
-              </button>
-              <button
-                onClick={() => navigate('combo-deals')}
-                className="px-5 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-bold rounded-xl cursor-pointer shadow-md inline-flex items-center justify-center gap-1.5"
-              >
-                <span>Browse Festive Combos</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
+              className="px-5 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-bold rounded-xl cursor-pointer shadow transition-all"
+            >
+              Reset All Filters
+            </button>
           </div>
         ) : (
-          /* Cards Grid */
+          /* Modern Voucher Cards Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredOffers.map((offer) => {
               const code = offer.code || `HAJI${offer.discountPercent}`;
               const isCopied = copiedId === offer.id;
+              const isApplied = appliedId === offer.id;
               const isActive = offer.status === 'ACTIVE';
 
               return (
                 <div
                   key={offer.id}
-                  className="bg-white rounded-3xl border border-[#E5E7EB] hover:border-amber-400 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden relative group"
+                  className="bg-white rounded-3xl border border-[#E5E7EB] hover:border-[#128C7E] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden relative group"
                 >
                   
-                  {/* TICKET TOP HEADER */}
+                  {/* Card Top Section */}
                   <div className="p-6 space-y-4">
                     
-                    {/* Top Status & Discount Row */}
-                    <div className="flex items-start justify-between gap-2">
+                    {/* Badge & Share Button */}
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 bg-amber-500 text-white rounded-full text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
+                        <span className="px-3 py-1 bg-gradient-to-r from-[#128C7E] to-[#075E54] text-white rounded-full text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5">
                           <Percent className="w-3.5 h-3.5" />
                           <span>{offer.discountPercent}% OFF</span>
                         </span>
-                        {isActive && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        
+                        {isActive ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-[#128C7E] border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#128C7E] animate-pulse" />
                             Active
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500">
+                            Expired
                           </span>
                         )}
                       </div>
 
-                      {/* Share Button */}
                       <button
                         onClick={() => handleShare(offer)}
                         className="p-1.5 text-gray-400 hover:text-[#128C7E] hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                        title="Share this deal"
+                        title="Share coupon deal"
                       >
                         <Share2 className="w-4 h-4" />
                       </button>
@@ -352,20 +335,20 @@ export default function OffersPage() {
 
                     {/* Offer Name */}
                     <div>
-                      <h3 className="text-xl font-black font-serif text-gray-900 group-hover:text-[#128C7E] transition-colors leading-snug">
+                      <h3 className="text-xl font-black font-serif text-black group-hover:text-[#128C7E] transition-colors leading-snug">
                         {offer.name}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                        Enjoy guaranteed {offer.discountPercent}% price deduction on authentic {offer.applicableCategoryName || 'gourmet items'}.
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                        Enjoy guaranteed {offer.discountPercent}% price deduction on fresh, premium {offer.applicableCategoryName || 'gourmet items'}.
                       </p>
                     </div>
 
-                    {/* Terms / Highlights Box */}
-                    <div className="bg-[#F9FAFB] rounded-2xl p-3 border border-[#E5E7EB] space-y-1.5 text-xs">
+                    {/* Rules Pill Box */}
+                    <div className="bg-[#F9FAFB] rounded-2xl p-3.5 border border-[#E5E7EB] space-y-2 text-xs">
                       <div className="flex items-center justify-between text-gray-600">
-                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Category:</span>
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Category:</span>
                         <button
-                          onClick={() => navigate('shop', { category: offer.applicableCategory })}
+                          onClick={() => navigate('shop', { category: offer.applicableCategory || 'all' })}
                           className="font-bold text-[#128C7E] hover:underline cursor-pointer"
                         >
                           {offer.applicableCategoryName || 'All Categories'} →
@@ -373,15 +356,15 @@ export default function OffersPage() {
                       </div>
 
                       <div className="flex items-center justify-between text-gray-600">
-                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Min. Order Value:</span>
-                        <span className="font-bold font-serif text-gray-900">
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Min. Order Value:</span>
+                        <span className="font-bold font-serif text-black">
                           {offer.minOrderAmount ? `₹${offer.minOrderAmount}` : 'No minimum spend'}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-gray-600 pt-0.5 border-t border-gray-200/60 font-mono text-[11px]">
-                        <span className="flex items-center gap-1 text-gray-500 font-sans">
-                          <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                      <div className="flex items-center justify-between text-gray-600 pt-1 border-t border-gray-200/60 font-mono text-[11px]">
+                        <span className="flex items-center gap-1 text-gray-400 font-sans">
+                          <Calendar className="w-3.5 h-3.5 text-[#128C7E]" />
                           <span>Valid Until:</span>
                         </span>
                         <span className="font-bold text-gray-800">{offer.endDate || 'Limited Period'}</span>
@@ -390,58 +373,45 @@ export default function OffersPage() {
 
                   </div>
 
-                  {/* VOUCHER PERFORATED CUTOUT DIVIDER */}
-                  <div className="relative flex items-center my-1">
-                    {/* Left Notched Circle Cutout */}
+                  {/* VOUCHER TEAR CUTOUT DIVIDER */}
+                  <div className="relative flex items-center my-0.5">
                     <div className="w-5 h-5 bg-[#FDFBF7] rounded-full border-r border-[#E5E7EB] -ml-2.5 shadow-inner" />
-                    {/* Dashed Perforated Tear Line */}
-                    <div className="flex-1 border-t-2 border-dashed border-[#E5E7EB] mx-1" />
-                    {/* Right Notched Circle Cutout */}
+                    <div className="flex-1 border-t-2 border-dashed border-[#E5E7EB] mx-2" />
                     <div className="w-5 h-5 bg-[#FDFBF7] rounded-full border-l border-[#E5E7EB] -mr-2.5 shadow-inner" />
                   </div>
 
-                  {/* TICKET BOTTOM ACTION ROW */}
+                  {/* Card Bottom Section */}
                   <div className="p-6 pt-3 bg-gradient-to-b from-white to-[#F9FAFB] space-y-3">
                     
-                    {/* Coupon Code & Copy Pill */}
-                    <div className="flex items-center justify-between gap-2 p-1.5 pl-3 bg-amber-50/80 border-2 border-dashed border-amber-300 rounded-2xl">
-                      <div className="space-y-0.5">
-                        <span className="text-[9px] uppercase font-bold text-amber-800/80 tracking-wider block">Coupon Code</span>
-                        <span className="font-mono text-sm font-black text-amber-950 tracking-wider">
-                          {code}
-                        </span>
-                      </div>
-                      
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => handleCopyCode(offer)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-                          isCopied
-                            ? 'bg-emerald-600 text-white shadow-sm'
-                            : 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm active:scale-95'
+                        onClick={() => handleApplyToCart(offer)}
+                        className={`py-3 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 ${
+                          isApplied ? 'bg-[#075E54]' : 'bg-[#128C7E] hover:bg-[#075E54]'
                         }`}
                       >
-                        {isCopied ? (
+                        {isApplied ? (
                           <>
                             <Check className="w-3.5 h-3.5" />
-                            <span>Copied!</span>
+                            <span>Applied!</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>Copy Code</span>
+                            <Zap className="w-3.5 h-3.5 text-white fill-white" />
+                            <span>Apply Offer</span>
                           </>
                         )}
                       </button>
-                    </div>
 
-                    {/* Shop Category CTA */}
-                    <button
-                      onClick={() => navigate('shop', { category: offer.applicableCategory || 'all' })}
-                      className="w-full py-3 bg-[#128C7E] hover:bg-[#075E54] active:scale-[0.98] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <span>Shop Category Now</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                      <button
+                        onClick={() => navigate('shop', { category: offer.applicableCategory || 'all' })}
+                        className="py-3 bg-emerald-50 hover:bg-[#128C7E] text-[#075E54] hover:text-white border border-[#128C7E]/30 font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 group-hover:border-[#128C7E]"
+                      >
+                        <span>Shop Items</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
 
                   </div>
 
@@ -451,98 +421,91 @@ export default function OffersPage() {
           </div>
         )}
 
-      </div>
+      </main>
 
-      {/* 5. HOW TO REDEEM 3-STEP GUIDE */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-20">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-8 sm:p-10 shadow-sm space-y-8">
+      {/* 5. HOW IT WORKS GUIDE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
+        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-8 sm:p-12 shadow-sm space-y-10">
           
           <div className="text-center max-w-xl mx-auto space-y-2">
             <span className="text-xs font-bold text-[#128C7E] uppercase tracking-widest block">
-              Effortless Savings
+              Quick & Seamless
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black font-serif text-gray-900">
+            <h2 className="text-2xl sm:text-3xl font-black font-serif text-black">
               How to Redeem Your Offers
             </h2>
             <p className="text-xs sm:text-sm text-gray-500">
-              Three simple steps to enjoy the freshest premium nuts, dates, and authentic spices at celebration prices.
+              Enjoying festival discounts on premium gourmet nuts and whole spices takes only 3 simple steps.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
             
             {/* Step 1 */}
-            <div className="p-6 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-3 text-center relative">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 font-serif font-black text-lg flex items-center justify-center mx-auto shadow-inner">
+            <div className="p-6 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-3 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#128C7E]/10 text-[#128C7E] font-serif font-black text-lg flex items-center justify-center mx-auto shadow-inner">
                 1
               </div>
-              <h3 className="text-base font-bold text-gray-900 font-serif">Copy Voucher Code</h3>
+              <h3 className="text-base font-bold text-black font-serif">Pick or Copy Voucher</h3>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Click the <strong>"Copy Code"</strong> button on your preferred voucher above to save it to your clipboard.
+                Click <strong>"Apply Code"</strong> to automatically attach the discount to your bag, or copy the code.
               </p>
             </div>
 
             {/* Step 2 */}
-            <div className="p-6 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-3 text-center relative">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 font-serif font-black text-lg flex items-center justify-center mx-auto shadow-inner">
+            <div className="p-6 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-3 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#128C7E]/10 text-[#128C7E] font-serif font-black text-lg flex items-center justify-center mx-auto shadow-inner">
                 2
               </div>
-              <h3 className="text-base font-bold text-gray-900 font-serif">Select Gourmet Items</h3>
+              <h3 className="text-base font-bold text-black font-serif">Add Gourmet Items</h3>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Browse our curated selection and add authentic dry fruits, spices, or dates to meet the minimum spend.
+                Add authentic dry fruits, spices, or dates to meet the minimum spend threshold.
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="p-6 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-3 text-center relative">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 font-serif font-black text-lg flex items-center justify-center mx-auto shadow-inner">
+            <div className="p-6 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] space-y-3 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#128C7E]/10 text-[#128C7E] font-serif font-black text-lg flex items-center justify-center mx-auto shadow-inner">
                 3
               </div>
-              <h3 className="text-base font-bold text-gray-900 font-serif">Apply & Save Instantly</h3>
+              <h3 className="text-base font-bold text-black font-serif">Instant Price Deduction</h3>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Enter your code in checkout notes or mention it in your WhatsApp order to receive immediate bill discounts.
+                Watch your Grand Total drop immediately on the Cart and Checkout summary before payment.
               </p>
             </div>
 
           </div>
 
         </div>
-      </div>
+      </section>
 
-      {/* 6. WHATSAPP VIP & BULK ENQUIRY BANNER */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-12">
-        <div className="bg-gradient-to-r from-[#128C7E] via-[#075E54] to-[#075E54] rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+      {/* 6. VIP BULK ORDERS FOOTER BANNER */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <div className="bg-gradient-to-r from-[#128C7E] via-[#075E54] to-[#075E54] rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-[#075E54]">
           <div className="space-y-2 text-center md:text-left max-w-xl">
-            <span className="text-xs font-bold text-amber-300 uppercase tracking-widest block">
+            <span className="text-xs font-bold text-[#F9FAFB] uppercase tracking-widest block">
               Corporate Gifts & Bulk Celebrations
             </span>
             <h3 className="text-2xl sm:text-3xl font-black font-serif text-white">
               Planning Bulk Orders or Festival Hampers?
             </h3>
-            <p className="text-xs sm:text-sm text-emerald-100">
-              Get customized wholesale volume discounts, personalized brass gift packaging, and door-to-door pan-India delivery.
+            <p className="text-xs sm:text-sm text-[#F9FAFB]/90 leading-relaxed">
+              Get customized corporate gift packaging, wholesale wedding dry fruit trays, and exclusive tiered volume discounts directly via WhatsApp.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
-            <button
-              onClick={() => {
-                const message = encodeURIComponent('Hello Haji Nuts & Spices! I would like to inquire about exclusive bulk order offers and festive gift hamper discounts.');
-                window.open(`https://wa.me/919940024479?text=${message}`, '_blank');
-              }}
-              className="px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-gray-950 font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-transform active:scale-95 text-center cursor-pointer"
-            >
-              Enquire on WhatsApp
-            </button>
-            <button
-              onClick={() => navigate('combo-deals')}
-              className="px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl transition-colors text-center cursor-pointer"
-            >
-              Explore Festive Combos
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              const message = encodeURIComponent('Hello Haji Nuts & Spices! I would like to inquire about exclusive bulk order offers and festive gift hamper discounts.');
+              window.open(`https://wa.me/919876543210?text=${message}`, '_blank');
+            }}
+            className="px-6 py-3.5 bg-white text-[#075E54] hover:bg-gray-100 font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95 shrink-0"
+          >
+            <span>WhatsApp Bulk Desk</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
-      </div>
+      </section>
 
     </div>
   );

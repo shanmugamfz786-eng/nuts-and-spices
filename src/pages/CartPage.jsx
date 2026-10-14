@@ -1,10 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { Trash2, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Trash2, ArrowRight, ArrowLeft, ShieldCheck, Tag, CheckCircle2, AlertCircle, X } from 'lucide-react';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, navigate, user, orders } = useCart();
-  const [realOrders, setRealOrders] = React.useState([]);
+  const { 
+    cart, 
+    removeFromCart, 
+    updateQuantity, 
+    clearCart, 
+    cartTotal, 
+    appliedCoupon, 
+    discountAmount, 
+    grandTotal, 
+    applyCoupon, 
+    removeCoupon, 
+    navigate, 
+    user, 
+    orders 
+  } = useCart();
+  const [realOrders, setRealOrders] = useState([]);
+  const [couponInput, setCouponInput] = useState('');
+  const [couponMessage, setCouponMessage] = useState(null);
+
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+    const res = applyCoupon(couponInput);
+    setCouponMessage({
+      type: res.success ? 'success' : 'error',
+      text: res.message
+    });
+    if (res.success) {
+      setCouponInput('');
+    }
+  };
 
   React.useEffect(() => {
     const fetchOrders = async () => {
@@ -171,32 +200,144 @@ export default function CartPage() {
             </div>
 
             {/* Order Summary Box */}
-            <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-lg h-fit space-y-6">
-              <h2 className="text-lg font-black font-serif text-[#000000] border-b border-[#F9FAFB] pb-3">
-                Order Summary
+            <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] shadow-lg h-fit space-y-5">
+              <h2 className="text-lg font-black font-serif text-[#000000] border-b border-[#F9FAFB] pb-3 flex items-center justify-between">
+                <span>Order Summary</span>
+                <span className="text-xs font-sans font-bold text-gray-500">
+                  {cart.length} {cart.length === 1 ? 'item' : 'items'}
+                </span>
               </h2>
 
-              <div className="space-y-3 text-xs">
-                <div className="flex justify-between text-[#000000]">
+              {/* Promo / Coupon Box */}
+              <div className="bg-[#FAF7F2] p-3.5 rounded-2xl border border-amber-200/80 space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-amber-950 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Have a Promo Coupon?</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => navigate('offers')}
+                    className="text-[11px] font-bold text-[#128C7E] hover:underline"
+                  >
+                    View All Offers →
+                  </button>
+                </div>
+
+                {appliedCoupon ? (
+                  <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black text-xs">
+                        %
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-xs font-black text-emerald-900 tracking-wider">
+                            {appliedCoupon.code}
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                            {appliedCoupon.discountPercent}% OFF
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-emerald-700">
+                          Savings of ₹{discountAmount.toLocaleString('en-IN')} applied!
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeCoupon}
+                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-colors cursor-pointer"
+                      title="Remove coupon"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleApplyCoupon} className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponInput}
+                        onChange={(e) => {
+                          setCouponInput(e.target.value);
+                          setCouponMessage(null);
+                        }}
+                        placeholder="e.g. HAJI20"
+                        className="flex-1 px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-white rounded-xl border border-gray-300 focus:border-[#128C7E] focus:ring-1 focus:ring-[#128C7E] outline-none placeholder:text-gray-400 placeholder:normal-case placeholder:font-sans"
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-gray-900 hover:bg-black text-white text-xs font-black tracking-wider uppercase rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+                      >
+                        Apply
+                      </button>
+                    </div>
+
+                    {couponMessage && (
+                      <p
+                        className={`text-[11px] font-semibold flex items-center gap-1 ${
+                          couponMessage.type === 'success' ? 'text-emerald-700' : 'text-red-600'
+                        }`}
+                      >
+                        {couponMessage.type === 'success' ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                        ) : (
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                        )}
+                        <span>{couponMessage.text}</span>
+                      </p>
+                    )}
+                  </form>
+                )}
+              </div>
+
+              {/* Bill Details */}
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between text-gray-700">
                   <span>Items Total:</span>
                   <span className="font-bold text-[#000000]">₹{cartTotal.toLocaleString('en-IN')}</span>
                 </div>
 
-                <div className="flex justify-between text-[#000000]">
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-700 font-bold bg-emerald-50/70 p-2 rounded-xl border border-emerald-200/60">
+                    <span className="flex items-center gap-1">
+                      <Tag className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Coupon Discount ({appliedCoupon?.code}):</span>
+                    </span>
+                    <span>- ₹{discountAmount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between text-gray-700">
                   <span>Packaging & Freshness Seals:</span>
-                  <span className="font-bold text-[#000000]">FREE</span>
+                  <span className="font-bold text-emerald-700">FREE</span>
                 </div>
 
-                <div className="flex justify-between text-[#000000]">
+                <div className="flex justify-between text-gray-700">
                   <span>Doorstep Delivery Charges:</span>
-                    <span className="font-bold text-[#000000]">FREE</span>
+                  <span className="font-bold text-emerald-700">FREE</span>
                 </div>
 
                 <div className="pt-3 border-t border-[#E5E7EB] flex justify-between items-baseline">
-                  <span className="text-sm font-black text-[#000000]">Grand Total:</span>
-                  <span className="text-2xl font-black text-[#000000]">
-                    ₹{cartTotal.toLocaleString('en-IN')}
-                  </span>
+                  <div>
+                    <span className="text-sm font-black text-[#000000] block">Grand Total:</span>
+                    {discountAmount > 0 && (
+                      <span className="text-[10px] font-semibold text-emerald-700">
+                        Total savings: ₹{discountAmount.toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    {discountAmount > 0 && (
+                      <span className="text-xs text-gray-400 line-through block font-medium">
+                        ₹{cartTotal.toLocaleString('en-IN')}
+                      </span>
+                    )}
+                    <span className="text-2xl font-black text-[#000000]">
+                      ₹{grandTotal.toLocaleString('en-IN')}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -215,7 +356,7 @@ export default function CartPage() {
                 }}
                 className="w-full py-4 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
-                <span>Proceed to Checkout</span>
+                <span>Proceed to Checkout (₹{grandTotal.toLocaleString('en-IN')})</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

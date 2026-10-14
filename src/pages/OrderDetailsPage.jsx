@@ -10,7 +10,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrderDetailsPage() {
-  const { selectedOrder, setSelectedOrder, orders, navigate, activeWhatsAppNumber, addToCart, products } = useCart();
+  const { selectedOrder, setSelectedOrder, orders, navigate, activeWhatsAppNumber, addToCart, products, addReview, user } = useCart();
   const [orderData, setOrderData] = useState(selectedOrder || null);
   const [isLoading, setIsLoading] = useState(!selectedOrder);
   const [copiedId, setCopiedId] = useState(false);
@@ -28,9 +28,14 @@ export default function OrderDetailsPage() {
   const [cancelError, setCancelError] = useState('');
   const [cancelSuccess, setCancelSuccess] = useState(false);
 
+  // Delivered Feedback Popup Modal States
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [selectedProductForReview, setSelectedProductForReview] = useState(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
   // Interactive UI States for Empty-Space Filling
-  const [userRating, setUserRating] = useState(5);
-  const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const [deliveryPreferences, setDeliveryPreferences] = useState({
     ringBell: true,
     leaveGuard: false,
@@ -96,6 +101,57 @@ export default function OrderDetailsPage() {
 
     findAndFetchOrder();
   }, [selectedOrder, orders]);
+
+  // Check if order is DELIVERED and prompt customer feedback popup
+  useEffect(() => {
+    if (orderData && String(orderData.status || '').toLowerCase() === 'delivered') {
+      const oid = orderData.order_id || orderData.orderId || orderData.id;
+      const feedbackKey = `feedback_submitted_${oid}`;
+      const alreadySubmitted = localStorage.getItem(feedbackKey);
+      
+      if (!alreadySubmitted) {
+        // Pre-select first item if available
+        let orderItems = [];
+        try {
+          if (Array.isArray(orderData.items)) orderItems = orderData.items;
+          else if (typeof orderData.items_json === 'string') orderItems = JSON.parse(orderData.items_json);
+        } catch {}
+
+        if (orderItems.length > 0) {
+          setSelectedProductForReview(orderItems[0]);
+        }
+
+        const timer = setTimeout(() => {
+          setIsFeedbackModalOpen(true);
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [orderData]);
+
+  const handleSubmitFeedback = (e) => {
+    e.preventDefault();
+    if (!orderData) return;
+    const oid = orderData.order_id || orderData.orderId || orderData.id;
+
+    addReview({
+      customerName: user?.name || orderData.customer_name || 'Valued Patron',
+      name: user?.name || orderData.customer_name || 'Valued Patron',
+      comment: feedbackComment || 'Order delivered fresh and on time! Highly recommended.',
+      quote: feedbackComment || 'Order delivered fresh and on time! Highly recommended.',
+      rating: feedbackRating,
+      productId: selectedProductForReview?.productId || selectedProductForReview?.id || '',
+      productName: selectedProductForReview?.name || 'Delivered Gourmet Item',
+      tag: 'Verified Delivery'
+    });
+
+    localStorage.setItem(`feedback_submitted_${oid}`, 'true');
+    setFeedbackSubmitted(true);
+    setTimeout(() => {
+      setFeedbackSubmitted(false);
+      setIsFeedbackModalOpen(false);
+    }, 2200);
+  };
 
   // Copy helper
   const handleCopy = (text, type) => {
@@ -1927,6 +1983,140 @@ export default function OrderDetailsPage() {
                 </div>
 
               </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* DELIVERED ORDER FEEDBACK REVIEW POPUP MODAL */}
+      <AnimatePresence>
+        {isFeedbackModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-emerald-100 relative overflow-hidden space-y-6"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setIsFeedbackModalOpen(false)}
+                className="absolute top-5 right-5 p-2 rounded-full text-gray-400 hover:text-black hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Header */}
+              <div className="text-center space-y-2 pt-2">
+                <div className="w-14 h-14 bg-emerald-50 text-[#128C7E] rounded-2xl flex items-center justify-center mx-auto text-2xl border border-emerald-200 shadow-inner">
+                  🎉
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[11px] font-black uppercase tracking-wider">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Order Delivered Successfully</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black font-serif text-black">
+                  How Was Your Gourmet Experience?
+                </h3>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                  Your package #{orderId} has reached you. Help other food lovers by sharing a quick review!
+                </p>
+              </div>
+
+              {/* Review Form */}
+              <form onSubmit={handleSubmitFeedback} className="space-y-4">
+                
+                {/* Select Product if multi-item */}
+                {items.length > 1 && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-700 block">Select Product to Review</label>
+                    <select
+                      value={selectedProductForReview?.productId || selectedProductForReview?.id || ''}
+                      onChange={(e) => {
+                        const sel = items.find(it => (it.productId || it.id) === e.target.value);
+                        if (sel) setSelectedProductForReview(sel);
+                      }}
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-black outline-none focus:border-[#128C7E]"
+                    >
+                      {items.map((it, idx) => (
+                        <option key={idx} value={it.productId || it.id}>
+                          {it.name} ({it.weight || 'Standard'})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Star Rating Selection */}
+                <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-center space-y-2">
+                  <span className="text-xs font-bold text-amber-950 block">Rate Freshness & Quality</span>
+                  <div className="flex items-center justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFeedbackRating(star)}
+                        className="p-1 cursor-pointer focus:outline-none transition-transform hover:scale-125"
+                      >
+                        <Star
+                          className={`w-7 h-7 ${
+                            star <= feedbackRating
+                              ? 'fill-amber-400 text-amber-400'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-xs font-black text-amber-900 block font-mono">
+                    {feedbackRating === 5 ? '⭐⭐⭐⭐⭐ 5/5 Excellent Taste' : `${feedbackRating} Stars`}
+                  </span>
+                </div>
+
+                {/* Feedback Comment */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 block">Your Review & Comments</label>
+                  <textarea
+                    rows={3}
+                    value={feedbackComment}
+                    onChange={(e) => setFeedbackComment(e.target.value)}
+                    placeholder="Tell us about the crispness, aroma, or packing seal..."
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs text-black outline-none focus:border-[#128C7E] resize-none"
+                  />
+                </div>
+
+                {feedbackSubmitted && (
+                  <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-emerald-200">
+                    <Check className="w-4 h-4 text-emerald-600" />
+                    <span>Review published to storefront! Thank you!</span>
+                  </div>
+                )}
+
+                {/* Modal Buttons */}
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const oid = orderData.order_id || orderData.orderId || orderData.id;
+                      localStorage.setItem(`feedback_submitted_${oid}`, 'true');
+                      setIsFeedbackModalOpen(false);
+                    }}
+                    className="w-1/3 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                  >
+                    Maybe Later
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="w-2/3 py-3 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Submit Review</span>
+                  </button>
+                </div>
+
+              </form>
 
             </motion.div>
           </div>
