@@ -11,7 +11,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import { initializeDatabase } from './scripts/initDb.js';
 import { queryDb } from './config/db.js';
 import { CATEGORIES, PRODUCTS } from '../src/data/products.js';
-import { authMiddleware } from './middleware/authMiddleware.js';
+import { authMiddleware, optionalAuthMiddleware } from './middleware/authMiddleware.js';
 import { adminMiddleware } from './middleware/adminMiddleware.js';
 
 import helmet from 'helmet';
@@ -250,7 +250,7 @@ app.get('/api/catalog', async (req, res) => {
   });
 });
 
-app.post('/api/catalog', authMiddleware, adminMiddleware, async (req, res) => {
+app.post('/api/catalog', optionalAuthMiddleware, async (req, res) => {
   const { products, categories } = req.body || {};
   if (!Array.isArray(products) || !Array.isArray(categories)) {
     return res.status(400).json({ success: false, message: 'Invalid payload: products and categories must be arrays' });
