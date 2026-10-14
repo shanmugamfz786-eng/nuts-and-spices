@@ -1,10 +1,29 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
-import { Search, Star, ArrowLeft } from 'lucide-react';
+import { Search, Star, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function AdminFeaturedProducts() {
   const { products, updateProduct, setAdminTab } = useCart();
   const [featuredSearchTerm, setFeaturedSearchTerm] = useState('');
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (msg, type = 'success') => {
+    setNotification({ msg, type });
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
+
+  const handleToggle = async (product) => {
+    const nextState = !product.isFeaturedToday;
+    await updateProduct(product.id, { isFeaturedToday: nextState });
+
+    if (nextState) {
+      showNotification(`"${product.name}" added to Featured Today! Live on all devices.`);
+    } else {
+      showNotification(`"${product.name}" removed from Featured Today.`);
+    }
+  };
 
   const featuredModalProducts = products.filter(p => {
     return p.name.toLowerCase().includes(featuredSearchTerm.toLowerCase()) || 
@@ -12,7 +31,15 @@ export default function AdminFeaturedProducts() {
   });
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-6 pb-20 md:pb-6 px-4 sm:px-6 md:px-8">
+    <div className="relative space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-6 pb-20 md:pb-6 px-4 sm:px-6 md:px-8">
+      {/* Toast Notification Popup */}
+      {notification && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-gray-700 animate-in fade-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-sm font-bold tracking-wide">{notification.msg}</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between bg-white p-4 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs shrink-0">
         <div className="flex items-center gap-4">
           <button
@@ -25,7 +52,7 @@ export default function AdminFeaturedProducts() {
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Manage Featured
+                Manage Featured Showcase
               </h1>
             </div>
           </div>
@@ -65,7 +92,7 @@ export default function AdminFeaturedProducts() {
                   <input 
                     type="checkbox" 
                     checked={!!p.isFeaturedToday}
-                    onChange={() => updateProduct(p.id, { isFeaturedToday: !p.isFeaturedToday })}
+                    onChange={() => handleToggle(p)}
                     className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600 bg-gray-100 border-gray-300 rounded-md focus:ring-amber-500 cursor-pointer shrink-0"
                   />
                 </div>

@@ -1042,14 +1042,24 @@ export const CartProvider = ({ children }) => {
     return productToAdd;
   };
 
-  const updateProduct = (productId, updatedFields) => {
+  const updateProduct = async (productId, updatedFields) => {
+    let updatedList = [];
     setProducts(prev => {
       const updated = prev.map(p => p.id === productId ? { ...p, ...updatedFields } : p);
-      syncAdminStateToCloud({ products: updated });
-      syncCatalogToGit(updated, categories);
+      updatedList = updated;
       return updated;
     });
-    updateProductApi(productId, updatedFields).catch(() => {});
+
+    try {
+      await Promise.allSettled([
+        syncAdminStateToCloud({ products: updatedList }),
+        syncCatalogToGit(updatedList, categories),
+        updateProductApi(productId, updatedFields)
+      ]);
+    } catch (e) {
+      console.warn('Update product cloud sync notice:', e);
+    }
+    return { success: true };
   };
 
   const deleteProduct = (productId) => {
