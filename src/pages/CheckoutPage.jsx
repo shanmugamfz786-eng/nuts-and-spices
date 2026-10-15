@@ -76,7 +76,8 @@ export default function CheckoutPage() {
   const validate = () => {
     const errs = {};
     if (!formData.name.trim()) errs.name = 'Full Name is required';
-    if (!formData.phone.trim() || formData.phone.length < 10) errs.phone = 'Valid 10-digit mobile number required';
+    const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+    if (!cleanPhone || cleanPhone.length !== 10) errs.phone = 'Mobile number must be exactly 10 digits';
     if (!formData.address.trim()) errs.address = 'Delivery address is required';
     if (!formData.city.trim()) errs.city = 'City is required';
     if (!formData.pincode.trim() || formData.pincode.length < 6) errs.pincode = 'Valid 6-digit pincode required';
@@ -247,9 +248,12 @@ export default function CheckoutPage() {
                 <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8C7A6B]" />
                 <input
                   type="tel"
-                  placeholder="e.g. 9876543210"
+                  maxLength={10}
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  placeholder="10-digit mobile number"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                   className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none ${
                     errors.phone ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB] focus:border-[#000000]'
                   }`}

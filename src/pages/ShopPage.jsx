@@ -50,7 +50,9 @@ export default function ShopPage() {
     const matchesCat = pCat === cId || 
                        pCat === cName || 
                        (cName && pCatName === cName) || 
-                       (cId && pCatName === cId);
+                       (cId && pCatName === cId) ||
+                       (pCat && cId && (pCat.includes(cId) || cId.includes(pCat))) ||
+                       (pCatName && cName && (pCatName.includes(cName) || cName.includes(pCatName)));
 
     const matchesSearch = !searchFilter.trim() || 
                           p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||

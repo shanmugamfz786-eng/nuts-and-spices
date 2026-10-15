@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { PRODUCTS, CATEGORIES, STORE_WHATSAPP_NUMBER, CATALOG_VERSION } from '../data/products';
 import { fetchCloudCatalog, saveCloudCatalog } from '../services/cloudDb';
 import { createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from '../api/productApi';
@@ -115,6 +115,11 @@ export const CartProvider = ({ children }) => {
     
     return defaultCats;
   });
+
+  const productsRef = useRef(products);
+  const categoriesRef = useRef(categories);
+  useEffect(() => { productsRef.current = products; }, [products]);
+  useEffect(() => { categoriesRef.current = categories; }, [categories]);
 
   // 4. ORDERS STATE (Admin & Customer Live Sync)
   const [orders, setOrders] = useState(() => {
@@ -448,19 +453,36 @@ export const CartProvider = ({ children }) => {
               }
             });
 
-            const sanitized = sanitizeProductList(merged);
-            setProducts(sanitized);
-            try { 
-              sessionStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
-              localStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
-            } catch {}
+            setProducts(prevProds => {
+              const localCustom = (prevProds || []).filter(lp => lp && lp.id && !PRODUCTS.find(p => p.id === lp.id));
+              localCustom.forEach(l => {
+                if (!merged.find(m => m.id === l.id)) {
+                  merged.push(l);
+                }
+              });
+              const sanitized = sanitizeProductList(merged);
+              try { 
+                sessionStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
+                localStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
+              } catch {}
+              return sanitized;
+            });
           }
           if (Array.isArray(cloudData.categories) && cloudData.categories.length > 0) {
-            setCategories(cloudData.categories);
-            try { 
-              sessionStorage.setItem('nuts_spices_categories', JSON.stringify(cloudData.categories));
-              localStorage.setItem('nuts_spices_categories', JSON.stringify(cloudData.categories));
-            } catch {}
+            setCategories(prevCats => {
+              const cloudCatMap = new Map(cloudData.categories.map(c => [c.id, c]));
+              (prevCats || []).forEach(c => {
+                if (c && c.id && !cloudCatMap.has(c.id)) {
+                  cloudCatMap.set(c.id, c);
+                }
+              });
+              const mergedCats = Array.from(cloudCatMap.values());
+              try { 
+                sessionStorage.setItem('nuts_spices_categories', JSON.stringify(mergedCats));
+                localStorage.setItem('nuts_spices_categories', JSON.stringify(mergedCats));
+              } catch {}
+              return mergedCats;
+            });
           }
         }
       } catch (err) {
@@ -1022,7 +1044,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // ADMIN - PRODUCT CRUD
-  const addProduct = (newProductData) => {
+  const addProduct = async (newProductData) => {
     const newId = `prod-${Date.now()}`;
     const productToAdd = {
       id: newId,
@@ -1033,13 +1055,25 @@ export const CartProvider = ({ children }) => {
       active: true,
       ...newProductData
     };
+    let updatedProducts = [];
     setProducts(prev => {
       const updated = [productToAdd, ...prev];
-      syncAdminStateToCloud({ products: updated });
-      syncCatalogToGit(updated, categories);
+      updatedProducts = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
-    createProductApi(productToAdd).catch(() => {});
+    productsRef.current = updatedProducts;
+
+    try {
+      await saveCloudCatalog(updatedProducts, categoriesRef.current);
+      syncAdminStateToCloud({ products: updatedProducts }).catch(() => {});
+      createProductApi(productToAdd).catch(() => {});
+    } catch (e) {
+      console.warn('addProduct cloud sync error:', e);
+    }
     return productToAdd;
   };
 
@@ -1048,12 +1082,17 @@ export const CartProvider = ({ children }) => {
     setProducts(prev => {
       const updated = prev.map(p => p.id === productId ? { ...p, ...updatedFields } : p);
       updatedList = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
+    productsRef.current = updatedList;
 
     try {
       // 1. Critical: Directly push updated catalog to TiDB Cloud & Vercel API first
-      await saveCloudCatalog(updatedList, categories);
+      await saveCloudCatalog(updatedList, categoriesRef.current);
 
       // 2. Also run secondary syncs in background
       Promise.allSettled([
@@ -1071,10 +1110,15 @@ export const CartProvider = ({ children }) => {
     
     // 1. Update state immediately
     setProducts(updatedProductsList);
+    productsRef.current = updatedProductsList;
+    try {
+      sessionStorage.setItem('nuts_spices_products', JSON.stringify(updatedProductsList));
+      localStorage.setItem('nuts_spices_products', JSON.stringify(updatedProductsList));
+    } catch {}
 
     try {
       // 2. Persist to TiDB Cloud & Vercel API
-      await saveCloudCatalog(updatedProductsList, categories);
+      await saveCloudCatalog(updatedProductsList, categoriesRef.current);
 
       // 3. Backup sync to admin state
       syncAdminStateToCloud({ products: updatedProductsList }).catch(() => {});
@@ -1085,76 +1129,157 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const deleteProduct = (productId) => {
+  const deleteProduct = async (productId) => {
+    let updatedProducts = [];
     setProducts(prev => {
       const updated = prev.filter(p => p.id !== productId);
-      syncAdminStateToCloud({ products: updated });
-      syncCatalogToGit(updated, categories);
+      updatedProducts = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
-    deleteProductApi(productId).catch(() => {});
+    productsRef.current = updatedProducts;
+
+    try {
+      await saveCloudCatalog(updatedProducts, categoriesRef.current);
+      syncAdminStateToCloud({ products: updatedProducts }).catch(() => {});
+      deleteProductApi(productId).catch(() => {});
+    } catch (e) {
+      console.warn('deleteProduct cloud sync error:', e);
+    }
   };
 
-  const toggleProductStatus = (productId) => {
+  const toggleProductStatus = async (productId) => {
+    let updatedProducts = [];
+    let toggledProduct = null;
     setProducts(prev => {
       const updated = prev.map(p => {
         if (p.id === productId) {
           const currentlyActive = isProductActive(p);
           const newStatus = currentlyActive ? 'Inactive' : 'Active';
-          const updatedP = { ...p, status: newStatus, active: newStatus === 'Active' };
-          updateProductApi(productId, updatedP).catch(() => {});
-          return updatedP;
+          toggledProduct = { ...p, status: newStatus, active: newStatus === 'Active' };
+          return toggledProduct;
         }
         return p;
       });
-      syncCatalogToGit(updated, categories);
+      updatedProducts = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
+    productsRef.current = updatedProducts;
+
+    try {
+      await saveCloudCatalog(updatedProducts, categoriesRef.current);
+      if (toggledProduct) {
+        updateProductApi(productId, toggledProduct).catch(() => {});
+      }
+    } catch (e) {
+      console.warn('toggleProductStatus cloud sync error:', e);
+    }
   };
 
   // ADMIN - CATEGORIES CRUD
-  const addCategory = (categoryData) => {
+  const addCategory = async (categoryData) => {
     const newId = categoryData.id || `cat-${Date.now()}`;
     const newCategory = { id: newId, ...categoryData };
+    let updatedCategories = [];
     setCategories(prev => {
-      const updated = [...prev, newCategory];
-      syncCatalogToGit(products, updated);
+      const filtered = prev.filter(c => c.id !== newId);
+      const updated = [...filtered, newCategory];
+      updatedCategories = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
-    createCategoryApi(newCategory).catch(() => {});
+    categoriesRef.current = updatedCategories;
+
+    try {
+      await saveCloudCatalog(productsRef.current, updatedCategories);
+      syncAdminStateToCloud({ categories: updatedCategories }).catch(() => {});
+      createCategoryApi(newCategory).catch(() => {});
+    } catch (e) {
+      console.warn('addCategory cloud sync error:', e);
+    }
+    return newCategory;
   };
 
-  const updateCategory = (categoryId, updatedFields) => {
+  const updateCategory = async (categoryId, updatedFields) => {
+    let updatedCategories = [];
     setCategories(prev => {
       const updated = prev.map(c => c.id === categoryId ? { ...c, ...updatedFields } : c);
-      syncCatalogToGit(products, updated);
+      updatedCategories = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
-    updateCategoryApi(categoryId, updatedFields).catch(() => {});
+    categoriesRef.current = updatedCategories;
+
+    try {
+      await saveCloudCatalog(productsRef.current, updatedCategories);
+      syncAdminStateToCloud({ categories: updatedCategories }).catch(() => {});
+      updateCategoryApi(categoryId, updatedFields).catch(() => {});
+    } catch (e) {
+      console.warn('updateCategory cloud sync error:', e);
+    }
   };
 
-  const deleteCategory = (categoryId) => {
+  const deleteCategory = async (categoryId) => {
+    let updatedCategories = [];
     setCategories(prev => {
       const updated = prev.filter(c => c.id !== categoryId);
-      syncCatalogToGit(products, updated);
+      updatedCategories = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
-    deleteCategoryApi(categoryId).catch(() => {});
+    categoriesRef.current = updatedCategories;
+
+    try {
+      await saveCloudCatalog(productsRef.current, updatedCategories);
+      syncAdminStateToCloud({ categories: updatedCategories }).catch(() => {});
+      deleteCategoryApi(categoryId).catch(() => {});
+    } catch (e) {
+      console.warn('deleteCategory cloud sync error:', e);
+    }
   };
 
-  const toggleCategoryPremium = (categoryId) => {
+  const toggleCategoryPremium = async (categoryId) => {
+    let updatedCategories = [];
+    let newStatus = false;
     setCategories(prev => {
       const updated = prev.map(c => {
         if (c.id === categoryId) {
-          const newStatus = !c.isPremium;
-          updateCategoryApi(categoryId, { isPremium: newStatus }).catch(() => {});
+          newStatus = !c.isPremium;
           return { ...c, isPremium: newStatus };
         }
         return c;
       });
-      syncCatalogToGit(products, updated);
+      updatedCategories = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_categories', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
+    categoriesRef.current = updatedCategories;
+
+    try {
+      await saveCloudCatalog(productsRef.current, updatedCategories);
+      updateCategoryApi(categoryId, { isPremium: newStatus }).catch(() => {});
+    } catch (e) {
+      console.warn('toggleCategoryPremium cloud sync error:', e);
+    }
   };
 
   // ADMIN - ORDERS CRUD & CUSTOMER CHECKOUT CREATION

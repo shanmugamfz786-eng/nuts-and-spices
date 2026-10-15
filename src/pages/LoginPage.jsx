@@ -535,6 +535,10 @@ export default function LoginPage() {
       setErrorMessage('Please enter your mobile/email and password.');
       return;
     }
+    if (/^\d+$/.test(id) && id.length !== 10) {
+      setErrorMessage('Mobile number must be exactly 10 digits.');
+      return;
+    }
 
     if (
       id.toLowerCase() === 'admin702@admin.com' || 
@@ -613,9 +617,16 @@ export default function LoginPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Enter mobile no. or email"
+                  placeholder="Enter 10-digit mobile no. or email"
                   value={loginIdentifier}
-                  onChange={(e) => setLoginIdentifier(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d+$/.test(val)) {
+                      setLoginIdentifier(val.slice(0, 10));
+                    } else {
+                      setLoginIdentifier(val);
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#128C7E] transition-colors"
                 />
               </div>

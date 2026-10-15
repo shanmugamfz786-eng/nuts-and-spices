@@ -76,12 +76,19 @@ export default function AdminCategories() {
   // Product mapper by category
   const getCategoryProducts = (cat) => {
     if (!cat || !products) return [];
-    const cId = (cat.id || '').toLowerCase();
-    const cName = (cat.name || '').toLowerCase();
+    const cId = (cat.id || '').toLowerCase().trim();
+    const cName = (cat.name || '').toLowerCase().trim();
     return products.filter(p => {
-      const pCat = (p.category || '').toLowerCase();
-      const pCatName = (p.categoryName || '').toLowerCase();
-      return pCat === cId || pCat === cName || pCatName === cName || pCatName === cId;
+      const pCat = (p.category || '').toLowerCase().trim();
+      const pCatName = (p.categoryName || '').toLowerCase().trim();
+      return (
+        pCat === cId ||
+        pCat === cName ||
+        (cName && pCatName === cName) ||
+        (cId && pCatName === cId) ||
+        (pCat && cId && (pCat.includes(cId) || cId.includes(pCat))) ||
+        (pCatName && cName && (pCatName.includes(cName) || cName.includes(pCatName)))
+      );
     });
   };
 

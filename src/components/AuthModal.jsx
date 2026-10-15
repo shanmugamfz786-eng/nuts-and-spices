@@ -39,6 +39,10 @@ export default function AuthModal() {
       setErrorMessage('Please enter your mobile/email and password.');
       return;
     }
+    if (/^\d+$/.test(id) && id.length !== 10) {
+      setErrorMessage('Mobile number must be exactly 10 digits.');
+      return;
+    }
 
     if (id.toLowerCase() === 'admin702@admin.com') {
       const adminRes = loginAdmin(id, loginPassword);
@@ -73,12 +77,27 @@ export default function AuthModal() {
     e.preventDefault();
     setErrorMessage('');
 
-    if (!regName.trim() || !regMobile.trim() || !regPassword) {
+    const cleanName = regName.trim();
+    const cleanPhone = regMobile.replace(/\D/g, '');
+
+    if (!cleanName || !cleanPhone || !regPassword) {
       setErrorMessage('Please fill in all required fields.');
+      return;
+    }
+    if (cleanPhone.length !== 10) {
+      setErrorMessage('Mobile number must be exactly 10 digits.');
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setErrorMessage('Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.');
       return;
     }
     if (regPassword !== regConfirmPassword) {
       setErrorMessage('Passwords do not match.');
+      return;
+    }
+    if (regPassword.length < 8) {
+      setErrorMessage('Password must be at least 8 characters long.');
       return;
     }
     if (!agreedTerms) {
@@ -87,9 +106,9 @@ export default function AuthModal() {
     }
 
     const res = await registerUser({
-      name: regName.trim(),
-      phone: regMobile.trim(),
-      email: regEmail.trim() || `${regName.toLowerCase().replace(/\s+/g, '')}@nutsandspices.in`,
+      name: cleanName,
+      phone: cleanPhone,
+      email: regEmail.trim() || `${cleanName.toLowerCase().replace(/\s+/g, '')}@nutsandspices.in`,
       password: regPassword
     });
 
@@ -216,9 +235,16 @@ export default function AuthModal() {
                   <input
                     type="text"
                     required
-                    placeholder="Enter mobile no. or email"
+                    placeholder="Enter 10-digit mobile no. or email"
                     value={loginIdentifier}
-                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (/^\d+$/.test(val)) {
+                        setLoginIdentifier(val.slice(0, 10));
+                      } else {
+                        setLoginIdentifier(val);
+                      }
+                    }}
                     className="w-full pl-10 pr-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000] transition-colors"
                   />
                 </div>
@@ -325,20 +351,34 @@ export default function AuthModal() {
 
               {/* Mobile Number */}
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
-                  Mobile Phone Number *
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
+                    Mobile Phone Number *
+                  </label>
+                  <span className={`text-[10px] font-mono font-bold ${regMobile.length === 10 ? 'text-[#128C7E]' : 'text-[#8C7A6B]'}`}>
+                    {regMobile.length}/10 digits
+                  </span>
+                </div>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="tel"
                     required
-                    placeholder="10-digit mobile number"
+                    maxLength={10}
+                    inputMode="numeric"
+                    pattern="[0-9]{10}"
+                    placeholder="Enter 10-digit mobile number"
                     value={regMobile}
-                    onChange={(e) => setRegMobile(e.target.value)}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setRegMobile(digits);
+                    }}
                     className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] placeholder-[#8C7A6B] outline-none focus:border-[#000000]"
                   />
                 </div>
+                <p className="text-[10px] text-[#8C7A6B] pl-1">
+                  Fixed 10 digits required (numbers only).
+                </p>
               </div>
 
               {/* Email Address */}
