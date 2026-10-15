@@ -56,11 +56,20 @@ export const getAllProducts = async (req, res) => {
       );
     }
 
-    const mappedFiltered = filtered.map(p => ({
-      ...p,
-      isFeaturedToday: p.is_featured_today === 1 ? true : (p.is_featured_today === 0 ? false : (p.isFeaturedToday || false)),
-      isBestSelling: p.is_best_selling === 1 ? true : (p.is_best_selling === 0 ? false : (p.isBestSelling || false))
-    }));
+    const mappedFiltered = filtered.map(p => {
+      let weights = p.weights;
+      if (!weights && p.weights_json) {
+        try {
+          weights = typeof p.weights_json === 'string' ? JSON.parse(p.weights_json) : p.weights_json;
+        } catch(e) {}
+      }
+      return {
+        ...p,
+        weights: Array.isArray(weights) ? weights : p.weights,
+        isFeaturedToday: p.is_featured_today === 1 ? true : (p.is_featured_today === 0 ? false : (p.isFeaturedToday || false)),
+        isBestSelling: p.is_best_selling === 1 ? true : (p.is_best_selling === 0 ? false : (p.isBestSelling || false))
+      };
+    });
 
     res.json({
       success: true,
@@ -105,6 +114,12 @@ export const getProductById = async (req, res) => {
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found.' });
+    }
+
+    if (!product.weights && product.weights_json) {
+      try {
+        product.weights = typeof product.weights_json === 'string' ? JSON.parse(product.weights_json) : product.weights_json;
+      } catch(e) {}
     }
 
     product.isFeaturedToday = product.is_featured_today === 1 ? true : (product.is_featured_today === 0 ? false : (product.isFeaturedToday || false));

@@ -44,8 +44,16 @@ export const CartProvider = ({ children }) => {
         { label: '250g', price: basePrice, originalPrice: Math.round(basePrice * 1.2) },
         { label: '500g', price: Math.round(basePrice * 1.8), originalPrice: Math.round(basePrice * 2.1) }
       ];
-      const validWeights = Array.isArray(p.weights) && p.weights.length > 0 
-        ? p.weights.map(w => ({
+      let rawWeights = p.weights || p.weights_json;
+      if (typeof rawWeights === 'string') {
+        try {
+          rawWeights = JSON.parse(rawWeights);
+        } catch {
+          rawWeights = null;
+        }
+      }
+      const validWeights = Array.isArray(rawWeights) && rawWeights.length > 0 
+        ? rawWeights.map(w => ({
             label: w?.label || '250g',
             price: Number(w?.price) || basePrice,
             originalPrice: Number(w?.originalPrice) || Math.round((Number(w?.price) || basePrice) * 1.2)
@@ -811,6 +819,7 @@ export const CartProvider = ({ children }) => {
         return [
           ...prevCart,
           {
+            id: product.id,
             cartItemId,
             productId: product.id,
             name: product.name,

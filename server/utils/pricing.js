@@ -49,9 +49,9 @@ export function calculateItemsSubtotal(items, catalogProducts) {
     let realPrice = null;
 
     if (Array.isArray(productWeights) && productWeights.length > 0) {
-      // If a specific weight variant label was requested, it MUST exist in the catalog
       if (item.weight) {
-        const variant = productWeights.find(w => w.label === item.weight);
+        const itemWeightNormalized = String(item.weight).toLowerCase().trim();
+        const variant = productWeights.find(w => String(w.label || '').toLowerCase().trim() === itemWeightNormalized);
         if (!variant) {
           throw new Error(`Variant '${item.weight}' does not exist for product '${backendProduct.name}'.`);
         }

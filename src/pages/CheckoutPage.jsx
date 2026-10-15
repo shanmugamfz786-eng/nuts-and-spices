@@ -106,9 +106,16 @@ export default function CheckoutPage() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          customer: formData, 
-          items: cart, 
-          notes: formData.notes,
+          customer: {
+            ...formData,
+            email: user?.email || formData.email || `${(formData.phone || '').replace(/\D/g, '')}@customer.local`
+          }, 
+          items: cart.map(item => ({
+            ...item,
+            id: item.id || item.productId,
+            productId: item.productId || item.id
+          })), 
+          notes: formData.notes || '',
           couponCode: appliedCoupon?.code || '',
           discountAmount: discountAmount || 0
         })
