@@ -3,8 +3,14 @@ import { useCart, isProductActive } from '../context/CartContext';
 import { Search, X, ShoppingBag, ArrowRight } from 'lucide-react';
 
 export default function SearchModal() {
-  const { products, isSearchOpen, setIsSearchOpen, navigate, addToCart } = useCart();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { products, isSearchOpen, setIsSearchOpen, navigate, addToCart, searchQuery, setSearchQuery } = useCart();
+  const [searchTerm, setSearchTerm] = useState(searchQuery || '');
+
+  React.useEffect(() => {
+    if (isSearchOpen) {
+      setSearchTerm(searchQuery || '');
+    }
+  }, [isSearchOpen, searchQuery]);
 
   React.useEffect(() => {
     const handleKeyDown = (e) => {
@@ -15,6 +21,16 @@ export default function SearchModal() {
   }, [setIsSearchOpen]);
 
   if (!isSearchOpen) return null;
+
+  const handleModalSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchTerm.trim();
+    setIsSearchOpen(false);
+    if (q) {
+      setSearchQuery(q);
+      navigate('shop', { category: 'all' });
+    }
+  };
 
   const activeProducts = (products || []).filter(isProductActive);
 
@@ -29,7 +45,7 @@ export default function SearchModal() {
     <div className="fixed inset-0 z-50 bg-[#3D2314]/35 backdrop-blur-sm flex items-start justify-center pt-16 px-4 animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-[#E5E7EB]">
         {/* Search Header Input */}
-        <div className="p-4 border-b border-[#E5E7EB] flex items-center gap-3 bg-[#F9FAFB]">
+        <form onSubmit={handleModalSearchSubmit} className="p-4 border-b border-[#E5E7EB] flex items-center gap-3 bg-[#F9FAFB]">
           <Search className="w-5 h-5 text-[#000000]" />
           <input
             type="text"
@@ -41,19 +57,21 @@ export default function SearchModal() {
           />
           {searchTerm && (
             <button 
+              type="button"
               onClick={() => setSearchTerm('')} 
-              className="text-xs text-[#8C7A6B] hover:text-[#000000] font-medium"
+              className="text-xs text-[#8C7A6B] hover:text-[#000000] font-medium cursor-pointer"
             >
               Clear
             </button>
           )}
           <button
+            type="button"
             onClick={() => setIsSearchOpen(false)}
-            className="p-1 rounded-lg text-[#8C7A6B] hover:text-[#000000] hover:bg-[#E5E7EB]/50 transition-colors"
+            className="p-1 rounded-lg text-[#8C7A6B] hover:text-[#000000] hover:bg-[#E5E7EB]/50 transition-colors cursor-pointer"
           >
             <X className="w-6 h-6" />
           </button>
-        </div>
+        </form>
 
         {/* Results List */}
         <div className="p-4 max-h-[60vh] overflow-y-auto divide-y divide-[#F9FAFB]">

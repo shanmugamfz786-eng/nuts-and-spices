@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
-import { ShieldCheck, Lock, Mail, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, AlertCircle, Store } from 'lucide-react';
 
 export default function AdminLogin() {
   const { loginAdmin, navigate } = useCart();
@@ -18,24 +18,53 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center p-4 relative overflow-hidden font-sans select-none">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col justify-between p-4 relative overflow-hidden font-sans select-none">
       
       {/* Background Ambient Glow Accents */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#128C7E]/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#128C7E]/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white border border-[#E5E7EB] rounded-3xl shadow-xl p-8 relative z-10 text-gray-800">
+      {/* Top Navbar */}
+      <header className="w-full max-w-5xl mx-auto py-3 px-4 flex items-center justify-between z-20 bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/80 shadow-xs mb-6">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/logo.jpg" 
+            alt="Haji Logo" 
+            className="w-9 h-9 object-contain rounded-xl border border-gray-200 bg-white shadow-2xs" 
+          />
+          <div className="flex flex-col text-left">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-800 font-serif leading-none">
+              HAJI NUTS & SPICES
+            </span>
+            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">
+              Enterprise Admin Portal
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('home')}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-[#075E54] border border-emerald-200/70 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-2xs"
+        >
+          <Store className="w-4 h-4" />
+          <span>View Store</span>
+        </button>
+      </header>
+
+      {/* Center Login Card */}
+      <div className="w-full max-w-md mx-auto bg-white border border-[#E5E7EB] rounded-3xl shadow-xl p-6 sm:p-8 relative z-10 text-gray-800 my-auto">
         
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-[#F9FAFB] mx-auto mb-4 shadow-sm flex items-center justify-center border border-[#E5E7EB]">
-            <ShieldCheck className="w-8 h-8 text-[#000000]" />
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 mx-auto mb-4 shadow-sm flex items-center justify-center border border-emerald-100">
+            <ShieldCheck className="w-8 h-8 text-[#075E54]" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-[#000000]">
+          <h1 className="text-2xl font-black tracking-tight text-gray-900">
             Admin Portal Login
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            NUTS & SPICES Control Panel Authentication
+            Gourmet Store Control Panel Authentication
           </p>
         </div>
 
@@ -59,7 +88,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter Your Admin Email"
-                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold text-gray-900 outline-none transition-colors"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#075E54] rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold text-gray-900 outline-none transition-colors"
               />
             </div>
           </div>
@@ -76,14 +105,14 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold text-gray-900 outline-none transition-colors"
+                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#075E54] rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold text-gray-900 outline-none transition-colors"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all transform active:scale-98 mt-3 cursor-pointer"
+            className="w-full py-3.5 bg-[#075E54] hover:bg-[#05463e] text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition-all transform active:scale-98 mt-3 cursor-pointer"
           >
             Sign In To Admin Portal
           </button>
@@ -93,14 +122,19 @@ export default function AdminLogin() {
           <button
             type="button"
             onClick={() => navigate('home')}
-            className="text-xs font-bold text-gray-500 hover:text-black transition-colors cursor-pointer"
+            className="text-xs font-bold text-gray-500 hover:text-emerald-800 transition-colors cursor-pointer inline-flex items-center gap-1"
           >
             ← Return to Store Home
           </button>
         </div>
 
       </div>
+
+      {/* Footer Branding Note */}
+      <footer className="text-center py-2 text-[11px] text-gray-400 font-mono">
+        Haji Gourmet Enterprise Portal &bull; Secure Session
+      </footer>
+
     </div>
   );
 }
-

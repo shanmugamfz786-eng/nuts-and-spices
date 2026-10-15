@@ -640,6 +640,33 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const changePassword = async ({ currentPassword, newPassword }) => {
+    try {
+      const token = localStorage.getItem('nuts_spices_auth_token');
+      if (!token) return { success: false, message: 'Please log in first.' };
+
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'https://nuts-and-spices-dqzp.onrender.com'
+          : ''
+      );
+
+      const res = await fetch(BASE + '/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      return { success: false, message: err?.message || 'Server error while updating password.' };
+    }
+  };
+
   const loginUser = async (loginData) => {
     const identifier = (loginData.identifier || loginData.phone || loginData.email || '').trim().toLowerCase();
     
@@ -1530,6 +1557,7 @@ export const CartProvider = ({ children }) => {
         registerUser,
         logoutUser,
         updateUserProfile,
+        changePassword,
         openAuthModal,
 
         // Admin Auth

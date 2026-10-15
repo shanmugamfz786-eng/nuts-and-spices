@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { Mail, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, Package, ChevronRight, X, LogOut, ShoppingBag, Settings, User as UserIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, Package, ChevronRight, X, LogOut, ShoppingBag, Settings, User as UserIcon, KeyRound, ShieldCheck, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginPage() {
-  const { user, loginUser, loginAdmin, logoutUser, navigate, updateUserProfile } = useCart();
+  const { user, loginUser, loginAdmin, logoutUser, navigate, updateUserProfile, changePassword } = useCart();
   const [showPassword, setShowPassword] = useState(false);
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -16,13 +16,105 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search);
       if (p.get('tab') === 'orders') return 'orders';
+      if (p.get('tab') === 'security' || p.get('tab') === 'password') return 'security';
     }
     return 'profile';
   });
   const [editName, setEditName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [passwordSent, setPasswordSent] = useState(false);
+
+  // Password Change State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
+  const [passwordModal, setPasswordModal] = useState({
+    isOpen: false,
+    type: 'error', // 'error' | 'success'
+    title: '',
+    message: ''
+  });
+
+  const calculatePasswordStrength = (pass) => {
+    if (!pass) return { score: 0, label: '', color: 'bg-gray-200' };
+    let s = 0;
+    if (pass.length >= 6) s += 1;
+    if (pass.length >= 8) s += 1;
+    if (/[0-9]/.test(pass)) s += 1;
+    if (/[^A-Za-z0-9]/.test(pass) || /[A-Z]/.test(pass)) s += 1;
+    
+    if (s <= 1) return { score: 1, label: 'Weak', color: 'bg-rose-500', text: 'text-rose-500' };
+    if (s === 2) return { score: 2, label: 'Fair', color: 'bg-amber-500', text: 'text-amber-500' };
+    if (s === 3) return { score: 3, label: 'Good', color: 'bg-blue-500', text: 'text-blue-500' };
+    return { score: 4, label: 'Strong', color: 'bg-emerald-600', text: 'text-emerald-600' };
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    if (!currentPassword.trim()) {
+      setPasswordModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Current Password Required',
+        message: 'Please enter your current password to proceed.'
+      });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Password Too Short',
+        message: 'New password must be at least 6 characters long.'
+      });
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setPasswordModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Choose a Different Password',
+        message: 'New password cannot be identical to your current password.'
+      });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Passwords Do Not Match',
+        message: 'Confirm password does not match your new password. Please check and re-enter.'
+      });
+      return;
+    }
+
+    setIsSubmittingPassword(true);
+    const res = await changePassword({ currentPassword, newPassword });
+    setIsSubmittingPassword(false);
+
+    if (res && res.success) {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Password Updated!',
+        message: 'Your new password has been successfully saved to the database. You can now use it to log in.'
+      });
+    } else {
+      setPasswordModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Incorrect Current Password',
+        message: res?.message || 'Incorrect password! The current password you entered is wrong. Please enter the correct password.'
+      });
+    }
+  };
 
   // My Orders State
   const [myOrders, setMyOrders] = useState([]);
@@ -158,6 +250,17 @@ export default function LoginPage() {
               )}
             </button>
             <button
+              onClick={() => setActiveTab('security')}
+              className={`flex-1 py-2 px-1 rounded-xl text-[11px] sm:text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                activeTab === 'security'
+                  ? 'bg-white text-[#128C7E] shadow-sm ring-1 ring-black/5'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              <KeyRound className="w-3.5 h-3.5 shrink-0" />
+              <span>Security</span>
+            </button>
+            <button
               onClick={() => setActiveTab('settings')}
               className={`flex-1 py-2 px-1 rounded-xl text-[11px] sm:text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
                 activeTab === 'settings'
@@ -227,6 +330,12 @@ export default function LoginPage() {
                    className={`flex items-center gap-2.5 cursor-pointer p-2.5 rounded-xl transition-all ${activeTab === 'orders' ? 'text-[#128C7E] bg-green-50 shadow-2xs font-black' : 'hover:text-[#000000] hover:bg-gray-50'}`}
                  >
                    <Package className="w-4 h-4 shrink-0"/> My Orders
+                 </li>
+                 <li 
+                   onClick={() => setActiveTab('security')}
+                   className={`flex items-center gap-2.5 cursor-pointer p-2.5 rounded-xl transition-all ${activeTab === 'security' ? 'text-[#128C7E] bg-green-50 shadow-2xs font-black' : 'hover:text-[#000000] hover:bg-gray-50'}`}
+                 >
+                   <KeyRound className="w-4 h-4 shrink-0"/> Change Password
                  </li>
                  <li 
                    onClick={() => setActiveTab('settings')}
@@ -442,6 +551,26 @@ export default function LoginPage() {
                       </button>
                     </div>
                   </form>
+
+                  {/* Security & Password Quick Card inside Profile */}
+                  <div className="mt-8 pt-6 border-t border-[#E5E7EB] flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#128C7E] flex items-center justify-center shrink-0">
+                        <KeyRound className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-gray-900">Account Password</h4>
+                        <p className="text-[11px] text-gray-500">Keep your account secure with a strong password</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('security')}
+                      className="px-4 py-2 bg-white hover:bg-emerald-50 text-[#128C7E] border border-emerald-300 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer text-center"
+                    >
+                      Change Password →
+                    </button>
+                  </div>
                 </div>
               ) : activeTab === 'settings' ? (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-300">
@@ -488,22 +617,24 @@ export default function LoginPage() {
                     <div>
                       <h3 className="text-xs font-black uppercase text-[#000000] tracking-wider mb-4 border-b border-[#E5E7EB] pb-2">Security</h3>
                       
-                      {passwordSent && (
-                        <div className="bg-green-50 text-green-700 border border-green-200 text-xs font-bold p-3.5 rounded-2xl flex items-center gap-2 mb-4">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Password reset link sent to your registered email/phone!</span>
+                      <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#128C7E] flex items-center justify-center shrink-0">
+                            <KeyRound className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-xs sm:text-sm font-bold text-gray-900">Account Password</p>
+                            <p className="text-[11px] text-gray-500">Update your security credentials</p>
+                          </div>
                         </div>
-                      )}
 
-                      <button 
-                        onClick={() => {
-                          setPasswordSent(true);
-                          setTimeout(() => setPasswordSent(false), 3000);
-                        }}
-                        className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-[#000000] font-bold text-xs rounded-xl transition-colors shadow-sm cursor-pointer"
-                      >
-                        Change Password
-                      </button>
+                        <button 
+                          onClick={() => setActiveTab('security')}
+                          className="px-4 py-2 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer text-center"
+                        >
+                          Change Password
+                        </button>
+                      </div>
                     </div>
 
                     {/* Danger Zone */}
@@ -522,12 +653,234 @@ export default function LoginPage() {
                     </div>
                   </div>
                 </div>
+              ) : activeTab === 'security' ? (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="flex justify-between items-end mb-4 sm:mb-8 border-b border-[#E5E7EB] pb-2.5 sm:pb-4">
+                    <div>
+                      <h2 className="text-lg sm:text-2xl font-black font-serif text-[#000000] flex items-center gap-2">
+                        <KeyRound className="w-4 h-4 sm:w-6 sm:h-6 text-[#128C7E]" />
+                        Change Password
+                      </h2>
+                      <p className="text-[11px] sm:text-xs text-[#8C7A6B] mt-0.5">
+                        Ensure your account stays protected by choosing a strong password.
+                      </p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleChangePassword} className="max-w-lg space-y-4 sm:space-y-5">
+
+                    {/* Current Password - Strictly masked without reveal button */}
+                    <div className="space-y-1 sm:space-y-1.5">
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000] flex items-center justify-between">
+                        <span>Current Password</span>
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type="password"
+                          required
+                          autoComplete="new-password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          placeholder="Enter your current password"
+                          className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-semibold text-[#000000] placeholder-gray-400 outline-none focus:border-[#128C7E] transition-colors shadow-xs"
+                        />
+                      </div>
+                    </div>
+
+                    {/* New Password */}
+                    <div className="space-y-1 sm:space-y-1.5">
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000] flex items-center justify-between">
+                        <span>New Password</span>
+                        {newPassword && (
+                          <span className={`text-[10px] font-black uppercase ${calculatePasswordStrength(newPassword).text}`}>
+                            {calculatePasswordStrength(newPassword).label}
+                          </span>
+                        )}
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type={showNewPassword ? 'text' : 'password'}
+                          required
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password (min. 6 characters)"
+                          className="w-full pl-10 pr-10 py-2.5 sm:py-3 bg-white border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-semibold text-[#000000] placeholder-gray-400 outline-none focus:border-[#128C7E] transition-colors shadow-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
+                        >
+                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+
+                      {/* Password Strength Meter */}
+                      {newPassword.length > 0 && (
+                        <div className="pt-1">
+                          <div className="grid grid-cols-4 gap-1.5 h-1.5">
+                            {[1, 2, 3, 4].map((step) => {
+                              const strength = calculatePasswordStrength(newPassword);
+                              return (
+                                <div
+                                  key={step}
+                                  className={`rounded-full transition-all duration-300 ${
+                                    step <= strength.score ? strength.color : 'bg-gray-200'
+                                  }`}
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Confirm New Password */}
+                    <div className="space-y-1 sm:space-y-1.5">
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000] flex items-center justify-between">
+                        <span>Confirm New Password</span>
+                        {confirmPassword && (
+                          <span className={`text-[10px] font-bold ${
+                            confirmPassword === newPassword ? 'text-emerald-600' : 'text-rose-500'
+                          }`}>
+                            {confirmPassword === newPassword ? '✓ Passwords Match' : '✕ Does Not Match'}
+                          </span>
+                        )}
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Re-enter your new password"
+                          className={`w-full pl-10 pr-10 py-2.5 sm:py-3 bg-white border rounded-xl sm:rounded-2xl text-xs font-semibold text-[#000000] placeholder-gray-400 outline-none transition-colors shadow-xs ${
+                            confirmPassword && confirmPassword !== newPassword
+                              ? 'border-rose-400 focus:border-rose-500'
+                              : 'border-[#E5E7EB] focus:border-[#128C7E]'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C7A6B] hover:text-[#000000] cursor-pointer"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Security Tip Box */}
+                    <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-200/80 text-[11px] text-gray-600 space-y-1">
+                      <p className="font-bold text-gray-800 flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#128C7E]" />
+                        Password Guidelines:
+                      </p>
+                      <ul className="list-disc list-inside space-y-0.5 text-gray-500 pl-1">
+                        <li>Minimum 6 characters (8+ recommended)</li>
+                        <li>Include both letters and numbers for higher security</li>
+                      </ul>
+                    </div>
+
+                    {/* Submit Buttons */}
+                    <div className="pt-2 sm:pt-4 flex items-center gap-3">
+                      <button
+                        type="submit"
+                        disabled={isSubmittingPassword || !currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()}
+                        className="flex-1 sm:flex-initial px-6 py-3 sm:px-8 sm:py-3.5 bg-[#128C7E] hover:bg-[#075E54] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs rounded-xl sm:rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer flex justify-center items-center gap-2 active:scale-98"
+                      >
+                        {isSubmittingPassword ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Update Password</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentPassword('');
+                          setNewPassword('');
+                          setConfirmPassword('');
+                        }}
+                        className="px-4 py-3 sm:py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl sm:rounded-2xl transition-colors cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    </div>
+
+                  </form>
+                </div>
               ) : null}
             </div>
           </motion.div>
         </div>
 
+        {/* Professional Result Popup Modal */}
+        <AnimatePresence>
+          {passwordModal.isOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 15 }}
+                className="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-gray-100 text-center relative overflow-hidden"
+              >
+                <button
+                  type="button"
+                  onClick={() => setPasswordModal({ ...passwordModal, isOpen: false })}
+                  className="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
 
+                <div className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4 ${
+                  passwordModal.type === 'success' ? 'bg-emerald-100 text-[#128C7E]' : 'bg-rose-100 text-rose-600'
+                }`}>
+                  {passwordModal.type === 'success' ? (
+                    <CheckCircle2 className="w-8 h-8" />
+                  ) : (
+                    <AlertCircle className="w-8 h-8" />
+                  )}
+                </div>
+
+                <h3 className="text-lg font-black text-gray-900 font-serif">
+                  {passwordModal.title}
+                </h3>
+                
+                <p className="text-xs text-gray-600 mt-2 leading-relaxed font-medium">
+                  {passwordModal.message}
+                </p>
+
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const wasSuccess = passwordModal.type === 'success';
+                      setPasswordModal({ ...passwordModal, isOpen: false });
+                      if (wasSuccess) {
+                        setActiveTab('profile');
+                      }
+                    }}
+                    className={`w-full py-3 px-4 rounded-xl font-extrabold text-xs uppercase tracking-wider text-white shadow-md transition-all cursor-pointer ${
+                      passwordModal.type === 'success'
+                        ? 'bg-[#128C7E] hover:bg-[#075E54]'
+                        : 'bg-rose-600 hover:bg-rose-700'
+                    }`}
+                  >
+                    {passwordModal.type === 'success' ? 'Continue to Profile' : 'Try Again'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
       </div>
     );
@@ -640,18 +993,9 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => alert('Password reset link sent to your mobile via WhatsApp.')}
-                  className="text-[11px] font-bold text-[#128C7E] hover:underline cursor-pointer"
-                >
-                  Forgot Password?
-                </button>
-              </div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#000000]">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input

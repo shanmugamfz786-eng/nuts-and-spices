@@ -252,18 +252,9 @@ export default function AuthModal() {
 
               {/* Password Input */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => alert('Password reset link sent to your mobile via WhatsApp.')}
-                    className="text-[11px] font-bold text-[#000000] hover:underline cursor-pointer"
-                  >
-                    Forgot?
-                  </button>
-                </div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#000000]">
+                  Password
+                </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input

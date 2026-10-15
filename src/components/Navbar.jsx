@@ -10,6 +10,8 @@ export default function Navbar() {
   const [navSearchInput, setNavSearchInput] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef(null);
+  const mobileSearchContainerRef = useRef(null);
+  const mobileSearchInputRef = useRef(null);
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(() => {
     const hasAnnouncement = ['home', 'shop', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage);
@@ -51,12 +53,18 @@ export default function Navbar() {
   // Close live search dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+      const inDesktop = searchContainerRef.current && searchContainerRef.current.contains(event.target);
+      const inMobile = mobileSearchContainerRef.current && mobileSearchContainerRef.current.contains(event.target);
+      if (!inDesktop && !inMobile) {
         setIsSearchFocused(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   // Lock body scroll when Category Drawer or Mobile Menu is open
@@ -71,14 +79,15 @@ export default function Navbar() {
   }, [isCategoryDrawerOpen, isMobileMenuOpen]);
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (navSearchInput.trim()) {
-      setSearchQuery(navSearchInput);
-      setIsSearchOpen(true);
-      setIsSearchFocused(false);
+    if (e) e.preventDefault();
+    const query = navSearchInput.trim();
+    setIsSearchFocused(false);
+    setIsSearchOpen(false);
+    if (query) {
+      setSearchQuery(query);
       navigate('shop', { category: 'all' });
     } else {
-      setIsSearchOpen(true);
+      navigate('shop', { category: 'all' });
     }
   };
 
@@ -190,6 +199,7 @@ export default function Navbar() {
                         return (
                           <div
                             key={product.id}
+                            onMouseDown={(e) => e.preventDefault()}
                             onClick={() => {
                               setIsSearchFocused(false);
                               setNavSearchInput('');
@@ -224,10 +234,11 @@ export default function Navbar() {
 
                       {/* View all results footer link */}
                       <div
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
                           setIsSearchFocused(false);
-                          setSearchQuery(navSearchInput);
-                          setIsSearchOpen(true);
+                          setIsSearchOpen(false);
+                          setSearchQuery(navSearchInput.trim());
                           navigate('shop', { category: 'all' });
                         }}
                         className="p-3.5 bg-[#F9FAFB] text-center hover:bg-[#E5E7EB]/40 transition-colors cursor-pointer border-t border-[#E5E7EB]"
@@ -337,8 +348,11 @@ export default function Navbar() {
 
               {/* Search Icon Button (Mobile Header) */}
               <button
-                onClick={() => setIsSearchOpen(true)}
-                className="md:hidden p-1 text-black hover:text-gray-700 transition-colors cursor-pointer"
+                onClick={() => {
+                  mobileSearchInputRef.current?.focus();
+                  setIsSearchFocused(true);
+                }}
+                className="md:hidden p-1 text-black hover:text-[#128C7E] transition-colors cursor-pointer"
                 title="Search"
               >
                 <Search className="w-5 h-5" />
@@ -358,11 +372,12 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Search Input Row with Live Dropdown */}
-          <div className="block md:hidden pb-2 relative">
-            <form onSubmit={handleSearchSubmit} className="w-full">
-              <div className="w-full relative flex items-center bg-white rounded-full border-2 border-[#128C7E] shadow-sm p-1">
+          <div ref={mobileSearchContainerRef} className="block md:hidden pb-2 relative">
+            <form onSubmit={handleSearchSubmit} className="w-full relative">
+              <div className="w-full relative flex items-center bg-white rounded-full border-2 border-[#128C7E] shadow-sm p-1 focus-within:ring-2 focus-within:ring-[#128C7E]/30">
                 <Search className="w-4 h-4 text-gray-500 ml-2.5 shrink-0" />
                 <input
+                  ref={mobileSearchInputRef}
                   type="text"
                   value={navSearchInput}
                   onFocus={() => setIsSearchFocused(true)}
@@ -371,11 +386,25 @@ export default function Navbar() {
                     setIsSearchFocused(true);
                   }}
                   placeholder="Search products..."
-                  className="w-full bg-transparent px-2 py-1 text-xs text-black focus:outline-none"
+                  className="w-full bg-transparent px-2.5 py-1 text-xs text-black focus:outline-none placeholder-gray-400"
                 />
+                {navSearchInput && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNavSearchInput('');
+                      setSearchQuery('');
+                      setIsSearchFocused(false);
+                    }}
+                    className="p-1 text-gray-400 hover:text-black mr-1 cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-[#128C7E] text-white font-bold text-[10px] rounded-full tracking-wider uppercase shrink-0"
+                  className="px-4 py-1.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-[10px] rounded-full tracking-wider uppercase shrink-0 shadow-sm cursor-pointer transition-all active:scale-95"
                 >
                   Search
                 </button>
@@ -383,49 +412,76 @@ export default function Navbar() {
             </form>
 
             {/* Mobile Live Dropdown Popup */}
-            {navSearchInput.trim().length > 0 && isSearchFocused && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-[#E5E7EB] overflow-hidden z-50">
-                {searchResults.length > 0 ? (
-                  <div className="divide-y divide-[#E5E7EB]/40 max-h-[300px] overflow-y-auto">
-                    {searchResults.map((product) => {
-                      const mainPrice = product.weights?.[0]?.price || product.price || 0;
-                      return (
-                        <div
-                          key={product.id}
-                          onClick={() => {
-                            setIsSearchFocused(false);
-                            setNavSearchInput('');
-                            navigate('product-details', { product });
-                          }}
-                          className="p-3 flex items-center justify-between hover:bg-[#F9FAFB]"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-10 h-10 rounded-lg object-cover border border-[#E5E7EB] shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <h4 className="text-xs font-bold text-[#000000] truncate">
-                                {product.name}
-                              </h4>
-                              <p className="text-[9px] font-semibold text-[#8C7A6B] uppercase">
-                                {product.categoryName || product.category || 'Gourmet'}
-                              </p>
+            <AnimatePresence>
+              {navSearchInput.trim().length > 0 && isSearchFocused && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#E5E7EB] overflow-hidden z-50"
+                >
+                  {searchResults.length > 0 ? (
+                    <div className="divide-y divide-[#E5E7EB]/40 max-h-[350px] overflow-y-auto">
+                      {searchResults.map((product) => {
+                        const mainPrice = product.weights?.[0]?.price || product.price || 0;
+                        return (
+                          <div
+                            key={product.id}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setIsSearchFocused(false);
+                              setNavSearchInput('');
+                              navigate('product-details', { product });
+                            }}
+                            className="p-3 flex items-center justify-between hover:bg-[#F9FAFB] active:bg-gray-100 transition-colors cursor-pointer group"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-11 h-11 rounded-xl object-cover border border-[#E5E7EB] shrink-0 group-hover:scale-105 transition-transform"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <h4 className="text-xs font-bold text-[#000000] truncate font-serif">
+                                  {product.name}
+                                </h4>
+                                <p className="text-[10px] font-bold text-[#8C7A6B] uppercase tracking-wider truncate mt-0.5">
+                                  {product.categoryName || product.category || 'Gourmet'}
+                                </p>
+                              </div>
                             </div>
+                            <span className="text-xs font-extrabold text-[#000000] font-mono shrink-0 pl-2">
+                              ₹{Number(mainPrice).toFixed(2)}
+                            </span>
                           </div>
-                          <span className="text-xs font-extrabold text-[#000000] font-mono shrink-0 pl-2">
-                            ₹{Number(mainPrice).toFixed(2)}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-xs text-[#000000]">No products found matching "{navSearchInput}"</div>
-                )}
-              </div>
-            )}
+                        );
+                      })}
+
+                      {/* View all results footer link */}
+                      <div
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setIsSearchFocused(false);
+                          setIsSearchOpen(false);
+                          setSearchQuery(navSearchInput.trim());
+                          navigate('shop', { category: 'all' });
+                        }}
+                        className="p-3 bg-[#F9FAFB] text-center hover:bg-[#E5E7EB]/40 transition-colors cursor-pointer border-t border-[#E5E7EB]"
+                      >
+                        <span className="text-xs font-black text-[#000000] hover:underline font-serif">
+                          View all results for "{navSearchInput}" →
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-5 text-center space-y-1">
+                      <p className="text-xs font-bold text-[#000000]">No products found matching "{navSearchInput}"</p>
+                      <p className="text-[11px] text-[#8C7A6B]">Try searching for almonds, dates, cashew, spices, or honey.</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         </div>

@@ -226,3 +226,74 @@ export const updateCurrentUser = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error while updating profile' });
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Current password and new password are required.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ success: false, message: 'New password cannot be identical to current password.' });
+    }
+
+    const userId = req.user.id || req.user.userId;
+    const phone = req.user.phone;
+    const email = req.user.email;
+
+    let userRecord = null;
+    if (userId) {
+      const users = await queryDb('SELECT * FROM users WHERE id = ? LIMIT 1', [userId]);
+      if (users && users.length > 0) userRecord = users[0];
+    }
+
+    if (!userRecord && (phone || email)) {
+      const users = await queryDb('SELECT * FROM users WHERE phone = ? OR email = ? LIMIT 1', [phone, email]);
+      if (users && users.length > 0) userRecord = users[0];
+    }
+
+    if (!userRecord) {
+      userRecord = memoryStore.users.find(u => 
+        (userId && u.id === userId) ||
+        (phone && u.phone === phone) ||
+        (email && u.email === email)
+      );
+    }
+
+    if (!userRecord) {
+      return res.status(404).json({ success: false, message: 'User account not found.' });
+    }
+
+    // Verify current password with bcrypt
+    const isMatch = await bcrypt.compare(currentPassword, userRecord.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update in database
+    if (userRecord.id) {
+      await queryDb('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userRecord.id]);
+    }
+
+    // Update in memoryStore
+    userRecord.password = hashedPassword;
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully!'
+    });
+  } catch (error) {
+    console.error('Change Password Error:', error);
+    res.status(500).json({ success: false, message: 'Server error while changing password.' });
+  }
+};
+
