@@ -28,7 +28,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     }
   };
 
-  const statusOptions = ['All Statuses', 'Pending', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
+  const statusOptions = ['All Statuses', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED', 'Unpaid Attempts'];
 
   // Normalize order items for consistent rendering
   const normalizedOrders = (orders || []).map(o => ({
@@ -40,20 +40,26 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     address: o.address || '',
     date: o.date || o.created_at || o.createdAt,
     total: Number(o.total !== undefined ? o.total : (o.totalAmount || o.total_amount || 0)),
-    status: (o.status || 'pending').toLowerCase()
+    status: (o.status || 'pending').toLowerCase(),
+    paymentStatus: (o.paymentStatus || o.payment_status || 'paid').toLowerCase()
   }));
 
   const filteredOrders = normalizedOrders.filter(o => {
     const statusNormalized = (o.status || '').toLowerCase();
     const filterNormalized = activeFilter.toLowerCase();
+    const isUnpaidAttempt = (o.paymentStatus === 'pending' || o.payment_status === 'pending') && (statusNormalized === 'pending' || statusNormalized === 'new');
     
+    // Only show unpaid attempts if admin specifically clicks 'Unpaid Attempts' tab
+    if (activeFilter === 'Unpaid Attempts') {
+      if (!isUnpaidAttempt) return false;
+    } else {
+      // By default for all statuses, hide unpaid checkout attempts
+      if (isUnpaidAttempt) return false;
+    }
+
     let matchesFilter = true;
-    if (activeFilter !== 'All Statuses') {
-      if (filterNormalized === 'pending') {
-        matchesFilter = statusNormalized === 'pending' || statusNormalized === 'new';
-      } else {
-        matchesFilter = statusNormalized === filterNormalized;
-      }
+    if (activeFilter !== 'All Statuses' && activeFilter !== 'Unpaid Attempts') {
+      matchesFilter = statusNormalized === filterNormalized;
     }
 
     const matchesSearch = 

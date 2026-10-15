@@ -16,6 +16,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
   // Normalize order items and statuses for enterprise consistency
   const normalizedOrders = (orders || []).map(o => {
     const s = (o.status || 'pending').toLowerCase();
+    const pStatus = (o.paymentStatus || o.payment_status || 'paid').toLowerCase();
     const totalVal = Number(o.total !== undefined ? o.total : (o.totalAmount || o.total_amount || 0));
     return {
       ...o,
@@ -25,8 +26,13 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
       city: o.city || o.address || 'Chennai',
       date: o.date || o.created_at || o.createdAt,
       totalVal,
-      statusNorm: s
+      statusNorm: s,
+      paymentStatus: pStatus
     };
+  }).filter(o => {
+    // Only count orders that have completed payment
+    const isUnpaid = (o.paymentStatus === 'pending') && (o.statusNorm === 'pending' || o.statusNorm === 'new');
+    return !isUnpaid;
   });
 
   // Filter orders dynamically based on selectedTimeRange

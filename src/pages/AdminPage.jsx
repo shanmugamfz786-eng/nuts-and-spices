@@ -152,28 +152,28 @@ export default function AdminPage() {
       
       {/* 1. ULTRA-PROFESSIONAL ENTERPRISE SIDEBAR */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-40 w-72 bg-[#0F172A] text-white flex flex-col justify-between shrink-0 h-screen overflow-hidden
+        fixed lg:static inset-y-0 left-0 z-40 w-72 bg-[#075E54] text-white flex flex-col justify-between shrink-0 h-screen overflow-hidden
         transform ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
-        transition-transform duration-300 ease-in-out shadow-2xl select-none border-r border-slate-800
+        transition-transform duration-300 ease-in-out shadow-2xl select-none border-r border-[#05463e]
       `}>
         <div className="flex flex-col flex-1 overflow-hidden">
           
           {/* Brand Header */}
-          <div className="p-5 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/60 shrink-0">
+          <div className="p-5 flex items-center justify-between border-b border-emerald-800/80 bg-[#05463e] shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img 
                   src="/logo.jpg" 
                   alt="Haji Nuts & Spices Logo" 
-                  className="w-10 h-10 object-contain rounded-xl shadow-md border border-slate-700 bg-white"
+                  className="w-10 h-10 object-contain rounded-xl shadow-md border border-emerald-700 bg-white"
                 />
-                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#0F172A] rounded-full" />
+                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#075E54] rounded-full" />
               </div>
               <div className="flex flex-col text-left">
                 <span className="text-base font-black tracking-wider text-white font-serif uppercase leading-tight flex items-center gap-1.5">
                   <span>HAJI GOURMET</span>
                 </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-400 tracking-widest uppercase">
+                <span className="text-[10px] font-mono font-bold text-amber-300 tracking-widest uppercase">
                   ENTERPRISE ERP 2.0
                 </span>
               </div>
@@ -181,26 +181,26 @@ export default function AdminPage() {
             
             <button 
               onClick={() => setIsMobileSidebarOpen(false)}
-              className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+              className="lg:hidden text-emerald-200 hover:text-white p-1 rounded-lg hover:bg-[#043731] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* System Telemetry Pill */}
-          <div className="px-5 py-2.5 bg-slate-950/40 border-b border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-400 shrink-0">
+          <div className="px-5 py-2.5 bg-[#043731] border-b border-emerald-800/60 flex items-center justify-between text-[11px] font-mono text-emerald-200 shrink-0">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
               <span>TiDB Cloud Active</span>
             </span>
-            <span className="text-[10px] text-slate-500 font-bold uppercase">CHENNAI DC</span>
+            <span className="text-[10px] text-emerald-300 font-bold uppercase">CHENNAI DC</span>
           </div>
 
           {/* Grouped Navigation Links */}
-          <nav className="px-3 py-4 space-y-6 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
+          <nav className="px-3 py-4 space-y-6 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-800">
             {navSections.map((section, sIdx) => (
               <div key={sIdx} className="space-y-1">
-                <span className="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1.5">
+                <span className="px-3 text-[10px] font-black uppercase tracking-wider text-emerald-200/80 block mb-1.5">
                   {section.group}
                 </span>
 
@@ -214,17 +214,17 @@ export default function AdminPage() {
                       onClick={() => handleNavigateTab(item.id)}
                       className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-[#128C7E] text-white shadow-md shadow-[#128C7E]/25 font-black ring-1 ring-emerald-400/30'
-                          : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                          ? 'bg-white text-[#075E54] shadow-md font-black ring-1 ring-white/40'
+                          : 'text-emerald-100 hover:text-white hover:bg-[#05463e]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#075E54]' : 'text-emerald-200'}`} />
                         <span className="truncate">{item.label}</span>
                       </div>
 
                       {item.badge && (
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black font-mono text-white ${item.badgeColor || 'bg-slate-700'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black font-mono ${isActive ? 'bg-[#075E54] text-white' : (item.badgeColor || 'bg-emerald-900 text-emerald-100')}`}>
                           {item.badge}
                         </span>
                       )}
@@ -238,10 +238,10 @@ export default function AdminPage() {
         </div>
 
         {/* Bottom Logout Button */}
-        <div className="p-4 border-t border-slate-800/80 bg-slate-900/40 shrink-0">
+        <div className="p-4 border-t border-emerald-800/80 bg-[#05463e] shrink-0">
           <button
             onClick={logoutAdmin}
-            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-slate-800/80 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 border border-slate-700/50 hover:border-rose-500/30 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs"
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-[#043731] hover:bg-rose-600 text-emerald-100 hover:text-white border border-emerald-700/50 hover:border-rose-500 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>

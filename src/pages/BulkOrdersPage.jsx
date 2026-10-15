@@ -31,7 +31,7 @@ export default function BulkOrdersPage() {
     <div className="bg-white min-h-screen pb-16 space-y-12">
       
       {/* PAGE HEADER BANNER */}
-      <section className="relative bg-gradient-to-br from-[#000000] via-[#000000] to-[#222222] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-[#000000]/40">
+      <section className="relative bg-gradient-to-r from-[#128C7E] via-[#0D7266] to-[#075E54] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-emerald-800/40">
         <div className="max-w-7xl mx-auto space-y-6 relative z-10">
           <button
             onClick={() => navigate('home')}
@@ -43,20 +43,20 @@ export default function BulkOrdersPage() {
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#000000] text-[#000000] text-[11px] font-extrabold uppercase tracking-wider border border-[#000000]/40">
-                <Package className="w-3.5 h-3.5 text-[#000000]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-[11px] font-extrabold uppercase tracking-wider border border-white/25 backdrop-blur-xs">
+                <Package className="w-3.5 h-3.5 text-amber-300" />
                 <span>Wholesale & Corporate Gifting</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-black font-serif text-white tracking-wide uppercase">
                 Bulk Orders
               </h1>
-              <p className="text-xs sm:text-sm text-[#E5E7EB] leading-relaxed font-serif">
+              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-serif">
                 Special wholesale pricing and luxury customized gift hampers for corporate events, weddings, and festive celebrations.
               </p>
             </div>
 
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-[#000000]/15 border-2 border-[#000000]/40 flex items-center justify-center shrink-0 shadow-2xl backdrop-blur-md">
-              <Gift className="w-12 h-12 sm:w-16 sm:h-16 text-[#000000]" />
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-white/15 border-2 border-white/25 flex items-center justify-center shrink-0 shadow-2xl backdrop-blur-md">
+              <Gift className="w-12 h-12 sm:w-16 sm:h-16 text-amber-300" />
             </div>
           </div>
         </div>
@@ -66,8 +66,8 @@ export default function BulkOrdersPage() {
         
         {/* WHY CHOOSE US FOR BULK */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-2 text-center">
-            <div className="w-10 h-10 rounded-xl bg-[#000000] text-white font-black flex items-center justify-center mx-auto text-sm">
+          <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-gray-200/80 space-y-2 text-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#128C7E] border border-emerald-200/80 font-black flex items-center justify-center mx-auto text-sm shadow-xs">
               %
             </div>
             <h3 className="font-bold font-serif text-[#000000] text-base">Wholesale Pricing</h3>
@@ -76,8 +76,8 @@ export default function BulkOrdersPage() {
             </p>
           </div>
 
-          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-2 text-center">
-            <div className="w-10 h-10 rounded-xl bg-[#000000] text-white font-black flex items-center justify-center mx-auto text-sm">
+          <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-gray-200/80 space-y-2 text-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#128C7E] border border-emerald-200/80 font-black flex items-center justify-center mx-auto text-sm shadow-xs">
               🎁
             </div>
             <h3 className="font-bold font-serif text-[#000000] text-base">Custom Branding</h3>
@@ -86,8 +86,8 @@ export default function BulkOrdersPage() {
             </p>
           </div>
 
-          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-2 text-center">
-            <div className="w-10 h-10 rounded-xl bg-[#000000] text-white font-black flex items-center justify-center mx-auto text-sm">
+          <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-gray-200/80 space-y-2 text-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#128C7E] border border-emerald-200/80 font-black flex items-center justify-center mx-auto text-sm shadow-xs">
               🚀
             </div>
             <h3 className="font-bold font-serif text-[#000000] text-base">Fast PAN-India Express</h3>
@@ -176,13 +176,13 @@ export default function BulkOrdersPage() {
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   placeholder="Mention custom packaging preferences, budget range, or delivery date..."
-                  className="w-full px-4 py-2.5 bg-[#F9FAFB] text-xs font-medium text-[#000000] rounded-xl border border-[#E5E7EB] outline-none focus:border-[#000000]"
+                  className="w-full px-4 py-2.5 bg-[#FAF7F2] text-xs font-medium text-[#000000] rounded-xl border border-gray-200 outline-none focus:border-[#128C7E]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 tracking-wider uppercase transition-all cursor-pointer"
+                className="w-full py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 tracking-wider uppercase transition-all cursor-pointer active:scale-95"
               >
                 <MessageSquare className="w-4 h-4 fill-current" />
                 <span>Submit Bulk Inquiry via WhatsApp</span>

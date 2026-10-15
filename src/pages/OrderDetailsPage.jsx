@@ -1420,8 +1420,8 @@ export default function OrderDetailsPage() {
         </div>
 
         {/* FULL-WIDTH SECTION: VIP REORDER BENEFIT & EXCLUSIVE COUPON BANNER (SPANS 100% WIDTH) */}
-        <div className="bg-gradient-to-br from-[#000000] via-[#111111] to-[#222222] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-[#128C7E]/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="bg-gradient-to-r from-[#128C7E] via-[#0D7266] to-[#075E54] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-emerald-700/40">
+          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute left-1/3 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">

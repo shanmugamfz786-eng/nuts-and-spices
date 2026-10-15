@@ -132,7 +132,7 @@ export default function ShopPage() {
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-md transition-all cursor-pointer ${
               viewMode === 'grid'
-                ? 'bg-[#000000] text-white shadow-xs'
+                ? 'bg-[#128C7E] text-white shadow-xs'
                 : 'text-gray-400 hover:text-gray-700'
             }`}
             title="Grid View"
@@ -143,7 +143,7 @@ export default function ShopPage() {
             onClick={() => setViewMode('list')}
             className={`p-1.5 rounded-md transition-all cursor-pointer ${
               viewMode === 'list'
-                ? 'bg-[#000000] text-white shadow-xs'
+                ? 'bg-[#128C7E] text-white shadow-xs'
                 : 'text-gray-400 hover:text-gray-700'
             }`}
             title="List View"
@@ -165,7 +165,7 @@ export default function ShopPage() {
           <p className="text-xs text-gray-500">Try selecting a different category or clearing search filters.</p>
           <button
             onClick={() => { setActiveCategory('all'); setSearchFilter(''); }}
-            className="px-4 py-2 bg-[#000000] text-white font-bold text-xs rounded-xl cursor-pointer"
+            className="px-5 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs rounded-xl cursor-pointer shadow-sm transition-all active:scale-95"
           >
             Reset Filters
           </button>

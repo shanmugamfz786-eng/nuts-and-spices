@@ -89,7 +89,7 @@ export default function ProductDetailsPage() {
       {/* Back Button */}
       <button
         onClick={() => navigate('shop')}
-        className="inline-flex items-center gap-2 text-xs font-bold text-[#000000] hover:underline"
+        className="inline-flex items-center gap-2 text-xs font-bold text-[#128C7E] hover:underline"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Back to Shop</span>
@@ -109,7 +109,7 @@ export default function ProductDetailsPage() {
             {/* Top Badges Stack matching cards */}
             <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10">
               {product.badge && (
-                <span className="bg-[#000000] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded shadow-md font-serif">
+                <span className="bg-[#128C7E] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded shadow-md font-serif">
                   {product.badge}
                 </span>
               )}
@@ -182,12 +182,12 @@ export default function ProductDetailsPage() {
                       onClick={() => setSelectedWeight(w)}
                       className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#000000] text-white border-[#000000] shadow-sm'
-                          : 'bg-white text-gray-800 border-gray-200 hover:border-[#000000] hover:bg-gray-50'
+                          ? 'bg-[#128C7E] text-white border-[#128C7E] shadow-sm'
+                          : 'bg-white text-gray-800 border-gray-200 hover:border-[#128C7E] hover:bg-emerald-50/40'
                       }`}
                     >
                       <span>{w.label}</span>
-                      <span className={`ml-1.5 font-normal text-[11px] ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
+                      <span className={`ml-1.5 font-normal text-[11px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
                         ₹{w.price}
                       </span>
                     </button>
@@ -272,7 +272,7 @@ export default function ProductDetailsPage() {
 
               <button
                 onClick={handleQuickCheckout}
-                className="py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider bg-[#000000] hover:bg-[#222222] text-white transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                className="py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider bg-[#075E54] hover:bg-[#05463e] text-white transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
                 <span>Proceed to Checkout →</span>
               </button>
@@ -303,7 +303,7 @@ export default function ProductDetailsPage() {
 
           <button
             onClick={() => setShowReviewForm(!showReviewForm)}
-            className="px-6 py-3 bg-[#000000] hover:bg-[#222222] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 self-start md:self-auto"
+            className="px-6 py-3 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 self-start md:self-auto"
           >
             <MessageSquare className="w-4 h-4" />
             <span>{showReviewForm ? 'Close Form' : 'Write a Review'}</span>

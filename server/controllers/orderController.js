@@ -257,7 +257,21 @@ export const createOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const dbOrders = await queryDb("SELECT * FROM orders ORDER BY CASE WHEN status = 'cancelled' THEN 0 WHEN status = 'refunded' THEN 1 ELSE 2 END, created_at DESC");
+    const includeAll = req.query.includeAll === 'true' || req.query.includeUnpaid === 'true';
+
+    // Only fetch orders where payment was completed (paid, refund_pending, refunded)
+    // or legacy confirmed orders where payment_status was not tracked.
+    // Unpaid checkout attempts (pending payment) are excluded unless explicitly requested.
+    let sql = `
+      SELECT * FROM orders 
+      WHERE (payment_status IN ('paid', 'refund_pending', 'refunded') OR (payment_status IS NULL AND status NOT IN ('pending', 'new')))`
+    ;
+    if (includeAll) {
+      sql = "SELECT * FROM orders";
+    }
+    sql += " ORDER BY CASE WHEN status = 'cancelled' THEN 0 WHEN status = 'refunded' THEN 1 ELSE 2 END, created_at DESC";
+
+    const dbOrders = await queryDb(sql);
     let formattedOrders = [];
     
     if (dbOrders && dbOrders.length > 0) {
@@ -284,6 +298,8 @@ export const getAllOrders = async (req, res) => {
           totalAmount: row.total_amount,
           total: Number(row.total_amount) || 0,
           status: (row.status || 'pending').toLowerCase(),
+          paymentStatus: (row.payment_status || 'paid').toLowerCase(),
+          payment_status: (row.payment_status || 'paid').toLowerCase(),
           items: parsedItems,
           notes: row.notes,
           date: row.created_at,
@@ -299,7 +315,16 @@ export const getAllOrders = async (req, res) => {
         };
       });
     } else {
-      formattedOrders = process.env.NODE_ENV !== 'production' ? memoryStore.orders : [];
+      let memOrders = process.env.NODE_ENV !== 'production' ? (memoryStore.orders || []) : [];
+      if (!includeAll) {
+        memOrders = memOrders.filter(o => {
+          const pStatus = (o.payment_status || o.paymentStatus || '').toLowerCase();
+          const oStatus = (o.status || '').toLowerCase();
+          return ['paid', 'refund_pending', 'refunded'].includes(pStatus) ||
+                 (!pStatus && !['pending', 'new'].includes(oStatus));
+        });
+      }
+      formattedOrders = memOrders;
     }
     
     res.json({

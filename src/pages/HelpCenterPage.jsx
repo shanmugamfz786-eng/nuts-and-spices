@@ -41,8 +41,8 @@ export default function HelpCenterPage() {
   return (
     <div className="bg-white min-h-screen pb-16 space-y-12">
       
-      {/* PAGE HEADER BANNER (Warm Spice Gradient - ZERO DARK SHADES) */}
-      <section className="relative bg-gradient-to-br from-[#000000] via-[#000000] to-[#222222] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-[#000000]/30">
+      {/* PAGE HEADER BANNER (Brand Emerald Theme) */}
+      <section className="relative bg-gradient-to-r from-[#128C7E] via-[#0D7266] to-[#075E54] text-white pt-10 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl border-b border-emerald-800/40">
         <div className="max-w-7xl mx-auto space-y-6 relative z-10">
           <button
             onClick={() => navigate('home')}
@@ -54,21 +54,21 @@ export default function HelpCenterPage() {
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-[#F9FAFB] text-[11px] font-extrabold uppercase tracking-wider border border-white/25">
-                <HelpCircle className="w-3.5 h-3.5 text-[#000000]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-[11px] font-extrabold uppercase tracking-wider border border-white/25 backdrop-blur-xs">
+                <HelpCircle className="w-3.5 h-3.5 text-amber-300" />
                 <span>Customer Care & Support</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-black font-serif text-white tracking-wide uppercase">
                 Help Center
               </h1>
-              <p className="text-xs sm:text-sm text-[#F9FAFB] leading-relaxed font-serif">
+              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-serif">
                 Have questions about ordering, shipping, payments, or product freshness? We're here 24/7 to assist you.
               </p>
             </div>
 
             <button
               onClick={handleWhatsAppHelp}
-              className="px-6 py-3 bg-[#000000] hover:bg-[#222222] text-white font-extrabold text-xs rounded-2xl shadow-xl flex items-center gap-2.5 transition-transform hover:scale-105 shrink-0 cursor-pointer border border-white/20"
+              className="px-6 py-3 bg-white hover:bg-emerald-50 text-[#128C7E] font-extrabold text-xs rounded-2xl shadow-xl flex items-center gap-2.5 transition-transform hover:scale-105 shrink-0 cursor-pointer border border-white/40"
             >
               <MessageSquare className="w-5 h-5 fill-current" />
               <span>Chat with Support on WhatsApp</span>
@@ -81,8 +81,8 @@ export default function HelpCenterPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-3 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#000000] text-[#000000] flex items-center justify-center mx-auto shadow-md">
+          <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-gray-200/80 space-y-3 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#128C7E] border border-emerald-200/80 flex items-center justify-center mx-auto shadow-xs">
               <Truck className="w-6 h-6" />
             </div>
             <h3 className="font-extrabold font-serif text-[#000000] text-lg">Shipping & Delivery</h3>
@@ -91,8 +91,8 @@ export default function HelpCenterPage() {
             </p>
           </div>
 
-          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-3 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#000000] text-[#000000] flex items-center justify-center mx-auto shadow-md">
+          <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-gray-200/80 space-y-3 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#128C7E] border border-emerald-200/80 flex items-center justify-center mx-auto shadow-xs">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h3 className="font-extrabold font-serif text-[#000000] text-lg">Freshness Guarantee</h3>
@@ -101,8 +101,8 @@ export default function HelpCenterPage() {
             </p>
           </div>
 
-          <div className="bg-[#F9FAFB] p-6 rounded-3xl border border-[#E5E7EB] space-y-3 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#000000] text-[#000000] flex items-center justify-center mx-auto shadow-md">
+          <div className="bg-[#FAF7F2] p-6 rounded-3xl border border-gray-200/80 space-y-3 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#128C7E] border border-emerald-200/80 flex items-center justify-center mx-auto shadow-xs">
               <Phone className="w-6 h-6" />
             </div>
             <h3 className="font-extrabold font-serif text-[#000000] text-lg">Direct Phone Support</h3>

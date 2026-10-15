@@ -217,9 +217,24 @@ function processMemoryQuery(sql, params) {
     }
 
     if (queryLower.includes('orders')) {
-      const [status, orderId] = params;
+      const orderId = params[params.length - 1];
       const order = memoryStore.orders.find(o => o.id === orderId || o.orderId === orderId);
-      if (order) order.status = status;
+      if (order) {
+        if (queryLower.includes("payment_status = 'paid'")) {
+          order.payment_status = 'paid';
+          order.paymentStatus = 'paid';
+          order.status = 'confirmed';
+        } else if (queryLower.includes("payment_status = 'failed'")) {
+          order.payment_status = 'failed';
+          order.paymentStatus = 'failed';
+        } else if (queryLower.includes("payment_status = 'refund_pending'")) {
+          order.payment_status = 'refund_pending';
+          order.paymentStatus = 'refund_pending';
+        }
+        if (params.length > 1 && typeof params[0] === 'string' && !params[0].startsWith('HNS-')) {
+          order.status = params[0];
+        }
+      }
       return { affectedRows: order ? 1 : 0 };
     }
   }
