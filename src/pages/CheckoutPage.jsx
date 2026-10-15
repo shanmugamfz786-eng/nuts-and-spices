@@ -9,6 +9,7 @@ export default function CheckoutPage() {
     cartTotal, 
     appliedCoupon, 
     discountAmount, 
+    deliveryCharge,
     grandTotal, 
     createNewOrder, 
     clearPurchasedItems, 
