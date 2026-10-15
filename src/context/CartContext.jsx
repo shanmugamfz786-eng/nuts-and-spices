@@ -917,8 +917,21 @@ export const CartProvider = ({ children }) => {
     return Math.round((eligibleSubtotal * pct) / 100);
   }, [appliedCoupon, cartTotal, cart]);
 
-  const deliveryCharge = 0;
-  const grandTotal = Math.max(0, cartTotal - discountAmount + deliveryCharge);
+  const effectiveSubtotal = Math.max(0, cartTotal - discountAmount);
+
+  const flatDeliveryFee = (storeSettings?.deliveryCharge !== undefined && storeSettings?.deliveryCharge !== null && !isNaN(Number(storeSettings.deliveryCharge)))
+    ? Number(storeSettings.deliveryCharge)
+    : ((storeSettings?.deliveryFee !== undefined && !isNaN(Number(storeSettings.deliveryFee))) ? Number(storeSettings.deliveryFee) : 50);
+
+  const freeDeliveryThreshold = (storeSettings?.minOrderAmount !== undefined && storeSettings?.minOrderAmount !== null && !isNaN(Number(storeSettings.minOrderAmount)))
+    ? Number(storeSettings.minOrderAmount)
+    : (Number(storeSettings?.freeDeliveryThreshold) || 500);
+
+  const deliveryCharge = (effectiveSubtotal >= freeDeliveryThreshold || effectiveSubtotal === 0 || flatDeliveryFee === 0)
+    ? 0
+    : flatDeliveryFee;
+
+  const grandTotal = Math.max(0, effectiveSubtotal + deliveryCharge);
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Apply Coupon Function

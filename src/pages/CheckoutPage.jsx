@@ -434,7 +434,9 @@ export default function CheckoutPage() {
 
             <div className="flex items-center justify-between text-[#8C7A6B]">
               <span>Delivery Charge:</span>
-              <span className="font-bold text-emerald-700">FREE</span>
+              <span className={`font-bold ${deliveryCharge === 0 ? 'text-emerald-700' : 'text-[#000000]'}`}>
+                {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toLocaleString('en-IN')}`}
+              </span>
             </div>
 
             <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-base font-black">

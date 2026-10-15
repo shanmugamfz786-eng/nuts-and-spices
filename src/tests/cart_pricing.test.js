@@ -75,5 +75,13 @@ describe('Frontend & Cart Pricing Calculations', () => {
     });
     assert.strictEqual(resultOver.deliveryCharge, 0);
     assert.strictEqual(resultOver.totalAmount, 550);
+
+    const resultZeroFee = calculateOrderTotals({
+      subtotal: 1,
+      discountAmount: 0,
+      storeSettings: { minOrderAmount: 500, deliveryCharge: 0 }
+    });
+    assert.strictEqual(resultZeroFee.deliveryCharge, 0);
+    assert.strictEqual(resultZeroFee.totalAmount, 1);
   });
 });

@@ -177,12 +177,25 @@ export function calculateOrderTotals({
   discountAmount = 0,
   storeSettings = {}
 }) {
-  const freeThreshold = Number(storeSettings.freeDeliveryThreshold) || 1499;
-  const flatFee = Number(storeSettings.deliveryFee) || 50;
+  // Resolve Free Delivery Threshold (matches AdminSettings 'minOrderAmount' or legacy 'freeDeliveryThreshold')
+  const rawThreshold = storeSettings.minOrderAmount !== undefined && storeSettings.minOrderAmount !== null
+    ? storeSettings.minOrderAmount
+    : storeSettings.freeDeliveryThreshold;
+  const freeThreshold = rawThreshold !== undefined && rawThreshold !== null && !isNaN(Number(rawThreshold))
+    ? Number(rawThreshold)
+    : 500;
+
+  // Resolve Standard Delivery Fee (matches AdminSettings 'deliveryCharge' or legacy 'deliveryFee')
+  const rawFee = storeSettings.deliveryCharge !== undefined && storeSettings.deliveryCharge !== null
+    ? storeSettings.deliveryCharge
+    : storeSettings.deliveryFee;
+  const flatFee = rawFee !== undefined && rawFee !== null && !isNaN(Number(rawFee))
+    ? Number(rawFee)
+    : 50;
 
   // Effective subtotal after discount
   const effectiveSubtotal = Math.max(0, roundCurrency(subtotal - discountAmount));
-  const deliveryCharge = effectiveSubtotal >= freeThreshold || effectiveSubtotal === 0 ? 0 : flatFee;
+  const deliveryCharge = (effectiveSubtotal >= freeThreshold || effectiveSubtotal === 0 || flatFee === 0) ? 0 : flatFee;
   const totalAmount = Math.max(0, roundCurrency(effectiveSubtotal + deliveryCharge));
 
   return {

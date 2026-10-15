@@ -133,5 +133,27 @@ describe('Pricing and Money Calculations Unit Tests', () => {
       });
       expect(totals.totalAmount).toBeGreaterThanOrEqual(0);
     });
+
+    it('respects deliveryCharge: 0 from AdminSettings', () => {
+      const totals = calculateOrderTotals({
+        subtotal: 1,
+        discountAmount: 0,
+        storeSettings: { minOrderAmount: 500, deliveryCharge: 0 }
+      });
+      expect(totals.subtotal).toBe(1);
+      expect(totals.deliveryCharge).toBe(0);
+      expect(totals.totalAmount).toBe(1);
+    });
+
+    it('applies deliveryCharge when subtotal is under minOrderAmount', () => {
+      const totals = calculateOrderTotals({
+        subtotal: 250,
+        discountAmount: 0,
+        storeSettings: { minOrderAmount: 500, deliveryCharge: 40 }
+      });
+      expect(totals.subtotal).toBe(250);
+      expect(totals.deliveryCharge).toBe(40);
+      expect(totals.totalAmount).toBe(290);
+    });
   });
 });
