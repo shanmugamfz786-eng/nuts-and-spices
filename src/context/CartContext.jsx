@@ -68,7 +68,7 @@ export const CartProvider = ({ children }) => {
         name: p.name || 'Gourmet Item',
         category: p.category || 'nuts-dry-fruits',
         categoryName: p.categoryName || 'NUTS & DRY FRUITS',
-        image: seedProductImageMap.get(p.id) || p.image || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
+        image: p.image || seedProductImageMap.get(p.id) || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
         price: basePrice,
         weights: validWeights,
         status: activeState ? 'Active' : 'Inactive',
@@ -89,8 +89,19 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // 2. PRODUCTS STATE (Master catalog initialized from seed PRODUCTS, dynamically updated live from TiDB Cloud)
-  const [products, setProducts] = useState(() => sanitizeProductList(PRODUCTS));
+  // 2. PRODUCTS STATE (Master catalog initialized from cached localStorage/sessionStorage first, then fallback to seed PRODUCTS, and live synced from TiDB Cloud)
+  const [products, setProducts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_products') || sessionStorage.getItem('nuts_spices_products');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return sanitizeProductList(parsed);
+        }
+      }
+    } catch {}
+    return sanitizeProductList(PRODUCTS);
+  });
 
   // 3. CATEGORIES STATE (Session Cached: 1-time backend load, instant page switches, auto-clears on tab close)
   const [categories, setCategories] = useState(() => {
@@ -447,8 +458,7 @@ export const CartProvider = ({ children }) => {
                 return {
                   ...seedP,
                   ...cloudP,
-                  // Always preserve local seed image
-                  image: seedProductImageMap.get(seedP.id) || seedP.image || cloudP.image || '',
+                  image: cloudP.image || seedP.image || seedProductImageMap.get(seedP.id) || '',
                 };
               }
               return seedP;
@@ -462,13 +472,17 @@ export const CartProvider = ({ children }) => {
             });
 
             setProducts(prevProds => {
-              const localCustom = (prevProds || []).filter(lp => lp && lp.id && !PRODUCTS.find(p => p.id === lp.id));
-              localCustom.forEach(l => {
-                if (!merged.find(m => m.id === l.id)) {
-                  merged.push(l);
-                }
+              const prevMap = new Map((prevProds || []).map(p => [p.id, p]));
+              const finalList = merged.map(m => {
+                const prev = prevMap.get(m.id);
+                // Prefer local recent updates if present
+                return prev ? { ...m, ...prev } : m;
               });
-              const sanitized = sanitizeProductList(merged);
+
+              const localCustom = (prevProds || []).filter(lp => lp && lp.id && !finalList.find(p => p.id === lp.id));
+              localCustom.forEach(l => finalList.push(l));
+
+              const sanitized = sanitizeProductList(finalList);
               try { 
                 sessionStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));
                 localStorage.setItem('nuts_spices_products', JSON.stringify(sanitized));

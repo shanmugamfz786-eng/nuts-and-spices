@@ -56,16 +56,21 @@ export const adminProductSchema = z.object({
   categoryName: z.string().trim().max(100).optional(),
   badge: z.string().trim().max(50).optional(),
   image: z.string().trim().max(2000).optional(),
+  price: z.number().nonnegative().optional(),
   weights: z.array(z.object({
     label: z.string().min(1),
-    price: z.number().nonnegative()
-  })).optional(),
+    price: z.number().nonnegative(),
+    originalPrice: z.number().optional()
+  }).passthrough()).optional(),
   description: z.string().trim().max(2000).optional(),
   origin: z.string().trim().max(100).optional(),
   shelfLife: z.string().trim().max(50).optional(),
   stock: z.number().int().nonnegative().optional(),
-  status: z.string().trim().max(20).optional()
-});
+  status: z.string().trim().max(20).optional(),
+  active: z.any().optional(),
+  isFeaturedToday: z.any().optional(),
+  isBestSelling: z.any().optional()
+}).passthrough();
 
 export const adminCategorySchema = z.object({
   name: z.string().trim().min(2).max(100),

@@ -13,29 +13,41 @@ export const getAllProducts = async (req, res) => {
     }
 
     try {
-      const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
-      if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
-         const parsedState = JSON.parse(adminStateRows[0].setting_value);
-         if (parsedState && parsedState.products && parsedState.products.length > 0) {
-            const existingIds = new Set(products.map(p => p.id));
-            for (const p of parsedState.products) {
-              if (!existingIds.has(p.id)) {
+      const catalogStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_catalog_json']);
+      if (catalogStateRows && catalogStateRows.length > 0 && catalogStateRows[0].setting_value) {
+         const parsedCatalog = JSON.parse(catalogStateRows[0].setting_value);
+         if (parsedCatalog && Array.isArray(parsedCatalog.products) && parsedCatalog.products.length > 0) {
+            const catalogMap = new Map(parsedCatalog.products.map(p => [p.id, p]));
+            // Merge changes onto existing products
+            products = products.map(p => {
+              if (catalogMap.has(p.id)) {
+                return { ...p, ...catalogMap.get(p.id) };
+              }
+              return p;
+            });
+            // And append any newly created products
+            for (const p of parsedCatalog.products) {
+              if (!products.some(prod => prod.id === p.id)) {
                 products.push(p);
-                existingIds.add(p.id);
               }
             }
          }
       }
 
-      const catalogStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_catalog_json']);
-      if (catalogStateRows && catalogStateRows.length > 0 && catalogStateRows[0].setting_value) {
-         const parsedCatalog = JSON.parse(catalogStateRows[0].setting_value);
-         if (parsedCatalog && parsedCatalog.products && parsedCatalog.products.length > 0) {
-            const existingIds = new Set(products.map(p => p.id));
-            for (const p of parsedCatalog.products) {
-              if (!existingIds.has(p.id)) {
+      const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
+      if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
+         const parsedState = JSON.parse(adminStateRows[0].setting_value);
+         if (parsedState && Array.isArray(parsedState.products) && parsedState.products.length > 0) {
+            const stateMap = new Map(parsedState.products.map(p => [p.id, p]));
+            products = products.map(p => {
+              if (stateMap.has(p.id)) {
+                return { ...p, ...stateMap.get(p.id) };
+              }
+              return p;
+            });
+            for (const p of parsedState.products) {
+              if (!products.some(prod => prod.id === p.id)) {
                 products.push(p);
-                existingIds.add(p.id);
               }
             }
          }
@@ -90,27 +102,18 @@ export const getProductById = async (req, res) => {
     if (!product) {
       product = PRODUCTS.find(p => p.id === id);
     }
-    if (!product) {
-       try {
-         const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
-         if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
-            const parsedState = JSON.parse(adminStateRows[0].setting_value);
-            if (parsedState && parsedState.products && parsedState.products.length > 0) {
-               product = parsedState.products.find(p => p.id === id);
-            }
-         }
-         
-         if (!product) {
-           const catalogStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_catalog_json']);
-           if (catalogStateRows && catalogStateRows.length > 0 && catalogStateRows[0].setting_value) {
-              const parsedCatalog = JSON.parse(catalogStateRows[0].setting_value);
-              if (parsedCatalog && parsedCatalog.products && parsedCatalog.products.length > 0) {
-                 product = parsedCatalog.products.find(p => p.id === id);
-              }
-           }
-         }
-       } catch(e) {}
-    }
+    try {
+      const catalogStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_catalog_json']);
+      if (catalogStateRows && catalogStateRows.length > 0 && catalogStateRows[0].setting_value) {
+        const parsedCatalog = JSON.parse(catalogStateRows[0].setting_value);
+        if (parsedCatalog && Array.isArray(parsedCatalog.products)) {
+          const catalogP = parsedCatalog.products.find(p => p.id === id);
+          if (catalogP) {
+            product = { ...(product || {}), ...catalogP };
+          }
+        }
+      }
+    } catch(e) {}
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found.' });
@@ -218,6 +221,8 @@ export const updateProduct = async (req, res) => {
     const weightsJson = weights ? JSON.stringify(weights) : (price ? JSON.stringify([{ label: 'Standard', price: Number(price) }]) : null);
     const activeVal = status ? status : ((active === true || active === 'true' || active === 'Active') ? 'Active' : 'Inactive');
 
+    const toSql = (v) => v !== undefined ? v : null;
+
     await queryDb(
       `UPDATE products SET 
         name = COALESCE(?, name), 
@@ -234,10 +239,25 @@ export const updateProduct = async (req, res) => {
         is_featured_today = COALESCE(?, is_featured_today),
         is_best_selling = COALESCE(?, is_best_selling)
        WHERE id = ?`,
-      [name, category, categoryName, badge, image, weightsJson, description, origin, shelfLife, stock, activeVal, isFeaturedToday !== undefined ? (isFeaturedToday ? 1 : 0) : null, isBestSelling !== undefined ? (isBestSelling ? 1 : 0) : null, id]
+      [
+        toSql(name), 
+        toSql(category), 
+        toSql(categoryName), 
+        toSql(badge), 
+        toSql(image), 
+        toSql(weightsJson), 
+        toSql(description), 
+        toSql(origin), 
+        toSql(shelfLife), 
+        stock !== undefined ? Number(stock) : null, 
+        toSql(activeVal), 
+        isFeaturedToday !== undefined ? (isFeaturedToday ? 1 : 0) : null, 
+        isBestSelling !== undefined ? (isBestSelling ? 1 : 0) : null, 
+        id
+      ]
     );
 
-    const curProds = inMemoryCatalog.products || PRODUCTS;
+    const curProds = inMemoryCatalog.products && inMemoryCatalog.products.length > 0 ? inMemoryCatalog.products : PRODUCTS;
     const updatedProds = curProds.map(p => {
       if (p.id === id) {
         const newStatus = activeVal || p.status;
@@ -253,6 +273,7 @@ export const updateProduct = async (req, res) => {
           ...(shelfLife && { shelfLife }),
           ...(stock !== undefined && { stock: Number(stock) }),
           ...(weights && { weights, price: weights[0] ? weights[0].price : p.price }),
+          ...(price !== undefined && !weights && { price: Number(price) }),
           ...(isFeaturedToday !== undefined && { isFeaturedToday }),
           ...(isBestSelling !== undefined && { isBestSelling }),
           status: newStatus,
@@ -261,6 +282,8 @@ export const updateProduct = async (req, res) => {
       }
       return p;
     });
+
+    // Update in-memory and sync to database catalog
     await syncServerCatalog(updatedProds, inMemoryCatalog.categories);
 
     res.json({

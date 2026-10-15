@@ -193,7 +193,8 @@ function processMemoryQuery(sql, params) {
     }
 
     if (queryLower.includes('products')) {
-      const [name, category, categoryName, badge, image, weightsJson, description, origin, shelfLife, stock, status, id] = params;
+      const id = params[params.length - 1];
+      const [name, category, categoryName, badge, image, weightsJson, description, origin, shelfLife, stock, status] = params;
       const prod = memoryStore.products.find(p => p.id === id);
       if (prod) {
         if (name) prod.name = name;
@@ -210,7 +211,12 @@ function processMemoryQuery(sql, params) {
           prod.active = prod.status === 'Active';
         }
         if (weightsJson) {
-          try { prod.weights = JSON.parse(weightsJson); } catch {}
+          try { 
+            prod.weights = JSON.parse(weightsJson);
+            if (prod.weights && prod.weights[0] && prod.weights[0].price) {
+              prod.price = Number(prod.weights[0].price);
+            }
+          } catch {}
         }
       }
       return { affectedRows: prod ? 1 : 0 };
