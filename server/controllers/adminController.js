@@ -82,6 +82,15 @@ export const syncAdminState = async (req, res) => {
       "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?",
       ['master_admin_state_json', adminStateJson, adminStateJson]
     );
+
+    if (req.body && req.body.storeSettings && typeof req.body.storeSettings === 'object') {
+      const storeSettingsJson = JSON.stringify(req.body.storeSettings);
+      await queryDb(
+        "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?",
+        ['store_settings_json', storeSettingsJson, storeSettingsJson]
+      );
+    }
+
     res.json({ success: true, message: 'Admin state synced to database successfully' });
   } catch (error) {
     console.error('Error syncing admin state:', error);

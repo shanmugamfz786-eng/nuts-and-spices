@@ -5,7 +5,7 @@ export const INITIAL_STORE_SETTINGS = {
   phone: '+91 98765 43210',
   email: 'orders@nutsandspices.store',
   address: '124, Gourmet Spice Market Road, T. Nagar, Chennai - 600017',
-  deliveryCharge: 50,
+  deliveryCharge: 0,
   minOrderAmount: 500,
   instagram: 'https://instagram.com/nutsandspices',
   facebook: 'https://facebook.com/nutsandspices'

@@ -18,7 +18,16 @@ export default function AdminSettings() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    updateStoreSettings(formData);
+    const cleaned = {
+      ...formData,
+      deliveryCharge: (formData.deliveryCharge !== undefined && formData.deliveryCharge !== null && formData.deliveryCharge !== '') 
+        ? Math.max(0, Number(formData.deliveryCharge)) 
+        : 0,
+      minOrderAmount: (formData.minOrderAmount !== undefined && formData.minOrderAmount !== null && formData.minOrderAmount !== '') 
+        ? Math.max(0, Number(formData.minOrderAmount)) 
+        : 0
+    };
+    updateStoreSettings(cleaned);
     setIsSaved(true);
   };
 

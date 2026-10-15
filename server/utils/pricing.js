@@ -191,11 +191,11 @@ export function calculateOrderTotals({
     : storeSettings.deliveryFee;
   const flatFee = rawFee !== undefined && rawFee !== null && !isNaN(Number(rawFee))
     ? Number(rawFee)
-    : 50;
+    : 0;
 
   // Effective subtotal after discount
   const effectiveSubtotal = Math.max(0, roundCurrency(subtotal - discountAmount));
-  const deliveryCharge = (effectiveSubtotal >= freeThreshold || effectiveSubtotal === 0 || flatFee === 0) ? 0 : flatFee;
+  const deliveryCharge = (flatFee === 0 || effectiveSubtotal === 0 || (freeThreshold > 0 && effectiveSubtotal >= freeThreshold)) ? 0 : flatFee;
   const totalAmount = Math.max(0, roundCurrency(effectiveSubtotal + deliveryCharge));
 
   return {

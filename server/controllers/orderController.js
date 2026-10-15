@@ -120,6 +120,12 @@ export const createOrder = async (req, res) => {
     let storeSettings = INITIAL_STORE_SETTINGS;
 
     try {
+      const sRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'store_settings_json'");
+      if (sRows && sRows.length > 0 && sRows[0].setting_value) {
+        const parsedS = JSON.parse(sRows[0].setting_value);
+        if (parsedS) storeSettings = { ...storeSettings, ...parsedS };
+      }
+
       const adminStateRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = ?", ['master_admin_state_json']);
       if (adminStateRows && adminStateRows.length > 0 && adminStateRows[0].setting_value) {
         const parsed = JSON.parse(adminStateRows[0].setting_value);
@@ -127,11 +133,11 @@ export const createOrder = async (req, res) => {
           serverOffers = parsed.offers;
         }
         if (parsed && parsed.storeSettings) {
-          storeSettings = parsed.storeSettings;
+          storeSettings = { ...storeSettings, ...parsed.storeSettings };
         }
       }
     } catch (e) {
-      console.warn('Failed to parse admin offers state for coupon validation', e);
+      console.warn('Failed to parse store settings state for order pricing', e);
     }
 
     // Check past customer orders for one-time coupon redemption rules

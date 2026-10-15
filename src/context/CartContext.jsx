@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { PRODUCTS, CATEGORIES, STORE_WHATSAPP_NUMBER, CATALOG_VERSION } from '../data/products';
-import { fetchCloudCatalog, saveCloudCatalog } from '../services/cloudDb';
+import { fetchCloudCatalog, saveCloudCatalog, saveCloudStoreSettings } from '../services/cloudDb';
 import { createProduct as createProductApi, updateProduct as updateProductApi, deleteProduct as deleteProductApi } from '../api/productApi';
 import { createCategory as createCategoryApi, updateCategory as updateCategoryApi, deleteCategory as deleteCategoryApi } from '../api/categoryApi';
 import { API_BASE_URL, fetchAdminStateApi, syncAdminStateApi } from '../api/index.js';
@@ -505,6 +505,12 @@ export const CartProvider = ({ children }) => {
               return mergedCats;
             });
           }
+          if (cloudData.storeSettings && typeof cloudData.storeSettings === 'object') {
+            setStoreSettings(cloudData.storeSettings);
+            try { 
+              localStorage.setItem('nuts_spices_store_settings', JSON.stringify(cloudData.storeSettings));
+            } catch {}
+          }
         }
       } catch (err) {
         console.warn('Cloud catalog fetch error:', err);
@@ -961,13 +967,13 @@ export const CartProvider = ({ children }) => {
 
   const flatDeliveryFee = (storeSettings?.deliveryCharge !== undefined && storeSettings?.deliveryCharge !== null && !isNaN(Number(storeSettings.deliveryCharge)))
     ? Number(storeSettings.deliveryCharge)
-    : ((storeSettings?.deliveryFee !== undefined && !isNaN(Number(storeSettings.deliveryFee))) ? Number(storeSettings.deliveryFee) : 50);
+    : ((storeSettings?.deliveryFee !== undefined && !isNaN(Number(storeSettings.deliveryFee))) ? Number(storeSettings.deliveryFee) : 0);
 
   const freeDeliveryThreshold = (storeSettings?.minOrderAmount !== undefined && storeSettings?.minOrderAmount !== null && !isNaN(Number(storeSettings.minOrderAmount)))
     ? Number(storeSettings.minOrderAmount)
     : (Number(storeSettings?.freeDeliveryThreshold) || 500);
 
-  const deliveryCharge = (effectiveSubtotal >= freeDeliveryThreshold || effectiveSubtotal === 0 || flatDeliveryFee === 0)
+  const deliveryCharge = (flatDeliveryFee === 0 || effectiveSubtotal === 0 || (freeDeliveryThreshold > 0 && effectiveSubtotal >= freeDeliveryThreshold))
     ? 0
     : flatDeliveryFee;
 
@@ -1505,7 +1511,15 @@ export const CartProvider = ({ children }) => {
 
   // ADMIN - SETTINGS UPDATE
   const updateStoreSettings = (newSettings) => {
-    setStoreSettings(prev => { const upd = { ...prev, ...newSettings }; syncAdminStateToCloud({ storeSettings: upd }); return upd; });
+    setStoreSettings(prev => { 
+      const upd = { ...prev, ...newSettings }; 
+      try {
+        localStorage.setItem('nuts_spices_store_settings', JSON.stringify(upd));
+      } catch {}
+      saveCloudStoreSettings(upd).catch(() => {});
+      syncAdminStateToCloud({ storeSettings: upd }).catch(() => {}); 
+      return upd; 
+    });
   };
 
   return (

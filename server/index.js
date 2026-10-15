@@ -105,6 +105,7 @@ import { handleCashfreeWebhook } from './controllers/paymentController.js';
 // Route-specific parser for admin state & catalog sync before global 1MB limit
 app.use('/api/admin/state', express.json({ limit: '20mb' }));
 app.use('/api/catalog', express.json({ limit: '20mb' }));
+app.use('/api/store-settings', express.json({ limit: '2mb' }));
 
 // Mount Cashfree Webhook directly BEFORE any general JSON body parser so req.body is a raw Buffer
 app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleCashfreeWebhook);
@@ -291,16 +292,95 @@ app.get('/api/catalog', async (req, res) => {
     return base;
   });
 
+  // Fetch store settings for public storefront consumption (delivery rates, free shipping minimum, contact, etc.)
+  let storeSettings = null;
+  try {
+    const sRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'store_settings_json'");
+    if (sRows && sRows.length > 0 && sRows[0].setting_value) {
+      storeSettings = JSON.parse(sRows[0].setting_value);
+    } else {
+      const aRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'master_admin_state_json'");
+      if (aRows && aRows.length > 0 && aRows[0].setting_value) {
+        const aParsed = JSON.parse(aRows[0].setting_value);
+        if (aParsed && aParsed.storeSettings) {
+          storeSettings = aParsed.storeSettings;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Store settings fetch note:', err.message);
+  }
+
   res.json({
     success: true,
     products: optimizedProducts,
     categories,
+    storeSettings,
     updatedAt
   });
 });
 
+// Public endpoint: Allow all visitors, guests, and customers to fetch live store settings (delivery rates, free delivery minimum, WhatsApp, etc.)
+app.get('/api/store-settings', async (req, res) => {
+  try {
+    let storeSettings = null;
+    const sRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'store_settings_json'");
+    if (sRows && sRows.length > 0 && sRows[0].setting_value) {
+      storeSettings = JSON.parse(sRows[0].setting_value);
+    } else {
+      const aRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'master_admin_state_json'");
+      if (aRows && aRows.length > 0 && aRows[0].setting_value) {
+        const aParsed = JSON.parse(aRows[0].setting_value);
+        if (aParsed && aParsed.storeSettings) {
+          storeSettings = aParsed.storeSettings;
+        }
+      }
+    }
+    return res.json({ success: true, storeSettings });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Admin endpoint: Update live store settings (delivery rates, free delivery threshold, contact, address, etc.)
+app.post('/api/store-settings', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { storeSettings } = req.body || {};
+    if (!storeSettings || typeof storeSettings !== 'object') {
+      return res.status(400).json({ success: false, message: 'Invalid payload: storeSettings object required' });
+    }
+
+    const jsonStr = JSON.stringify(storeSettings);
+    await queryDb(
+      "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?",
+      ['store_settings_json', jsonStr, jsonStr]
+    );
+
+    // Also update master_admin_state_json so admin state stays 100% in sync
+    try {
+      const aRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'master_admin_state_json'");
+      let adminState = {};
+      if (aRows && aRows.length > 0 && aRows[0].setting_value) {
+        adminState = JSON.parse(aRows[0].setting_value);
+      }
+      adminState.storeSettings = storeSettings;
+      const updatedAdminStateJson = JSON.stringify(adminState);
+      await queryDb(
+        "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?",
+        ['master_admin_state_json', updatedAdminStateJson, updatedAdminStateJson]
+      );
+    } catch (adminStateErr) {
+      console.warn('Admin state sync note:', adminStateErr.message);
+    }
+
+    return res.json({ success: true, message: 'Store settings updated live successfully', storeSettings });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.post('/api/catalog', authMiddleware, adminMiddleware, async (req, res) => {
-  const { products, categories } = req.body || {};
+  const { products, categories, storeSettings } = req.body || {};
   if (!Array.isArray(products) || !Array.isArray(categories)) {
     return res.status(400).json({ success: false, message: 'Invalid payload: products and categories must be arrays' });
   }
@@ -311,6 +391,18 @@ app.post('/api/catalog', authMiddleware, adminMiddleware, async (req, res) => {
       success: false, 
       message: 'Payload exceeds allowed limits (max 500 products, 100 categories)' 
     });
+  }
+
+  if (storeSettings && typeof storeSettings === 'object') {
+    try {
+      const sJson = JSON.stringify(storeSettings);
+      await queryDb(
+        "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?",
+        ['store_settings_json', sJson, sJson]
+      );
+    } catch (sErr) {
+      console.warn('Catalog storeSettings sync note:', sErr.message);
+    }
   }
 
   await syncServerCatalog(products, categories);

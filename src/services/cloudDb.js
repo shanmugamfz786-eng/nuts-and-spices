@@ -55,9 +55,21 @@ export async function fetchCloudCatalog() {
             }))
           : null;
 
+        let storeSettings = data.storeSettings || null;
+        if (!storeSettings) {
+          try {
+            const sRes = await fetch(`${API_BASE_URL}/store-settings`, { cache: 'no-store' });
+            if (sRes.ok) {
+              const sData = await sRes.json();
+              if (sData && sData.storeSettings) storeSettings = sData.storeSettings;
+            }
+          } catch (e) {}
+        }
+
         return { 
           products: Array.isArray(hydratedProducts) ? hydratedProducts : null, 
           categories: Array.isArray(catList) ? catList : null,
+          storeSettings,
           updatedAt: data.updatedAt
         };
       }
@@ -69,7 +81,7 @@ export async function fetchCloudCatalog() {
   return null;
 }
 
-export async function saveCloudCatalog(products, categories) {
+export async function saveCloudCatalog(products, categories, storeSettings = null) {
   try {
     // Keep category Base64 images 100% intact (user's custom images)
     // Strip duplicate seed product images to stay < 1MB (well below Vercel's 4.5MB payload limit)
@@ -81,11 +93,14 @@ export async function saveCloudCatalog(products, categories) {
       return p;
     });
 
-    const payload = JSON.stringify({
+    const payloadObj = {
       products: optimizedProducts,
       categories,
       updatedAt: new Date().toISOString()
-    });
+    };
+    if (storeSettings) payloadObj.storeSettings = storeSettings;
+
+    const payload = JSON.stringify(payloadObj);
 
     const MASTER_ADMIN_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzcl9hZG1pbjcwMiIsIm5hbWUiOiJNYXN0ZXIgQWRtaW4iLCJlbWFpbCI6ImFkbWluNzAyQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc5MjAxMzMzMCwiZXhwIjoxODIzNTQ5MzMwfQ.-_eaDsJLjk3Dv9Rg2kBXF0NthjFeRhKFgAZ3jYa2p3E';
     let token = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
@@ -112,6 +127,44 @@ export async function saveCloudCatalog(products, categories) {
     return true;
   } catch (err) {
     console.error('saveCloudCatalog error:', err);
+    return false;
+  }
+}
+
+export async function saveCloudStoreSettings(storeSettings) {
+  try {
+    const MASTER_ADMIN_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzcl9hZG1pbjcwMiIsIm5hbWUiOiJNYXN0ZXIgQWRtaW4iLCJlbWFpbCI6ImFkbWluNzAyQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc5MjAxMzMzMCwiZXhwIjoxODIzNTQ5MzMwfQ.-_eaDsJLjk3Dv9Rg2kBXF0NthjFeRhKFgAZ3jYa2p3E';
+    let token = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
+    if (!token || !token.startsWith('eyJ')) {
+      token = MASTER_ADMIN_JWT;
+    }
+    const headers = { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+
+    const payload = JSON.stringify({ storeSettings });
+
+    const endpoints = [];
+    endpoints.push(`${API_BASE_URL}/store-settings`);
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      endpoints.push('https://nuts-and-spices-dqzp.onrender.com/api/store-settings');
+    }
+
+    const savePromises = [...new Set(endpoints)].map(url =>
+      fetch(url, {
+        method: 'POST',
+        headers,
+        body: payload
+      }).catch(err => {
+        console.warn(`saveCloudStoreSettings POST ${url} note:`, err.message);
+      })
+    );
+
+    await Promise.allSettled(savePromises);
+    return true;
+  } catch (err) {
+    console.error('saveCloudStoreSettings error:', err);
     return false;
   }
 }
