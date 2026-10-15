@@ -84,7 +84,8 @@ export default function ProductDetailsPage() {
   const originalTotalPrice = origPrice * quantity;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="bg-[#FAF7F2]/40 min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       
       {/* Back Button */}
       <button
@@ -130,17 +131,17 @@ export default function ProductDetailsPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-[#F9FAFB] p-3 rounded-xl border border-[#E5E7EB] text-center">
-              <span className="text-[10px] font-bold text-[#8C7A6B] uppercase block">Origin</span>
-              <span className="text-xs font-bold text-[#000000]">{product.origin || 'India'}</span>
+            <div className="bg-[#FAF7F2] p-3 rounded-xl border border-gray-200/80 text-center">
+              <span className="text-[10px] font-bold text-gray-500 uppercase block">Origin</span>
+              <span className="text-xs font-black text-gray-900">{product.origin || 'India'}</span>
             </div>
-            <div className="bg-[#F9FAFB] p-3 rounded-xl border border-[#E5E7EB] text-center">
-              <span className="text-[10px] font-bold text-[#8C7A6B] uppercase block">Shelf Life</span>
-              <span className="text-xs font-bold text-[#000000]">{product.shelfLife || '6 Months'}</span>
+            <div className="bg-[#FAF7F2] p-3 rounded-xl border border-gray-200/80 text-center">
+              <span className="text-[10px] font-bold text-gray-500 uppercase block">Shelf Life</span>
+              <span className="text-xs font-black text-gray-900">{product.shelfLife || '6 Months'}</span>
             </div>
-            <div className="bg-[#F9FAFB] p-3 rounded-xl border border-[#E5E7EB] text-center">
-              <span className="text-[10px] font-bold text-[#8C7A6B] uppercase block">Purity</span>
-              <span className="text-xs font-bold text-[#000000]">100% Pure</span>
+            <div className="bg-[#FAF7F2] p-3 rounded-xl border border-gray-200/80 text-center">
+              <span className="text-[10px] font-bold text-gray-500 uppercase block">Purity</span>
+              <span className="text-xs font-black text-[#128C7E]">100% Pure</span>
             </div>
           </div>
         </div>
@@ -150,17 +151,17 @@ export default function ProductDetailsPage() {
           <div className="space-y-4">
             
             <div className="flex items-center gap-2">
-              <span className="text-xs font-extrabold text-[#000000] uppercase tracking-wider bg-[#F9FAFB] px-3 py-1 rounded-full border border-[#E5E7EB]">
+              <span className="text-xs font-extrabold text-[#128C7E] uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
                 {product.categoryName}
               </span>
-              <div className="flex items-center gap-1 text-xs font-bold text-[#000000]">
+              <div className="flex items-center gap-1 text-xs font-bold text-gray-800">
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 <span>{product.rating}</span>
-                <span className="text-[#8C7A6B]">({product.reviews} customer reviews)</span>
+                <span className="text-gray-500">({product.reviews} customer reviews)</span>
               </div>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black font-serif text-[#000000]">
+            <h1 className="text-2xl sm:text-3xl font-black font-serif text-gray-950">
               {product.name}
             </h1>
 
@@ -253,8 +254,8 @@ export default function ProductDetailsPage() {
                 onClick={handleAddToCart}
                 className={`py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg active:scale-95 ${
                   added 
-                    ? 'bg-[#075E54] text-white' 
-                    : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
+                    ? 'bg-emerald-600 text-white' 
+                    : 'bg-white hover:bg-emerald-50 text-[#128C7E] border-2 border-[#128C7E]'
                 }`}
               >
                 {added ? (
@@ -264,7 +265,7 @@ export default function ProductDetailsPage() {
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="w-5 h-5 text-white" />
+                    <ShoppingBag className="w-5 h-5 text-[#128C7E]" />
                     <span>Add to Cart</span>
                   </>
                 )}
@@ -272,7 +273,7 @@ export default function ProductDetailsPage() {
 
               <button
                 onClick={handleQuickCheckout}
-                className="py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider bg-[#075E54] hover:bg-[#05463e] text-white transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                className="py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider bg-[#128C7E] hover:bg-[#0e7064] text-white transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
                 <span>Proceed to Checkout →</span>
               </button>
@@ -303,7 +304,7 @@ export default function ProductDetailsPage() {
 
           <button
             onClick={() => setShowReviewForm(!showReviewForm)}
-            className="px-6 py-3 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 self-start md:self-auto"
+            className="px-6 py-3 bg-emerald-50 hover:bg-emerald-100 text-[#128C7E] border border-emerald-200/80 text-xs font-black uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 self-start md:self-auto"
           >
             <MessageSquare className="w-4 h-4" />
             <span>{showReviewForm ? 'Close Form' : 'Write a Review'}</span>
@@ -383,7 +384,7 @@ export default function ProductDetailsPage() {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow cursor-pointer active:scale-95"
+                className="px-6 py-2.5 bg-[#128C7E] hover:bg-[#0e7064] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow cursor-pointer active:scale-95"
               >
                 Submit Review
               </button>
@@ -394,7 +395,7 @@ export default function ProductDetailsPage() {
         {/* Reviews List */}
         <div className="space-y-4">
           {matchingReviews.length === 0 ? (
-            <div className="text-center py-10 bg-[#F9FAFB] rounded-2xl border border-gray-200 space-y-2">
+            <div className="text-center py-10 bg-[#FAF7F2] rounded-2xl border border-gray-200/80 space-y-2">
               <div className="text-3xl">⭐</div>
               <p className="text-sm font-bold text-gray-800">Be the first to review this product!</p>
               <p className="text-xs text-gray-500">Order today and share your authentic feedback with our community.</p>
@@ -403,7 +404,7 @@ export default function ProductDetailsPage() {
             matchingReviews.map((rev) => (
               <div
                 key={rev.id}
-                className="p-5 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] hover:border-gray-300 transition-colors space-y-2"
+                className="p-5 rounded-2xl bg-[#FAF7F2]/50 border border-[#E5E7EB] hover:border-gray-300 transition-colors space-y-2"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -450,6 +451,7 @@ export default function ProductDetailsPage() {
 
       </div>
 
+    </div>
     </div>
   );
 }

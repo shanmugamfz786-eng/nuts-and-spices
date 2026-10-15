@@ -110,8 +110,8 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             onClick={handleAddToCart}
             className={`w-full py-2.5 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
               added 
-                ? 'bg-[#075E54] text-white' 
-                : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
+                ? 'bg-emerald-600 text-white' 
+                : 'bg-[#128C7E] hover:bg-[#0e7064] text-white'
             }`}
           >
             {added ? (
@@ -226,8 +226,8 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             onClick={handleAddToCart}
             className={`w-full py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
               added 
-                ? 'bg-[#075E54] text-white' 
-                : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
+                ? 'bg-emerald-600 text-white' 
+                : 'bg-[#128C7E] hover:bg-[#0e7064] text-white'
             }`}
           >
             {added ? (

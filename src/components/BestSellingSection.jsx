@@ -132,8 +132,8 @@ function BestSellerCard({ product }) {
           onClick={handleAddToCart}
           className={`w-full py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:shadow-md active:scale-95 ${
             added
-              ? 'bg-[#075E54] text-white'
-              : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
+              ? 'bg-emerald-600 text-white'
+              : 'bg-[#128C7E] hover:bg-[#0e7064] text-white'
           }`}
         >
           {added ? (
@@ -143,7 +143,7 @@ function BestSellerCard({ product }) {
             </>
           ) : (
             <>
-              <ShoppingCart className="w-3.5 h-3.5 text-[#000000]" />
+              <ShoppingCart className="w-3.5 h-3.5 text-white" />
               <span>ADD TO CART</span>
             </>
           )}

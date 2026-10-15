@@ -12,7 +12,7 @@ export default function Navbar() {
   const searchContainerRef = useRef(null);
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(() => {
-    const hasAnnouncement = ['home', 'shop', 'category', 'categories', 'product-details', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage);
+    const hasAnnouncement = ['home', 'shop', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage);
     return hasAnnouncement ? 104 : 64;
   });
 
@@ -90,7 +90,7 @@ export default function Navbar() {
       >
         
         {/* TOP ANNOUNCEMENT BAR (SHOW ON HOME & TOP LINK PAGES) */}
-        {['home', 'shop', 'category', 'categories', 'product-details', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage) && (
+        {['home', 'shop', 'about', 'help', 'bulk-orders', 'contact', 'shipping-policy', 'returns-refunds', 'privacy-policy', 'faqs'].includes(activePage) && (
           <div className="bg-gradient-to-r from-[#128C7E] via-[#128C7E] to-[#128C7E] text-[#F9FAFB] text-[11px] sm:text-[12px] font-extrabold py-1.5 sm:py-2 px-4 sm:px-6 border-b border-[#128C7E]/30 tracking-wider uppercase shadow-xs">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 lg:gap-8">
               
@@ -583,7 +583,7 @@ export default function Navbar() {
           <div className="relative w-84 sm:w-96 max-w-[90vw] bg-white h-screen shadow-2xl flex flex-col z-50 animate-in slide-in-from-left duration-300 border-r border-[#E5E7EB]">
             
             {/* 1. Brand Header */}
-            <div className="p-5 bg-gradient-to-r from-[#128C7E] to-[#075E54] text-white flex items-center justify-between shrink-0 shadow-md">
+            <div className="p-5 bg-gradient-to-r from-[#128C7E] to-[#0e7064] text-white flex items-center justify-between shrink-0 shadow-md">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-white p-0.5 shadow-sm shrink-0">
                   <img src="/logo.jpg" alt="Logo" className="w-full h-full object-contain rounded-full" />
@@ -665,7 +665,7 @@ export default function Navbar() {
                         <span className="text-xs font-black text-gray-950 font-serif">
                           Gourmet Vouchers & Offers
                         </span>
-                        <span className="px-1.5 py-0.2 bg-[#075E54] text-white font-black text-[9px] rounded-md uppercase">
+                        <span className="px-1.5 py-0.2 bg-[#128C7E] text-white font-black text-[9px] rounded-md uppercase">
                           ACTIVE
                         </span>
                       </div>
@@ -728,7 +728,7 @@ export default function Navbar() {
                   setIsCategoryDrawerOpen(false);
                   navigate('shop', { category: 'all' });
                 }}
-                className="w-full py-2.5 px-4 bg-gray-900 hover:bg-black text-white text-xs font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
+                className="w-full py-2.5 px-4 bg-[#128C7E] hover:bg-[#0e7064] text-white text-xs font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
               >
                 <span>View Full Shop Catalog</span>
                 <ArrowRight className="w-4 h-4" />

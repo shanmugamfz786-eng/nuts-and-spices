@@ -82,7 +82,8 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="bg-[#FAF7F2]/40 min-h-screen py-6">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       
       {/* Search Filter Clear Tag (Only shown if search query exists) */}
       {searchFilter.trim() && (
@@ -165,7 +166,7 @@ export default function ShopPage() {
           <p className="text-xs text-gray-500">Try selecting a different category or clearing search filters.</p>
           <button
             onClick={() => { setActiveCategory('all'); setSearchFilter(''); }}
-            className="px-5 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs rounded-xl cursor-pointer shadow-sm transition-all active:scale-95"
+            className="px-5 py-2.5 bg-[#128C7E] hover:bg-[#0e7064] text-white font-bold text-xs rounded-xl cursor-pointer shadow-sm transition-all active:scale-95"
           >
             Reset Filters
           </button>
@@ -182,6 +183,7 @@ export default function ShopPage() {
         </div>
       )}
 
+    </div>
     </div>
   );
 }
