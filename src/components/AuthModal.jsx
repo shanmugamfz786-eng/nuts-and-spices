@@ -153,38 +153,38 @@ export default function AuthModal() {
           >
         
         {/* Header Bar */}
-        <div className="bg-gradient-to-r from-[#000000] via-[#000000] to-[#222222] text-white p-6 pb-5 relative shrink-0">
+        <div className="bg-[#128C7E] text-white p-6 pb-5 relative shrink-0 shadow-md">
           <button
             onClick={() => setIsAuthModalOpen(false)}
-            className="absolute right-4 top-4 p-1.5 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="absolute right-4 top-4 p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-[#000000]" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#000000]">
+            <Sparkles className="w-4 h-4 text-emerald-100" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-100">
               Nuts & Spices Gourmet Club
             </span>
           </div>
           <h2 className="text-2xl font-black font-serif tracking-tight">
             {authMode === 'login' ? 'Welcome Back!' : 'Create Account'}
           </h2>
-          <p className="text-xs text-[#E5E7EB] mt-1">
+          <p className="text-xs text-emerald-50 mt-1">
             {authMode === 'login' 
               ? 'Log in to access your orders & quick WhatsApp checkout.'
               : 'Join today for exclusive gourmet offers and WhatsApp updates.'}
           </p>
 
           {/* Mode Switcher Tabs */}
-          <div className="grid grid-cols-2 bg-black/15 p-1 rounded-2xl mt-5 border border-white/20">
+          <div className="grid grid-cols-2 bg-white/15 p-1 rounded-2xl mt-5 border border-white/20">
             <button
               type="button"
               onClick={() => { setAuthMode('login'); setErrorMessage(''); }}
               className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 authMode === 'login'
-                  ? 'bg-[#000000] text-white shadow-md'
-                  : 'text-[#E5E7EB] hover:text-white'
+                  ? 'bg-white text-[#128C7E] shadow-md font-black'
+                  : 'text-white/80 hover:text-white'
               }`}
             >
               LOGIN
@@ -195,8 +195,8 @@ export default function AuthModal() {
               onClick={() => { setAuthMode('register'); setErrorMessage(''); }}
               className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 authMode === 'register'
-                  ? 'bg-[#000000] text-white shadow-md'
-                  : 'text-[#E5E7EB] hover:text-white'
+                  ? 'bg-white text-[#128C7E] shadow-md font-black'
+                  : 'text-white/80 hover:text-white'
               }`}
             >
               REGISTER
@@ -300,7 +300,7 @@ export default function AuthModal() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
+                className="w-full py-3.5 bg-[#128C7E] hover:bg-[#0e7064] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md hover:shadow-lg uppercase tracking-wider cursor-pointer mt-2"
               >
                 LOGIN TO ACCOUNT
               </button>
@@ -319,7 +319,7 @@ export default function AuthModal() {
               <button
                 type="button"
                 onClick={handleWhatsAppQuickLogin}
-                className="w-full py-3 bg-[#000000] hover:bg-[#000000] text-white font-bold text-xs rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4 fill-white" />
                 <span>LOGIN WITH WHATSAPP OTP</span>
@@ -458,7 +458,7 @@ export default function AuthModal() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 bg-[#000000] hover:bg-[#000000] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
+                className="w-full py-3 bg-[#128C7E] hover:bg-[#0e7064] text-white font-extrabold text-xs rounded-2xl transition-all shadow-md uppercase tracking-wider cursor-pointer mt-2"
               >
                 CREATE MY ACCOUNT
               </button>

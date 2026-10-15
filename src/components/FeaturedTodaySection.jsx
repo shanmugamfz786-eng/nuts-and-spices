@@ -231,7 +231,7 @@ export default function FeaturedTodaySection() {
         {/* Visit Now Button */}
         <button
           onClick={handleVisitNow}
-          className="border border-[#000000]/60 hover:border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white transition-all font-semibold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer group"
+          className="border border-[#128C7E] hover:border-[#0e7064] text-[#128C7E] hover:bg-[#128C7E] hover:text-white transition-all font-semibold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer group"
         >
           <span>Visit Now</span>
           <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
@@ -244,7 +244,7 @@ export default function FeaturedTodaySection() {
         {/* Left Scroll Button */}
         <button
           onClick={scrollLeft}
-          className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#000000] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
+          className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#128C7E] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -264,7 +264,7 @@ export default function FeaturedTodaySection() {
         {/* Right Scroll Button */}
         <button
           onClick={scrollRight}
-          className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#000000] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
+          className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:text-[#128C7E] hover:bg-[#FAF7F2] transition-all cursor-pointer opacity-95 hover:opacity-100"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-5 h-5" />
@@ -278,7 +278,7 @@ export default function FeaturedTodaySection() {
             key={dot}
             className={`transition-all duration-300 rounded-full ${
               activeIndex === dot
-                ? 'w-6 h-1.5 bg-[#000000]'
+                ? 'w-6 h-1.5 bg-[#128C7E]'
                 : 'w-2 h-1.5 bg-gray-300'
             }`}
           />

@@ -85,6 +85,24 @@ export default function ShopPage() {
     <div className="bg-[#FAF7F2]/40 min-h-screen py-6">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       
+      {/* BRAND SEARCH BUTTON COLOR (#128C7E) SHOP BANNER */}
+      <section className="relative bg-[#128C7E] text-white py-6 px-4 sm:px-6 lg:px-8 shadow-md rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest border border-white/20 mb-1">
+              <span>All Harvest Catalog</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black font-serif uppercase tracking-wide text-white">
+              {activeCategory === 'all' ? 'All Products' : ((categories || []).find(c => c.id === activeCategory)?.name || 'Gourmet Selection')}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-white bg-white/20 px-3.5 py-2 rounded-xl border border-white/20 shadow-xs self-start sm:self-auto font-sans">
+            <span className="w-2 h-2 rounded-full bg-emerald-200 animate-pulse" />
+            <span>{filtered.length} Products Available</span>
+          </div>
+        </div>
+      </section>
+
       {/* Search Filter Clear Tag (Only shown if search query exists) */}
       {searchFilter.trim() && (
         <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs font-bold text-[#000000] w-fit">

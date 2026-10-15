@@ -115,7 +115,7 @@ export default function BulkOrdersPage() {
               <p className="text-xs text-[#8C7A6B]">Our bulk sales representative will get in touch with you shortly.</p>
               <button
                 onClick={() => setSubmitted(false)}
-                className="px-4 py-2 bg-[#000000] text-white text-xs font-bold rounded-xl"
+                className="px-4 py-2 bg-[#128C7E] hover:bg-[#0e7064] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
                 Submit Another Request
               </button>

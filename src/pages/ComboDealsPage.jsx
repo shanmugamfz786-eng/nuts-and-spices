@@ -632,7 +632,7 @@ export default function ComboDealsPage() {
                           className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs ${
                             isAdded
                               ? 'bg-emerald-600 text-white'
-                              : 'bg-slate-900 hover:bg-black text-white hover:shadow-md'
+                              : 'bg-[#128C7E] hover:bg-[#0e7064] text-white hover:shadow-md'
                           }`}
                         >
                           {isAdded ? (
@@ -697,9 +697,9 @@ export default function ComboDealsPage() {
                 const phone = (activeWhatsAppNumber || STORE_WHATSAPP_NUMBER || '919876543210').replace(/[^0-9]/g, '');
                 window.open(`https://wa.me/${phone}?text=${encodeURIComponent('Hello Haji Nuts & Spices! I would like to inquire about Custom Wedding / Corporate Gift Hampers.')}`, '_blank');
               }}
-              className="w-full sm:w-auto px-6 py-3 bg-slate-950 hover:bg-black text-white font-bold text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-400" />
+              <MessageCircle className="w-4 h-4 text-white" />
               <span>Chat on WhatsApp</span>
             </button>
           </div>

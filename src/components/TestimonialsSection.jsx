@@ -241,9 +241,9 @@ export default function TestimonialsSection() {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full py-3 bg-[#000000] hover:bg-[#000000] text-white font-bold text-sm uppercase tracking-wider rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                    className="w-full py-3 bg-[#128C7E] hover:bg-[#0e7064] text-white font-bold text-sm uppercase tracking-wider rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                   >
-                    <Send className="w-4 h-4 text-[#000000]" />
+                    <Send className="w-4 h-4 text-white" />
                     <span>Post My Feedback Live</span>
                   </button>
                 </div>

@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-[#000000] tracking-tight">
             Privacy Policy
           </h1>
-          <div className="w-16 h-1 bg-[#000000] mx-auto rounded-full" />
+          <div className="w-16 h-1 bg-[#128C7E] mx-auto rounded-full" />
         </div>
 
         {/* MAIN DOCUMENT WHITE CARD CONTAINER */}

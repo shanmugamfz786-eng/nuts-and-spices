@@ -56,29 +56,26 @@ export default function CategoryPage() {
   return (
     <div className="bg-[#FAF7F2]/40 min-h-screen pb-16 space-y-8">
       
-      {/* CLEAN LIGHT GOURMET BREADCRUMB & CATEGORY HEADER (NO DARK BG) */}
-      <section className="bg-gradient-to-r from-[#FAF7F2] via-emerald-50/50 to-[#FAF7F2] border-b border-emerald-100/80 py-7 px-4 sm:px-6 lg:px-8 shadow-xs">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+      {/* BRAND SEARCH BUTTON COLOR (#128C7E) BANNER WITH WHITE TEXT - MATCHING USER SCREENSHOT */}
+      <section className="relative bg-[#128C7E] text-white py-6 px-4 sm:px-6 lg:px-8 shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('home', { category: 'all' })}
-              className="p-2.5 text-gray-700 hover:text-[#128C7E] transition-all bg-white hover:bg-emerald-50 rounded-2xl border border-gray-200/80 shadow-xs cursor-pointer active:scale-95 shrink-0"
+              className="p-2 sm:p-2.5 text-white/90 hover:text-white transition-all bg-white/20 hover:bg-white/30 rounded-full border border-white/25 shadow-xs cursor-pointer active:scale-95 shrink-0"
               title="Return to Home"
             >
-              <ArrowLeft className="w-5 h-5 text-[#128C7E]" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100/80 text-[#128C7E] text-[10px] font-black uppercase tracking-widest border border-emerald-200/80 mb-1">
-                <span>Handpicked Collection</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black font-serif uppercase tracking-wide text-gray-950">
+              <h1 className="text-2xl sm:text-3xl font-black font-serif uppercase tracking-wide text-white">
                 {currentCategory.name}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-white/90 px-3.5 py-2 rounded-xl border border-gray-200/80 shadow-2xs self-start sm:self-auto font-sans">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="flex items-center gap-2 text-xs font-bold text-white bg-white/20 px-3.5 py-2 rounded-xl border border-white/20 shadow-2xs font-sans">
+            <span className="w-2 h-2 rounded-full bg-emerald-200 animate-pulse" />
             <span>{sortedProducts.length} Products Available</span>
           </div>
         </div>

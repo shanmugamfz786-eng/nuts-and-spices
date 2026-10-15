@@ -85,8 +85,8 @@ export default function FaqPage() {
                   <div className="flex items-center gap-3.5">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                       isOpen 
-                        ? 'bg-[#000000] text-[#F9FAFB]' 
-                        : 'bg-[#F9FAFB] text-[#000000] border border-[#E5E7EB]'
+                        ? 'bg-[#128C7E] text-white shadow-xs' 
+                        : 'bg-emerald-50 text-[#128C7E] border border-emerald-200/80'
                     }`}>
                       <HelpCircle className="w-4.5 h-4.5" />
                     </div>

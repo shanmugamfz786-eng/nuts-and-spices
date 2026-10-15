@@ -24,7 +24,7 @@ export default function RegisterPage() {
           <p className="text-xs text-[#8C7A6B] mt-2">You are currently logged in as {user.name}.</p>
           <button
             onClick={() => navigate('shop', { category: 'all' })}
-            className="mt-6 px-6 py-3 bg-[#000000] text-white font-bold text-xs rounded-2xl uppercase tracking-wider cursor-pointer"
+            className="mt-6 px-6 py-3 bg-[#128C7E] hover:bg-[#0e7064] text-white font-bold text-xs rounded-2xl uppercase tracking-wider cursor-pointer transition-all shadow-md active:scale-95"
           >
             BROWSE SHOP CATALOG
           </button>

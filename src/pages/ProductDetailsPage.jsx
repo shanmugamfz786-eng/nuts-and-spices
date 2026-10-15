@@ -87,14 +87,23 @@ export default function ProductDetailsPage() {
     <div className="bg-[#FAF7F2]/40 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       
-      {/* Back Button */}
-      <button
-        onClick={() => navigate('shop')}
-        className="inline-flex items-center gap-2 text-xs font-bold text-[#128C7E] hover:underline"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Back to Shop</span>
-      </button>
+      {/* BRAND SEARCH BUTTON COLOR (#128C7E) PRODUCT BREADCRUMB HEADER */}
+      <section className="relative bg-[#128C7E] text-white py-4 px-4 sm:px-6 lg:px-8 shadow-md rounded-2xl">
+        <div className="flex items-center justify-between gap-4">
+          <button
+            onClick={() => navigate('shop')}
+            className="inline-flex items-center gap-2 p-2 sm:px-3.5 sm:py-2 text-white hover:text-emerald-100 transition-all bg-white/20 hover:bg-white/30 rounded-full sm:rounded-xl border border-white/25 shadow-xs cursor-pointer active:scale-95 text-xs font-bold"
+          >
+            <ArrowLeft className="w-4 h-4 text-white" />
+            <span>Back to Shop</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-white bg-white/20 px-3 py-1 rounded-full border border-white/25">
+              {product?.categoryName || 'Gourmet Selection'}
+            </span>
+          </div>
+        </div>
+      </section>
 
       {/* Main Details Card */}
       <div className="bg-white rounded-3xl border border-[#E5E7EB] p-6 sm:p-10 shadow-lg grid grid-cols-1 lg:grid-cols-2 gap-10">

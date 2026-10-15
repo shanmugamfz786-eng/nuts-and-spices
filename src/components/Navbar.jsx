@@ -152,7 +152,7 @@ export default function Navbar() {
             {/* 2. CENTER: PILL SEARCH BAR WITH LIVE POPUP DROPDOWN (DESKTOP) */}
             <div ref={searchContainerRef} className="hidden md:flex flex-1 max-w-lg mx-4 relative">
               <form onSubmit={handleSearchSubmit} className="w-full relative flex items-center">
-                <div className="w-full relative flex items-center bg-white rounded-full border border-black shadow-sm p-1 focus-within:ring-2 focus-within:ring-black/30">
+                <div className="w-full relative flex items-center bg-white rounded-full border-2 border-[#128C7E] shadow-sm p-1 focus-within:ring-2 focus-within:ring-[#128C7E]/30">
                   <Search className="w-4 h-4 text-gray-500 ml-2.5 shrink-0" />
                   <input
                     type="text"
@@ -329,7 +329,7 @@ export default function Navbar() {
               >
                 <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
                 {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-[#128C7E] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                     {cartItemCount}
                   </span>
                 )}
@@ -360,7 +360,7 @@ export default function Navbar() {
           {/* Mobile Search Input Row with Live Dropdown */}
           <div className="block md:hidden pb-2 relative">
             <form onSubmit={handleSearchSubmit} className="w-full">
-              <div className="w-full relative flex items-center bg-white rounded-full border border-black shadow-sm p-1">
+              <div className="w-full relative flex items-center bg-white rounded-full border-2 border-[#128C7E] shadow-sm p-1">
                 <Search className="w-4 h-4 text-gray-500 ml-2.5 shrink-0" />
                 <input
                   type="text"
@@ -515,7 +515,7 @@ export default function Navbar() {
                 <span className="flex items-center gap-2">
                   <span>My Wishlist</span>
                   {wishlist.length > 0 && (
-                    <span className="bg-[#000000] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                    <span className="bg-[#128C7E] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-xs">
                       {wishlist.length}
                     </span>
                   )}

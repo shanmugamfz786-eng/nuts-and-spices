@@ -100,7 +100,7 @@ export default function SearchModal() {
                         e.stopPropagation();
                         addToCart(product, weightObj, 1);
                       }}
-                      className="px-3 py-1.5 text-xs font-semibold bg-[#F9FAFB] text-[#000000] hover:bg-[#000000] hover:text-white rounded-lg transition-colors flex items-center gap-1 border border-[#E5E7EB]"
+                      className="px-3 py-1.5 text-xs font-semibold bg-[#F9FAFB] text-[#000000] hover:bg-[#128C7E] hover:border-[#128C7E] hover:text-white rounded-lg transition-colors flex items-center gap-1 border border-[#E5E7EB]"
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>+ Add</span>

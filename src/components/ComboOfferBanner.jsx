@@ -37,7 +37,7 @@ export default function ComboOfferBanner() {
               <button
                 type="button"
                 onClick={() => navigate('combo-deals')}
-                className="group inline-flex items-center gap-2.5 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full text-white text-xs sm:text-sm font-bold bg-gradient-to-r from-[#000000] via-[#000000] to-[#000000] hover:from-[#000000] hover:to-[#000000] active:scale-95 shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.5)] transition-all duration-300 cursor-pointer border border-[#F9FAFB]/30"
+                className="group inline-flex items-center gap-2.5 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full text-white text-xs sm:text-sm font-bold bg-[#128C7E] hover:bg-[#0e7064] active:scale-95 shadow-[0_8px_20px_rgba(18,140,126,0.4)] hover:shadow-[0_10px_25px_rgba(18,140,126,0.5)] transition-all duration-300 cursor-pointer border border-[#F9FAFB]/30"
               >
                 <span>View Special Combos</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />

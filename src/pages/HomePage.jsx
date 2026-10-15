@@ -67,7 +67,7 @@ export default function HomePage() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif text-[#000000]">
             Explore categories
           </h2>
-          <div className="w-12 h-1 bg-[#000000] mx-auto rounded-full" />
+          <div className="w-12 h-1 bg-[#128C7E] mx-auto rounded-full" />
           <p className="text-xs sm:text-base font-serif italic text-[#000000] leading-relaxed pt-1">
             Experience the finest selection of premium dates, exotic nuts, and artisanal wellness blends.
           </p>
