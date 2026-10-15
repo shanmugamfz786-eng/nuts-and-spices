@@ -187,8 +187,12 @@ export default function AdminSettings() {
               <input
                 type="number"
                 min="0"
-                value={formData.deliveryCharge}
-                onChange={(e) => setFormData({ ...formData, deliveryCharge: Number(e.target.value) })}
+                placeholder="0"
+                value={formData.deliveryCharge ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, deliveryCharge: val === '' ? '' : Number(val) });
+                }}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
               />
             </div>
@@ -199,8 +203,12 @@ export default function AdminSettings() {
               <input
                 type="number"
                 min="0"
-                value={formData.minOrderAmount}
-                onChange={(e) => setFormData({ ...formData, minOrderAmount: Number(e.target.value) })}
+                placeholder="0"
+                value={formData.minOrderAmount ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, minOrderAmount: val === '' ? '' : Number(val) });
+                }}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
               />
             </div>
