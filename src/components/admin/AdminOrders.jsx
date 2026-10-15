@@ -119,7 +119,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     }
   };
 
-  const activeWhatsApp = storeSettings.whatsappNumber || '919876543210';
+  const activeWhatsApp = storeSettings?.whatsappNumber || '919876543210';
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-sans">

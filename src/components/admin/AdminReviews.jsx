@@ -3,7 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { Star, CheckCircle, EyeOff, Trash2 } from 'lucide-react';
 
 export default function AdminReviews() {
-  const { reviews, updateReviewStatus, deleteReview } = useCart();
+  const { reviews = [], updateReviewStatus, deleteReview } = useCart();
   const [deleteConfirmReview, setDeleteConfirmReview] = useState(null);
 
   const getStatusBadge = (status) => {
@@ -27,7 +27,7 @@ export default function AdminReviews() {
         <div>
           <h2 className="text-2xl font-black font-serif text-white tracking-wide flex items-center gap-2">
             <Star className="w-6 h-6 text-[#F9FAFB]" />
-            ⭐ ADMIN — REVIEWS ({reviews.length})
+            ⭐ ADMIN — REVIEWS ({(reviews || []).length})
           </h2>
           <p className="text-xs text-amber-100 mt-1">
             Moderate customer reviews, approve ratings to display on storefront, hide or remove feedback.

@@ -3,7 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { Ticket, Plus, Calendar, Trash2, Edit, X } from 'lucide-react';
 
 export default function AdminOffers() {
-  const { offers, categories, addOffer, deleteOffer, updateOffer } = useCart();
+  const { offers = [], categories = [], addOffer, deleteOffer, updateOffer } = useCart() || {};
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [deleteConfirmOffer, setDeleteConfirmOffer] = useState(null);
@@ -51,7 +51,7 @@ export default function AdminOffers() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const catObj = categories.find(c => c.id === formData.applicableCategory);
+    const catObj = (categories || []).find(c => c.id === formData.applicableCategory);
     const categoryName = catObj ? catObj.name : 'All Products';
     const cleanCode = (formData.code || `HAJI${formData.discountPercent}`).trim().toUpperCase();
 

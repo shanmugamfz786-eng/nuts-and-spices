@@ -108,9 +108,9 @@ export default function AdminCombos() {
       const matchCat = selectedCategory === 'all' || combo.category === selectedCategory;
       const q = searchQuery.toLowerCase().trim();
       const matchSearch = !q || 
-        combo.name.toLowerCase().includes(q) ||
-        combo.description.toLowerCase().includes(q) ||
-        (combo.items || []).some(it => it.toLowerCase().includes(q));
+        (combo.name || '').toLowerCase().includes(q) ||
+        (combo.description || '').toLowerCase().includes(q) ||
+        (combo.items || []).some(it => (it || '').toLowerCase().includes(q));
       return matchCat && matchSearch;
     });
   }, [comboDeals, selectedCategory, searchQuery]);

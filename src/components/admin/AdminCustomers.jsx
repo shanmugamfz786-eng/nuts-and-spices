@@ -3,7 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { Users, Search, Phone, Mail, MapPin, Calendar, ChevronRight, X, UserCheck, Eye, Trash2 } from 'lucide-react';
 
 export default function AdminCustomers({ onViewOrderDetails }) {
-  const { orders, registeredUsers, deleteCustomer } = useCart();
+  const { orders = [], registeredUsers = [], deleteCustomer } = useCart() || {};
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [deleteConfirmCustomer, setDeleteConfirmCustomer] = useState(null);
@@ -12,40 +12,52 @@ export default function AdminCustomers({ onViewOrderDetails }) {
   const customersMap = {};
 
   // 1. Process orders to group customer order history & total spending
-  orders.forEach(ord => {
-    const key = (ord.phone || ord.customerName).trim().toLowerCase();
+  (orders || []).forEach(ord => {
+    if (!ord) return;
+    const phone = String(ord.phone || '').trim();
+    const name = String(ord.customerName || ord.customer_name || 'Customer').trim();
+    const key = (phone || name || String(ord.id || Math.random())).toLowerCase();
+
     if (!customersMap[key]) {
       customersMap[key] = {
-        name: ord.customerName || 'Customer',
-        phone: ord.phone || 'N/A',
+        name,
+        phone: phone || 'N/A',
         email: ord.email || 'customer@nutsandspices.store',
-        address: ord.address || 'Chennai',
+        address: ord.address || ord.city || 'Chennai',
         city: ord.city || 'Chennai',
         pincode: ord.pincode || '600001',
         totalOrders: 0,
         totalPurchase: 0,
-        lastOrderDate: ord.date,
+        lastOrderDate: ord.date || ord.created_at || ord.createdAt,
         orderHistory: []
       };
     }
 
+    const totalVal = Number(ord.total !== undefined ? ord.total : (ord.totalAmount || ord.total_amount || 0));
     customersMap[key].totalOrders += 1;
-    customersMap[key].totalPurchase += (ord.total || 0);
+    customersMap[key].totalPurchase += totalVal;
     customersMap[key].orderHistory.push(ord);
 
     // Update last order date if newer
-    if (new Date(ord.date) > new Date(customersMap[key].lastOrderDate)) {
-      customersMap[key].lastOrderDate = ord.date;
+    const ordDate = ord.date || ord.created_at || ord.createdAt;
+    if (ordDate) {
+      if (!customersMap[key].lastOrderDate || new Date(ordDate) > new Date(customersMap[key].lastOrderDate)) {
+        customersMap[key].lastOrderDate = ordDate;
+      }
     }
   });
 
   // 2. Add registered users who haven't placed orders yet
-  registeredUsers.forEach(u => {
-    const key = (u.phone || u.name).trim().toLowerCase();
+  (registeredUsers || []).forEach(u => {
+    if (!u) return;
+    const phone = String(u.phone || '').trim();
+    const name = String(u.name || 'Registered Patron').trim();
+    const key = (phone || name || String(u.id || Math.random())).toLowerCase();
+
     if (!customersMap[key]) {
       customersMap[key] = {
-        name: u.name,
-        phone: u.phone || 'N/A',
+        name,
+        phone: phone || 'N/A',
         email: u.email || 'customer@nutsandspices.store',
         address: 'Registered Store User',
         city: 'Chennai',
@@ -60,11 +72,14 @@ export default function AdminCustomers({ onViewOrderDetails }) {
 
   const customerList = Object.values(customersMap);
 
-  const filteredCustomers = customerList.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.phone.includes(searchTerm) ||
-    c.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCustomers = customerList.filter(c => {
+    const s = searchTerm.toLowerCase();
+    return (
+      (c.name && c.name.toLowerCase().includes(s)) ||
+      (c.phone && c.phone.includes(searchTerm)) ||
+      (c.email && c.email.toLowerCase().includes(s))
+    );
+  });
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">

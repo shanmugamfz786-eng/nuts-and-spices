@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useCart, isProductActive } from '../context/CartContext';
 import { ChevronLeft, ChevronRight, ShoppingCart, Check, ChevronDown, Heart, Eye } from 'lucide-react';
 
@@ -162,6 +162,26 @@ export default function FeaturedTodaySection() {
     return (products || []).filter(p => isProductActive(p) && p.isFeaturedToday);
   }, [products]);
 
+  // Ensure the carousel always resets to the leftmost start position (index 0) on mount and whenever featured products are updated
+  useEffect(() => {
+    const resetToStart = () => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ left: 0, behavior: 'instant' });
+        scrollRef.current.scrollLeft = 0;
+        setActiveIndex(0);
+      }
+    };
+
+    resetToStart();
+    const rafId = requestAnimationFrame(resetToStart);
+    const timer = setTimeout(resetToStart, 60);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
+    };
+  }, [featuredProducts]);
+
   const scrollLeft = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: -280, behavior: 'smooth' });
@@ -177,7 +197,12 @@ export default function FeaturedTodaySection() {
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      const scrollRatio = scrollLeft / (scrollWidth - clientWidth || 1);
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll <= 0) {
+        setActiveIndex(0);
+        return;
+      }
+      const scrollRatio = scrollLeft / maxScroll;
       const index = Math.min(3, Math.floor(scrollRatio * 4));
       setActiveIndex(index);
     }
@@ -229,7 +254,7 @@ export default function FeaturedTodaySection() {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth scrollbar-none py-3 px-1 snap-x snap-mandatory"
+          className="flex justify-start items-stretch gap-4 sm:gap-5 overflow-x-auto scrollbar-none py-3 px-1 snap-x snap-mandatory"
         >
           {featuredProducts.map((product) => (
             <FeaturedCard key={product.id} product={product} />

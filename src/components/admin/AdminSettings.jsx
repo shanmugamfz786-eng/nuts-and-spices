@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { 
   Settings, Save, Phone, MessageSquare, 
@@ -7,8 +7,14 @@ import {
 
 export default function AdminSettings() {
   const { storeSettings, updateStoreSettings } = useCart();
-  const [formData, setFormData] = useState({ ...storeSettings });
+  const [formData, setFormData] = useState({ ...(storeSettings || {}) });
   const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (storeSettings) {
+      setFormData({ ...storeSettings });
+    }
+  }, [storeSettings]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
