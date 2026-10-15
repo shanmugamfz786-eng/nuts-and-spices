@@ -108,11 +108,56 @@ export const createPaymentSession = async (req, res) => {
       body: JSON.stringify(requestBody)
     });
 
-    const data = await response.json();
+    let data = await response.json();
 
     if (!response.ok) {
-      console.error('Cashfree Order Creation Error:', data);
-      return res.status(500).json({ success: false, message: 'Failed to create payment session.', error: data });
+      // If Cashfree order already exists, recover by fetching existing active session or creating fresh retry attempt
+      if (data && data.code === 'order_already_exists') {
+        console.warn(`Cashfree order ${requestBody.order_id} already exists. Attempting recovery...`);
+        try {
+          const fetchRes = await fetch(`${apiUrl}/${encodeURIComponent(requestBody.order_id)}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-client-id': process.env.CASHFREE_APP_ID,
+              'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+              'x-api-version': '2023-08-01'
+            }
+          });
+          const existingData = await fetchRes.json();
+          if (fetchRes.ok && existingData.payment_session_id && existingData.order_status === 'ACTIVE') {
+            console.log('Reusing active Cashfree payment session:', existingData.payment_session_id);
+            data = existingData;
+          } else {
+            // Existing order is expired, paid, or missing session: create fresh Cashfree order with attempt suffix
+            const retryOrderId = `${requestBody.order_id}_${Date.now().toString(36).slice(-4).toUpperCase()}`;
+            console.warn(`Creating fresh Cashfree order attempt with ID: ${retryOrderId}`);
+            const retryRes = await fetch(apiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-client-id': process.env.CASHFREE_APP_ID,
+                'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+                'x-api-version': '2023-08-01'
+              },
+              body: JSON.stringify({ ...requestBody, order_id: retryOrderId })
+            });
+            const retryData = await retryRes.json();
+            if (retryRes.ok && retryData.payment_session_id) {
+              data = retryData;
+            } else {
+              console.error('Cashfree Retry Order Creation Error:', retryData);
+              return res.status(500).json({ success: false, message: 'Failed to create payment session.', error: retryData });
+            }
+          }
+        } catch (fetchErr) {
+          console.error('Error recovering duplicate Cashfree order:', fetchErr);
+          return res.status(500).json({ success: false, message: 'Failed to create payment session.', error: data });
+        }
+      } else {
+        console.error('Cashfree Order Creation Error:', data);
+        return res.status(500).json({ success: false, message: 'Failed to create payment session.', error: data });
+      }
     }
 
     const paymentUrl = data.payments?.url || (
@@ -189,7 +234,10 @@ export const verifyPayment = async (req, res) => {
     // Verify Cashfree order_status === 'PAID' AND Cashfree amount === DB order total_amount
     const isStatusPaid = data.order_status === 'PAID';
     const amountMatches = Math.abs(parseFloat(data.order_amount) - parseFloat(dbOrder.total_amount)) < 0.01;
-    const orderIdMatches = String(data.order_id) === String(dbOrder.id) || String(data.order_id) === String(dbOrder.order_id);
+    const orderIdMatches = String(data.order_id) === String(dbOrder.id) ||
+      String(data.order_id) === String(dbOrder.order_id) ||
+      String(data.order_id).startsWith(String(dbOrder.id) + '_') ||
+      String(data.order_id).startsWith(String(dbOrder.order_id) + '_');
 
     if (isStatusPaid && amountMatches && orderIdMatches) {
       // Idempotently update order status in DB
@@ -286,8 +334,9 @@ export const handleCashfreeWebhook = async (req, res) => {
       const paymentStatus = payment?.payment_status;
 
       const isPaid = orderStatus === 'PAID' || paymentStatus === 'SUCCESS';
+      const baseOrderId = orderId.includes('_') ? orderId.split('_')[0] : orderId;
 
-      const dbOrders = await queryDb('SELECT * FROM orders WHERE id = ? OR order_id = ? LIMIT 1', [orderId, orderId]);
+      const dbOrders = await queryDb('SELECT * FROM orders WHERE id = ? OR order_id = ? OR id = ? OR order_id = ? LIMIT 1', [orderId, orderId, baseOrderId, baseOrderId]);
       if (dbOrders && dbOrders.length > 0) {
         const dbOrder = dbOrders[0];
 
