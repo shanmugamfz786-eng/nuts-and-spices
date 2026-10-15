@@ -93,7 +93,7 @@ export const createPaymentSession = async (req, res) => {
         customer_name: customerName
       },
       order_meta: {
-        return_url: `${frontendBaseUrl}/order-success?order_id={order_id}`
+        return_url: req.body.returnUrl || `${frontendBaseUrl}/order-success?order_id={order_id}`
       }
     };
 
@@ -115,9 +115,16 @@ export const createPaymentSession = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Failed to create payment session.', error: data });
     }
 
+    const paymentUrl = data.payments?.url || (
+      process.env.CASHFREE_ENV === 'PRODUCTION'
+        ? `https://payments.cashfree.com/order/#${data.payment_session_id}`
+        : `https://sandbox.cashfree.com/order/#${data.payment_session_id}`
+    );
+
     return res.json({
       success: true,
       paymentSessionId: data.payment_session_id,
+      paymentUrl,
       orderId: data.order_id,
       environment: process.env.CASHFREE_ENV === 'PRODUCTION' ? 'production' : 'sandbox'
     });

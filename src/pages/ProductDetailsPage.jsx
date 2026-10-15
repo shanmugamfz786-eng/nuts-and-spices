@@ -106,18 +106,26 @@ export default function ProductDetailsPage() {
               alt={product.name}
               className="w-full h-full object-cover"
             />
-            {product.badge && (
-              <span className="absolute top-4 left-4 bg-[#000000] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                {product.badge}
-              </span>
-            )}
+            {/* Top Badges Stack matching cards */}
+            <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10">
+              {product.badge && (
+                <span className="bg-[#000000] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded shadow-md font-serif">
+                  {product.badge}
+                </span>
+              )}
+              {((origPrice > curPrice) || (product?.discountPercent > 0)) && (
+                <span className="bg-[#B91C1C] text-white text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded shadow-md w-fit">
+                  {product?.discountPercent || Math.round(((origPrice - curPrice) / origPrice) * 100)}% OFF
+                </span>
+              )}
+            </div>
             <button
               onClick={() => toggleWishlist(product.id)}
               className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md shadow-md transition-colors ${
                 isWishlisted ? 'bg-red-50 text-red-500' : 'bg-white/80 text-[#8C7A6B] hover:text-red-500'
               }`}
             >
-              <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+              <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current text-red-500' : ''}`} />
             </button>
           </div>
 
@@ -146,7 +154,7 @@ export default function ProductDetailsPage() {
                 {product.categoryName}
               </span>
               <div className="flex items-center gap-1 text-xs font-bold text-[#000000]">
-                <Star className="w-4 h-4 fill-[#000000] text-[#000000]" />
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 <span>{product.rating}</span>
                 <span className="text-[#8C7A6B]">({product.reviews} customer reviews)</span>
               </div>
@@ -156,7 +164,7 @@ export default function ProductDetailsPage() {
               {product.name}
             </h1>
 
-            <p className="text-xs sm:text-sm text-[#000000] leading-relaxed">
+            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
               {product.description}
             </p>
 
@@ -174,12 +182,12 @@ export default function ProductDetailsPage() {
                       onClick={() => setSelectedWeight(w)}
                       className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#128C7E] text-white border-[#128C7E] shadow-sm'
-                          : 'bg-white text-gray-800 border-gray-300 hover:border-[#128C7E] hover:bg-emerald-50/50'
+                          ? 'bg-[#000000] text-white border-[#000000] shadow-sm'
+                          : 'bg-white text-gray-800 border-gray-200 hover:border-[#000000] hover:bg-gray-50'
                       }`}
                     >
                       <span>{w.label}</span>
-                      <span className={`ml-1.5 font-normal text-[11px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                      <span className={`ml-1.5 font-normal text-[11px] ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
                         ₹{w.price}
                       </span>
                     </button>
@@ -215,21 +223,23 @@ export default function ProductDetailsPage() {
               </div>
             </div>
 
-            {/* Dynamic Total Price */}
-            <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex items-center justify-between">
+            {/* Dynamic Total Price Container */}
+            <div className="p-4 sm:p-5 bg-[#FAF7F2] rounded-2xl border border-gray-200/80 flex items-center justify-between">
               <div>
-                <span className="text-xs text-gray-500 block">Total Amount:</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#128C7E] font-serif">
-                    ₹{totalPrice.toLocaleString('en-IN')}
+                <span className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider block">Total Amount:</span>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="text-2xl sm:text-3xl font-black text-[#000000] font-serif">
+                    ₹{totalPrice.toLocaleString('en-IN')}.00
                   </span>
-                  <span className="text-xs text-gray-400 line-through font-mono">
-                    ₹{originalTotalPrice.toLocaleString('en-IN')}
-                  </span>
+                  {originalTotalPrice > totalPrice && (
+                    <span className="text-xs text-gray-400 line-through font-sans">
+                      ₹{originalTotalPrice.toLocaleString('en-IN')}.00
+                    </span>
+                  )}
                 </div>
               </div>
 
-              <span className="text-xs font-bold text-emerald-800 bg-emerald-100/80 border border-emerald-200 px-3 py-1 rounded-full">
+              <span className="text-[11px] font-bold text-[#128C7E] bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full">
                 Free Express Delivery Eligible
               </span>
             </div>
@@ -241,7 +251,7 @@ export default function ProductDetailsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={handleAddToCart}
-                className={`py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg active:scale-95 ${
+                className={`py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg active:scale-95 ${
                   added 
                     ? 'bg-[#075E54] text-white' 
                     : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
@@ -262,9 +272,9 @@ export default function ProductDetailsPage() {
 
               <button
                 onClick={handleQuickCheckout}
-                className="py-3.5 px-6 rounded-2xl font-bold text-sm bg-gray-950 hover:bg-black text-white transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                className="py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider bg-[#000000] hover:bg-[#222222] text-white transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
-                <span>Proceed to Cart & Checkout</span>
+                <span>Proceed to Checkout →</span>
               </button>
             </div>
           </div>
@@ -279,8 +289,8 @@ export default function ProductDetailsPage() {
         {/* Header & Rating Summary */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-6">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-[#128C7E] rounded-full text-xs font-bold uppercase tracking-wider">
-              <Star className="w-3.5 h-3.5 fill-[#128C7E]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-full text-xs font-bold uppercase tracking-wider">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               <span>Verified Patron Ratings</span>
             </div>
             <h2 className="text-2xl font-black font-serif text-black">
@@ -293,7 +303,7 @@ export default function ProductDetailsPage() {
 
           <button
             onClick={() => setShowReviewForm(!showReviewForm)}
-            className="px-6 py-3 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 self-start md:self-auto"
+            className="px-6 py-3 bg-[#000000] hover:bg-[#222222] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0 self-start md:self-auto"
           >
             <MessageSquare className="w-4 h-4" />
             <span>{showReviewForm ? 'Close Form' : 'Write a Review'}</span>

@@ -138,6 +138,7 @@ export default function CheckoutPage() {
       }
 
       const phone4 = (formData.phone || '').replace(/\D/g, '').slice(-4);
+      const returnUrl = `${window.location.origin}/order-success?order_id={order_id}&phone4=${phone4}`;
 
       // Initialize Cashfree Payment Session
       const payRes = await fetch(BASE + '/api/payment/create-session', {
@@ -148,7 +149,8 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           orderId: backendOrderId,
-          phone4
+          phone4,
+          returnUrl
         })
       });
 
@@ -162,24 +164,50 @@ export default function CheckoutPage() {
         throw new Error(payData.message || 'Failed to obtain Cashfree payment session');
       }
 
-      // Initialize Cashfree SDK (either preloaded in index.html or dynamic load)
-      let cashfree;
-      if (typeof window !== 'undefined' && window.Cashfree) {
-        cashfree = window.Cashfree({ mode: payData.environment || 'production' });
-      } else {
-        cashfree = await load({ mode: payData.environment || 'production' });
+      const directPaymentUrl = payData.paymentUrl || (
+        (payData.environment === 'sandbox')
+          ? `https://sandbox.cashfree.com/order/#${payData.paymentSessionId}`
+          : `https://payments.cashfree.com/order/#${payData.paymentSessionId}`
+      );
+
+      // Attempt Cashfree SDK checkout with automatic instant fallback to direct URL
+      let redirected = false;
+      try {
+        let cashfree = null;
+        if (typeof window !== 'undefined' && typeof window.Cashfree === 'function') {
+          cashfree = window.Cashfree({ mode: payData.environment || 'production' });
+        } else {
+          try {
+            cashfree = await load({ mode: payData.environment || 'production' });
+          } catch (loadErr) {
+            console.warn('Cashfree SDK dynamic load note:', loadErr);
+          }
+        }
+
+        if (cashfree && typeof cashfree.checkout === 'function') {
+          const res = await cashfree.checkout({
+            paymentSessionId: payData.paymentSessionId,
+            redirectTarget: "_self"
+          });
+          if (!res || !res.error) {
+            redirected = true;
+          } else {
+            console.warn('Cashfree checkout note:', res?.error);
+          }
+        }
+      } catch (sdkErr) {
+        console.warn('Cashfree SDK exception, using direct fallback:', sdkErr);
       }
 
-      if (!cashfree) {
-        throw new Error('Cashfree Payment Gateway SDK failed to initialize');
+      // If SDK didn't trigger navigation, directly open Cashfree checkout URL
+      if (!redirected) {
+        window.location.href = directPaymentUrl;
       }
 
-      // Redirect immediately to Cashfree Payment Gateway page
-      await cashfree.checkout({
-        paymentSessionId: payData.paymentSessionId,
-        returnUrl: `${window.location.origin}/order-success?order_id={order_id}&phone4=${phone4}`,
-        redirectTarget: "_self"
-      });
+      // Safety fallback: ensure navigation within 1200ms
+      setTimeout(() => {
+        window.location.href = directPaymentUrl;
+      }, 1200);
       
     } catch (err) {
       console.error('Payment initialization error', err);
