@@ -65,7 +65,13 @@ export default function LoginPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success && data.orders) {
-          setMyOrders(data.orders);
+          const paidOrders = data.orders.filter(o => {
+            const pStatus = String(o.payment_status || o.paymentStatus || '').toLowerCase();
+            const oStatus = String(o.status || '').toLowerCase();
+            return ['paid', 'refund_pending', 'refunded'].includes(pStatus) || 
+                   (!pStatus && !['pending', 'new', 'cancelled'].includes(oStatus));
+          });
+          setMyOrders(paidOrders);
         }
         setLoadingOrders(false);
       })

@@ -520,15 +520,39 @@ export const updateOrderStatus = async (req, res) => {
 
 export const getMyOrders = async (req, res) => {
   try {
-    const userPhone = (req.user.phone || '').trim().toLowerCase();
-    const userEmail = (req.user.email || '').trim().toLowerCase();
-    
-    let query = 'SELECT * FROM orders WHERE phone = ?';
-    let params = [userPhone];
+    const userPhone = (req.user?.phone || '').replace(/\D/g, '').slice(-10);
+    const userEmail = (req.user?.email || '').trim().toLowerCase();
+    const includeUnpaid = req.query.includeUnpaid === 'true';
+
+    if (!userPhone && !userEmail) {
+      return res.json({ success: true, orders: [] });
+    }
+
+    const conditions = [];
+    const params = [];
+
+    if (userPhone && userPhone.length >= 7) {
+      conditions.push('(phone = ? OR phone LIKE ?)');
+      params.push(userPhone, `%${userPhone}`);
+    }
+
     if (userEmail) {
-      query += ' OR email = ?';
+      conditions.push('LOWER(email) = ?');
       params.push(userEmail);
     }
+
+    if (conditions.length === 0) {
+      return res.json({ success: true, orders: [] });
+    }
+
+    let query = `SELECT * FROM orders WHERE (${conditions.join(' OR ')})`;
+
+    // Customers only see orders where payment was completed (paid, refund_pending, refunded)
+    // or legacy confirmed orders. Unpaid checkout attempts are hidden.
+    if (!includeUnpaid) {
+      query += " AND (payment_status IN ('paid', 'refund_pending', 'refunded') OR (payment_status IS NULL AND status NOT IN ('pending', 'new', 'cancelled')))";
+    }
+
     query += ' ORDER BY created_at DESC';
     
     const dbOrders = await queryDb(query, params);
@@ -555,6 +579,8 @@ export const getMyOrders = async (req, res) => {
           deliveryCharge: row.delivery_charge,
           totalAmount: row.total_amount,
           status: row.status,
+          paymentStatus: row.payment_status || 'paid',
+          payment_status: row.payment_status || 'paid',
           items: parsedItems,
           notes: row.notes,
           createdAt: row.created_at,
@@ -567,6 +593,17 @@ export const getMyOrders = async (req, res) => {
             pincode: row.pincode
           }
         };
+      });
+    } else if (process.env.NODE_ENV !== 'production' && memoryStore.orders.length > 0) {
+      formattedOrders = memoryStore.orders.filter(o => {
+        const oPhone = (o.phone || '').replace(/\D/g, '').slice(-10);
+        const oEmail = (o.email || '').trim().toLowerCase();
+        const matchesUser = (userPhone && userPhone.length >= 7 && oPhone === userPhone) || (userEmail && oEmail === userEmail);
+        if (!matchesUser) return false;
+        if (includeUnpaid) return true;
+        const pStatus = (o.payment_status || o.paymentStatus || '').toLowerCase();
+        const oStatus = (o.status || '').toLowerCase();
+        return ['paid', 'refund_pending', 'refunded'].includes(pStatus) || (!pStatus && !['pending', 'new', 'cancelled'].includes(oStatus));
       });
     }
 

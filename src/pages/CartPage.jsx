@@ -15,8 +15,7 @@ export default function CartPage() {
     applyCoupon, 
     removeCoupon, 
     navigate, 
-    user, 
-    orders 
+    user 
   } = useCart();
   const [realOrders, setRealOrders] = useState([]);
   const [couponInput, setCouponInput] = useState('');
@@ -63,16 +62,27 @@ export default function CartPage() {
     fetchOrders();
   }, [user]);
 
-  const myOrders = realOrders.length > 0 ? realOrders : (orders || []).filter(o => {
-    const oPhone = o.phone || (o.customer && o.customer.phone);
-    const oEmail = o.email || (o.customer && o.customer.email);
-    const isOwner = user ? ((user.phone && oPhone === user.phone) || (user.email && oEmail === user.email)) : false;
-    return isOwner;
-  }).sort((a, b) => {
-      const da = a.timestamp || a.created_at ? new Date(a.timestamp || a.created_at).getTime() : 0;
-      const db = b.timestamp || b.created_at ? new Date(b.timestamp || b.created_at).getTime() : 0;
+  const myOrders = (realOrders || [])
+    .filter(o => {
+      const oPhone = (o.phone || (o.customer && o.customer.phone) || '').replace(/\D/g, '').slice(-10);
+      const oEmail = (o.email || (o.customer && o.customer.email) || '').trim().toLowerCase();
+      const userPhone = (user?.phone || '').replace(/\D/g, '').slice(-10);
+      const userEmail = (user?.email || '').trim().toLowerCase();
+      const isOwner = user ? ((userPhone && oPhone === userPhone) || (userEmail && oEmail === userEmail)) : false;
+
+      // Only show orders where payment was completed (paid, refund_pending, refunded)
+      const pStatus = String(o.payment_status || o.paymentStatus || '').toLowerCase();
+      const oStatus = String(o.status || '').toLowerCase();
+      const isPaid = ['paid', 'refund_pending', 'refunded'].includes(pStatus) || 
+                     (!pStatus && !['pending', 'new', 'cancelled'].includes(oStatus));
+
+      return isOwner && isPaid;
+    })
+    .sort((a, b) => {
+      const da = a.timestamp || a.created_at || a.createdAt ? new Date(a.timestamp || a.created_at || a.createdAt).getTime() : 0;
+      const db = b.timestamp || b.created_at || b.createdAt ? new Date(b.timestamp || b.created_at || b.createdAt).getTime() : 0;
       return db - da;
-  });
+    });
 
 
 
