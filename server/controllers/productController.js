@@ -75,11 +75,15 @@ export const getAllProducts = async (req, res) => {
           weights = typeof p.weights_json === 'string' ? JSON.parse(p.weights_json) : p.weights_json;
         } catch(e) {}
       }
+      const isFeatured = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
+      const isBest = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
       return {
         ...p,
         weights: Array.isArray(weights) ? weights : p.weights,
-        isFeaturedToday: p.is_featured_today === 1 ? true : (p.is_featured_today === 0 ? false : (p.isFeaturedToday || false)),
-        isBestSelling: p.is_best_selling === 1 ? true : (p.is_best_selling === 0 ? false : (p.isBestSelling || false))
+        isFeaturedToday: Boolean(isFeatured),
+        is_featured_today: isFeatured ? 1 : 0,
+        isBestSelling: Boolean(isBest),
+        is_best_selling: isBest ? 1 : 0
       };
     });
 
@@ -125,8 +129,12 @@ export const getProductById = async (req, res) => {
       } catch(e) {}
     }
 
-    product.isFeaturedToday = product.is_featured_today === 1 ? true : (product.is_featured_today === 0 ? false : (product.isFeaturedToday || false));
-    product.isBestSelling = product.is_best_selling === 1 ? true : (product.is_best_selling === 0 ? false : (product.isBestSelling || false));
+    const isFeatured = product.isFeaturedToday === true || product.isFeaturedToday === 'true' || product.is_featured_today === 1 || product.is_featured_today === '1';
+    const isBest = product.isBestSelling === true || product.isBestSelling === 'true' || product.is_best_selling === 1 || product.is_best_selling === '1';
+    product.isFeaturedToday = Boolean(isFeatured);
+    product.is_featured_today = isFeatured ? 1 : 0;
+    product.isBestSelling = Boolean(isBest);
+    product.is_best_selling = isBest ? 1 : 0;
 
     res.json({
       success: true,

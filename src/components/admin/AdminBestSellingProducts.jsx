@@ -15,7 +15,7 @@ export default function AdminBestSellingProducts() {
     if (Array.isArray(products) && products.length > 0) {
       const initialMap = {};
       products.forEach(p => {
-        initialMap[p.id] = !!p.isBestSelling;
+        initialMap[p.id] = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
       });
       setSelectedMap(initialMap);
     }
@@ -38,10 +38,14 @@ export default function AdminBestSellingProducts() {
   const handleSaveAll = async () => {
     setIsSaving(true);
     try {
-      const updatedProducts = products.map(p => ({
-        ...p,
-        isBestSelling: !!selectedMap[p.id]
-      }));
+      const updatedProducts = products.map(p => {
+        const isBest = !!selectedMap[p.id];
+        return {
+          ...p,
+          isBestSelling: isBest,
+          is_best_selling: isBest ? 1 : 0
+        };
+      });
 
       const res = await batchUpdateProducts(updatedProducts);
       if (res && res.success !== false) {

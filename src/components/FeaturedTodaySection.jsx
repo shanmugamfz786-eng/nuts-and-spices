@@ -159,7 +159,7 @@ export default function FeaturedTodaySection() {
 
   // Dynamically load the user's authentic store products that are marked as Featured Today
   const featuredProducts = useMemo(() => {
-    return (products || []).filter(p => isProductActive(p) && p.isFeaturedToday);
+    return (products || []).filter(p => isProductActive(p) && (p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1'));
   }, [products]);
 
   // Ensure the carousel always resets to the leftmost start position (index 0) on mount and whenever featured products are updated

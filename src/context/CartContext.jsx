@@ -62,21 +62,25 @@ export const CartProvider = ({ children }) => {
 
       const activeState = isProductActive(p);
 
-      return {
-        ...p,
-        id: p.id || `prod-${Math.random()}`,
-        name: p.name || 'Gourmet Item',
-        category: p.category || 'nuts-dry-fruits',
-        categoryName: p.categoryName || 'NUTS & DRY FRUITS',
-        image: p.image || seedProductImageMap.get(p.id) || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
-        price: basePrice,
-        weights: validWeights,
-        status: activeState ? 'Active' : 'Inactive',
-        active: activeState,
-        isFeaturedToday: p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1',
-        isBestSelling: p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1'
-      };
-    }).filter(Boolean);
+        const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
+        const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+        return {
+          ...p,
+          id: p.id || `prod-${Math.random()}`,
+          name: p.name || 'Gourmet Item',
+          category: p.category || 'nuts-dry-fruits',
+          categoryName: p.categoryName || 'NUTS & DRY FRUITS',
+          image: p.image || seedProductImageMap.get(p.id) || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
+          price: basePrice,
+          weights: validWeights,
+          status: activeState ? 'Active' : 'Inactive',
+          active: activeState,
+          isFeaturedToday: Boolean(feat),
+          is_featured_today: feat ? 1 : 0,
+          isBestSelling: Boolean(best),
+          is_best_selling: best ? 1 : 0
+        };
+      }).filter(Boolean);
   };
 
   // 1b. AUTHENTICATION (USER)
@@ -472,15 +476,10 @@ export const CartProvider = ({ children }) => {
             });
 
             setProducts(prevProds => {
-              const prevMap = new Map((prevProds || []).map(p => [p.id, p]));
-              const finalList = merged.map(m => {
-                const prev = prevMap.get(m.id);
-                // Prefer local recent updates if present
-                return prev ? { ...m, ...prev } : m;
-              });
-
-              const localCustom = (prevProds || []).filter(lp => lp && lp.id && !finalList.find(p => p.id === lp.id));
-              localCustom.forEach(l => finalList.push(l));
+              // The cloud catalog is the authoritative source across all devices
+              const mergedIds = new Set(merged.map(p => p.id));
+              const localCustom = (prevProds || []).filter(lp => lp && lp.id && !mergedIds.has(lp.id));
+              const finalList = [...merged, ...localCustom];
 
               const sanitized = sanitizeProductList(finalList);
               try { 

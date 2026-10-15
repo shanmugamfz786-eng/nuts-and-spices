@@ -155,10 +155,18 @@ const seedProductImageMap = new Map(PRODUCTS.map(p => [p.id, p.image]));
 
 export const syncServerCatalog = async (products, categories) => {
   if (Array.isArray(products)) {
-    inMemoryCatalog.products = products.map(p => ({
-      ...p,
-      image: p.image || seedProductImageMap.get(p.id) || ''
-    }));
+    inMemoryCatalog.products = products.map(p => {
+      const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
+      const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+      return {
+        ...p,
+        image: p.image || seedProductImageMap.get(p.id) || '',
+        isFeaturedToday: feat,
+        is_featured_today: feat ? 1 : 0,
+        isBestSelling: best,
+        is_best_selling: best ? 1 : 0
+      };
+    });
   }
   if (Array.isArray(categories)) {
     inMemoryCatalog.categories = categories;
@@ -187,6 +195,30 @@ export const syncServerCatalog = async (products, categories) => {
       }
     }
 
+    // Sync is_featured_today and is_best_selling into TiDB Cloud products table
+    if (Array.isArray(products) && products.length > 0) {
+      const featuredIds = products
+        .filter(p => p && p.id && (p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1'))
+        .map(p => p.id);
+      const bestSellingIds = products
+        .filter(p => p && p.id && (p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1'))
+        .map(p => p.id);
+
+      // Fast batch update for is_featured_today in TiDB Cloud
+      await queryDb("UPDATE products SET is_featured_today = 0");
+      if (featuredIds.length > 0) {
+        const placeholders = featuredIds.map(() => '?').join(',');
+        await queryDb(`UPDATE products SET is_featured_today = 1 WHERE id IN (${placeholders})`, featuredIds);
+      }
+
+      // Fast batch update for is_best_selling in TiDB Cloud
+      await queryDb("UPDATE products SET is_best_selling = 0");
+      if (bestSellingIds.length > 0) {
+        const placeholders = bestSellingIds.map(() => '?').join(',');
+        await queryDb(`UPDATE products SET is_best_selling = 1 WHERE id IN (${placeholders})`, bestSellingIds);
+      }
+    }
+
     // Also sync memoryStore so any in-memory queries see the exact active items
     try {
       const { memoryStore } = await import('./config/db.js');
@@ -210,10 +242,18 @@ app.get('/api/catalog', async (req, res) => {
     if (rows && rows.length > 0 && rows[0].setting_value) {
       const parsed = JSON.parse(rows[0].setting_value);
       if (parsed && Array.isArray(parsed.products) && Array.isArray(parsed.categories)) {
-        products = parsed.products.map(p => ({
-          ...p,
-          image: p.image || seedProductImageMap.get(p.id) || ''
-        }));
+        products = parsed.products.map(p => {
+          const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
+          const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+          return {
+            ...p,
+            image: p.image || seedProductImageMap.get(p.id) || '',
+            isFeaturedToday: feat,
+            is_featured_today: feat ? 1 : 0,
+            isBestSelling: best,
+            is_best_selling: best ? 1 : 0
+          };
+        });
         categories = parsed.categories;
         updatedAt = parsed.updatedAt || updatedAt;
         hasMasterCatalog = true;
@@ -235,11 +275,20 @@ app.get('/api/catalog', async (req, res) => {
 
   // Optimize payload over the wire: omit duplicate seed images to stay < 1MB (well below Vercel 4.5MB limit)
   const optimizedProducts = (products || []).map(p => {
-    if (p.image && p.image === seedProductImageMap.get(p.id)) {
-      const { image, ...rest } = p;
+    const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
+    const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+    let base = {
+      ...p,
+      isFeaturedToday: feat,
+      is_featured_today: feat ? 1 : 0,
+      isBestSelling: best,
+      is_best_selling: best ? 1 : 0
+    };
+    if (base.image && base.image === seedProductImageMap.get(base.id)) {
+      const { image, ...rest } = base;
       return rest;
     }
-    return p;
+    return base;
   });
 
   res.json({

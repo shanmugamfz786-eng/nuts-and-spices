@@ -160,7 +160,7 @@ export default function BestSellingSection() {
 
   // Dynamically load the user's authentic store products that are marked as Best Selling
   const bestSellerProducts = useMemo(() => {
-    return (products || []).filter(p => isProductActive(p) && p.isBestSelling);
+    return (products || []).filter(p => isProductActive(p) && (p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1'));
   }, [products]);
 
   const scrollLeft = () => {

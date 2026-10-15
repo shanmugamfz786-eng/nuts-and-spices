@@ -15,7 +15,7 @@ export default function AdminFeaturedProducts() {
     if (Array.isArray(products) && products.length > 0) {
       const initialMap = {};
       products.forEach(p => {
-        initialMap[p.id] = !!p.isFeaturedToday;
+        initialMap[p.id] = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
       });
       setSelectedMap(initialMap);
     }
@@ -38,10 +38,14 @@ export default function AdminFeaturedProducts() {
   const handleSaveAll = async () => {
     setIsSaving(true);
     try {
-      const updatedProducts = products.map(p => ({
-        ...p,
-        isFeaturedToday: !!selectedMap[p.id]
-      }));
+      const updatedProducts = products.map(p => {
+        const isFeatured = !!selectedMap[p.id];
+        return {
+          ...p,
+          isFeaturedToday: isFeatured,
+          is_featured_today: isFeatured ? 1 : 0
+        };
+      });
 
       const res = await batchUpdateProducts(updatedProducts);
       if (res && res.success !== false) {
