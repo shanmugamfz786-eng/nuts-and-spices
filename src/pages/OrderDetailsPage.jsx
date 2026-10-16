@@ -44,6 +44,8 @@ export default function OrderDetailsPage() {
   });
   const [instructionsSaved, setInstructionsSaved] = useState(false);
   const [showAuditLogs, setShowAuditLogs] = useState(true);
+  const [userRating, setUserRating] = useState(5);
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
