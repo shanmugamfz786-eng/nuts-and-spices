@@ -10,7 +10,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrderDetailsPage() {
-  const { selectedOrder, setSelectedOrder, orders, navigate, activeWhatsAppNumber, addToCart, products, addReview, user } = useCart();
+  const { selectedOrder, setSelectedOrder, orders, navigate, activeWhatsAppNumber, addToCart, products, addReview, user, storeSettings } = useCart();
   const [orderData, setOrderData] = useState(selectedOrder || null);
   const [isLoading, setIsLoading] = useState(!selectedOrder);
   const [copiedId, setCopiedId] = useState(false);
@@ -1652,14 +1652,14 @@ export default function OrderDetailsPage() {
                 <div className="flex justify-between items-start border-b border-gray-200 pb-5">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <img src="/logo.jpg" alt="Logo" className="w-10 h-10 object-contain rounded-full border border-gray-200" />
+                      <img src={storeSettings?.logoUrl || "/logo.jpg"} alt="Logo" className="w-10 h-10 object-contain rounded-full border border-gray-200" />
                       <div>
-                        <h2 className="text-base font-black font-serif text-black uppercase tracking-wider">HAJI NUTS & SPICES</h2>
+                        <h2 className="text-base font-black font-serif text-black uppercase tracking-wider">{storeSettings?.storeName || 'HAJI NUTS & SPICES'}</h2>
                         <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Premium Gourmet Dry Fruits & Spices</p>
                       </div>
                     </div>
                     <p className="text-[11px] text-gray-600 mt-2">
-                      No. 42, Mint Street, Sowcarpet, Chennai - 600001, Tamil Nadu, India
+                      {storeSettings?.address || 'No. 42, Mint Street, Sowcarpet, Chennai - 600001, Tamil Nadu, India'}
                     </p>
                     <p className="text-[11px] text-gray-600">
                       <strong>GSTIN:</strong> 33AAACH1234F1Z5 &nbsp;|&nbsp; <strong>FSSAI:</strong> 12423008000451
@@ -1758,7 +1758,7 @@ export default function OrderDetailsPage() {
                 {/* Footer Stamp & Signature */}
                 <div className="border-t border-gray-200 pt-6 flex items-center justify-between text-[11px] text-gray-500">
                   <div className="space-y-0.5">
-                    <p className="font-bold text-black">Thank you for choosing HAJI NUTS & SPICES!</p>
+                    <p className="font-bold text-black">Thank you for choosing {storeSettings?.storeName || 'HAJI NUTS & SPICES'}!</p>
                     <p>Computer-generated tax invoice. No signature required.</p>
                   </div>
                   <div className="text-right">

@@ -1510,16 +1510,27 @@ export const CartProvider = ({ children }) => {
   };
 
   // ADMIN - SETTINGS UPDATE
-  const updateStoreSettings = (newSettings) => {
+  const updateStoreSettings = async (newSettings) => {
+    let updated;
     setStoreSettings(prev => { 
-      const upd = { ...prev, ...newSettings }; 
+      updated = { ...prev, ...newSettings }; 
       try {
-        localStorage.setItem('nuts_spices_store_settings', JSON.stringify(upd));
+        localStorage.setItem('nuts_spices_store_settings', JSON.stringify(updated));
       } catch {}
-      saveCloudStoreSettings(upd).catch(() => {});
-      syncAdminStateToCloud({ storeSettings: upd }).catch(() => {}); 
-      return upd; 
+      return updated; 
     });
+
+    const upd = updated || { ...storeSettings, ...newSettings };
+    try {
+      await Promise.allSettled([
+        saveCloudStoreSettings(upd),
+        saveCloudCatalog(products, categories, upd),
+        syncAdminStateToCloud({ storeSettings: upd })
+      ]);
+    } catch (err) {
+      console.warn('updateStoreSettings cloud sync error:', err);
+    }
+    return { success: true };
   };
 
   return (

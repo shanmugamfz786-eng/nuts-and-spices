@@ -32,7 +32,8 @@ export default function AdminPage() {
     products,
     adminTab, 
     setAdminTab,
-    refreshOrders
+    refreshOrders,
+    storeSettings
   } = useCart();
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -159,15 +160,15 @@ export default function AdminPage() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img 
-                  src="/logo.jpg" 
-                  alt="Haji Nuts & Spices Logo" 
+                  src={storeSettings?.logoUrl || "/logo.jpg"} 
+                  alt={storeSettings?.storeName || "Store Logo"} 
                   className="w-10 h-10 object-contain rounded-xl shadow-md border border-emerald-700 bg-white"
                 />
                 <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#075E54] rounded-full" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-base font-black tracking-wider text-white font-serif uppercase leading-tight flex items-center gap-1.5">
-                  <span>HAJI GOURMET</span>
+                <span className="text-base font-black tracking-wider text-white font-serif uppercase leading-tight flex items-center gap-1.5 truncate max-w-[150px]">
+                  <span>{storeSettings?.storeName || 'HAJI GOURMET'}</span>
                 </span>
                 <span className="text-[10px] font-mono font-bold text-amber-300 tracking-widest uppercase">
                   ENTERPRISE ERP 2.0

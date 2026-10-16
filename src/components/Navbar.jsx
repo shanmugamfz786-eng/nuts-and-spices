@@ -4,7 +4,7 @@ import { Search, Heart, ShoppingBag, User, Menu, X, LayoutGrid, ChevronRight, Sp
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
-  const { activePage, navigate, cartItemCount, wishlist, setIsSearchOpen, setSearchQuery, user, categories, products, setSelectedProduct } = useCart();
+  const { activePage, navigate, cartItemCount, wishlist, setIsSearchOpen, setSearchQuery, user, categories, products, setSelectedProduct, storeSettings } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const [navSearchInput, setNavSearchInput] = useState('');
@@ -138,9 +138,9 @@ export default function Navbar() {
                 className="focus:outline-none cursor-pointer group rounded-full p-0.5 hover:ring-2 hover:ring-[#128C7E] transition-all"
               >
                 <img 
-                  src="/logo.jpg" 
-                  alt="Haji Nuts & Spices Logo" 
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full shadow-sm group-hover:scale-105 transition-transform"
+                  src={storeSettings?.logoUrl || "/logo.jpg"} 
+                  alt={storeSettings?.storeName || "Haji Nuts & Spices Logo"} 
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full shadow-sm group-hover:scale-105 transition-transform bg-white"
                 />
               </button>
 
@@ -149,12 +149,22 @@ export default function Navbar() {
                 onClick={() => navigate('home')}
                 className="flex flex-col text-left focus:outline-none cursor-pointer group"
               >
-                <span className="text-base sm:text-xl font-black tracking-wider text-black font-serif uppercase leading-none group-hover:text-[#128C7E] transition-colors">
-                  HAJI
-                </span>
-                <span className="text-[10px] sm:text-[11px] font-extrabold text-black tracking-widest uppercase font-serif inline-block mt-0.5 group-hover:text-[#128C7E] transition-colors">
-                  NUTS & SPICES
-                </span>
+                {(() => {
+                  const name = (storeSettings?.storeName || 'HAJI NUTS & SPICES').trim();
+                  const words = name.split(/\s+/);
+                  const firstWord = words[0];
+                  const remainingWords = words.slice(1).join(' ');
+                  return (
+                    <>
+                      <span className="text-base sm:text-xl font-black tracking-wider text-black font-serif uppercase leading-none group-hover:text-[#128C7E] transition-colors">
+                        {firstWord}
+                      </span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold text-black tracking-widest uppercase font-serif inline-block mt-0.5 group-hover:text-[#128C7E] transition-colors">
+                        {remainingWords || 'STORE'}
+                      </span>
+                    </>
+                  );
+                })()}
               </button>
             </div>
 
@@ -618,7 +628,7 @@ export default function Navbar() {
                 Admin Portal Login →
               </button>
               <p className="text-[10px] font-semibold text-[#8C7A6B]">
-                © HAJI NUTS & SPICES - Gourmet Selection
+                © {storeSettings?.storeName || 'HAJI NUTS & SPICES'} - Gourmet Selection
               </p>
             </div>
 
@@ -642,11 +652,11 @@ export default function Navbar() {
             <div className="p-5 bg-gradient-to-r from-[#128C7E] to-[#0e7064] text-white flex items-center justify-between shrink-0 shadow-md">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-white p-0.5 shadow-sm shrink-0">
-                  <img src="/logo.jpg" alt="Logo" className="w-full h-full object-contain rounded-full" />
+                  <img src={storeSettings?.logoUrl || "/logo.jpg"} alt="Logo" className="w-full h-full object-contain rounded-full" />
                 </div>
                 <div>
                   <h2 className="text-base font-black font-serif tracking-wider uppercase leading-tight">
-                    Haji Nuts & Spices
+                    {storeSettings?.storeName || 'Haji Nuts & Spices'}
                   </h2>
                   <span className="text-[10px] font-extrabold text-emerald-200 tracking-widest uppercase block mt-0.5">
                     Gourmet Catalog & Deals

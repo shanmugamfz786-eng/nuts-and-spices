@@ -9,26 +9,49 @@ export default function AdminSettings() {
   const { storeSettings, updateStoreSettings } = useCart();
   const [formData, setFormData] = useState({ ...(storeSettings || {}) });
   const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (storeSettings) {
+    if (storeSettings && !isDirty) {
       setFormData({ ...storeSettings });
     }
-  }, [storeSettings]);
+  }, [storeSettings, isDirty]);
 
-  const handleSubmit = (e) => {
+  const handleChange = (field, value) => {
+    setIsDirty(true);
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const cleaned = {
-      ...formData,
-      deliveryCharge: (formData.deliveryCharge !== undefined && formData.deliveryCharge !== null && formData.deliveryCharge !== '') 
-        ? Math.max(0, Number(formData.deliveryCharge)) 
-        : 0,
-      minOrderAmount: (formData.minOrderAmount !== undefined && formData.minOrderAmount !== null && formData.minOrderAmount !== '') 
-        ? Math.max(0, Number(formData.minOrderAmount)) 
-        : 0
-    };
-    updateStoreSettings(cleaned);
-    setIsSaved(true);
+    setIsSaving(true);
+    try {
+      const cleaned = {
+        ...formData,
+        storeName: (formData.storeName || '').trim() || 'HAJI NUTS & SPICES',
+        whatsappNumber: (formData.whatsappNumber || '').replace(/[^0-9]/g, '') || '919876543210',
+        logoUrl: (formData.logoUrl || '').trim(),
+        phone: (formData.phone || '').trim(),
+        email: (formData.email || '').trim(),
+        address: (formData.address || '').trim(),
+        instagram: (formData.instagram || '').trim(),
+        facebook: (formData.facebook || '').trim(),
+        deliveryCharge: (formData.deliveryCharge !== undefined && formData.deliveryCharge !== null && formData.deliveryCharge !== '') 
+          ? Math.max(0, Number(formData.deliveryCharge)) 
+          : 0,
+        minOrderAmount: (formData.minOrderAmount !== undefined && formData.minOrderAmount !== null && formData.minOrderAmount !== '') 
+          ? Math.max(0, Number(formData.minOrderAmount)) 
+          : 0
+      };
+      await updateStoreSettings(cleaned);
+      setIsDirty(false);
+      setIsSaved(true);
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -91,8 +114,8 @@ export default function AdminSettings() {
               <input
                 type="text"
                 required
-                value={formData.storeName}
-                onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                value={formData.storeName || ''}
+                onChange={(e) => handleChange('storeName', e.target.value)}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-bold"
               />
             </div>
@@ -105,8 +128,8 @@ export default function AdminSettings() {
                 <input
                   type="text"
                   required
-                  value={formData.whatsappNumber}
-                  onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
+                  value={formData.whatsappNumber || ''}
+                  onChange={(e) => handleChange('whatsappNumber', e.target.value)}
                   placeholder="919876543210"
                   className="w-full bg-[#F9FAFB]/50 border border-amber-300 focus:border-[#000000] rounded-xl p-3 pl-10 text-gray-900 outline-none font-mono font-bold"
                 />
@@ -121,8 +144,8 @@ export default function AdminSettings() {
               <label className="block font-bold uppercase text-gray-700 mb-1">Logo Image URL</label>
               <input
                 type="text"
-                value={formData.logoUrl}
-                onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                value={formData.logoUrl || ''}
+                onChange={(e) => handleChange('logoUrl', e.target.value)}
                 placeholder="https://..."
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none"
               />
@@ -143,8 +166,8 @@ export default function AdminSettings() {
               <label className="block font-bold uppercase text-gray-700 mb-1">Support Phone Number</label>
               <input
                 type="text"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                value={formData.phone || ''}
+                onChange={(e) => handleChange('phone', e.target.value)}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-bold"
               />
             </div>
@@ -154,8 +177,8 @@ export default function AdminSettings() {
               <label className="block font-bold uppercase text-gray-700 mb-1">Store Email</label>
               <input
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                value={formData.email || ''}
+                onChange={(e) => handleChange('email', e.target.value)}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-bold"
               />
             </div>
@@ -165,8 +188,8 @@ export default function AdminSettings() {
               <label className="block font-bold uppercase text-gray-700 mb-1">Store Full Address</label>
               <textarea
                 rows={2}
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                value={formData.address || ''}
+                onChange={(e) => handleChange('address', e.target.value)}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none font-medium"
               />
             </div>
@@ -190,6 +213,7 @@ export default function AdminSettings() {
                 placeholder="0"
                 value={formData.deliveryCharge ?? ''}
                 onChange={(e) => {
+                  setIsDirty(true);
                   const val = e.target.value;
                   setFormData({ ...formData, deliveryCharge: val === '' ? '' : Number(val) });
                 }}
@@ -206,6 +230,7 @@ export default function AdminSettings() {
                 placeholder="0"
                 value={formData.minOrderAmount ?? ''}
                 onChange={(e) => {
+                  setIsDirty(true);
                   const val = e.target.value;
                   setFormData({ ...formData, minOrderAmount: val === '' ? '' : Number(val) });
                 }}
@@ -227,8 +252,8 @@ export default function AdminSettings() {
               <label className="block font-bold uppercase text-gray-700 mb-1">Instagram Profile URL</label>
               <input
                 type="text"
-                value={formData.instagram}
-                onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                value={formData.instagram || ''}
+                onChange={(e) => handleChange('instagram', e.target.value)}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none"
               />
             </div>
@@ -237,8 +262,8 @@ export default function AdminSettings() {
               <label className="block font-bold uppercase text-gray-700 mb-1">Facebook Page URL</label>
               <input
                 type="text"
-                value={formData.facebook}
-                onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                value={formData.facebook || ''}
+                onChange={(e) => handleChange('facebook', e.target.value)}
                 className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 outline-none"
               />
             </div>
@@ -249,10 +274,13 @@ export default function AdminSettings() {
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="px-8 py-3.5 bg-gradient-to-r from-[#128C7E] to-[#075E54] hover:from-[#075E54] hover:to-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
+            disabled={isSaving}
+            className={`px-8 py-3.5 bg-gradient-to-r from-[#128C7E] to-[#075E54] hover:from-[#075E54] hover:to-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center gap-2 ${
+              isSaving ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:shadow-xl'
+            }`}
           >
-            <Save className="w-5 h-5" />
-            <span>Save & Apply Store Settings</span>
+            <Save className={`w-5 h-5 ${isSaving ? 'animate-spin' : ''}`} />
+            <span>{isSaving ? 'Saving Live Settings...' : 'Save & Apply Store Settings'}</span>
           </button>
         </div>
 

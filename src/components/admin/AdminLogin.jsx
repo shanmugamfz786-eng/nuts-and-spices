@@ -3,7 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { ShieldCheck, Lock, Mail, AlertCircle, Store } from 'lucide-react';
 
 export default function AdminLogin() {
-  const { loginAdmin, navigate } = useCart();
+  const { loginAdmin, navigate, storeSettings } = useCart();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,13 +28,13 @@ export default function AdminLogin() {
       <header className="w-full max-w-5xl mx-auto py-3 px-4 flex items-center justify-between z-20 bg-white/80 backdrop-blur-md rounded-2xl border border-gray-200/80 shadow-xs mb-6">
         <div className="flex items-center gap-3">
           <img 
-            src="/logo.jpg" 
-            alt="Haji Logo" 
+            src={storeSettings?.logoUrl || "/logo.jpg"} 
+            alt={storeSettings?.storeName || "Haji Logo"} 
             className="w-9 h-9 object-contain rounded-xl border border-gray-200 bg-white shadow-2xs" 
           />
           <div className="flex flex-col text-left">
             <span className="text-xs font-black uppercase tracking-wider text-emerald-800 font-serif leading-none">
-              HAJI NUTS & SPICES
+              {storeSettings?.storeName || 'HAJI NUTS & SPICES'}
             </span>
             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">
               Enterprise Admin Portal

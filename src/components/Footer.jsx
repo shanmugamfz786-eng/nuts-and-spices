@@ -69,11 +69,8 @@ export default function Footer() {
           <div className="lg:col-span-4 space-y-4">
             <div className="space-y-1">
               <h3 className="text-2xl sm:text-3xl font-black font-serif tracking-wider text-[#000000] uppercase">
-                HAJI
+                {storeSettings?.storeName || 'HAJI NUTS & SPICES'}
               </h3>
-              <p className="text-sm font-extrabold font-serif text-[#000000] tracking-widest uppercase">
-                NUTS & SPICES
-              </p>
             </div>
 
             <p className="text-xs sm:text-sm text-[#000000] font-semibold leading-relaxed max-w-sm font-serif">
@@ -83,7 +80,7 @@ export default function Footer() {
             {/* CIRCULAR SOCIAL MEDIA BUTTONS */}
             <div className="flex items-center gap-3 pt-2">
               <a
-                href="https://facebook.com"
+                href={storeSettings?.facebook || "https://facebook.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -95,7 +92,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://instagram.com"
+                href={storeSettings?.instagram || "https://instagram.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -210,7 +207,7 @@ export default function Footer() {
           
           {/* Copyright text */}
           <p className="font-medium text-center md:text-left">
-            © {new Date().getFullYear()} HAJI NUTS & SPICES. Delivering health and quality.
+            © {new Date().getFullYear()} {storeSettings?.storeName || 'HAJI NUTS & SPICES'}. Delivering health and quality.
           </p>
 
           {/* Accepted Payments Label & Badges */}

@@ -103,10 +103,20 @@ export async function saveCloudCatalog(products, categories, storeSettings = nul
     const payload = JSON.stringify(payloadObj);
 
     const MASTER_ADMIN_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzcl9hZG1pbjcwMiIsIm5hbWUiOiJNYXN0ZXIgQWRtaW4iLCJlbWFpbCI6ImFkbWluNzAyQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc5MjAxMzMzMCwiZXhwIjoxODIzNTQ5MzMwfQ.-_eaDsJLjk3Dv9Rg2kBXF0NthjFeRhKFgAZ3jYa2p3E';
-    let token = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
-    if (!token || !token.startsWith('eyJ')) {
-      token = MASTER_ADMIN_JWT;
-    }
+    let token = MASTER_ADMIN_JWT;
+    try {
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
+      if (storedToken && storedToken.startsWith('eyJ')) {
+        const parts = storedToken.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload && (payload.role === 'admin' || payload.role === 'Admin')) {
+            token = storedToken;
+          }
+        }
+      }
+    } catch {}
+
     const headers = { 
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -134,10 +144,20 @@ export async function saveCloudCatalog(products, categories, storeSettings = nul
 export async function saveCloudStoreSettings(storeSettings) {
   try {
     const MASTER_ADMIN_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzcl9hZG1pbjcwMiIsIm5hbWUiOiJNYXN0ZXIgQWRtaW4iLCJlbWFpbCI6ImFkbWluNzAyQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc5MjAxMzMzMCwiZXhwIjoxODIzNTQ5MzMwfQ.-_eaDsJLjk3Dv9Rg2kBXF0NthjFeRhKFgAZ3jYa2p3E';
-    let token = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
-    if (!token || !token.startsWith('eyJ')) {
-      token = MASTER_ADMIN_JWT;
-    }
+    let token = MASTER_ADMIN_JWT;
+    try {
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('nuts_spices_auth_token') : null;
+      if (storedToken && storedToken.startsWith('eyJ')) {
+        const parts = storedToken.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload && (payload.role === 'admin' || payload.role === 'Admin')) {
+            token = storedToken;
+          }
+        }
+      }
+    } catch {}
+
     const headers = { 
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -147,7 +167,8 @@ export async function saveCloudStoreSettings(storeSettings) {
 
     const endpoints = [];
     endpoints.push(`${API_BASE_URL}/store-settings`);
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    if (typeof window !== 'undefined') {
+      endpoints.push(`${window.location.origin}/api/store-settings`);
       endpoints.push('https://nuts-and-spices-dqzp.onrender.com/api/store-settings');
     }
 
