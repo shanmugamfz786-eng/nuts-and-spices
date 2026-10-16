@@ -5,7 +5,7 @@ import {
   Copy, Phone, Mail, AlertCircle, X, MessageCircle, ShoppingBag, ChevronRight,
   Printer, ShieldCheck, Award, FileText, Check, Sparkles, Navigation,
   RotateCcw, HelpCircle, ChevronDown, ChevronUp, AlertTriangle,
-  Key, UserCheck, Star, Zap
+  Key, UserCheck, Star, Zap, Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -35,17 +35,12 @@ export default function OrderDetailsPage() {
   const [selectedProductForReview, setSelectedProductForReview] = useState(null);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
-  // Interactive UI States for Empty-Space Filling
-  const [deliveryPreferences, setDeliveryPreferences] = useState({
-    ringBell: true,
-    leaveGuard: false,
-    callArrival: true,
-    contactless: false
-  });
-  const [instructionsSaved, setInstructionsSaved] = useState(false);
-  const [showAuditLogs, setShowAuditLogs] = useState(true);
+  // In-Page Interactive Product Review & Feedback States
   const [userRating, setUserRating] = useState(5);
-  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [userReviewComment, setUserReviewComment] = useState('');
+  const [selectedReviewItemIdx, setSelectedReviewItemIdx] = useState(0);
+  const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState(false);
+  const [reviewCommentError, setReviewCommentError] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -250,12 +245,6 @@ export default function OrderDetailsPage() {
     }
   };
 
-  const handleTogglePreference = (key) => {
-    setDeliveryPreferences(prev => ({ ...prev, [key]: !prev[key] }));
-    setInstructionsSaved(true);
-    setTimeout(() => setInstructionsSaved(false), 2000);
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-[75vh] flex flex-col items-center justify-center p-6 space-y-4">
@@ -326,6 +315,40 @@ export default function OrderDetailsPage() {
     items = [];
   }
 
+  // Handle Send Review / Feedback to Product Page
+  const handleSendFeedback = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!userReviewComment.trim()) {
+      setReviewCommentError('Please write your review/feedback before sending.');
+      return;
+    }
+    setReviewCommentError('');
+
+    const targetItem = (items && items.length > 0) ? items[selectedReviewItemIdx] || items[0] : null;
+    const prodId = targetItem?.productId || targetItem?.id || '';
+    const prodName = targetItem?.name || 'Gourmet Selection';
+    const reviewerName = user?.name || orderData?.customer_name || 'Verified Patron';
+
+    if (addReview) {
+      addReview({
+        customerName: reviewerName,
+        name: reviewerName,
+        comment: userReviewComment.trim(),
+        quote: userReviewComment.trim(),
+        rating: userRating,
+        productId: prodId,
+        productName: prodName,
+        tag: 'Verified Purchase'
+      });
+    }
+
+    setReviewSubmitSuccess(true);
+    setUserReviewComment('');
+    setTimeout(() => {
+      setReviewSubmitSuccess(false);
+    }, 4500);
+  };
+
   const currentStatus = (orderData.status || 'pending').toLowerCase();
   const isCancelled = currentStatus === 'cancelled';
   const isRefunded = currentStatus === 'refunded';
@@ -378,38 +401,6 @@ export default function OrderDetailsPage() {
       icon: Award,
       isCompleted: !isCancelled && !isRefunded && isDelivered,
       isCurrent: isDelivered
-    }
-  ];
-
-  // Simulated Audit Trail Events for high-density tracking
-  const AUDIT_TRAIL_LOGS = [
-    {
-      time: `${rawDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}, ${rawDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`,
-      event: 'Order Registered in Haji ERP',
-      location: 'Central Server, Mint Street, Sowcarpet',
-      detail: 'Inventory reserved & automated GST sales voucher generated.',
-      status: 'completed'
-    },
-    {
-      time: `${rawDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}, +2 hrs`,
-      event: 'Clean Room Packing & Quality QC #04',
-      location: 'Sowcarpet Master Clean-Room Facility',
-      detail: '100% manual grading, nitrogen barrier flush sealed.',
-      status: !isCancelled ? 'completed' : 'halted'
-    },
-    {
-      time: `${rawDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}, +6 hrs`,
-      event: 'Bagged & Manifested for Air Express',
-      location: 'Chennai Guindy Aviation Cargo Gateway',
-      detail: `Consignment scanned with AWB barcode ${awbNumber}.`,
-      status: ['shipped', 'out_for_delivery', 'delivered'].includes(currentStatus) ? 'completed' : 'pending'
-    },
-    {
-      time: `${estimatedDeliveryDate}, 08:30 AM`,
-      event: 'Last-Mile Delivery Vehicle Departure',
-      location: `${orderData.city || 'Chennai'} Delivery Sub-Hub`,
-      detail: 'Assigned to courier executive with secure OTP handover verification.',
-      status: ['out_for_delivery', 'delivered'].includes(currentStatus) ? 'completed' : 'pending'
     }
   ];
 
@@ -512,27 +503,6 @@ export default function OrderDetailsPage() {
                 <Clock className="w-3.5 h-3.5 text-gray-400" />
                 <span>Booked on {orderDateFormatted}</span>
               </p>
-            </div>
-
-            {/* Center: Fulfillment & Consignment Metadata Strip (Fills the previous empty gap!) */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50/90 p-3.5 rounded-2xl border border-gray-200/80 grow max-w-xl">
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">Origin Hub</span>
-                <p className="text-xs font-black text-black truncate">Sowcarpet Central Hub</p>
-                <span className="text-[10px] text-emerald-700 font-bold block">✓ Grade-A QC Passed</span>
-              </div>
-
-              <div className="space-y-0.5 border-l border-gray-200/80 pl-3">
-                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">Airway Bill</span>
-                <p className="text-xs font-black font-mono text-black truncate">{awbNumber}</p>
-                <span className="text-[10px] text-blue-700 font-bold block">Air Express Cargo</span>
-              </div>
-
-              <div className="space-y-0.5 border-l border-gray-200/80 pl-3 col-span-2 sm:col-span-1">
-                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">Packaging</span>
-                <p className="text-xs font-black text-black">Triple Nitrogen Seal</p>
-                <span className="text-[10px] text-purple-700 font-bold block">100% Moisture Proof</span>
-              </div>
             </div>
 
             {/* Right: Estimated Delivery & Grand Total Card */}
@@ -774,88 +744,6 @@ export default function OrderDetailsPage() {
             })}
           </div>
 
-          {/* Live Delivery Checkpoint & Telemetry Banner */}
-          <div className="bg-gradient-to-r from-gray-50 via-emerald-50/40 to-gray-50 p-4 rounded-2xl border border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-2xs">
-                <Truck className="w-4 h-4 text-[#128C7E]" />
-              </div>
-              <div>
-                <p className="font-bold text-black flex items-center gap-2">
-                  <span>Current Checkpoint:</span>
-                  <span className="font-semibold text-gray-700">Chennai Sorting Hub (Express Gateway, Guindy)</span>
-                </p>
-                <p className="text-[11px] text-gray-500">
-                  Standard delivery speed • Handled with food-grade temperature care (Ambient 22°C - 24°C)
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 self-start sm:self-auto">
-              <button
-                onClick={() => setShowAuditLogs(!showAuditLogs)}
-                className="text-[11px] font-bold text-gray-600 hover:text-black flex items-center gap-1 cursor-pointer"
-              >
-                <span>{showAuditLogs ? 'Hide Activity Trail' : 'View Activity Trail'}</span>
-                {showAuditLogs ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              </button>
-
-              <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-gray-200 shadow-2xs">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#128C7E]" />
-                <span className="font-extrabold text-[#128C7E] text-[10px] uppercase tracking-wider">
-                  100% Quality Insured
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Detailed Real-Time Logistics Audit Trail (Rich High-Density Activity Log) */}
-          <AnimatePresence>
-            {showAuditLogs && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden border-t border-gray-100 pt-4"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-[#128C7E]" />
-                      <span>Consignment Event Timeline & Scan Logs</span>
-                    </span>
-                    <span className="text-[10px] font-mono text-gray-400">Node: CHN-HUB-GATE-01</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {AUDIT_TRAIL_LOGS.map((log, lIdx) => (
-                      <div 
-                        key={lIdx}
-                        className={`p-3 rounded-xl border text-xs space-y-1 ${
-                          log.status === 'completed'
-                            ? 'bg-emerald-50/40 border-emerald-200/70'
-                            : log.status === 'halted'
-                            ? 'bg-gray-50 border-gray-200'
-                            : 'bg-white border-gray-200/70'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold text-gray-500">{log.time}</span>
-                          <span className={`w-2 h-2 rounded-full ${
-                            log.status === 'completed' ? 'bg-emerald-500' : log.status === 'halted' ? 'bg-gray-400' : 'bg-amber-400'
-                          }`} />
-                        </div>
-                        <p className="font-black text-black text-xs leading-snug">{log.event}</p>
-                        <p className="text-[10px] text-gray-600 font-semibold">{log.location}</p>
-                        <p className="text-[10px] text-gray-500 leading-tight">{log.detail}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
         </div>
 
         {/* MAIN BODY: 2-COLUMN BALANCED ENTERPRISE GRID (PERFECT SYMMETRY, ZERO VOID) */}
@@ -1028,90 +916,157 @@ export default function OrderDetailsPage() {
               </div>
             </div>
 
-            {/* 3. ROUTE JOURNEY & DELIVERY SECURITY PASSCODE CARD */}
+            {/* 3. INTERACTIVE PRODUCT REVIEW & ORDERING EXPERIENCE */}
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] space-y-5">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-[#128C7E]" />
-                  <h4 className="text-sm font-black font-serif text-black uppercase tracking-wider">
-                    Transit Checkpoints & Logistics Flow
-                  </h4>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-amber-500 fill-amber-400" />
+                    <h4 className="text-base font-black font-serif text-black tracking-wide">
+                      Rate Your Ordering Experience & Write Feedback
+                    </h4>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Your rating and feedback will be published directly under the product page.
+                  </p>
                 </div>
-                <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                  Pan-India Air Grid
-                </span>
+                {reviewSubmitSuccess && (
+                  <span className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black rounded-full uppercase tracking-wider inline-flex items-center gap-1 shrink-0">
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Feedback Published!</span>
+                  </span>
+                )}
               </div>
 
-              {/* 4-Hub Timeline */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-200/70 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-2xs">
-                    <Package className="w-4 h-4 text-[#128C7E]" />
-                  </div>
-                  <div className="space-y-0.5 min-w-0">
-                    <span className="text-[10px] font-black uppercase text-gray-500">Dispatch Facility</span>
-                    <p className="text-xs font-black text-black truncate">Central Gourmet Hub, Sowcarpet</p>
-                    <p className="text-[11px] text-emerald-700 font-semibold">✓ Quality Tested & Dispatched</p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-200/70 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-2xs">
-                    <Truck className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div className="space-y-0.5 min-w-0">
-                    <span className="text-[10px] font-black uppercase text-gray-500">Aviation Gateway</span>
-                    <p className="text-xs font-black text-black truncate">Guindy Express Transit Center</p>
-                    <p className="text-[11px] text-blue-700 font-semibold">✓ Air Cargo Manifest Cleared</p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-200/70 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-2xs">
-                    <Navigation className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <div className="space-y-0.5 min-w-0">
-                    <span className="text-[10px] font-black uppercase text-gray-500">Last-Mile Station</span>
-                    <p className="text-xs font-black text-black truncate">Local Hub: {orderData.city || 'Chennai Hub'}</p>
-                    <p className="text-[11px] text-amber-700 font-semibold">Sorting for Delivery Vehicle</p>
+              {/* Product Selector (if multiple items in order) */}
+              {items && items.length > 1 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-700 block">
+                    Select Product to Review:
+                  </label>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {items.map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedReviewItemIdx(idx)}
+                        className={`px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 border ${
+                          selectedReviewItemIdx === idx
+                            ? 'bg-[#128C7E] text-white border-[#128C7E] shadow-sm'
+                            : 'bg-gray-50 hover:bg-gray-100 text-gray-800 border-gray-200'
+                        }`}
+                      >
+                        <img 
+                          src={item.image || '/logo.jpg'} 
+                          alt={item.name} 
+                          className="w-5 h-5 rounded-md object-cover bg-white" 
+                          onError={(e) => { e.target.onerror = null; e.target.src = '/logo.jpg'; }}
+                        />
+                        <span className="truncate max-w-[180px]">{item.name}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
+              )}
 
-                <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-200/70 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-2xs">
-                    <MapPin className="w-4 h-4 text-emerald-600" />
-                  </div>
-                  <div className="space-y-0.5 min-w-0">
-                    <span className="text-[10px] font-black uppercase text-gray-500">Final Destination</span>
-                    <p className="text-xs font-black text-black truncate">{orderData.address || 'Customer Residence'}</p>
-                    <p className="text-[11px] text-gray-600 font-medium">Recipient Doorstep Delivery</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Delivery Security OTP Passcode Pill */}
-              <div className="bg-gradient-to-r from-emerald-50/80 via-white to-emerald-50/80 p-4 rounded-2xl border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#128C7E] text-white flex items-center justify-center shrink-0 shadow-sm">
-                    <Key className="w-5 h-5" />
-                  </div>
+              {/* Single item indicator */}
+              {items && items.length === 1 && (
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200/80">
+                  <img 
+                    src={items[0]?.image || '/logo.jpg'} 
+                    alt={items[0]?.name} 
+                    className="w-10 h-10 rounded-xl object-cover bg-white border border-gray-200" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = '/logo.jpg'; }}
+                  />
                   <div>
-                    <span className="text-[10px] font-black uppercase text-[#128C7E] tracking-wider block">
-                      Secure Handover Verification
-                    </span>
-                    <p className="text-xs text-gray-700">
-                      Share this 4-digit PIN only with courier upon physically receiving your parcel.
-                    </p>
+                    <span className="text-[10px] font-bold uppercase text-gray-500 tracking-wider block">Reviewing Product</span>
+                    <h5 className="text-xs font-black text-black">{items[0]?.name || 'Gourmet Selection'}</h5>
                   </div>
                 </div>
+              )}
 
-                <div className="flex items-center gap-2 self-start sm:self-auto bg-white px-4 py-2 rounded-xl border border-emerald-300 shadow-2xs">
-                  <span className="text-xs font-bold text-gray-500 uppercase">OTP PIN:</span>
-                  <span className="text-base font-black font-mono tracking-widest text-[#128C7E]">
-                    {String(orderId).replace(/\D/g, '').slice(-4) || '4928'}
+              {/* Star Rating Selector */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-gray-700">
+                    Your Rating:
+                  </label>
+                  <span className="text-xs font-black text-amber-700 font-mono">
+                    {userRating === 5 ? '⭐⭐⭐⭐⭐ 5/5 Outstanding' :
+                     userRating === 4 ? '⭐⭐⭐⭐ 4/5 Very Good' :
+                     userRating === 3 ? '⭐⭐⭐ 3/5 Good' :
+                     userRating === 2 ? '⭐⭐ 2/5 Fair' : '⭐ 1/5 Poor'}
                   </span>
                 </div>
+                <div className="flex items-center gap-2 py-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setUserRating(star)}
+                      className="p-1.5 hover:scale-125 transition-transform cursor-pointer rounded-lg hover:bg-amber-50"
+                      title={`${star} Star`}
+                    >
+                      <Star 
+                        className={`w-7 h-7 ${
+                          star <= userRating 
+                            ? 'text-amber-400 fill-amber-400' 
+                            : 'text-gray-200'
+                        }`} 
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Feedback Comment Textarea */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700 block">
+                  Write Your Review / Feedback:
+                </label>
+                <textarea
+                  rows={4}
+                  value={userReviewComment}
+                  onChange={(e) => {
+                    setUserReviewComment(e.target.value);
+                    if (reviewCommentError) setReviewCommentError('');
+                  }}
+                  placeholder="Share details about freshness, crunchiness, aroma, packaging, or delivery experience..."
+                  className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs text-black placeholder:text-gray-400 outline-none focus:border-[#128C7E] focus:bg-white transition-all resize-none font-medium leading-relaxed"
+                />
+                {reviewCommentError && (
+                  <p className="text-[11px] font-bold text-rose-600 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    <span>{reviewCommentError}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Submit Action */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <p className="text-[11px] text-gray-500">
+                  Reviews are instantly published under the verified customer reviews section on the product page.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleSendFeedback}
+                  className="px-6 py-3 bg-[#128C7E] hover:bg-[#0e6f63] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#128C7E]/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Send Feedback</span>
+                </button>
+              </div>
+
+              {/* Success Notification Banner */}
+              {reviewSubmitSuccess && (
+                <div className="p-4 bg-emerald-50 text-emerald-900 rounded-2xl border border-emerald-200 text-xs font-bold flex items-center gap-2.5">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <span>
+                    Thank you! Your feedback for <strong>{(items[selectedReviewItemIdx] || items[0])?.name || 'this product'}</strong> has been published and linked directly under the product page!
+                  </span>
+                </div>
+              )}
             </div>
 
           </div>
@@ -1171,114 +1126,7 @@ export default function OrderDetailsPage() {
               </div>
             </div>
 
-            {/* 2. COURIER EXECUTIVE & DELIVERY PARTNER CARD */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <h3 className="text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-[#128C7E]" />
-                  <span>Delivery Partner</span>
-                </h3>
-                <span className="text-[10px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase">
-                  Verified Agent
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#128C7E]/10 border border-[#128C7E]/20 text-[#128C7E] flex items-center justify-center font-black text-sm shrink-0">
-                  RK
-                </div>
-                <div className="min-w-0 space-y-0.5">
-                  <h4 className="text-sm font-black text-black leading-tight">
-                    Ramesh K.
-                  </h4>
-                  <p className="text-[11px] text-gray-500">
-                    Haji Express Courier #842 • Express Van
-                  </p>
-                  <div className="flex items-center gap-1 text-[11px] text-amber-500">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    <span className="font-black text-black">4.9</span>
-                    <span className="text-gray-400 text-[10px]">(1,480+ Deliveries in Chennai)</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 text-xs bg-gray-50 p-3 rounded-xl border border-gray-200/70">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Assigned Slot:</span>
-                  <strong className="text-black">Morning (10 AM - 1 PM)</strong>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Health Standard:</span>
-                  <span className="text-emerald-700 font-bold">✓ Vaccinated & Sanitized</span>
-                </div>
-              </div>
-
-              <a
-                href={`tel:${activeWhatsAppNumber || '919655298540'}`}
-                className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-black font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <Phone className="w-3.5 h-3.5 text-[#128C7E]" />
-                <span>Contact Logistics Dispatch</span>
-              </a>
-            </div>
-
-            {/* 3. INTERACTIVE DELIVERY PREFERENCES CARD */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <h3 className="text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-500" />
-                  <span>Doorstep Preferences</span>
-                </h3>
-                {instructionsSaved && (
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                    ✓ Updated
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-2.5 text-xs">
-                <label 
-                  onClick={() => handleTogglePreference('ringBell')}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100/80 cursor-pointer border border-gray-200/70 transition-colors"
-                >
-                  <span className="text-gray-700 font-medium">Ring doorbell once upon arrival</span>
-                  <input 
-                    type="checkbox" 
-                    checked={deliveryPreferences.ringBell} 
-                    onChange={() => {}}
-                    className="w-4 h-4 accent-[#128C7E] rounded cursor-pointer" 
-                  />
-                </label>
-
-                <label 
-                  onClick={() => handleTogglePreference('callArrival')}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100/80 cursor-pointer border border-gray-200/70 transition-colors"
-                >
-                  <span className="text-gray-700 font-medium">Call phone 5 mins before arrival</span>
-                  <input 
-                    type="checkbox" 
-                    checked={deliveryPreferences.callArrival} 
-                    onChange={() => {}}
-                    className="w-4 h-4 accent-[#128C7E] rounded cursor-pointer" 
-                  />
-                </label>
-
-                <label 
-                  onClick={() => handleTogglePreference('leaveGuard')}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100/80 cursor-pointer border border-gray-200/70 transition-colors"
-                >
-                  <span className="text-gray-700 font-medium">Leave with security / apartment guard</span>
-                  <input 
-                    type="checkbox" 
-                    checked={deliveryPreferences.leaveGuard} 
-                    onChange={() => {}}
-                    className="w-4 h-4 accent-[#128C7E] rounded cursor-pointer" 
-                  />
-                </label>
-              </div>
-            </div>
-
-            {/* 4. FINANCIAL SUMMARY CARD */}
+            {/* 2. FINANCIAL SUMMARY CARD */}
             <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] space-y-4">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <h3 className="text-xs font-black uppercase text-gray-500 tracking-wider">
@@ -1346,48 +1194,7 @@ export default function OrderDetailsPage() {
               </div>
             </div>
 
-            {/* 5. INTERACTIVE ORDER RATING & EXPERIENCE CARD */}
-            <div className="bg-white rounded-3xl p-5 border border-gray-200/80 shadow-2xs space-y-3 text-xs">
-              <div className="flex items-center justify-between">
-                <h4 className="font-black text-black flex items-center gap-1.5">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
-                  <span>Rate Your Ordering Experience</span>
-                </h4>
-                {ratingSubmitted && (
-                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-                    ✓ Feedback Logged!
-                  </span>
-                )}
-              </div>
-              
-              <p className="text-gray-500 text-[11px] leading-relaxed">
-                How easy was checkout and order tracking? Your feedback keeps our Sowcarpet artisans thriving!
-              </p>
-
-              <div className="flex items-center justify-center gap-2 py-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => {
-                      setUserRating(star);
-                      setRatingSubmitted(true);
-                      setTimeout(() => setRatingSubmitted(false), 3000);
-                    }}
-                    className="p-1 hover:scale-125 transition-transform cursor-pointer"
-                  >
-                    <Star 
-                      className={`w-6 h-6 ${
-                        star <= userRating 
-                          ? 'text-amber-400 fill-amber-400' 
-                          : 'text-gray-300'
-                      }`} 
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 6. NEED HELP & CONCIERGE ASSISTANCE BOX */}
+            {/* 3. NEED HELP & CONCIERGE ASSISTANCE BOX */}
             <div className="bg-white rounded-3xl p-5 border border-gray-200/80 shadow-2xs space-y-2 text-xs">
               <h4 className="font-black text-black flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4 text-[#128C7E]" />
@@ -1419,46 +1226,6 @@ export default function OrderDetailsPage() {
 
           </div>
 
-        </div>
-
-        {/* FULL-WIDTH SECTION: VIP REORDER BENEFIT & EXCLUSIVE COUPON BANNER (SPANS 100% WIDTH) */}
-        <div className="bg-gradient-to-r from-[#128C7E] via-[#0D7266] to-[#075E54] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-emerald-700/40">
-          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute left-1/3 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>Haji Club Loyal Patron Privilege</span>
-              </div>
-              <h3 className="text-lg sm:text-2xl font-black font-serif text-white tracking-wide">
-                Enjoy Flat 10% OFF on Your Next Gourmet Order
-              </h3>
-              <p className="text-xs text-gray-300 max-w-xl leading-relaxed">
-                Treat your family to premium dry fruits, Afghan Anjeer, or Kashmiri Saffron. You have also earned <strong className="text-amber-400 font-mono">+45 Haji Gold Coins</strong> from this consignment!
-              </p>
-            </div>
-
-            {/* Coupon Code Pill */}
-            <div className="flex items-center gap-3 self-start lg:self-auto bg-white/10 backdrop-blur-md p-2 pl-4 rounded-2xl border border-white/20 shrink-0">
-              <div className="flex flex-col text-left">
-                <span className="text-[9px] uppercase font-bold text-gray-300 tracking-wider">Promo Coupon</span>
-                <span className="text-base font-black font-mono text-emerald-400 tracking-wider">HAJIGOURMET10</span>
-              </div>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText('HAJIGOURMET10');
-                  setCopiedCoupon(true);
-                  setTimeout(() => setCopiedCoupon(false), 2000);
-                }}
-                className="px-4 py-2.5 bg-[#128C7E] hover:bg-[#0e6f63] text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shadow-md"
-              >
-                {copiedCoupon ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedCoupon ? 'Copied Code!' : 'Copy Code'}</span>
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* FULL-WIDTH SECTION: POPULAR RECOMMENDATIONS & PAIRINGS (FILLS BOTTOM EMPTY SPACE) */}
