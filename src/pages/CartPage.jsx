@@ -357,11 +357,15 @@ export default function CartPage() {
                   <div className="flex justify-between items-start border-b border-gray-100 pb-2.5">
                     <div>
                       <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block">Order ID</span>
-                      <span className="text-sm font-bold text-gray-900">#{order.orderId}</span>
+                      <span className="text-sm font-bold text-gray-900">#{order.order_id || order.orderId || order.id}</span>
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block">Date</span>
-                      <span className="text-xs font-bold text-gray-700">{order.timestamp || 'Just now'}</span>
+                      <span className="text-xs font-bold text-gray-700">
+                        {order.created_at || order.createdAt || order.date
+                          ? new Date(order.created_at || order.createdAt || order.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })
+                          : (order.timestamp || 'Just now')}
+                      </span>
                     </div>
                   </div>
                   <div className="space-y-1 py-2">
@@ -369,9 +373,17 @@ export default function CartPage() {
                       Items Included
                     </div>
                     <div className="text-xs font-semibold text-gray-800 line-clamp-2">
-                      {order.items && order.items.length > 0 
-                        ? order.items.map(i => `${i.quantity}x ${i.name}`).join(', ') 
-                        : 'Assorted Gourmet Products'}
+                      {(() => {
+                        let parsedItems = [];
+                        try {
+                          if (Array.isArray(order.items)) parsedItems = order.items;
+                          else if (typeof order.items_json === 'string') parsedItems = JSON.parse(order.items_json);
+                          else if (typeof order.items === 'string') parsedItems = JSON.parse(order.items);
+                        } catch {}
+                        return parsedItems.length > 0 
+                          ? parsedItems.map(i => `${i.quantity || 1}x ${i.name || 'Gourmet Item'}`).join(', ') 
+                          : 'Assorted Gourmet Products';
+                      })()}
                     </div>
                   </div>
                   <div className="flex justify-between items-end pt-2 border-t border-gray-100">
@@ -390,7 +402,7 @@ export default function CartPage() {
                     <div className="text-right">
                       <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Total</span>
                       <span className="text-sm font-black text-gray-900 font-mono">
-                        ₹{order.total ? order.total.toLocaleString('en-IN') : 0}
+                        ₹{Number(order.total_amount || order.totalAmount || order.total || order.subtotal || 0).toLocaleString('en-IN')}
                       </span>
                     </div>
                   </div>
