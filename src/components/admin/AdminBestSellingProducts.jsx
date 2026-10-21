@@ -10,17 +10,19 @@ export default function AdminBestSellingProducts() {
 
   // Local selection map: productId -> boolean
   const [selectedMap, setSelectedMap] = useState({});
-  const isInitializedRef = useRef(false);
 
-  // Initialize selection from products ONLY once on mount or when products first arrive
+  // Sync selection from products, preserving user's current session choices
   useEffect(() => {
-    if (!isInitializedRef.current && Array.isArray(products) && products.length > 0) {
-      const initialMap = {};
-      products.forEach(p => {
-        initialMap[p.id] = isProductBestSeller(p);
+    if (Array.isArray(products) && products.length > 0) {
+      setSelectedMap(prev => {
+        const next = { ...prev };
+        products.forEach(p => {
+          if (next[p.id] === undefined) {
+            next[p.id] = isProductBestSeller(p);
+          }
+        });
+        return next;
       });
-      setSelectedMap(initialMap);
-      isInitializedRef.current = true;
     }
   }, [products]);
 
@@ -32,7 +34,10 @@ export default function AdminBestSellingProducts() {
   };
 
   const handleToggle = async (productId) => {
-    const nextVal = !selectedMap[productId];
+    const prod = products.find(p => p.id === productId);
+    const currentVal = selectedMap[productId] !== undefined ? Boolean(selectedMap[productId]) : isProductBestSeller(prod);
+    const nextVal = !currentVal;
+
     // 1. Instant local UI update
     setSelectedMap(prev => ({
       ...prev,
@@ -42,7 +47,6 @@ export default function AdminBestSellingProducts() {
     // 2. Direct real-time sync with CartContext & TiDB Cloud
     try {
       await toggleBestSellingProduct(productId, nextVal);
-      const prod = products.find(p => p.id === productId);
       showNotification(`${prod ? prod.name : 'Product'} ${nextVal ? 'marked as Top Bestseller' : 'removed from Top Bestsellers'}!`);
     } catch (err) {
       showNotification('Failed to sync changes.', 'error');
@@ -53,7 +57,7 @@ export default function AdminBestSellingProducts() {
     setIsSaving(true);
     try {
       const updatedProducts = products.map(p => {
-        const isBest = !!selectedMap[p.id];
+        const isBest = selectedMap[p.id] !== undefined ? Boolean(selectedMap[p.id]) : isProductBestSeller(p);
         return {
           ...p,
           isBestSelling: isBest,
@@ -63,7 +67,7 @@ export default function AdminBestSellingProducts() {
 
       const res = await batchUpdateProducts(updatedProducts);
       if (res && res.success !== false) {
-        const count = Object.values(selectedMap).filter(Boolean).length;
+        const count = updatedProducts.filter(p => p.isBestSelling).length;
         showNotification(`All saved! ${count} best selling products are now live across all devices.`);
       } else {
         showNotification('Failed to save. Please try again.', 'error');
@@ -80,7 +84,7 @@ export default function AdminBestSellingProducts() {
            (p.id && p.id.toLowerCase().includes(bestsellingSearchTerm.toLowerCase()));
   });
 
-  const selectedCount = Object.values(selectedMap).filter(Boolean).length;
+  const selectedCount = products.filter(p => selectedMap[p.id] !== undefined ? Boolean(selectedMap[p.id]) : isProductBestSeller(p)).length;
 
   return (
     <div className="relative space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-6 pb-20 md:pb-6 px-4 sm:px-6 md:px-8">
@@ -158,7 +162,7 @@ export default function AdminBestSellingProducts() {
             </div>
           ) : (
             bestsellingModalProducts.map(p => {
-              const isSelected = Boolean(selectedMap[p.id]);
+              const isSelected = selectedMap[p.id] !== undefined ? Boolean(selectedMap[p.id]) : isProductBestSeller(p);
               return (
                 <div 
                   key={p.id} 

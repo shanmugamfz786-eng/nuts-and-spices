@@ -224,10 +224,31 @@ export const createProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, categoryName, badge, price, image, description, origin, shelfLife, stock, status, active, weights, isFeaturedToday, isBestSelling } = req.body;
+    const { 
+      name, 
+      category, 
+      categoryName, 
+      badge, 
+      price, 
+      image, 
+      description, 
+      origin, 
+      shelfLife, 
+      stock, 
+      status, 
+      active, 
+      weights, 
+      isFeaturedToday, 
+      is_featured_today, 
+      isBestSelling, 
+      is_best_selling 
+    } = req.body;
 
     const weightsJson = weights ? JSON.stringify(weights) : (price ? JSON.stringify([{ label: 'Standard', price: Number(price) }]) : null);
     const activeVal = status ? status : ((active === true || active === 'true' || active === 'Active') ? 'Active' : 'Inactive');
+
+    const rawFeat = isFeaturedToday !== undefined ? isFeaturedToday : is_featured_today;
+    const rawBest = isBestSelling !== undefined ? isBestSelling : is_best_selling;
 
     const toSql = (v) => v !== undefined ? v : null;
 
@@ -259,8 +280,8 @@ export const updateProduct = async (req, res) => {
         toSql(shelfLife), 
         stock !== undefined ? Number(stock) : null, 
         toSql(activeVal), 
-        isFeaturedToday !== undefined ? (isFeaturedToday ? 1 : 0) : null, 
-        isBestSelling !== undefined ? (isBestSelling ? 1 : 0) : null, 
+        rawFeat !== undefined ? ((rawFeat === true || rawFeat === 'true' || rawFeat === 1 || rawFeat === '1') ? 1 : 0) : null, 
+        rawBest !== undefined ? ((rawBest === true || rawBest === 'true' || rawBest === 1 || rawBest === '1') ? 1 : 0) : null, 
         id
       ]
     );
@@ -269,6 +290,13 @@ export const updateProduct = async (req, res) => {
     const updatedProds = curProds.map(p => {
       if (p.id === id) {
         const newStatus = activeVal || p.status;
+        const featVal = rawFeat !== undefined 
+          ? (rawFeat === true || rawFeat === 'true' || rawFeat === 1 || rawFeat === '1')
+          : (p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1');
+        const bestVal = rawBest !== undefined 
+          ? (rawBest === true || rawBest === 'true' || rawBest === 1 || rawBest === '1')
+          : (p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1');
+
         return {
           ...p,
           ...(name && { name }),
@@ -282,8 +310,10 @@ export const updateProduct = async (req, res) => {
           ...(stock !== undefined && { stock: Number(stock) }),
           ...(weights && { weights, price: weights[0] ? weights[0].price : p.price }),
           ...(price !== undefined && !weights && { price: Number(price) }),
-          ...(isFeaturedToday !== undefined && { isFeaturedToday }),
-          ...(isBestSelling !== undefined && { isBestSelling }),
+          isFeaturedToday: Boolean(featVal),
+          is_featured_today: featVal ? 1 : 0,
+          isBestSelling: Boolean(bestVal),
+          is_best_selling: bestVal ? 1 : 0,
           status: newStatus,
           active: newStatus === 'Active'
         };

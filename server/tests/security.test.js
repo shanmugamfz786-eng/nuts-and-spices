@@ -85,9 +85,9 @@ describe('Security and Reliability Test Suite', () => {
         totalAmount: 1,
         items: [
           {
-            id: 'ndf-01',
-            cartItemId: 'ndf-01-250g',
-            name: 'California Jumbo Almonds (Badam)',
+            id: 'vp-01',
+            cartItemId: 'vp-01-250g',
+            name: 'VEG CHIPS',
             weight: '250g',
             price: 1, // client tries 1 INR instead of catalog price
             quantity: 2
@@ -126,11 +126,11 @@ describe('Security and Reliability Test Suite', () => {
           },
           items: [
             {
-              id: 'ndf-01',
-              cartItemId: 'ndf-01-250g',
-              name: 'California Jumbo Almonds (Badam)',
+              id: 'vp-01',
+              cartItemId: 'vp-01-250g',
+              name: 'VEG CHIPS',
               weight: '250g',
-              price: 340,
+              price: 250,
               quantity: 1
             }
           ]

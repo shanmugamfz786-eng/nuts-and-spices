@@ -479,9 +479,16 @@ export const CartProvider = ({ children }) => {
                 const isUnsplash = !cloudP.image || cloudP.image.includes('unsplash.com');
                 const finalImg = (!isUnsplash && cloudP.image) ? cloudP.image : (seedImg || seedP.image || '/images/products/product_1.jpg');
 
+                const feat = cloudP.isFeaturedToday === true || cloudP.isFeaturedToday === 'true' || cloudP.is_featured_today === 1 || cloudP.is_featured_today === '1';
+                const best = cloudP.isBestSelling === true || cloudP.isBestSelling === 'true' || cloudP.is_best_selling === 1 || cloudP.is_best_selling === '1';
+
                 return {
                   ...seedP,
                   ...cloudP,
+                  isFeaturedToday: Boolean(feat),
+                  is_featured_today: feat ? 1 : 0,
+                  isBestSelling: Boolean(best),
+                  is_best_selling: best ? 1 : 0,
                   image: finalImg,
                 };
               }

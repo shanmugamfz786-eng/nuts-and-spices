@@ -10,17 +10,19 @@ export default function AdminFeaturedProducts() {
 
   // Local selection map: productId -> boolean
   const [selectedMap, setSelectedMap] = useState({});
-  const isInitializedRef = useRef(false);
 
-  // Initialize selection from products ONLY once on mount or when products first arrive
+  // Sync selection from products, preserving user's current session choices
   useEffect(() => {
-    if (!isInitializedRef.current && Array.isArray(products) && products.length > 0) {
-      const initialMap = {};
-      products.forEach(p => {
-        initialMap[p.id] = isProductFeatured(p);
+    if (Array.isArray(products) && products.length > 0) {
+      setSelectedMap(prev => {
+        const next = { ...prev };
+        products.forEach(p => {
+          if (next[p.id] === undefined) {
+            next[p.id] = isProductFeatured(p);
+          }
+        });
+        return next;
       });
-      setSelectedMap(initialMap);
-      isInitializedRef.current = true;
     }
   }, [products]);
 
@@ -32,7 +34,10 @@ export default function AdminFeaturedProducts() {
   };
 
   const handleToggle = async (productId) => {
-    const nextVal = !selectedMap[productId];
+    const prod = products.find(p => p.id === productId);
+    const currentVal = selectedMap[productId] !== undefined ? Boolean(selectedMap[productId]) : isProductFeatured(prod);
+    const nextVal = !currentVal;
+
     // 1. Instant local UI update
     setSelectedMap(prev => ({
       ...prev,
@@ -42,7 +47,6 @@ export default function AdminFeaturedProducts() {
     // 2. Direct real-time sync with CartContext & TiDB Cloud
     try {
       await toggleFeaturedProduct(productId, nextVal);
-      const prod = products.find(p => p.id === productId);
       showNotification(`${prod ? prod.name : 'Product'} ${nextVal ? 'added to' : 'removed from'} Featured Showcase!`);
     } catch (err) {
       showNotification('Failed to sync changes.', 'error');
@@ -53,7 +57,7 @@ export default function AdminFeaturedProducts() {
     setIsSaving(true);
     try {
       const updatedProducts = products.map(p => {
-        const isFeatured = !!selectedMap[p.id];
+        const isFeatured = selectedMap[p.id] !== undefined ? Boolean(selectedMap[p.id]) : isProductFeatured(p);
         return {
           ...p,
           isFeaturedToday: isFeatured,
@@ -63,7 +67,7 @@ export default function AdminFeaturedProducts() {
 
       const res = await batchUpdateProducts(updatedProducts);
       if (res && res.success !== false) {
-        const count = Object.values(selectedMap).filter(Boolean).length;
+        const count = updatedProducts.filter(p => p.isFeaturedToday).length;
         showNotification(`All saved! ${count} featured products are now live across all devices.`);
       } else {
         showNotification('Failed to save. Please try again.', 'error');
@@ -80,7 +84,7 @@ export default function AdminFeaturedProducts() {
            (p.id && p.id.toLowerCase().includes(featuredSearchTerm.toLowerCase()));
   });
 
-  const selectedCount = Object.values(selectedMap).filter(Boolean).length;
+  const selectedCount = products.filter(p => selectedMap[p.id] !== undefined ? Boolean(selectedMap[p.id]) : isProductFeatured(p)).length;
 
   return (
     <div className="relative space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-6 pb-20 md:pb-6 px-4 sm:px-6 md:px-8">
@@ -158,7 +162,7 @@ export default function AdminFeaturedProducts() {
             </div>
           ) : (
             featuredModalProducts.map(p => {
-              const isSelected = Boolean(selectedMap[p.id]);
+              const isSelected = selectedMap[p.id] !== undefined ? Boolean(selectedMap[p.id]) : isProductFeatured(p);
               return (
                 <div 
                   key={p.id} 
