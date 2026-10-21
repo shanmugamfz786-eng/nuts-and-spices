@@ -3,26 +3,24 @@ import { useCart, isProductBestSeller } from '../../context/CartContext';
 import { Search, Award, ArrowLeft, CheckCircle2, Save, Loader2, Check } from 'lucide-react';
 
 export default function AdminBestSellingProducts() {
-  const { products, batchUpdateProducts, toggleBestSellingProduct, setAdminTab } = useCart();
+  const { products, batchUpdateProducts, setAdminTab } = useCart();
   const [bestsellingSearchTerm, setBestsellingSearchTerm] = useState('');
   const [notification, setNotification] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Local selection map: productId -> boolean
   const [selectedMap, setSelectedMap] = useState({});
+  const hasInitializedRef = useRef(false);
 
-  // Sync selection from products, preserving user's current session choices
+  // Initialize selection ONLY ONCE from products when loaded, preventing any background wipe-out
   useEffect(() => {
-    if (Array.isArray(products) && products.length > 0) {
-      setSelectedMap(prev => {
-        const next = { ...prev };
-        products.forEach(p => {
-          if (next[p.id] === undefined) {
-            next[p.id] = isProductBestSeller(p);
-          }
-        });
-        return next;
+    if (!hasInitializedRef.current && Array.isArray(products) && products.length > 0) {
+      const initial = {};
+      products.forEach(p => {
+        initial[p.id] = isProductBestSeller(p);
       });
+      setSelectedMap(initial);
+      hasInitializedRef.current = true;
     }
   }, [products]);
 
@@ -30,29 +28,22 @@ export default function AdminBestSellingProducts() {
     setNotification({ msg, type });
     setTimeout(() => {
       setNotification(null);
-    }, 3500);
+    }, 4000);
   };
 
-  const handleToggle = async (productId) => {
+  // Instant local UI toggle - zero latency, zero background race conditions, never resets before confirm
+  const handleToggle = (productId) => {
     const prod = products.find(p => p.id === productId);
     const currentVal = selectedMap[productId] !== undefined ? Boolean(selectedMap[productId]) : isProductBestSeller(prod);
     const nextVal = !currentVal;
 
-    // 1. Instant local UI update
     setSelectedMap(prev => ({
       ...prev,
       [productId]: nextVal
     }));
-
-    // 2. Direct real-time sync with CartContext & TiDB Cloud
-    try {
-      await toggleBestSellingProduct(productId, nextVal);
-      showNotification(`${prod ? prod.name : 'Product'} ${nextVal ? 'marked as Top Bestseller' : 'removed from Top Bestsellers'}!`);
-    } catch (err) {
-      showNotification('Failed to sync changes.', 'error');
-    }
   };
 
+  // Confirm and persist all changes in a single atomic batch across all devices
   const handleSaveAll = async () => {
     setIsSaving(true);
     try {
@@ -68,7 +59,7 @@ export default function AdminBestSellingProducts() {
       const res = await batchUpdateProducts(updatedProducts);
       if (res && res.success !== false) {
         const count = updatedProducts.filter(p => p.isBestSelling).length;
-        showNotification(`All saved! ${count} best selling products are now live across all devices.`);
+        showNotification(`✓ Confirmed! ${count} best selling products are now live across all devices.`);
       } else {
         showNotification('Failed to save. Please try again.', 'error');
       }
@@ -87,7 +78,7 @@ export default function AdminBestSellingProducts() {
   const selectedCount = products.filter(p => selectedMap[p.id] !== undefined ? Boolean(selectedMap[p.id]) : isProductBestSeller(p)).length;
 
   return (
-    <div className="relative space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-6 pb-20 md:pb-6 px-4 sm:px-6 md:px-8">
+    <div className="relative space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-6 pb-28 md:pb-6 px-4 sm:px-6 md:px-8">
       {/* Toast Notification Popup */}
       {notification && (
         <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border animate-in fade-in slide-in-from-top-4 duration-300 ${
@@ -112,7 +103,7 @@ export default function AdminBestSellingProducts() {
               Manage Top Sellers
             </h1>
             <p className="text-xs font-semibold text-gray-500 mt-0.5">
-              Click any product to toggle bestseller status. Changes sync live instantly to all devices!
+              Select or deselect items below, then click Confirm & Save to publish live to all devices.
             </p>
           </div>
         </div>
@@ -120,7 +111,7 @@ export default function AdminBestSellingProducts() {
         {/* Top Save & Count Actions */}
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
-            {selectedCount} Bestsellers
+            {selectedCount} Selected
           </span>
           <button
             onClick={handleSaveAll}
@@ -135,7 +126,7 @@ export default function AdminBestSellingProducts() {
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>Save All Changes</span>
+                <span>Confirm & Save ({selectedCount})</span>
               </>
             )}
           </button>
@@ -207,6 +198,30 @@ export default function AdminBestSellingProducts() {
             })
           )}
         </div>
+      </div>
+
+      {/* Floating Bottom Action Bar on Mobile so Confirm is always 1 tap away */}
+      <div className="sm:hidden fixed bottom-4 left-4 right-4 z-40 bg-gray-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl border border-gray-800 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-5">
+        <div className="text-xs font-extrabold text-emerald-400 pl-1">
+          {selectedCount} Selected
+        </div>
+        <button
+          onClick={handleSaveAll}
+          disabled={isSaving}
+          className="flex items-center gap-2 bg-[#128C7E] active:bg-[#0e7065] text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md disabled:opacity-50"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-3.5 h-3.5" />
+              <span>Confirm & Save</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
