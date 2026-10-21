@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useCart } from '../../context/CartContext';
-import { Search, Award, ArrowLeft, CheckCircle2, Save, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useCart, isProductBestSeller } from '../../context/CartContext';
+import { Search, Award, ArrowLeft, CheckCircle2, Save, Loader2, Check } from 'lucide-react';
 
 export default function AdminBestSellingProducts() {
-  const { products, batchUpdateProducts, setAdminTab } = useCart();
+  const { products, batchUpdateProducts, toggleBestSellingProduct, setAdminTab } = useCart();
   const [bestsellingSearchTerm, setBestsellingSearchTerm] = useState('');
   const [notification, setNotification] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Local selection map: productId -> boolean
   const [selectedMap, setSelectedMap] = useState({});
+  const isInitializedRef = useRef(false);
 
+  // Initialize selection from products ONLY once on mount or when products first arrive
   useEffect(() => {
-    if (Array.isArray(products) && products.length > 0) {
+    if (!isInitializedRef.current && Array.isArray(products) && products.length > 0) {
       const initialMap = {};
       products.forEach(p => {
-        initialMap[p.id] = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+        initialMap[p.id] = isProductBestSeller(p);
       });
       setSelectedMap(initialMap);
+      isInitializedRef.current = true;
     }
   }, [products]);
 
@@ -25,14 +28,25 @@ export default function AdminBestSellingProducts() {
     setNotification({ msg, type });
     setTimeout(() => {
       setNotification(null);
-    }, 4000);
+    }, 3500);
   };
 
-  const handleCheckboxChange = (productId) => {
+  const handleToggle = async (productId) => {
+    const nextVal = !selectedMap[productId];
+    // 1. Instant local UI update
     setSelectedMap(prev => ({
       ...prev,
-      [productId]: !prev[productId]
+      [productId]: nextVal
     }));
+
+    // 2. Direct real-time sync with CartContext & TiDB Cloud
+    try {
+      await toggleBestSellingProduct(productId, nextVal);
+      const prod = products.find(p => p.id === productId);
+      showNotification(`${prod ? prod.name : 'Product'} ${nextVal ? 'marked as Top Bestseller' : 'removed from Top Bestsellers'}!`);
+    } catch (err) {
+      showNotification('Failed to sync changes.', 'error');
+    }
   };
 
   const handleSaveAll = async () => {
@@ -50,7 +64,7 @@ export default function AdminBestSellingProducts() {
       const res = await batchUpdateProducts(updatedProducts);
       if (res && res.success !== false) {
         const count = Object.values(selectedMap).filter(Boolean).length;
-        showNotification(`Saved! ${count} best selling products are now live across all devices.`);
+        showNotification(`All saved! ${count} best selling products are now live across all devices.`);
       } else {
         showNotification('Failed to save. Please try again.', 'error');
       }
@@ -94,15 +108,15 @@ export default function AdminBestSellingProducts() {
               Manage Top Sellers
             </h1>
             <p className="text-xs font-semibold text-gray-500 mt-0.5">
-              Select products and click Save to publish live to all devices
+              Click any product to toggle bestseller status. Changes sync live instantly to all devices!
             </p>
           </div>
         </div>
 
-        {/* Top Save Button */}
+        {/* Top Save & Count Actions */}
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
-            {selectedCount} Selected
+          <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
+            {selectedCount} Bestsellers
           </span>
           <button
             onClick={handleSaveAll}
@@ -117,7 +131,7 @@ export default function AdminBestSellingProducts() {
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>Save Changes</span>
+                <span>Save All Changes</span>
               </>
             )}
           </button>
@@ -132,7 +146,7 @@ export default function AdminBestSellingProducts() {
             placeholder="Search products to mark as best selling..."
             value={bestsellingSearchTerm}
             onChange={(e) => setBestsellingSearchTerm(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 focus:border-amber-500 rounded-xl py-3 pl-11 pr-4 text-sm font-bold text-gray-900 outline-none"
+            className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 rounded-xl py-3 pl-11 pr-4 text-sm font-bold text-gray-900 outline-none"
           />
         </div>
 
@@ -143,26 +157,50 @@ export default function AdminBestSellingProducts() {
               <div className="text-gray-500 font-bold">No products found.</div>
             </div>
           ) : (
-            bestsellingModalProducts.map(p => (
-              <label key={p.id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-amber-300 shadow-sm cursor-pointer transition-all">
-                <div className="flex items-center gap-4">
-                  <img src={p.image} alt={p.name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border border-gray-200 bg-gray-50 shrink-0" />
-                  <div>
-                    <div className="font-extrabold text-gray-800 text-sm sm:text-base">{p.name}</div>
-                    <div className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase mt-1">{p.categoryName || p.category}</div>
+            bestsellingModalProducts.map(p => {
+              const isSelected = Boolean(selectedMap[p.id]);
+              return (
+                <div 
+                  key={p.id} 
+                  onClick={() => handleToggle(p.id)}
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer select-none ${
+                    isSelected 
+                      ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-300 shadow-sm' 
+                      : 'bg-white border-gray-200 hover:border-gray-300 shadow-2xs'
+                  }`}
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <img 
+                      src={p.image} 
+                      alt={p.name} 
+                      className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border border-gray-200 bg-gray-50 shrink-0" 
+                    />
+                    <div className="min-w-0">
+                      <div className="font-extrabold text-gray-800 text-sm sm:text-base truncate">{p.name}</div>
+                      <div className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase mt-1">
+                        {p.categoryName || p.category} • ₹{p.price}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pl-3 border-l border-gray-100 shrink-0">
+                    {isSelected && (
+                      <span className="text-[10px] sm:text-xs font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-700" />
+                        Bestseller
+                      </span>
+                    )}
+                    <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-colors ${
+                      isSelected 
+                        ? 'bg-emerald-600 border-emerald-700 text-white shadow-xs' 
+                        : 'bg-white border-gray-300 hover:border-gray-400'
+                    }`}>
+                      {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 pl-2 border-l border-gray-100 ml-2">
-                  {selectedMap[p.id] && <span className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase hidden sm:block shrink-0">Best Selling</span>}
-                  <input 
-                    type="checkbox" 
-                    checked={!!selectedMap[p.id]}
-                    onChange={() => handleCheckboxChange(p.id)}
-                    className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600 bg-gray-100 border-gray-300 rounded-md focus:ring-amber-500 cursor-pointer shrink-0"
-                  />
-                </div>
-              </label>
-            ))
+              );
+            })
           )}
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { useCart, isProductActive } from '../context/CartContext';
+import { useCart, isProductActive, isProductFeatured } from '../context/CartContext';
 import { ChevronLeft, ChevronRight, ShoppingCart, Check, ChevronDown, Heart, Eye } from 'lucide-react';
 
 function FeaturedCard({ product }) {
@@ -157,9 +157,9 @@ export default function FeaturedTodaySection() {
   const scrollRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Dynamically load the user's authentic store products that are marked as Featured Today
+  // Dynamically load the store products that are marked as Featured Today
   const featuredProducts = useMemo(() => {
-    return (products || []).filter(p => isProductActive(p) && (p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1'));
+    return (products || []).filter(p => isProductFeatured(p));
   }, [products]);
 
   // Ensure the carousel always resets to the leftmost start position (index 0) on mount and whenever featured products are updated

@@ -55,7 +55,7 @@ export const adminProductSchema = z.object({
   category: z.string().trim().max(100).optional(),
   categoryName: z.string().trim().max(100).optional(),
   badge: z.string().trim().max(50).optional(),
-  image: z.string().trim().max(2000).optional(),
+  image: z.string().trim().optional(),
   price: z.number().nonnegative().optional(),
   weights: z.array(z.object({
     label: z.string().min(1),
@@ -73,11 +73,14 @@ export const adminProductSchema = z.object({
 }).passthrough();
 
 export const adminCategorySchema = z.object({
+  id: z.string().trim().max(100).optional(),
   name: z.string().trim().min(2).max(100),
-  image: z.string().trim().max(2000).optional(),
+  image: z.string().trim().optional(),
   description: z.string().trim().max(1000).optional(),
-  status: z.string().trim().max(20).optional()
-});
+  status: z.string().trim().max(20).optional(),
+  iconLucideName: z.string().trim().optional(),
+  isPremium: z.any().optional()
+}).passthrough();
 
 /**
  * Middleware generator for Zod validation

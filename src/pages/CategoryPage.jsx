@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCart, isProductActive } from '../context/CartContext';
+import { useCart, isProductActive, isProductFeatured, isProductBestSeller } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import { ArrowLeft, SlidersHorizontal, Sparkles, ShoppingBag } from 'lucide-react';
 
@@ -29,7 +29,11 @@ export default function CategoryPage() {
       const pCatName = (p.categoryName || '').toLowerCase().trim();
 
       if (cId === 'featured-today' || cId === 'featured') {
-        return p.isFeaturedToday === true || p.is_featured_today === 1;
+        return isProductFeatured(p);
+      }
+
+      if (cId === 'bestseller' || cId === 'bestsellers' || cId === 'best-selling') {
+        return isProductBestSeller(p);
       }
 
       return (

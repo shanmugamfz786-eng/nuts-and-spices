@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { useCart, isProductActive } from '../context/CartContext';
+import { useCart, isProductActive, isProductBestSeller } from '../context/CartContext';
 import { ChevronLeft, ChevronRight, ShoppingCart, Check, ChevronDown, Heart, Eye } from 'lucide-react';
 
 function BestSellerCard({ product }) {
@@ -158,9 +158,9 @@ export default function BestSellingSection() {
   const scrollRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Dynamically load the user's authentic store products that are marked as Best Selling
+  // Dynamically load the store products that are marked as Best Selling
   const bestSellerProducts = useMemo(() => {
-    return (products || []).filter(p => isProductActive(p) && (p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1'));
+    return (products || []).filter(p => isProductBestSeller(p));
   }, [products]);
 
   const scrollLeft = () => {

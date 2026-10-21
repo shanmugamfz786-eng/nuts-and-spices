@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCart, isProductActive } from '../context/CartContext';
+import { useCart, isProductActive, isProductFeatured, isProductBestSeller } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import { LayoutGrid, List, ChevronDown, X } from 'lucide-react';
 
@@ -33,12 +33,21 @@ export default function ShopPage() {
     }
 
     if (activeCategory === 'featured-today' || activeCategory === 'featured') {
-      const isFeatured = p.isFeaturedToday === true || p.is_featured_today === 1;
+      const isFeatured = isProductFeatured(p);
       const matchesSearch = !searchFilter.trim() || 
                             p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
                             (p.categoryName || '').toLowerCase().includes(searchFilter.toLowerCase()) ||
                             (p.description || '').toLowerCase().includes(searchFilter.toLowerCase());
       return isFeatured && matchesSearch;
+    }
+
+    if (activeCategory === 'bestseller' || activeCategory === 'bestsellers' || activeCategory === 'best-selling') {
+      const isBest = isProductBestSeller(p);
+      const matchesSearch = !searchFilter.trim() || 
+                            p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                            (p.categoryName || '').toLowerCase().includes(searchFilter.toLowerCase()) ||
+                            (p.description || '').toLowerCase().includes(searchFilter.toLowerCase());
+      return isBest && matchesSearch;
     }
 
     const catObj = (categories || []).find(c => c.id === activeCategory);

@@ -15,6 +15,8 @@ import {
 } from '../data/mockAdminData';
 
 export const isProductActive = (p) => p && p.active !== false && p.status !== 'Inactive';
+export const isProductFeatured = (p) => Boolean(p && isProductActive(p) && (p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1'));
+export const isProductBestSeller = (p) => Boolean(p && isProductActive(p) && (p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1'));
 
 const CartContext = createContext();
 
@@ -456,6 +458,7 @@ export const CartProvider = ({ children }) => {
             });
 
             // Merge cloud flags onto the FULL seed product list so admin always sees ALL products
+            const hasSavedCatalog = Array.isArray(cloudData.products) && cloudData.products.length > 0;
             const merged = PRODUCTS.map(seedP => {
               const cloudP = cloudFlagMap[seedP.id];
               if (cloudP) {
@@ -463,6 +466,15 @@ export const CartProvider = ({ children }) => {
                   ...seedP,
                   ...cloudP,
                   image: cloudP.image || seedP.image || seedProductImageMap.get(seedP.id) || '',
+                };
+              }
+              if (hasSavedCatalog) {
+                return {
+                  ...seedP,
+                  isFeaturedToday: false,
+                  is_featured_today: 0,
+                  isBestSelling: false,
+                  is_best_selling: 0
                 };
               }
               return seedP;
@@ -1251,6 +1263,72 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const toggleFeaturedProduct = async (productId, forcedValue) => {
+    let newStatus = false;
+    let updatedProducts = [];
+    setProducts(prev => {
+      const updated = prev.map(p => {
+        if (p.id === productId) {
+          newStatus = forcedValue !== undefined ? Boolean(forcedValue) : !isProductFeatured(p);
+          return {
+            ...p,
+            isFeaturedToday: newStatus,
+            is_featured_today: newStatus ? 1 : 0
+          };
+        }
+        return p;
+      });
+      updatedProducts = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    productsRef.current = updatedProducts;
+
+    try {
+      await saveCloudCatalog(updatedProducts, categoriesRef.current);
+      updateProductApi(productId, { isFeaturedToday: newStatus, is_featured_today: newStatus ? 1 : 0 }).catch(() => {});
+    } catch (e) {
+      console.warn('toggleFeaturedProduct sync error:', e);
+    }
+    return newStatus;
+  };
+
+  const toggleBestSellingProduct = async (productId, forcedValue) => {
+    let newStatus = false;
+    let updatedProducts = [];
+    setProducts(prev => {
+      const updated = prev.map(p => {
+        if (p.id === productId) {
+          newStatus = forcedValue !== undefined ? Boolean(forcedValue) : !isProductBestSeller(p);
+          return {
+            ...p,
+            isBestSelling: newStatus,
+            is_best_selling: newStatus ? 1 : 0
+          };
+        }
+        return p;
+      });
+      updatedProducts = updated;
+      try {
+        sessionStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+        localStorage.setItem('nuts_spices_products', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    productsRef.current = updatedProducts;
+
+    try {
+      await saveCloudCatalog(updatedProducts, categoriesRef.current);
+      updateProductApi(productId, { isBestSelling: newStatus, is_best_selling: newStatus ? 1 : 0 }).catch(() => {});
+    } catch (e) {
+      console.warn('toggleBestSellingProduct sync error:', e);
+    }
+    return newStatus;
+  };
+
   // ADMIN - CATEGORIES CRUD
   const addCategory = async (categoryData) => {
     const newId = categoryData.id || `cat-${Date.now()}`;
@@ -1610,6 +1688,8 @@ export const CartProvider = ({ children }) => {
         batchUpdateProducts,
         deleteProduct,
         toggleProductStatus,
+        toggleFeaturedProduct,
+        toggleBestSellingProduct,
 
         // Admin Category Actions
         addCategory,
