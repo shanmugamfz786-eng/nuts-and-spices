@@ -1,5 +1,5 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v10_restored_authentic_images_2026';
+export const CATALOG_VERSION = 'v11_bestsellers_live_sync_2026';
 
 export const CATEGORIES = [
   {
@@ -118,8 +118,7 @@ export const PRODUCTS = [
     "stock": 45,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "/images/products/product_12.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_12.jpg"
   },
   {
     "id": "vp-02",
@@ -157,8 +156,7 @@ export const PRODUCTS = [
     "price": 160,
     "status": "Active",
     "active": true,
-    "image": "/images/products/product_13.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_13.jpg"
   },
   {
     "id": "vp-03",
@@ -182,8 +180,7 @@ export const PRODUCTS = [
     "status": "Active",
     "active": true,
     "stock": 45,
-    "image": "/images/products/product_14.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_14.jpg"
   },
   {
     "id": "vp-04",
@@ -211,8 +208,7 @@ export const PRODUCTS = [
     "stock": 45,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "/images/products/product_15.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_15.jpg"
   },
   {
     "id": "ndf-01",
@@ -240,8 +236,7 @@ export const PRODUCTS = [
     "price": 350,
     "status": "Active",
     "active": true,
-    "image": "/images/products/product_16.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_16.jpg"
   },
   {
     "id": "ndf-02",
@@ -269,8 +264,7 @@ export const PRODUCTS = [
     "price": 350,
     "status": "Active",
     "active": true,
-    "image": "/images/products/product_17.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_17.jpg"
   },
   {
     "id": "ndf-03",
@@ -298,8 +292,7 @@ export const PRODUCTS = [
     "price": 350,
     "status": "Active",
     "active": true,
-    "image": "/images/products/product_18.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_18.jpg"
   },
   {
     "id": "ndf-04",
@@ -327,8 +320,7 @@ export const PRODUCTS = [
     "price": 350,
     "status": "Active",
     "active": true,
-    "image": "/images/products/product_19.jpg",
-    "isBestSelling": true
+    "image": "/images/products/product_19.jpg"
   },
   {
     "id": "ndf-05",
