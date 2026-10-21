@@ -86,7 +86,7 @@ export default function HomePage() {
               {/* Rounded Square Image Box */}
               <div className="w-full aspect-square rounded-[28px] overflow-hidden bg-white shadow-md group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-1.5 border border-[#E5E7EB]/60 relative">
                 <img
-                  src={cat.image || 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=600'}
+                  src={cat.image || '/images/products/product_1.jpg'}
                   alt={cat.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />

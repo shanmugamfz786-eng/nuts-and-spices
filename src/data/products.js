@@ -1,12 +1,12 @@
 export const STORE_WHATSAPP_NUMBER = '919876543210';
-export const CATALOG_VERSION = 'v9_bestselling_sync_2026';
+export const CATALOG_VERSION = 'v10_restored_authentic_images_2026';
 
 export const CATEGORIES = [
   {
     "id": "all",
     "name": "All Products",
     "icon": "✨",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/combo_banner.jpg"
   },
   {
     "id": "viral-product",
@@ -928,7 +928,7 @@ export const PRODUCTS = [
     "price": 350,
     "status": "Active",
     "active": true,
-    "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_39.jpg"
   },
   {
     "id": "dt-04",
@@ -2819,7 +2819,7 @@ export const PRODUCTS = [
     "price": 50,
     "status": "Active",
     "active": true,
-    "image": "https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_100.jpg"
   },
   {
     "id": "wl-01",
@@ -3018,7 +3018,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    "image": "/images/products/product_14.jpg",
     "isFeaturedToday": true
   },
   {
@@ -3052,7 +3052,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_1.jpg"
   },
   {
     "id": "vir-1791180887986-2",
@@ -3090,7 +3090,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_1.jpg"
   },
   {
     "id": "nut-1791180887986-3",
@@ -3133,7 +3133,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_16.jpg"
   },
   {
     "id": "nut-1791180887986-4",
@@ -3171,7 +3171,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_16.jpg"
   },
   {
     "id": "nut-1791180887986-5",
@@ -3209,7 +3209,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_16.jpg"
   },
   {
     "id": "nut-1791180887986-6",
@@ -3252,7 +3252,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_18.jpg"
   },
   {
     "id": "nut-1791180887986-7",
@@ -3295,7 +3295,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_22.jpg"
   },
   {
     "id": "nut-1791180887986-8",
@@ -3333,7 +3333,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    "image": "/images/products/product_30.jpg",
     "isFeaturedToday": false
   },
   {
@@ -3372,7 +3372,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_33.jpg"
   },
   {
     "id": "dat-1791180887986-10",
@@ -3405,7 +3405,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_37.jpg"
   },
   {
     "id": "dat-1791180887986-11",
@@ -3438,7 +3438,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_38.jpg"
   },
   {
     "id": "dat-1791180887986-12",
@@ -3471,7 +3471,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_39.jpg"
   },
   {
     "id": "dat-1791180887986-13",
@@ -3504,7 +3504,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_39.jpg"
   },
   {
     "id": "dat-1791180887986-14",
@@ -3537,7 +3537,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_40.jpg"
   },
   {
     "id": "dat-1791180887986-15",
@@ -3570,7 +3570,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_42.jpg"
   },
   {
     "id": "mal-1791180887986-16",
@@ -3603,7 +3603,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_47.jpg"
   },
   {
     "id": "mal-1791180887986-17",
@@ -3631,7 +3631,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_53.jpg"
   },
   {
     "id": "mal-1791180887986-18",
@@ -3669,7 +3669,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_57.jpg"
   },
   {
     "id": "see-1791180887986-19",
@@ -3707,7 +3707,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_60.jpg"
   },
   {
     "id": "see-1791180887986-20",
@@ -3745,7 +3745,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_62.jpg"
   },
   {
     "id": "see-1791180887986-21",
@@ -3783,7 +3783,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_63.jpg"
   },
   {
     "id": "see-1791180887986-22",
@@ -3821,7 +3821,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_65.jpg"
   },
   {
     "id": "ric-1791180887986-23",
@@ -3849,7 +3849,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_71.jpg"
   },
   {
     "id": "ric-1791180887986-24",
@@ -3877,7 +3877,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_73.jpg"
   },
   {
     "id": "ric-1791180887986-25",
@@ -3915,7 +3915,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_79.jpg"
   },
   {
     "id": "mas-1791180887986-26",
@@ -3958,7 +3958,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_83.jpg"
   },
   {
     "id": "vir-1791180887986-27",
@@ -3986,7 +3986,7 @@ export const PRODUCTS = [
     "stock": 50,
     "ingredients": "100% Natural",
     "storage": "Cool dry place",
-    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"
+    "image": "/images/products/product_14.jpg"
   },
   {
     "id": "vir-1791180887986-28",

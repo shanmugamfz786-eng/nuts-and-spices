@@ -62,17 +62,21 @@ export const CartProvider = ({ children }) => {
           }))
         : defaultWeights;
 
-      const activeState = isProductActive(p);
-
+        const activeState = isProductActive(p);
         const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
         const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+
+        const seedImg = seedProductImageMap.get(p.id);
+        const isUnsplash = !p.image || p.image.includes('unsplash.com');
+        const resolvedImage = (!isUnsplash && p.image) ? p.image : (seedImg || p.image || '/images/products/product_1.jpg');
+
         return {
           ...p,
           id: p.id || `prod-${Math.random()}`,
           name: p.name || 'Gourmet Item',
           category: p.category || 'nuts-dry-fruits',
           categoryName: p.categoryName || 'NUTS & DRY FRUITS',
-          image: p.image || seedProductImageMap.get(p.id) || 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
+          image: resolvedImage,
           price: basePrice,
           weights: validWeights,
           status: activeState ? 'Active' : 'Inactive',
@@ -98,6 +102,14 @@ export const CartProvider = ({ children }) => {
   // 2. PRODUCTS STATE (Master catalog initialized from cached localStorage/sessionStorage first, then fallback to seed PRODUCTS, and live synced from TiDB Cloud)
   const [products, setProducts] = useState(() => {
     try {
+      const storedVer = localStorage.getItem('nuts_spices_catalog_version');
+      if (storedVer !== CATALOG_VERSION) {
+        localStorage.removeItem('nuts_spices_products');
+        sessionStorage.removeItem('nuts_spices_products');
+        sessionStorage.removeItem('nuts_spices_categories');
+        localStorage.setItem('nuts_spices_catalog_version', CATALOG_VERSION);
+        return sanitizeProductList(PRODUCTS);
+      }
       const saved = localStorage.getItem('nuts_spices_products') || sessionStorage.getItem('nuts_spices_products');
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -118,6 +130,7 @@ export const CartProvider = ({ children }) => {
         if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed.map(c => ({
             ...c,
+            image: (!c.image || c.image.includes('unsplash.com')) ? (c.id === 'all' ? '/images/combo_banner.jpg' : '/images/products/product_1.jpg') : c.image,
             isPremium: c.isPremium !== undefined ? c.isPremium : (c.id !== 'all')
           }));
         }
@@ -133,7 +146,7 @@ export const CartProvider = ({ children }) => {
         id: "featured-today",
         name: "Featured Today",
         icon: "⭐",
-        image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+        image: "/images/combo_banner.jpg",
         isPremium: true
       });
     }
@@ -462,10 +475,14 @@ export const CartProvider = ({ children }) => {
             const merged = PRODUCTS.map(seedP => {
               const cloudP = cloudFlagMap[seedP.id];
               if (cloudP) {
+                const seedImg = seedProductImageMap.get(seedP.id);
+                const isUnsplash = !cloudP.image || cloudP.image.includes('unsplash.com');
+                const finalImg = (!isUnsplash && cloudP.image) ? cloudP.image : (seedImg || seedP.image || '/images/products/product_1.jpg');
+
                 return {
                   ...seedP,
                   ...cloudP,
-                  image: cloudP.image || seedP.image || seedProductImageMap.get(seedP.id) || '',
+                  image: finalImg,
                 };
               }
               if (hasSavedCatalog) {

@@ -47,12 +47,16 @@ export async function fetchCloudCatalog() {
       }
 
       if (prodList || catList) {
-        // Hydrate product images if stripped for bandwidth optimization
+        // Hydrate product images with authentic assets
         const hydratedProducts = Array.isArray(prodList)
-          ? prodList.map(p => ({
-              ...p,
-              image: p.image || seedProductImageMap.get(p.id) || ''
-            }))
+          ? prodList.map(p => {
+              const seedImg = seedProductImageMap.get(p.id);
+              const isUnsplash = !p.image || p.image.includes('unsplash.com');
+              return {
+                ...p,
+                image: (!isUnsplash && p.image) ? p.image : (seedImg || p.image || '/images/products/product_1.jpg')
+              };
+            })
           : null;
 
         let storeSettings = data.storeSettings || null;
@@ -83,18 +87,18 @@ export async function fetchCloudCatalog() {
 
 export async function saveCloudCatalog(products, categories, storeSettings = null) {
   try {
-    // Keep category Base64 images 100% intact (user's custom images)
-    // Strip duplicate seed product images to stay < 1MB (well below Vercel's 4.5MB payload limit)
-    const optimizedProducts = (products || []).map(p => {
-      if (p.image && p.image === seedProductImageMap.get(p.id)) {
-        const { image, ...rest } = p;
-        return rest;
-      }
-      return p;
+    // Ensure all products retain authentic image URLs
+    const sanitizedProducts = (products || []).map(p => {
+      const seedImg = seedProductImageMap.get(p.id);
+      const isUnsplash = !p.image || p.image.includes('unsplash.com');
+      return {
+        ...p,
+        image: (!isUnsplash && p.image) ? p.image : (seedImg || p.image || '/images/products/product_1.jpg')
+      };
     });
 
     const payloadObj = {
-      products: optimizedProducts,
+      products: sanitizedProducts,
       categories,
       updatedAt: new Date().toISOString()
     };

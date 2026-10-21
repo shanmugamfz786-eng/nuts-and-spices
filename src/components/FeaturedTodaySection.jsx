@@ -82,7 +82,7 @@ function FeaturedCard({ product }) {
 
         {/* Real Product Image from Store Catalog */}
         <img
-          src={product.image || 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=600'}
+          src={product.image || '/images/products/product_1.jpg'}
           alt={product.name}
           className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500"
         />

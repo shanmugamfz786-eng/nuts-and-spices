@@ -5,6 +5,7 @@ export default function AdminMobileBottomNav({
   activeTab,
   onSelectTab,
   onOpenMenu,
+  onLogout,
   pendingOrdersCount = 0,
   lowStockCount = 0
 }) {

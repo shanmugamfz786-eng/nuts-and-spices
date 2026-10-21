@@ -14,7 +14,7 @@ export default function CategoryPage() {
   ) || {
     id: selectedCategory || 'all',
     name: selectedCategory ? selectedCategory.replace(/-/g, ' ').toUpperCase() : 'SPECIAL COLLECTION',
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=600',
+    image: '/images/combo_banner.jpg',
     description: 'Explore our handpicked gourmet collection crafted with 100% natural ingredients.'
   };
 

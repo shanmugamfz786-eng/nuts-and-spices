@@ -176,13 +176,25 @@ export default function AdminPage() {
               </div>
             </div>
             
-            <button 
-              onClick={() => setIsMobileSidebarOpen(false)}
-              className="lg:hidden text-emerald-200 hover:text-white p-1 rounded-lg hover:bg-[#043731] transition-colors cursor-pointer"
-              aria-label="Close sidebar"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={logoutAdmin}
+                className="lg:hidden flex items-center gap-1 px-2.5 py-1 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-xs active:scale-95 select-none"
+                title="Logout of Admin"
+              >
+                <LogOut className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Logout</span>
+              </button>
+
+              <button 
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="lg:hidden text-emerald-200 hover:text-white p-1 rounded-lg hover:bg-[#043731] transition-colors cursor-pointer"
+                aria-label="Close sidebar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
 
@@ -237,10 +249,10 @@ export default function AdminPage() {
         </div>
 
         {/* Bottom Logout */}
-        <div className="p-4 border-t border-emerald-800/80 bg-[#05463e] shrink-0">
+        <div className="p-4 border-t border-emerald-800/80 bg-[#05463e] shrink-0 pb-24 lg:pb-4">
           <button
             onClick={logoutAdmin}
-            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-[#043731] hover:bg-rose-600 text-emerald-100 hover:text-white border border-emerald-700/50 hover:border-rose-500 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs"
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-[#043731] hover:bg-rose-600 text-emerald-100 hover:text-white border border-emerald-700/50 hover:border-rose-500 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs active:scale-95"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -303,16 +315,29 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Desktop Center/Right Search Bar */}
-            <div className="hidden md:flex items-center relative w-72 max-w-xs">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input 
-                type="text"
-                value={globalSearch}
-                onChange={(e) => setGlobalSearch(e.target.value)}
-                placeholder="Search catalog, order #, patron..."
-                className="w-full bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl pl-9 pr-3 py-1.5 text-xs text-black placeholder-gray-400 outline-none transition-colors"
-              />
+            {/* Right: Desktop Search Bar & Mobile Dedicated Logout Button */}
+            <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center relative w-72 max-w-xs">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input 
+                  type="text"
+                  value={globalSearch}
+                  onChange={(e) => setGlobalSearch(e.target.value)}
+                  placeholder="Search catalog, order #, patron..."
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl pl-9 pr-3 py-1.5 text-xs text-black placeholder-gray-400 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Mobile Dedicated Logout Button in Header */}
+              <button
+                type="button"
+                onClick={logoutAdmin}
+                className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 rounded-xl font-extrabold text-xs transition-all cursor-pointer shadow-xs active:scale-95 select-none shrink-0"
+                title="Logout of Admin"
+              >
+                <LogOut className="w-3.5 h-3.5 text-rose-600 stroke-[2.5]" />
+                <span>Logout</span>
+              </button>
             </div>
 
           </div>
@@ -366,6 +391,7 @@ export default function AdminPage() {
         activeTab={adminTab}
         onSelectTab={handleNavigateTab}
         onOpenMenu={() => setIsMobileSidebarOpen(true)}
+        onLogout={logoutAdmin}
         pendingOrdersCount={pendingOrdersCount}
         lowStockCount={lowStockCount}
       />

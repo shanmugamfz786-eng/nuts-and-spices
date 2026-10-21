@@ -155,22 +155,31 @@ export let inMemoryCatalog = {
 const seedProductImageMap = new Map(PRODUCTS.map(p => [p.id, p.image]));
 
 export const syncServerCatalog = async (products, categories) => {
-  if (Array.isArray(products)) {
+  if (Array.isArray(products) && products.length > 0) {
     inMemoryCatalog.products = products.map(p => {
       const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
       const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+      const seedImg = seedProductImageMap.get(p.id);
+      const isUnsplash = !p.image || p.image.includes('unsplash.com');
+      const image = (!isUnsplash && p.image) ? p.image : (seedImg || p.image || '/images/products/product_1.jpg');
+
       return {
         ...p,
-        image: p.image || seedProductImageMap.get(p.id) || '',
+        image,
         isFeaturedToday: feat,
         is_featured_today: feat ? 1 : 0,
         isBestSelling: best,
         is_best_selling: best ? 1 : 0
       };
     });
+  } else if (!inMemoryCatalog.products || inMemoryCatalog.products.length === 0) {
+    inMemoryCatalog.products = PRODUCTS;
   }
-  if (Array.isArray(categories)) {
+
+  if (Array.isArray(categories) && categories.length > 0) {
     inMemoryCatalog.categories = categories;
+  } else if (!inMemoryCatalog.categories || inMemoryCatalog.categories.length === 0) {
+    inMemoryCatalog.categories = CATEGORIES;
   }
   inMemoryCatalog.updatedAt = new Date().toISOString();
 
@@ -242,13 +251,17 @@ app.get('/api/catalog', async (req, res) => {
     const rows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'master_catalog_json'");
     if (rows && rows.length > 0 && rows[0].setting_value) {
       const parsed = JSON.parse(rows[0].setting_value);
-      if (parsed && Array.isArray(parsed.products) && Array.isArray(parsed.categories)) {
+      if (parsed && Array.isArray(parsed.products) && parsed.products.length > 0 && Array.isArray(parsed.categories) && parsed.categories.length > 0) {
         products = parsed.products.map(p => {
           const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
           const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
+          const seedImg = seedProductImageMap.get(p.id);
+          const isUnsplash = !p.image || p.image.includes('unsplash.com');
+          const image = (!isUnsplash && p.image) ? p.image : (seedImg || p.image || '/images/products/product_1.jpg');
+
           return {
             ...p,
-            image: p.image || seedProductImageMap.get(p.id) || '',
+            image,
             isFeaturedToday: feat,
             is_featured_today: feat ? 1 : 0,
             isBestSelling: best,
@@ -265,31 +278,31 @@ app.get('/api/catalog', async (req, res) => {
   }
 
   // 2. Only if NO master catalog was ever saved, initialize from seed PRODUCTS and CATEGORIES
-  if (!hasMasterCatalog) {
-    products = products || PRODUCTS;
-    categories = categories || CATEGORIES;
+  if (!hasMasterCatalog || !products || products.length === 0) {
+    products = PRODUCTS;
+    categories = CATEGORIES;
   }
 
   inMemoryCatalog.products = products;
   inMemoryCatalog.categories = categories;
   inMemoryCatalog.updatedAt = updatedAt;
 
-  // Optimize payload over the wire: omit duplicate seed images to stay < 1MB (well below Vercel 4.5MB limit)
-  const optimizedProducts = (products || []).map(p => {
+  // Deliver products with authentic image URLs intact
+  const finalProducts = (products || []).map(p => {
     const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
     const best = p.isBestSelling === true || p.isBestSelling === 'true' || p.is_best_selling === 1 || p.is_best_selling === '1';
-    let base = {
+    const seedImg = seedProductImageMap.get(p.id);
+    const isUnsplash = !p.image || p.image.includes('unsplash.com');
+    const image = (!isUnsplash && p.image) ? p.image : (seedImg || p.image || '/images/products/product_1.jpg');
+
+    return {
       ...p,
+      image,
       isFeaturedToday: feat,
       is_featured_today: feat ? 1 : 0,
       isBestSelling: best,
       is_best_selling: best ? 1 : 0
     };
-    if (base.image && base.image === seedProductImageMap.get(base.id)) {
-      const { image, ...rest } = base;
-      return rest;
-    }
-    return base;
   });
 
   // Fetch store settings for public storefront consumption (delivery rates, free shipping minimum, contact, etc.)
@@ -313,7 +326,7 @@ app.get('/api/catalog', async (req, res) => {
 
   res.json({
     success: true,
-    products: optimizedProducts,
+    products: finalProducts,
     categories,
     storeSettings,
     updatedAt
@@ -391,6 +404,11 @@ app.post('/api/catalog', authMiddleware, adminMiddleware, async (req, res) => {
       success: false, 
       message: 'Payload exceeds allowed limits (max 500 products, 100 categories)' 
     });
+  }
+
+  // Prevent catastrophic accidental wipe of live catalog
+  if (products.length === 0 && categories.length === 0) {
+    return res.json({ success: true, message: 'Empty catalog payload acknowledged without clearing database' });
   }
 
   if (storeSettings && typeof storeSettings === 'object') {
