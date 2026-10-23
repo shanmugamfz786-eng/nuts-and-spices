@@ -30,7 +30,14 @@ export const CartProvider = ({ children }) => {
   const [storeSettings, setStoreSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('nuts_spices_store_settings');
-      return saved ? JSON.parse(saved) : INITIAL_STORE_SETTINGS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!parsed.logoUrl || parsed.logoUrl.includes('unsplash.com')) {
+          parsed.logoUrl = '/logo.jpg';
+        }
+        return parsed;
+      }
+      return INITIAL_STORE_SETTINGS;
     } catch {
       return INITIAL_STORE_SETTINGS;
     }
@@ -542,9 +549,13 @@ export const CartProvider = ({ children }) => {
             });
           }
           if (cloudData.storeSettings && typeof cloudData.storeSettings === 'object') {
-            setStoreSettings(cloudData.storeSettings);
+            const cleanSettings = { ...cloudData.storeSettings };
+            if (!cleanSettings.logoUrl || cleanSettings.logoUrl.includes('unsplash.com')) {
+              cleanSettings.logoUrl = '/logo.jpg';
+            }
+            setStoreSettings(cleanSettings);
             try { 
-              localStorage.setItem('nuts_spices_store_settings', JSON.stringify(cloudData.storeSettings));
+              localStorage.setItem('nuts_spices_store_settings', JSON.stringify(cleanSettings));
             } catch {}
           }
         }

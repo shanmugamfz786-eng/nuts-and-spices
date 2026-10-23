@@ -1652,7 +1652,12 @@ export default function OrderDetailsPage() {
                 <div className="flex justify-between items-start border-b border-gray-200 pb-5">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <img src={storeSettings?.logoUrl || "/logo.jpg"} alt="Logo" className="w-10 h-10 object-contain rounded-full border border-gray-200" />
+                      <img 
+                        src={(storeSettings?.logoUrl && !storeSettings.logoUrl.includes('unsplash.com')) ? storeSettings.logoUrl : "/logo.jpg"} 
+                        alt="Logo" 
+                        className="w-10 h-10 object-contain rounded-full border border-gray-200" 
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/logo.jpg'; }}
+                      />
                       <div>
                         <h2 className="text-base font-black font-serif text-black uppercase tracking-wider">{storeSettings?.storeName || 'HAJI NUTS & SPICES'}</h2>
                         <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Premium Gourmet Dry Fruits & Spices</p>

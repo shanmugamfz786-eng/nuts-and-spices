@@ -138,9 +138,10 @@ export default function Navbar() {
                 className="focus:outline-none cursor-pointer group rounded-full p-0.5 hover:ring-2 hover:ring-[#128C7E] transition-all"
               >
                 <img 
-                  src={storeSettings?.logoUrl || "/logo.jpg"} 
+                  src={(storeSettings?.logoUrl && !storeSettings.logoUrl.includes('unsplash.com')) ? storeSettings.logoUrl : "/logo.jpg"} 
                   alt={storeSettings?.storeName || "Haji Nuts & Spices Logo"} 
                   className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full shadow-sm group-hover:scale-105 transition-transform bg-white"
+                  onError={(e) => { e.target.onerror = null; e.target.src = '/logo.jpg'; }}
                 />
               </button>
 
@@ -652,7 +653,12 @@ export default function Navbar() {
             <div className="p-5 bg-gradient-to-r from-[#128C7E] to-[#0e7064] text-white flex items-center justify-between shrink-0 shadow-md">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-white p-0.5 shadow-sm shrink-0">
-                  <img src={storeSettings?.logoUrl || "/logo.jpg"} alt="Logo" className="w-full h-full object-contain rounded-full" />
+                  <img 
+                    src={(storeSettings?.logoUrl && !storeSettings.logoUrl.includes('unsplash.com')) ? storeSettings.logoUrl : "/logo.jpg"} 
+                    alt="Logo" 
+                    className="w-full h-full object-contain rounded-full" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = '/logo.jpg'; }}
+                  />
                 </div>
                 <div>
                   <h2 className="text-base font-black font-serif tracking-wider uppercase leading-tight">

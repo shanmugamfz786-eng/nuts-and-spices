@@ -1,6 +1,6 @@
 export const INITIAL_STORE_SETTINGS = {
   storeName: 'HAJI NUTS & SPICES',
-  logoUrl: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=200',
+  logoUrl: '/logo.jpg',
   whatsappNumber: '919876543210',
   phone: '+91 98765 43210',
   email: 'orders@nutsandspices.store',
