@@ -12,7 +12,7 @@ export default function AboutUsPage() {
       title: 'Our Story',
       icon: BookOpen,
       color: 'bg-[#128C7E]',
-      image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800',
+      image: '/images/our_story.jpg',
       description: 'Founded with a deep passion for authenticity and health, NUTS & SPICES began its journey by sourcing directly from heritage farms and spice gardens across the Western Ghats, Kashmir, and international estates. We believe that true flavor and nutrition start at the source. Over the years, we have grown from a modest family initiative into a trusted gourmet destination, connecting thousands of families with unadulterated, farm-fresh ingredients crafted by nature.'
     },
     {
@@ -20,7 +20,7 @@ export default function AboutUsPage() {
       title: 'Our Quality',
       icon: ShieldCheck,
       color: 'bg-[#128C7E]',
-      image: 'https://images.unsplash.com/photo-1508061252966-177bf9f7f457?auto=format&fit=crop&q=80&w=800',
+      image: '/images/our_quality.jpg',
       description: 'Quality is non-negotiable at NUTS & SPICES. Every single batch of jumbo almonds, cardamom pods, and organic seeds undergoes rigorous hand-sorting, moisture testing, and hygienic multi-stage processing. We maintain strict zero-adulteration standards with zero artificial colors, synthetic flavors, or harmful chemical preservatives. Sealed in food-grade, nitrogen-flushed packages, we lock in original aromas and crisp texture.'
     },
     {
@@ -28,7 +28,7 @@ export default function AboutUsPage() {
       title: 'Our Products',
       icon: ShoppingBag,
       color: 'bg-[#128C7E]',
-      image: 'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=800',
+      image: '/images/our_products.jpg',
       description: 'Our carefully curated pantry spans across California Jumbo Almonds, Mangalore W240 Cashews, Afghan Anjeer, Royal Kimia & Ajwa Dates, telling a story of rich taste and supreme nutrition. From hand-ground aromatic masalas and unpolished traditional millets to wild forest honey and superfood seed mixes, each item is packed with essential vitamins, minerals, and healthy fats for your daily wellness.'
     },
     {
@@ -36,7 +36,7 @@ export default function AboutUsPage() {
       title: 'Our Promise',
       icon: HeartHandshake,
       color: 'bg-[#128C7E]',
-      image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800',
+      image: '/images/our_promise.jpg',
       description: 'We promise 100% transparency, freshness, and utmost customer convenience. We have eliminated complicated online payment gateways so you can browse, customize pack sizes, and instantly dispatch orders directly to our store team via WhatsApp. We promise fast doorstep delivery, honest weight measurements, and prompt personal customer support for every single package shipped.'
     }
   ];

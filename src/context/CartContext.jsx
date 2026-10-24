@@ -190,7 +190,14 @@ export const CartProvider = ({ children }) => {
   const [reviews, setReviews] = useState(() => {
     try {
       const saved = localStorage.getItem('nuts_spices_reviews');
-      return saved ? JSON.parse(saved) : INITIAL_REVIEWS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+      localStorage.setItem('nuts_spices_reviews', JSON.stringify(INITIAL_REVIEWS));
+      return INITIAL_REVIEWS;
     } catch {
       return INITIAL_REVIEWS;
     }
@@ -1565,21 +1572,36 @@ export const CartProvider = ({ children }) => {
       comment: reviewData.quote || reviewData.comment || 'Wonderful quality and taste!',
       rating: Number(reviewData.rating) || 5,
       tag: reviewData.tag || 'Verified Customer',
-      date: new Date().toISOString().split('T')[0],
-      status: 'APPROVED',
+      date: reviewData.date || new Date().toISOString().split('T')[0],
+      status: reviewData.status || 'APPROVED',
       productName: reviewData.productName || 'Store Experience',
       productId: reviewData.productId || ''
     };
-    setReviews(prev => { const upd = [newRev, ...prev]; syncAdminStateToCloud({ reviews: upd }); return upd; });
+    setReviews(prev => { 
+      const upd = [newRev, ...prev]; 
+      try { localStorage.setItem('nuts_spices_reviews', JSON.stringify(upd)); } catch {}
+      syncAdminStateToCloud({ reviews: upd }); 
+      return upd; 
+    });
     return newRev;
   };
 
   const updateReviewStatus = (reviewId, newStatus) => {
-    setReviews(prev => { const upd = prev.map(r => r.id === reviewId ? { ...r, status: newStatus } : r); syncAdminStateToCloud({ reviews: upd }); return upd; });
+    setReviews(prev => { 
+      const upd = prev.map(r => r.id === reviewId ? { ...r, status: newStatus } : r); 
+      try { localStorage.setItem('nuts_spices_reviews', JSON.stringify(upd)); } catch {}
+      syncAdminStateToCloud({ reviews: upd }); 
+      return upd; 
+    });
   };
 
   const deleteReview = (reviewId) => {
-    setReviews(prev => { const upd = prev.filter(r => r.id !== reviewId); syncAdminStateToCloud({ reviews: upd }); return upd; });
+    setReviews(prev => { 
+      const upd = prev.filter(r => r.id !== reviewId); 
+      try { localStorage.setItem('nuts_spices_reviews', JSON.stringify(upd)); } catch {}
+      syncAdminStateToCloud({ reviews: upd }); 
+      return upd; 
+    });
   };
 
   // ADMIN - CUSTOMER DELETE

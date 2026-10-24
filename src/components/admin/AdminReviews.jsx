@@ -1,10 +1,46 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
-import { Star, CheckCircle, EyeOff, Trash2 } from 'lucide-react';
+import { Star, CheckCircle, EyeOff, Trash2, Plus, X } from 'lucide-react';
 
 export default function AdminReviews() {
-  const { reviews = [], updateReviewStatus, deleteReview } = useCart();
+  const { reviews = [], updateReviewStatus, deleteReview, addReview } = useCart();
   const [deleteConfirmReview, setDeleteConfirmReview] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newReview, setNewReview] = useState({
+    customerName: '',
+    productName: 'Store Experience & Quality',
+    rating: 5,
+    comment: '',
+    status: 'APPROVED'
+  });
+
+  const handleAddReview = (e) => {
+    e.preventDefault();
+    if (!newReview.customerName.trim() || !newReview.comment.trim()) return;
+
+    if (addReview) {
+      addReview({
+        customerName: newReview.customerName.trim(),
+        name: newReview.customerName.trim(),
+        productName: newReview.productName.trim() || 'Store Experience & Quality',
+        rating: Number(newReview.rating) || 5,
+        comment: newReview.comment.trim(),
+        quote: newReview.comment.trim(),
+        status: newReview.status || 'APPROVED',
+        tag: 'Verified Customer',
+        date: new Date().toISOString().split('T')[0]
+      });
+    }
+
+    setIsAddModalOpen(false);
+    setNewReview({
+      customerName: '',
+      productName: 'Store Experience & Quality',
+      rating: 5,
+      comment: '',
+      status: 'APPROVED'
+    });
+  };
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -33,6 +69,13 @@ export default function AdminReviews() {
             Moderate customer reviews, approve ratings to display on storefront, hide or remove feedback.
           </p>
         </div>
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-amber-50 text-[#075E54] font-bold rounded-xl text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer self-start sm:self-auto active:scale-95"
+        >
+          <Plus className="w-4 h-4 text-[#075E54]" />
+          <span>Add New Review</span>
+        </button>
       </div>
 
       {/* REVIEWS TABLE */}
@@ -155,6 +198,120 @@ export default function AdminReviews() {
                 Confirm Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CUSTOM ADD REVIEW MODAL */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs">
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl my-auto text-gray-800 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="text-base font-bold font-serif text-gray-900 flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <span>Create New Patron Review</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddReview} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Customer Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Kumar"
+                  value={newReview.customerName}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, customerName: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#128C7E] bg-gray-50/50"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Product / Service Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. California Jumbo Almonds or Store Experience"
+                  value={newReview.productName}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, productName: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#128C7E] bg-gray-50/50"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Rating (Stars)
+                  </label>
+                  <select
+                    value={newReview.rating}
+                    onChange={(e) => setNewReview(prev => ({ ...prev, rating: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#128C7E] bg-gray-50/50"
+                  >
+                    <option value={5}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4 Stars)</option>
+                    <option value={3}>⭐⭐⭐ (3 Stars)</option>
+                    <option value={2}>⭐⭐ (2 Stars)</option>
+                    <option value={1}>⭐ (1 Star)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Initial Status
+                  </label>
+                  <select
+                    value={newReview.status}
+                    onChange={(e) => setNewReview(prev => ({ ...prev, status: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#128C7E] bg-gray-50/50"
+                  >
+                    <option value="APPROVED">APPROVED (Live on Tribe)</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="HIDDEN">HIDDEN</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Review Comment *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Write the customer testimonial quote..."
+                  value={newReview.comment}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#128C7E] bg-gray-50/50 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold rounded-xl text-xs shadow-md cursor-pointer transition-colors"
+                >
+                  Save & Publish
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

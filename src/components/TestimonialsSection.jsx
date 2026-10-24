@@ -1,52 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
+import { INITIAL_REVIEWS } from '../data/mockAdminData';
 import { User, Quote, Star, MessageSquarePlus, Send, CheckCircle2, ThumbsUp } from 'lucide-react';
 
-const SEED_TESTIMONIALS = [
-  {
-    id: 'rev-seed-1',
-    rating: 5,
-    quote: '"Super tasty veg chips, fruit chips and cashew nuts. Packaging very fine and fresh!"',
-    comment: '"Super tasty veg chips, fruit chips and cashew nuts. Packaging very fine and fresh!"',
-    name: 'Anitha Ganesh',
-    tag: 'Premium Buyer',
-    status: 'APPROVED',
-    date: '2026-09-20'
-  },
-  {
-    id: 'rev-seed-2',
-    rating: 5,
-    quote: '"We order Nuts and quality is superb.. we ordered from Ramanathapuram, Thondi. On time delivery!"',
-    comment: '"We order Nuts and quality is superb.. we ordered from Ramanathapuram, Thondi. On time delivery!"',
-    name: 'Jamruth Banu',
-    tag: 'Premium Buyer',
-    status: 'APPROVED',
-    date: '2026-09-19'
-  },
-  {
-    id: 'rev-seed-3',
-    rating: 5,
-    quote: '"Packing pakka and dates n\' chips were very tasty. So I gave 5 stars!"',
-    comment: '"Packing pakka and dates n\' chips were very tasty. So I gave 5 stars!"',
-    name: 'Manju Gobi',
-    tag: 'Premium Buyer',
-    status: 'APPROVED',
-    date: '2026-09-18'
-  },
-  {
-    id: 'rev-seed-4',
-    rating: 5,
-    quote: '"All the items I received were excellent. The vegetable chips were crunchy and flavorful, and the prunes were fresh and soft. Packaging was neat and delivery was on time. Very satisfied with the quality. THANK YOU!"',
-    comment: '"All the items I received were excellent. The vegetable chips were crunchy and flavorful, and the prunes were fresh and soft. Packaging was neat and delivery was on time. Very satisfied with the quality. THANK YOU!"',
-    name: 'Prashanth Mani',
-    tag: 'Premium Buyer',
-    status: 'APPROVED',
-    date: '2026-09-17'
-  }
-];
-
 export default function TestimonialsSection() {
-  const { reviews, addReview, user } = useCart();
+  const { reviews = [], addReview, user } = useCart();
 
   // Form State
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -56,35 +14,28 @@ export default function TestimonialsSection() {
   const [comment, setComment] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  // Combine user-submitted reviews with default testimonials
+  // STRICT ADMIN SOURCE: Displays reviews configured in Patron Reviews & Blogs
   const allReviews = useMemo(() => {
+    // 1. Source directly from Admin Page (reviews); fall back to INITIAL_REVIEWS if empty
+    const sourceReviews = (Array.isArray(reviews) && reviews.length > 0) ? reviews : INITIAL_REVIEWS;
+
     const list = [];
     const seenQuotes = new Set();
 
-    // 1. Newly posted & context reviews first
-    if (Array.isArray(reviews)) {
-      reviews.forEach(r => {
-        const text = (r.quote || r.comment || '').trim();
-        const status = (r.status || 'APPROVED').toUpperCase();
-        if (text && status !== 'REJECTED' && !seenQuotes.has(text.toLowerCase())) {
-          list.push({
-            id: r.id || `rev-${Math.random()}`,
-            rating: Number(r.rating) || 5,
-            quote: text.startsWith('"') ? text : `"${text}"`,
-            name: r.name || r.customerName || 'Verified Buyer',
-            tag: r.tag || 'Verified Customer',
-            date: r.date || 'Recent'
-          });
-          seenQuotes.add(text.toLowerCase());
-        }
-      });
-    }
-
-    // 2. Add seed testimonials if not already in list
-    SEED_TESTIMONIALS.forEach(s => {
-      const text = s.quote.trim();
-      if (!seenQuotes.has(text.toLowerCase())) {
-        list.push(s);
+    sourceReviews.forEach((r) => {
+      const text = (r.quote || r.comment || r.feedback || r.review || r.message || '').trim();
+      const status = (r.status || 'APPROVED').toUpperCase();
+      
+      // Displays all reviews from Patron Reviews & Blogs except if admin marked as HIDDEN or REJECTED
+      if (text && status !== 'HIDDEN' && status !== 'REJECTED' && !seenQuotes.has(text.toLowerCase())) {
+        list.push({
+          id: r.id || `rev-${Math.random()}`,
+          rating: Number(r.rating) || 5,
+          quote: text.startsWith('"') ? text : `"${text}"`,
+          name: r.customerName || r.name || 'Verified Buyer',
+          tag: r.productName ? `${r.productName}` : (r.tag || 'Verified Customer'),
+          date: r.date || 'Recent'
+        });
         seenQuotes.add(text.toLowerCase());
       }
     });
@@ -252,10 +203,19 @@ export default function TestimonialsSection() {
           </div>
         )}
 
-        {/* REVIEW CARDS GRID (DYNAMICALLY SHOWS ALL STORE & USER FEEDBACK) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {allReviews.map((rev) => (
-            <div
+        {/* REVIEW CARDS GRID (DYNAMICALLY SHOWS ALL STORE & USER FEEDBACK FROM ADMIN) */}
+        {allReviews.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-3xl border border-[#E5E7EB] max-w-xl mx-auto p-8 shadow-xs space-y-2">
+            <Quote className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <h3 className="text-base sm:text-lg font-bold font-serif text-[#000000]">No Approved Reviews Yet</h3>
+            <p className="text-xs text-gray-500">
+              Only reviews approved in the Admin Dashboard appear here. Be the first to share your experience!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {allReviews.map((rev) => (
+              <div
               key={rev.id}
               className="bg-white p-6 sm:p-7 rounded-3xl border border-[#E5E7EB] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between space-y-6 relative group"
             >
@@ -305,6 +265,7 @@ export default function TestimonialsSection() {
             </div>
           ))}
         </div>
+        )}
 
       </div>
     </section>
