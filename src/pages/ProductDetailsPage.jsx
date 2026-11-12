@@ -138,9 +138,9 @@ export default function ProductDetailsPage() {
                   {product.badge}
                 </span>
               )}
-              {((origPrice > curPrice) || (product?.discountPercent > 0)) && (
+              {product?.discountPercent > 0 && (
                 <span className="bg-[#B91C1C] text-white text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded shadow-md w-fit">
-                  {product?.discountPercent || Math.round(((origPrice - curPrice) / origPrice) * 100)}% OFF
+                  {product.discountPercent}% OFF
                 </span>
               )}
             </div>
@@ -257,18 +257,7 @@ export default function ProductDetailsPage() {
                   <span className="text-2xl sm:text-3xl font-black text-[#000000] font-serif">
                     ₹{totalPrice.toLocaleString('en-IN')}.00
                   </span>
-                  {originalTotalPrice > totalPrice && (
-                    <span className="text-xs text-gray-400 line-through font-sans">
-                      ₹{originalTotalPrice.toLocaleString('en-IN')}.00
-                    </span>
-                  )}
                 </div>
-                {isCustomPincodePrice && (
-                  <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold inline-flex items-center gap-1 mt-1.5">
-                    <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-                    Special Price for Delivery Pincode {effectivePincode}
-                  </div>
-                )}
               </div>
 
               <span className="text-[11px] font-bold text-[#128C7E] bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full w-fit">

@@ -623,14 +623,6 @@ export default function ComboDealsPage() {
                               <span className="text-xl font-black font-serif text-[#128C7E]">
                                 ₹{finalPrice}
                               </span>
-                              <span className="text-xs text-slate-400 line-through font-mono">
-                                ₹{currentWeight.originalPrice}
-                              </span>
-                              {isPincode && (
-                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
-                                  Pincode Price
-                                </span>
-                              )}
                             </div>
                             <span className="text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
                               {disc}% OFF

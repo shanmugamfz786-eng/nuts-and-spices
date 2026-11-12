@@ -20,10 +20,9 @@ function BestSellerCard({ product }) {
   const isWishlisted = Array.isArray(wishlist) && wishlist.includes(product.id);
 
   const curP = getProductFinalPrice ? getProductFinalPrice(product, activeWeight) : (Number(activeWeight.price) || 250);
-  const origP = Number(activeWeight.originalPrice) || ((product.discountPercent > 0) ? Math.round(curP / ((100 - product.discountPercent) / 100)) : Math.round(curP * 1.2));
-  const discountPercent = (product.discountPercent !== undefined && product.discountPercent !== null) 
+  const discountPercent = (product.discountPercent !== undefined && product.discountPercent !== null && product.discountPercent > 0) 
     ? Number(product.discountPercent) 
-    : (origP > curP ? Math.round(((origP - curP) / origP) * 100) : 15);
+    : 0;
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
@@ -117,12 +116,9 @@ function BestSellerCard({ product }) {
           <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
-        {/* Price Row (Strikethrough Original + Highlighted Discounted Price) */}
+        {/* Price Row */}
         <div className="pt-0.5">
-          <span className="text-[11px] text-gray-400 line-through font-medium block">
-            ₹{origP}.00
-          </span>
-          <span className="text-base sm:text-lg font-black text-[#A67C1E] font-serif block -mt-0.5">
+          <span className="text-base sm:text-lg font-black text-[#A67C1E] font-serif block">
             ₹{curP}.00
           </span>
         </div>

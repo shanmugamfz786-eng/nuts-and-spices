@@ -30,10 +30,9 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     setTimeout(() => setAdded(false), 1500);
   };
 
-  const origP = Number(activeWeight.originalPrice) || ((product.discountPercent > 0) ? Math.round(curP / ((100 - product.discountPercent) / 100)) : Math.round(curP * 1.2));
   const discountPercent = (product.discountPercent !== undefined && product.discountPercent !== null && product.discountPercent > 0) 
     ? Number(product.discountPercent) 
-    : (origP > curP ? Math.round(((origP - curP) / origP) * 100) : 15);
+    : 0;
 
   // ==================== LIST VIEW (HORIZONTAL CARD) ====================
   if (viewMode === 'list') {
@@ -100,18 +99,9 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         {/* Right Side: Price + Add to Cart Button */}
         <div className="flex flex-col sm:flex-row md:flex-col items-start md:items-end justify-between md:justify-center gap-2 md:gap-1.5 shrink-0 w-full md:w-56">
           <div className="flex flex-col md:text-right">
-            <span className="text-[11px] text-gray-400 line-through font-sans leading-none">
-              ₹{origP}.00
-            </span>
-            <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight mt-0.5">
+            <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight">
               ₹{curP}.00
             </span>
-            {isCustomPincodePrice && (
-              <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-1 w-fit mt-1">
-                <MapPin className="w-2.5 h-2.5 text-emerald-600" />
-                Pincode {effectivePincode} Price
-              </span>
-            )}
           </div>
 
           <button
@@ -219,20 +209,10 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         {/* Price & Add to Cart Button */}
         <div className="pt-1.5 space-y-2">
           
-          {/* Strikethrough Original & Bold Current Price in Gold */}
           <div className="flex flex-col">
-            <span className="text-[11px] text-gray-400 line-through font-sans leading-none">
-              ₹{origP}.00
-            </span>
-            <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight mt-0.5">
+            <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight">
               ₹{curP}.00
             </span>
-            {isCustomPincodePrice && (
-              <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-1 w-fit mt-1">
-                <MapPin className="w-2.5 h-2.5 text-emerald-600" />
-                Pincode {effectivePincode} Price
-              </span>
-            )}
           </div>
 
           {/* Add to Cart Button */}
