@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { 
   Settings, Save, Phone, MessageSquare, 
-  Truck, Share2, CheckCircle 
+  Share2, CheckCircle 
 } from 'lucide-react';
 
 export default function AdminSettings() {
@@ -196,49 +196,6 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        {/* SECTION 3: DELIVERY & SHIPPING CONFIG */}
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm space-y-4">
-          <h3 className="text-base font-black font-serif text-[#000000] pb-3 border-b border-[#E5E7EB] flex items-center gap-2">
-            <Truck className="w-5 h-5 text-[#000000]" />
-            Delivery Rates & Free Shipping Minimums
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            {/* Delivery Charge */}
-            <div>
-              <label className="block font-bold uppercase text-gray-700 mb-1">Standard Delivery Fee (₹)</label>
-              <input
-                type="number"
-                min="0"
-                placeholder="0"
-                value={formData.deliveryCharge ?? ''}
-                onChange={(e) => {
-                  setIsDirty(true);
-                  const val = e.target.value;
-                  setFormData({ ...formData, deliveryCharge: val === '' ? '' : Number(val) });
-                }}
-                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
-              />
-            </div>
-
-            {/* Minimum Order Amount for Free Delivery */}
-            <div>
-              <label className="block font-bold uppercase text-gray-700 mb-1">Free Delivery Threshold (₹)</label>
-              <input
-                type="number"
-                min="0"
-                placeholder="0"
-                value={formData.minOrderAmount ?? ''}
-                onChange={(e) => {
-                  setIsDirty(true);
-                  const val = e.target.value;
-                  setFormData({ ...formData, minOrderAmount: val === '' ? '' : Number(val) });
-                }}
-                className="w-full bg-[#F9FAFB]/50 border border-[#E5E7EB] focus:border-[#000000] rounded-xl p-3 text-gray-900 font-serif font-bold text-sm outline-none"
-              />
-            </div>
-          </div>
-        </div>
 
         {/* SECTION 4: SOCIAL MEDIA */}
         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm space-y-4">
