@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { Mail, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, Package, ChevronRight, X, LogOut, ShoppingBag, Settings, User as UserIcon, KeyRound, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, Package, ChevronRight, X, LogOut, ShoppingBag, Settings, User as UserIcon, KeyRound, ShieldCheck, AlertCircle, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginPage() {
@@ -21,6 +21,7 @@ export default function LoginPage() {
     return 'profile';
   });
   const [editName, setEditName] = useState('');
+  const [editPincode, setEditPincode] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -123,14 +124,24 @@ export default function LoginPage() {
   useEffect(() => {
     if (user) {
       setEditName(user.name || '');
+      setEditPincode(user.pincode || '');
     }
   }, [user]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     if (!editName.trim()) return;
+
+    if (editPincode && !/^\d{6}$/.test(editPincode.trim())) {
+      alert('Delivery pincode must be a 6-digit number.');
+      return;
+    }
+
     setIsSaving(true);
-    const res = await updateUserProfile(editName.trim());
+    const res = await updateUserProfile({
+      name: editName.trim(),
+      pincode: editPincode.trim() || null
+    });
     setIsSaving(false);
     if (res && res.success) {
       setSaveSuccess(true);
@@ -532,6 +543,28 @@ export default function LoginPage() {
                         readOnly
                         className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-semibold text-[#000000] outline-none cursor-not-allowed"
                       />
+                    </div>
+
+                    {/* Delivery Pincode */}
+                    <div className="space-y-1 sm:space-y-1.5">
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000] flex items-center justify-between">
+                        <span>Default Delivery Pincode</span>
+                        <span className="text-[10px] text-[#128C7E] font-medium lowercase">auto local pricing</span>
+                      </label>
+                      <div className="relative">
+                        <MapPin className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          maxLength={6}
+                          placeholder="e.g. 600017"
+                          value={editPincode}
+                          onChange={(e) => setEditPincode(e.target.value.replace(/\D/g, ''))}
+                          className="w-full pl-10 pr-4 py-2.5 sm:px-4 sm:py-3 bg-white border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-mono font-semibold text-[#000000] outline-none focus:border-[#128C7E] transition-colors shadow-xs"
+                        />
+                      </div>
+                      <p className="text-[10px] text-[#8C7A6B]">
+                        Whenever you log in, this pincode automatically applies to show your fixed local prices.
+                      </p>
                     </div>
 
                     <div className="pt-2 sm:pt-4">

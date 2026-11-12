@@ -39,6 +39,7 @@ const memoryStore = {
   orders: [],
   reviews: [],
   coupons: [],
+  pincode_pricing: [],
   settings: {
     whatsapp_number: process.env.STORE_WHATSAPP_NUMBER || '919655298540',
     delivery_charge: '50'
@@ -113,6 +114,29 @@ function processMemoryQuery(sql, params) {
       }
       return memoryStore.orders;
     }
+
+    if (queryLower.includes('from pincode_pricing')) {
+      if (!memoryStore.pincode_pricing) memoryStore.pincode_pricing = [];
+      if (queryLower.includes('where pincode = ?') || queryLower.includes('pincode = ?') || queryLower.includes('pincode_to')) {
+        const pincode = String(params[0] || '').trim();
+        const pinNum = Number(pincode);
+        return memoryStore.pincode_pricing.filter(r => {
+          const isActive = r.status === 'active' || !queryLower.includes("status = 'active'");
+          if (!isActive) return false;
+          if (r.pincode === pincode) return true;
+          if (r.pincode_to && !isNaN(pinNum)) {
+            const start = Number(r.pincode);
+            const end = Number(r.pincode_to);
+            return pinNum >= start && pinNum <= end;
+          }
+          return false;
+        });
+      }
+      if (queryLower.includes('where id = ?')) {
+        return memoryStore.pincode_pricing.filter(r => r.id === params[0]);
+      }
+      return memoryStore.pincode_pricing;
+    }
   }
 
   // 2. INSERT / REPLACE Queries
@@ -169,6 +193,31 @@ function processMemoryQuery(sql, params) {
       };
       memoryStore.orders.unshift(newOrder);
       return { insertId: newOrder.id, affectedRows: 1 };
+    }
+
+    if (queryLower.includes('pincode_pricing')) {
+      if (!memoryStore.pincode_pricing) memoryStore.pincode_pricing = [];
+      const [id, productId, variantWeight, pincode, price, status] = params;
+      const newRule = {
+        id,
+        product_id: productId,
+        variant_weight: variantWeight,
+        pincode,
+        price: Number(price),
+        status: status || 'active',
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      // Check duplicate
+      const dupIdx = memoryStore.pincode_pricing.findIndex(
+        r => r.product_id === productId && r.variant_weight.toLowerCase() === variantWeight.toLowerCase() && r.pincode === pincode
+      );
+      if (dupIdx >= 0) {
+        memoryStore.pincode_pricing[dupIdx] = newRule;
+      } else {
+        memoryStore.pincode_pricing.push(newRule);
+      }
+      return { insertId: id, affectedRows: 1 };
     }
   }
 
@@ -243,10 +292,34 @@ function processMemoryQuery(sql, params) {
       }
       return { affectedRows: order ? 1 : 0 };
     }
+
+    if (queryLower.includes('pincode_pricing')) {
+      if (!memoryStore.pincode_pricing) memoryStore.pincode_pricing = [];
+      const id = params[params.length - 1];
+      const rule = memoryStore.pincode_pricing.find(r => r.id === id);
+      if (rule) {
+        if (queryLower.includes('price = ?') && queryLower.includes('status = ?')) {
+          rule.price = Number(params[0]);
+          rule.status = params[1];
+        } else if (queryLower.includes('price = ?')) {
+          rule.price = Number(params[0]);
+        } else if (queryLower.includes('status = ?')) {
+          rule.status = params[0];
+        }
+        rule.updated_at = new Date();
+      }
+      return { affectedRows: rule ? 1 : 0 };
+    }
   }
 
   // 4. DELETE Queries
   if (queryLower.startsWith('delete')) {
+    if (queryLower.includes('from pincode_pricing')) {
+      const id = params[0];
+      if (!memoryStore.pincode_pricing) memoryStore.pincode_pricing = [];
+      memoryStore.pincode_pricing = memoryStore.pincode_pricing.filter(r => r.id !== id);
+      return { affectedRows: 1 };
+    }
     if (queryLower.includes('from categories')) {
       const id = params[0];
       memoryStore.categories = memoryStore.categories.filter(c => c.id !== id);

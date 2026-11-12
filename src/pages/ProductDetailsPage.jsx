@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import { useCart, isProductActive } from '../context/CartContext';
 import { PRODUCTS } from '../data/products';
-import { ArrowLeft, Star, ShoppingBag, ShieldCheck, Truck, RefreshCw, Heart, Check, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Star, ShoppingBag, ShieldCheck, Truck, RefreshCw, Heart, Check, MessageSquare, MapPin } from 'lucide-react';
 
 export default function ProductDetailsPage() {
-  const { selectedProduct, products, addToCart, wishlist, toggleWishlist, navigate, reviews = [], addReview, user } = useCart();
+  const { 
+    selectedProduct, 
+    products, 
+    addToCart, 
+    wishlist, 
+    toggleWishlist, 
+    navigate, 
+    reviews = [], 
+    addReview, 
+    user,
+    getProductFinalPrice,
+    hasPincodePrice,
+    effectivePincode
+  } = useCart();
   
   const activeProds = (products || []).filter(isProductActive);
   const product = (selectedProduct && isProductActive(selectedProduct))
@@ -67,18 +80,20 @@ export default function ProductDetailsPage() {
   const activeWeight = selectedWeight || safeWeights[0] || defaultWeight;
   const isWishlisted = product ? wishlist.includes(product.id) : false;
 
+  const curPrice = getProductFinalPrice ? getProductFinalPrice(product, activeWeight) : (Number(activeWeight?.price) || Number(product?.price) || 290);
+  const isCustomPincodePrice = hasPincodePrice ? hasPincodePrice(product, activeWeight) : false;
+
   const handleAddToCart = () => {
-    addToCart(product, activeWeight, quantity);
+    addToCart(product, { ...activeWeight, price: curPrice }, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
 
   const handleQuickCheckout = () => {
-    addToCart(product, activeWeight, quantity);
+    addToCart(product, { ...activeWeight, price: curPrice }, quantity);
     navigate('cart');
   };
 
-  const curPrice = Number(activeWeight?.price) || Number(product?.price) || 290;
   const origPrice = Number(activeWeight?.originalPrice) || ((product?.discountPercent > 0) ? Math.round(curPrice / ((100 - product.discountPercent) / 100)) : curPrice);
   const totalPrice = curPrice * quantity;
   const originalTotalPrice = origPrice * quantity;
@@ -186,6 +201,7 @@ export default function ProductDetailsPage() {
               <div className="flex flex-wrap gap-2">
                 {safeWeights.map((w, i) => {
                   const isSelected = activeWeight === w;
+                  const resolvedVariantPrice = getProductFinalPrice ? getProductFinalPrice(product, w) : w.price;
                   return (
                     <button
                       key={product.id + '-' + w.label + '-' + i}
@@ -198,7 +214,7 @@ export default function ProductDetailsPage() {
                     >
                       <span>{w.label}</span>
                       <span className={`ml-1.5 font-normal text-[11px] ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
-                        ₹{w.price}
+                        ₹{resolvedVariantPrice}
                       </span>
                     </button>
                   );
@@ -234,7 +250,7 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* Dynamic Total Price Container */}
-            <div className="p-4 sm:p-5 bg-[#FAF7F2] rounded-2xl border border-gray-200/80 flex items-center justify-between">
+            <div className="p-4 sm:p-5 bg-[#FAF7F2] rounded-2xl border border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider block">Total Amount:</span>
                 <div className="flex items-baseline gap-2 mt-0.5">
@@ -247,9 +263,15 @@ export default function ProductDetailsPage() {
                     </span>
                   )}
                 </div>
+                {isCustomPincodePrice && (
+                  <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold inline-flex items-center gap-1 mt-1.5">
+                    <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                    Special Price for Delivery Pincode {effectivePincode}
+                  </div>
+                )}
               </div>
 
-              <span className="text-[11px] font-bold text-[#128C7E] bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full">
+              <span className="text-[11px] font-bold text-[#128C7E] bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full w-fit">
                 Free Express Delivery Eligible
               </span>
             </div>

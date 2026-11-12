@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { Trash2, ArrowRight, ArrowLeft, ShieldCheck, Tag, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Trash2, ArrowRight, ArrowLeft, ShieldCheck, Tag, CheckCircle2, AlertCircle, X, MapPin } from 'lucide-react';
+import PincodeSelectorModal from '../components/PincodeSelectorModal';
 
 export default function CartPage() {
   const { 
@@ -16,8 +17,10 @@ export default function CartPage() {
     applyCoupon, 
     removeCoupon, 
     navigate, 
-    user 
+    user,
+    effectivePincode
   } = useCart();
+  const [isPincodeModalOpen, setIsPincodeModalOpen] = useState(false);
   const [realOrders, setRealOrders] = useState([]);
   const [couponInput, setCouponInput] = useState('');
   const [couponMessage, setCouponMessage] = useState(null);
@@ -224,6 +227,24 @@ export default function CartPage() {
                   </span>
                 </h2>
 
+                {/* Delivery Location Pincode Pill */}
+                <div className="flex items-center justify-between p-2.5 bg-emerald-50/80 border border-emerald-200/80 rounded-xl text-xs">
+                  <div className="flex items-center gap-1.5 font-medium text-emerald-950">
+                    <MapPin className="w-3.5 h-3.5 text-[#128C7E] shrink-0" />
+                    <span>Deliver to:</span>
+                    <span className="font-mono font-black text-emerald-800">
+                      {effectivePincode || 'Not Set'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPincodeModalOpen(true)}
+                    className="text-[11px] font-extrabold text-[#128C7E] hover:underline cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </div>
+
                 {/* Coupon Code Input */}
                 <form onSubmit={handleApplyCoupon} className="space-y-2">
                   <div className="flex gap-2">
@@ -413,6 +434,11 @@ export default function CartPage() {
         )}
 
       </div>
+
+      <PincodeSelectorModal
+        isOpen={isPincodeModalOpen}
+        onClose={() => setIsPincodeModalOpen(false)}
+      />
     </div>
   );
 }

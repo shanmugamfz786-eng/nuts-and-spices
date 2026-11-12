@@ -6,6 +6,7 @@ import { createCategory as createCategoryApi, updateCategory as updateCategoryAp
 import { API_BASE_URL, fetchAdminStateApi, syncAdminStateApi } from '../api/index.js';
 import { login as loginAuthApi, register as registerAuthApi } from '../api/authApi.js';
 import { updateOrderStatusApi, deleteOrderApi } from '../api/orderApi.js';
+import { fetchPincodePrices, updateUserPincodeApi } from '../api/pincodePricingApi.js';
 import { 
   INITIAL_STORE_SETTINGS, 
   INITIAL_ORDERS, 
@@ -264,6 +265,78 @@ export const CartProvider = ({ children }) => {
       return [];
     }
   });
+
+  // 7b. PINCODE PRICING & LOCATION STATE
+  // Priority: 1. tempPincode -> 2. user profile pincode -> 3. guest localStorage pincode -> 4. default
+  const [tempPincode, setTempPincode] = useState(null);
+  const [guestPincode, setGuestPincode] = useState(() => {
+    try {
+      return localStorage.getItem('nuts_spices_guest_pincode') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [pincodePrices, setPincodePrices] = useState({});
+  const [pincodeAddedAmount, setPincodeAddedAmount] = useState(0);
+  const [isPincodeLoading, setIsPincodeLoading] = useState(false);
+
+  // Compute active effective delivery pincode based on strict 4-level priority
+  const effectivePincode = useMemo(() => {
+    // 1. Logged-in customer with temporary selection
+    if (tempPincode && /^\d{6}$/.test(String(tempPincode).trim())) {
+      return String(tempPincode).trim();
+    }
+    // 2. Logged-in customer without temporary selection -> saved profile pincode
+    if (user && user.pincode && /^\d{6}$/.test(String(user.pincode).trim())) {
+      return String(user.pincode).trim();
+    }
+    // 3. Guest customer with saved localStorage pincode
+    if (!user && guestPincode && /^\d{6}$/.test(String(guestPincode).trim())) {
+      return String(guestPincode).trim();
+    }
+    // 4. No pincode
+    return '';
+  }, [tempPincode, user, guestPincode]);
+
+  const isTempPincode = Boolean(user && tempPincode && /^\d{6}$/.test(String(tempPincode).trim()) && tempPincode !== user.pincode);
+
+  // Fetch active pincode prices whenever effective delivery pincode changes
+  useEffect(() => {
+    let isCancelled = false;
+    if (effectivePincode && /^\d{6}$/.test(effectivePincode)) {
+      setIsPincodeLoading(true);
+      fetchPincodePrices(effectivePincode)
+        .then(res => {
+          if (!isCancelled) {
+            if (res && res.success && res.priceMap) {
+              setPincodePrices(res.priceMap);
+              setPincodeAddedAmount(res.storewideAdjustment ? Number(res.storewideAdjustment.value) : 0);
+            } else {
+              setPincodePrices({});
+              setPincodeAddedAmount(0);
+            }
+            setIsPincodeLoading(false);
+          }
+        })
+        .catch(() => {
+          if (!isCancelled) {
+            setPincodePrices({});
+            setPincodeAddedAmount(0);
+            setIsPincodeLoading(false);
+          }
+        });
+    } else {
+      setPincodePrices({});
+      setPincodeAddedAmount(0);
+      setIsPincodeLoading(false);
+    }
+    return () => { isCancelled = true; };
+  }, [effectivePincode]);
+
+  // Reset temporary pincode when user changes (login / logout)
+  useEffect(() => {
+    setTempPincode(null);
+  }, [user]);
 
   // 8. NAVIGATION & ROUTING STATE
   const [activePage, setActivePage] = useState(() => {
@@ -684,22 +757,33 @@ export const CartProvider = ({ children }) => {
     return { success: true, user: fallbackUser };
   };
 
-  const updateUserProfile = async (newName) => {
+  const updateUserProfile = async (profileData) => {
     try {
       const token = localStorage.getItem('nuts_spices_auth_token');
       if (!token) return { success: false, message: 'Not authenticated' };
 
-      const res = await fetch((import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') + '/api/auth/me', {
+      const payload = typeof profileData === 'string' ? { name: profileData } : profileData;
+
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'https://nuts-and-spices-dqzp.onrender.com'
+          : ''
+      );
+
+      const res = await fetch(BASE + '/api/auth/me', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ name: newName })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.user) {
         setUser(data.user);
+        try {
+          localStorage.setItem('nuts_spices_user', JSON.stringify(data.user));
+        } catch {}
         if (data.token) {
           localStorage.setItem('nuts_spices_auth_token', data.token);
         }
@@ -707,8 +791,12 @@ export const CartProvider = ({ children }) => {
       return data;
     } catch (err) {
       // Fallback for local update if API fails
-      const updatedUser = { ...user, name: newName };
+      const payload = typeof profileData === 'string' ? { name: profileData } : profileData;
+      const updatedUser = { ...user, ...payload };
       setUser(updatedUser);
+      try {
+        localStorage.setItem('nuts_spices_user', JSON.stringify(updatedUser));
+      } catch {}
       return { success: true, user: updatedUser };
     }
   };
@@ -785,6 +873,7 @@ export const CartProvider = ({ children }) => {
 
   const logoutUser = () => {
     setUser(null);
+    setTempPincode(null);
     setCart([]);
     localStorage.removeItem('nuts_spices_user');
     localStorage.removeItem('nuts_spices_cart');
@@ -903,10 +992,125 @@ export const CartProvider = ({ children }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // PINCODE PRICING HELPERS & RESOLUTION
+  const getProductFinalPrice = (product, weightObj) => {
+    if (!product) return 100;
+    const normWeight = String(weightObj?.label || (product.weights && product.weights[0] ? product.weights[0].label : '') || '').toLowerCase().trim();
+    if (pincodePrices && pincodePrices[product.id]) {
+      if (pincodePrices[product.id][normWeight] !== undefined) {
+        return Number(pincodePrices[product.id][normWeight]);
+      }
+      if (pincodePrices[product.id]['standard'] !== undefined) {
+        return Number(pincodePrices[product.id]['standard']);
+      }
+    }
+    const base = weightObj ? Number(weightObj.price) : (product.weights && product.weights[0] ? Number(product.weights[0].price) : (Number(product.price) || 100));
+    if (pincodeAddedAmount > 0) {
+      return base + pincodeAddedAmount;
+    }
+    return base;
+  };
+
+  const hasPincodePrice = (product, weightObj) => {
+    if (pincodeAddedAmount > 0) return true;
+    if (!product || !pincodePrices) return false;
+    const normWeight = String(weightObj?.label || (product.weights && product.weights[0] ? product.weights[0].label : '') || '').toLowerCase().trim();
+    return Boolean(
+      pincodePrices[product.id] && (
+        pincodePrices[product.id][normWeight] !== undefined ||
+        pincodePrices[product.id]['standard'] !== undefined
+      )
+    );
+  };
+
+  const setDeliveryPincode = async (newPin, saveToProfile = false) => {
+    const cleanPin = String(newPin || '').trim();
+    if (!/^\d{6}$/.test(cleanPin)) {
+      return { success: false, message: 'Please enter a valid 6-digit Indian postal pincode.' };
+    }
+
+    if (user) {
+      if (saveToProfile) {
+        try {
+          await updateUserProfile({ pincode: cleanPin });
+          setTempPincode(null);
+        } catch (e) {
+          console.warn('Profile pincode update note:', e);
+        }
+      } else {
+        setTempPincode(cleanPin);
+      }
+    } else {
+      setGuestPincode(cleanPin);
+      try {
+        localStorage.setItem('nuts_spices_guest_pincode', cleanPin);
+      } catch {}
+    }
+    return { success: true, pincode: cleanPin };
+  };
+
+  const clearTempPincode = () => {
+    setTempPincode(null);
+  };
+
+  const clearDeliveryPincode = () => {
+    setTempPincode(null);
+    if (!user) {
+      setGuestPincode('');
+      try {
+        localStorage.removeItem('nuts_spices_guest_pincode');
+      } catch {}
+    }
+  };
+
+  // Dynamically refresh all existing cart items whenever pincodePrices change
+  useEffect(() => {
+    setCart(prevCart => {
+      if (!prevCart || prevCart.length === 0) return prevCart;
+      let changed = false;
+      const updated = prevCart.map(item => {
+        const prod = products.find(p => p.id === (item.productId || item.id));
+        if (!prod) return item;
+        const normWeight = String(item.weight || '').toLowerCase().trim();
+        let targetPrice = item.price;
+
+        if (pincodePrices && pincodePrices[prod.id] && pincodePrices[prod.id][normWeight] !== undefined) {
+          targetPrice = Number(pincodePrices[prod.id][normWeight]);
+        } else {
+          // Fallback to default catalog variant price (+ pincodeAddedAmount if set)
+          let pWeights = prod.weights || prod.weights_json;
+          if (typeof pWeights === 'string') {
+            try { pWeights = JSON.parse(pWeights); } catch { pWeights = []; }
+          }
+          if (Array.isArray(pWeights) && pWeights.length > 0) {
+            const v = pWeights.find(w => String(w.label || '').toLowerCase().trim() === normWeight);
+            if (v && v.price !== undefined) targetPrice = Number(v.price);
+          } else if (prod.price !== undefined) {
+            targetPrice = Number(prod.price);
+          }
+          if (pincodeAddedAmount > 0) {
+            targetPrice = targetPrice + pincodeAddedAmount;
+          }
+        }
+
+        if (targetPrice !== item.price) {
+          changed = true;
+          return {
+            ...item,
+            price: targetPrice,
+            cartItemId: `${prod.id}-${item.weight}-${targetPrice}`
+          };
+        }
+        return item;
+      });
+      return changed ? updated : prevCart;
+    });
+  }, [pincodePrices, pincodeAddedAmount, products]);
+
   // CART HANDLERS
   const addToCart = (product, weightObj, quantity = 1) => {
     const weightLabel = weightObj ? weightObj.label : (product.weights && product.weights[0] ? product.weights[0].label : 'Standard');
-    const itemPrice = weightObj ? weightObj.price : (product.weights && product.weights[0] ? product.weights[0].price : product.price || 100);
+    const itemPrice = getProductFinalPrice(product, weightObj);
     const cartItemId = `${product.id}-${weightLabel}-${itemPrice}`;
 
     setCart(prevCart => {
@@ -1784,7 +1988,22 @@ export const CartProvider = ({ children }) => {
         deleteCustomer,
 
         // Reset Store Helper
-        resetStoreToDefault
+        resetStoreToDefault,
+
+        // Pincode-Wise Pricing & Delivery Location
+        effectivePincode,
+        deliveryPincode: effectivePincode,
+        tempPincode,
+        isTempPincode,
+        guestPincode,
+        pincodePrices,
+        pincodeAddedAmount,
+        isPincodeLoading,
+        getProductFinalPrice,
+        hasPincodePrice,
+        setDeliveryPincode,
+        clearTempPincode,
+        clearDeliveryPincode
       }}
     >
       {children}

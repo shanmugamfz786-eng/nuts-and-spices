@@ -6,14 +6,18 @@
 export const CONFIG = {
   // Base URL for backend REST API. Falls back to environment variable, then Render deployment if in production
   API_BASE_URL: (() => {
+    // When running locally on localhost or 127.0.0.1, always use local backend / Vite proxy
+    if (typeof window !== 'undefined') {
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (isLocal) {
+        return '';
+      }
+    }
     const envUrl = import.meta.env.VITE_API_BASE_URL;
-    if (envUrl) {
+    if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
       return envUrl.replace(/\/api\/?$/, '');
     }
-    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-      return 'https://nuts-and-spices-dqzp.onrender.com';
-    }
-    return '';
+    return 'https://nuts-and-spices-dqzp.onrender.com';
   })(),
 
   // Cashfree Environment Mode ('SANDBOX' or 'PRODUCTION')

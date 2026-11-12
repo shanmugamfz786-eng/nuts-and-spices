@@ -1,12 +1,29 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { Search, Heart, ShoppingBag, User, Menu, X, LayoutGrid, ChevronRight, Sparkles, Gift, Tag, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Menu, X, LayoutGrid, ChevronRight, Sparkles, Gift, Tag, ArrowRight, ShieldCheck, MapPin, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PincodeSelectorModal from './PincodeSelectorModal';
 
 export default function Navbar() {
-  const { activePage, navigate, cartItemCount, wishlist, setIsSearchOpen, setSearchQuery, user, categories, products, setSelectedProduct, storeSettings } = useCart();
+  const { 
+    activePage, 
+    navigate, 
+    cartItemCount, 
+    wishlist, 
+    setIsSearchOpen, 
+    setSearchQuery, 
+    user, 
+    categories, 
+    products, 
+    setSelectedProduct, 
+    storeSettings,
+    effectivePincode,
+    isTempPincode,
+    getProductFinalPrice
+  } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+  const [isPincodeModalOpen, setIsPincodeModalOpen] = useState(false);
   const [navSearchInput, setNavSearchInput] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef(null);
@@ -206,7 +223,7 @@ export default function Navbar() {
                   {searchResults.length > 0 ? (
                     <div className="divide-y divide-[#E5E7EB]/40 max-h-[380px] overflow-y-auto">
                       {searchResults.map((product) => {
-                        const mainPrice = product.weights?.[0]?.price || product.price || 0;
+                        const mainPrice = getProductFinalPrice ? getProductFinalPrice(product, product.weights?.[0]) : (product.weights?.[0]?.price || product.price || 0);
                         return (
                           <div
                             key={product.id}
@@ -434,7 +451,7 @@ export default function Navbar() {
                   {searchResults.length > 0 ? (
                     <div className="divide-y divide-[#E5E7EB]/40 max-h-[350px] overflow-y-auto">
                       {searchResults.map((product) => {
-                        const mainPrice = product.weights?.[0]?.price || product.price || 0;
+                        const mainPrice = getProductFinalPrice ? getProductFinalPrice(product, product.weights?.[0]) : (product.weights?.[0]?.price || product.price || 0);
                         return (
                           <div
                             key={product.id}
@@ -527,8 +544,8 @@ export default function Navbar() {
             </div>
 
             {/* Menu Items List */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 divide-y divide-[#E5E7EB]/60">
-              
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="divide-y divide-[#E5E7EB]/60">
               {/* About */}
               <button
                 onClick={() => { setIsMobileMenuOpen(false); navigate('about'); }}
@@ -618,6 +635,7 @@ export default function Navbar() {
                 <ChevronRight className="w-5 h-5 text-[#8C7A6B] group-hover:text-[#128C7E] group-hover:translate-x-1 transition-transform" />
               </button>
 
+              </div>
             </div>
 
             {/* Drawer Footer */}

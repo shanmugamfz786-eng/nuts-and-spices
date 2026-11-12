@@ -3,7 +3,7 @@ import { useCart, isProductActive, isProductFeatured } from '../context/CartCont
 import { ChevronLeft, ChevronRight, ShoppingCart, Check, ChevronDown, Heart, Eye } from 'lucide-react';
 
 function FeaturedCard({ product }) {
-  const { addToCart, wishlist, toggleWishlist, navigate } = useCart();
+  const { addToCart, wishlist, toggleWishlist, navigate, getProductFinalPrice } = useCart();
   
   const defaultWeight = (product && product.weights && product.weights[0]) 
     ? product.weights[0] 
@@ -18,7 +18,7 @@ function FeaturedCard({ product }) {
   const weightsList = Array.isArray(product.weights) && product.weights.length > 0 ? product.weights : [defaultWeight];
   const isWishlisted = Array.isArray(wishlist) && wishlist.includes(product.id);
 
-  const curP = Number(activeWeight.price) || 350;
+  const curP = getProductFinalPrice ? getProductFinalPrice(product, activeWeight) : (Number(activeWeight.price) || 350);
   const origP = Number(activeWeight.originalPrice) || ((product.discountPercent > 0) ? Math.round(curP / ((100 - product.discountPercent) / 100)) : Math.round(curP * 1.2));
   const discountPercent = (product.discountPercent !== undefined && product.discountPercent !== null) 
     ? Number(product.discountPercent) 
@@ -26,7 +26,7 @@ function FeaturedCard({ product }) {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    addToCart(product, activeWeight, 1);
+    addToCart(product, { ...activeWeight, price: curP }, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };

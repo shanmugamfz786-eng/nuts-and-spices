@@ -4,7 +4,27 @@ export const registerSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name must be under 100 characters'),
   phone: z.string().trim().min(10, 'Valid 10-digit mobile number required'),
   email: z.string().trim().email('Invalid email address').optional().or(z.literal('')),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128)
+  password: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  pincode: z.string().trim().regex(/^\d{6}$/, 'Pincode must be a 6-digit number').optional().or(z.literal('')).nullable()
+});
+
+export const pincodePricingSchema = z.object({
+  productId: z.string().trim().min(1, 'Product ID is required'),
+  variantWeight: z.string().trim().min(1, 'Product variant/weight is required'),
+  pincode: z.string().trim().regex(/^\d{6}$/, 'Pincode must be exactly 6 digits'),
+  pincodeTo: z.string().trim().regex(/^\d{6}$/, 'Ending Pincode must be exactly 6 digits').optional().or(z.literal('')).nullable(),
+  price: z.number().positive('Price must be greater than zero'),
+  adjustmentType: z.enum(['fixed', 'flat_increase', 'percent_increase']).default('fixed').optional(),
+  status: z.enum(['active', 'inactive']).default('active').optional()
+});
+
+export const updatePincodePricingSchema = z.object({
+  price: z.number().positive('Price must be greater than zero').optional(),
+  adjustmentType: z.enum(['fixed', 'flat_increase', 'percent_increase']).optional(),
+  status: z.enum(['active', 'inactive']).optional(),
+  variantWeight: z.string().trim().min(1).optional(),
+  pincode: z.string().trim().regex(/^\d{6}$/, 'Pincode must be exactly 6 digits').optional(),
+  pincodeTo: z.string().trim().regex(/^\d{6}$/, 'Ending Pincode must be exactly 6 digits').optional().or(z.literal('')).nullable()
 });
 
 export const loginSchema = z.object({

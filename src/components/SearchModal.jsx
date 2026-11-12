@@ -3,7 +3,7 @@ import { useCart, isProductActive } from '../context/CartContext';
 import { Search, X, ShoppingBag, ArrowRight } from 'lucide-react';
 
 export default function SearchModal() {
-  const { products, isSearchOpen, setIsSearchOpen, navigate, addToCart, searchQuery, setSearchQuery } = useCart();
+  const { products, isSearchOpen, setIsSearchOpen, navigate, addToCart, searchQuery, setSearchQuery, getProductFinalPrice } = useCart();
   const [searchTerm, setSearchTerm] = useState(searchQuery || '');
 
   React.useEffect(() => {
@@ -87,6 +87,7 @@ export default function SearchModal() {
           ) : (
             filteredProducts.map((product) => {
               const weightObj = product?.weights?.[0] || { label: '250g', price: Number(product?.price) || 350 };
+              const resolvedPrice = getProductFinalPrice ? getProductFinalPrice(product, weightObj) : weightObj.price;
               return (
                 <div 
                   key={product.id}
@@ -107,7 +108,7 @@ export default function SearchModal() {
                         {product.name}
                       </h4>
                       <span className="text-xs text-[#000000] font-semibold">
-                        ₹{weightObj.price} / {weightObj.label}
+                        ₹{resolvedPrice} / {weightObj.label}
                       </span>
                     </div>
                   </div>
@@ -116,7 +117,7 @@ export default function SearchModal() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        addToCart(product, weightObj, 1);
+                        addToCart(product, { ...weightObj, price: resolvedPrice }, 1);
                       }}
                       className="px-3 py-1.5 text-xs font-semibold bg-[#F9FAFB] text-[#000000] hover:bg-[#128C7E] hover:border-[#128C7E] hover:text-white rounded-lg transition-colors flex items-center gap-1 border border-[#E5E7EB]"
                     >

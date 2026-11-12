@@ -4,7 +4,7 @@ import ProductCard from '../components/ProductCard';
 import { ArrowLeft, SlidersHorizontal, Sparkles, ShoppingBag } from 'lucide-react';
 
 export default function CategoryPage() {
-  const { navigate, products, categories, selectedCategory } = useCart();
+  const { navigate, products, categories, selectedCategory, getProductFinalPrice } = useCart();
   const [sortBy, setSortBy] = useState('featured'); // 'featured' | 'price-low' | 'price-high' | 'rating'
 
   // Find category metadata
@@ -47,9 +47,10 @@ export default function CategoryPage() {
     });
 
   // Sort products
+  const getItemPrice = (item) => getProductFinalPrice ? getProductFinalPrice(item, item?.weights?.[0]) : (item?.weights?.[0]?.price || item?.price || 0);
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    const aPrice = a.weights && a.weights[0] ? a.weights[0].price : (a.price || 0);
-    const bPrice = b.weights && b.weights[0] ? b.weights[0].price : (b.price || 0);
+    const aPrice = getItemPrice(a);
+    const bPrice = getItemPrice(b);
 
     if (sortBy === 'price-low') return aPrice - bPrice;
     if (sortBy === 'price-high') return bPrice - aPrice;

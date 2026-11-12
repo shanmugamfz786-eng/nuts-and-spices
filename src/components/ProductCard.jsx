@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useCart, isProductActive } from '../context/CartContext';
-import { Heart, ShoppingCart, Check, ChevronDown } from 'lucide-react';
+import { Heart, ShoppingCart, Check, ChevronDown, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
-  const { addToCart, wishlist, toggleWishlist, navigate } = useCart();
+  const { addToCart, wishlist, toggleWishlist, navigate, getProductFinalPrice, hasPincodePrice, effectivePincode } = useCart();
   
   const defaultWeight = (product?.weights && product.weights[0]) 
     ? product.weights[0] 
@@ -20,14 +20,16 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
   const isWishlisted = wishlist.includes(product.id);
 
+  const curP = getProductFinalPrice ? getProductFinalPrice(product, activeWeight) : (Number(activeWeight.price) || 350);
+  const isCustomPincodePrice = hasPincodePrice ? hasPincodePrice(product, activeWeight) : false;
+
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    addToCart(product, activeWeight, 1);
+    addToCart(product, { ...activeWeight, price: curP }, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
 
-  const curP = Number(activeWeight.price) || 350;
   const origP = Number(activeWeight.originalPrice) || ((product.discountPercent > 0) ? Math.round(curP / ((100 - product.discountPercent) / 100)) : Math.round(curP * 1.2));
   const discountPercent = (product.discountPercent !== undefined && product.discountPercent !== null && product.discountPercent > 0) 
     ? Number(product.discountPercent) 
@@ -104,6 +106,12 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight mt-0.5">
               ₹{curP}.00
             </span>
+            {isCustomPincodePrice && (
+              <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-1 w-fit mt-1">
+                <MapPin className="w-2.5 h-2.5 text-emerald-600" />
+                Pincode {effectivePincode} Price
+              </span>
+            )}
           </div>
 
           <button
@@ -219,6 +227,12 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight mt-0.5">
               ₹{curP}.00
             </span>
+            {isCustomPincodePrice && (
+              <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-1 w-fit mt-1">
+                <MapPin className="w-2.5 h-2.5 text-emerald-600" />
+                Pincode {effectivePincode} Price
+              </span>
+            )}
           </div>
 
           {/* Add to Cart Button */}

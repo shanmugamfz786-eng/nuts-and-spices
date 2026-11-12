@@ -14,7 +14,9 @@ export default function CheckoutPage() {
     createNewOrder, 
     clearPurchasedItems, 
     navigate, 
-    user 
+    user,
+    effectivePincode,
+    setDeliveryPincode 
   } = useCart();
   React.useEffect(() => { if (!user) navigate('cart'); }, [user, navigate]);
 
@@ -23,7 +25,7 @@ export default function CheckoutPage() {
     phone: user?.phone || '',
     address: '',
     city: '',
-    pincode: '',
+    pincode: effectivePincode || user?.pincode || '',
     notes: ''
   });
 
@@ -351,10 +353,17 @@ export default function CheckoutPage() {
                 <Hash className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8C7A6B]" />
                 <input
                   type="text"
+                  maxLength={6}
                   placeholder="e.g. 600017"
                   value={formData.pincode}
-                  onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none ${
+                  onChange={(e) => {
+                    const pin = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setFormData(prev => ({ ...prev, pincode: pin }));
+                    if (pin.length === 6) {
+                      setDeliveryPincode(pin, false);
+                    }
+                  }}
+                  className={`w-full pl-9 pr-3 py-2.5 text-xs font-medium text-[#000000] bg-[#F9FAFB] rounded-xl border outline-none font-mono ${
                     errors.pincode ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB] focus:border-[#000000]'
                   }`}
                 />

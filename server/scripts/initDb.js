@@ -86,6 +86,22 @@ export async function initializeDatabase() {
     `CREATE TABLE IF NOT EXISTS settings (
       setting_key VARCHAR(50) PRIMARY KEY,
       setting_value LONGTEXT NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+    `CREATE TABLE IF NOT EXISTS pincode_pricing (
+      id VARCHAR(50) PRIMARY KEY,
+      product_id VARCHAR(50) NOT NULL,
+      variant_weight VARCHAR(50) NOT NULL,
+      pincode VARCHAR(10) NOT NULL,
+      pincode_to VARCHAR(10) NULL,
+      price DECIMAL(10,2) NOT NULL,
+      adjustment_type VARCHAR(20) DEFAULT 'fixed',
+      status ENUM('active', 'inactive') DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_pincode (pincode),
+      INDEX idx_pincode_to (pincode_to),
+      INDEX idx_product (product_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
   ];
 
@@ -168,6 +184,51 @@ export async function initializeDatabase() {
       }
     } catch (migrationErr) {
       console.warn("Notice on payment_status migration:", migrationErr.message);
+    }
+
+    // Safe idempotent migration for users pincode column
+    try {
+      const [userCols] = await pool.query(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'users' AND COLUMN_NAME = 'pincode'"
+      );
+      if (!userCols || userCols.length === 0) {
+        await pool.query(
+          "ALTER TABLE users ADD COLUMN pincode VARCHAR(10) NULL"
+        );
+        console.log("🛠️ Migrated users table: added pincode column.");
+      }
+    } catch (migrationErr) {
+      console.warn("Notice on users pincode migration:", migrationErr.message);
+    }
+
+    // Safe idempotent migration for pincode_pricing pincode_to column
+    try {
+      const [ppCols] = await pool.query(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'pincode_pricing' AND COLUMN_NAME = 'pincode_to'"
+      );
+      if (!ppCols || ppCols.length === 0) {
+        await pool.query(
+          "ALTER TABLE pincode_pricing ADD COLUMN pincode_to VARCHAR(10) NULL AFTER pincode"
+        );
+        console.log("🛠️ Migrated pincode_pricing table: added pincode_to column.");
+      }
+    } catch (migrationErr) {
+      console.warn("Notice on pincode_pricing migration:", migrationErr.message);
+    }
+
+    // Safe idempotent migration for pincode_pricing adjustment_type column
+    try {
+      const [adjCols] = await pool.query(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'pincode_pricing' AND COLUMN_NAME = 'adjustment_type'"
+      );
+      if (!adjCols || adjCols.length === 0) {
+        await pool.query(
+          "ALTER TABLE pincode_pricing ADD COLUMN adjustment_type VARCHAR(20) DEFAULT 'fixed' AFTER price"
+        );
+        console.log("🛠️ Migrated pincode_pricing table: added adjustment_type column.");
+      }
+    } catch (migrationErr) {
+      console.warn("Notice on pincode_pricing adjustment_type migration:", migrationErr.message);
     }
 
     console.log('✅ TiDB / MySQL database tables created successfully!');

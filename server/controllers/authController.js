@@ -18,7 +18,7 @@ const getJwtSecret = () => process.env.JWT_SECRET || 'fallback_development_secre
 
 export const registerCustomer = async (req, res) => {
   try {
-    const { name, phone, email, password } = req.body;
+    const { name, phone, email, password, pincode } = req.body;
 
     if (!name || !phone || !password) {
       return res.status(400).json({ success: false, message: 'Name, phone number, and password are required.' });
@@ -32,6 +32,15 @@ export const registerCustomer = async (req, res) => {
     const cleanPhone = normalizeIdentifier(phone);
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit Indian mobile number.' });
+    }
+
+    // Pincode format: 6-digit number (if provided)
+    let cleanPincode = null;
+    if (pincode && typeof pincode === 'string' && pincode.trim().length > 0) {
+      if (!/^\d{6}$/.test(pincode.trim())) {
+        return res.status(400).json({ success: false, message: 'Delivery pincode must be a 6-digit number.' });
+      }
+      cleanPincode = pincode.trim();
     }
 
     // Password format: minimum 8 characters
@@ -60,8 +69,8 @@ export const registerCustomer = async (req, res) => {
 
     // Force role to 'customer' - never allow clients to set their own role
     await queryDb(
-      'INSERT INTO users (id, name, phone, email, password, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, name.trim(), cleanPhone, cleanEmail, hashedPassword, 'customer']
+      'INSERT INTO users (id, name, phone, email, password, role, pincode) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [userId, name.trim(), cleanPhone, cleanEmail, hashedPassword, 'customer', cleanPincode]
     );
 
     const userObj = {
@@ -69,7 +78,8 @@ export const registerCustomer = async (req, res) => {
       name: name.trim(),
       phone: cleanPhone,
       email: cleanEmail,
-      role: 'customer'
+      role: 'customer',
+      pincode: cleanPincode
     };
 
     const token = jwt.sign(userObj, getJwtSecret(), { expiresIn: '7d' });
@@ -88,7 +98,7 @@ export const registerCustomer = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await queryDb('SELECT id, name, email, phone, role, created_at FROM users');
+    const users = await queryDb('SELECT id, name, email, phone, role, pincode, created_at FROM users');
     res.json({ success: true, users: users || (process.env.NODE_ENV !== 'production' ? memoryStore.users : []) });
   } catch (err) {
     if (process.env.NODE_ENV === 'production') {
@@ -151,7 +161,8 @@ export const loginUser = async (req, res) => {
       name: userRecord.name,
       phone: userRecord.phone,
       email: userRecord.email,
-      role: userRecord.role
+      role: userRecord.role,
+      pincode: userRecord.pincode || null
     };
 
     const token = jwt.sign(userPayload, getJwtSecret(), { expiresIn: '7d' });
@@ -178,9 +189,29 @@ export const getCurrentUser = async (req, res) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, getJwtSecret());
 
+    // Fetch latest user data from DB if available
+    let freshUser = decoded;
+    if (decoded && decoded.id) {
+      try {
+        const rows = await queryDb('SELECT id, name, phone, email, role, pincode FROM users WHERE id = ? LIMIT 1', [decoded.id]);
+        if (rows && rows.length > 0) {
+          freshUser = {
+            id: rows[0].id,
+            name: rows[0].name,
+            phone: rows[0].phone,
+            email: rows[0].email,
+            role: rows[0].role,
+            pincode: rows[0].pincode || null
+          };
+        }
+      } catch (dbErr) {
+        console.warn('Could not refresh user from DB, using token payload:', dbErr.message);
+      }
+    }
+
     res.json({
       success: true,
-      user: decoded
+      user: freshUser
     });
   } catch (error) {
     res.status(401).json({ success: false, message: 'Invalid or expired token.' });
@@ -189,30 +220,53 @@ export const getCurrentUser = async (req, res) => {
 
 export const updateCurrentUser = async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ success: false, message: 'Name is required' });
+    const { name, pincode } = req.body;
+    if (!name && pincode === undefined) {
+      return res.status(400).json({ success: false, message: 'Name or Pincode is required to update.' });
+    }
+
+    let cleanPincode = undefined;
+    if (pincode !== undefined) {
+      if (pincode && typeof pincode === 'string' && pincode.trim().length > 0) {
+        if (!/^\d{6}$/.test(pincode.trim())) {
+          return res.status(400).json({ success: false, message: 'Delivery pincode must be exactly 6 digits.' });
+        }
+        cleanPincode = pincode.trim();
+      } else if (pincode === null || pincode === '') {
+        cleanPincode = null;
+      }
     }
     
     // User ID is available in req.user from authMiddleware
     const userId = req.user.id || req.user.userId;
     
-    // Fallback logic for updating name in TiDB
+    // Update in TiDB / MySQL
     if (userId) {
-      await queryDb('UPDATE users SET name = ? WHERE id = ?', [name, userId]);
+      if (name && cleanPincode !== undefined) {
+        await queryDb('UPDATE users SET name = ?, pincode = ? WHERE id = ?', [name.trim(), cleanPincode, userId]);
+      } else if (name) {
+        await queryDb('UPDATE users SET name = ? WHERE id = ?', [name.trim(), userId]);
+      } else if (cleanPincode !== undefined) {
+        await queryDb('UPDATE users SET pincode = ? WHERE id = ?', [cleanPincode, userId]);
+      }
     }
 
     // Also update in memoryStore just in case
     if (req.user.phone) {
       const memUser = memoryStore.users.find(u => u.phone === req.user.phone);
       if (memUser) {
-        memUser.name = name;
+        if (name) memUser.name = name.trim();
+        if (cleanPincode !== undefined) memUser.pincode = cleanPincode;
       }
     }
     
-    // Issue a new token with updated name
+    // Issue a new token with updated user details
     const { iat, exp, ...restUser } = req.user;
-    const userPayload = { ...restUser, name };
+    const userPayload = { 
+      ...restUser, 
+      ...(name ? { name: name.trim() } : {}),
+      ...(cleanPincode !== undefined ? { pincode: cleanPincode } : {})
+    };
     const token = jwt.sign(userPayload, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({

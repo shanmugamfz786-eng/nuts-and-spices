@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, CheckCircle2, ShieldCheck, LogIn, Gift } from 'lucide-react';
+import { Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, CheckCircle2, ShieldCheck, LogIn, Gift, MapPin } from 'lucide-react';
 
 export default function RegisterPage() {
   const { user, registerUser, navigate } = useCart();
@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const [regName, setRegName] = useState('');
   const [regMobile, setRegMobile] = useState('');
   const [regEmail, setRegEmail] = useState('');
+  const [regPincode, setRegPincode] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [agreedTerms, setAgreedTerms] = useState(true);
@@ -65,11 +66,17 @@ export default function RegisterPage() {
       return;
     }
 
+    if (regPincode && !/^\d{6}$/.test(regPincode.trim())) {
+      setErrorMessage('Delivery pincode must be a 6-digit number.');
+      return;
+    }
+
     const res = await registerUser({
       name: cleanName,
       phone: cleanPhone,
       email: regEmail.trim() || `${cleanName.toLowerCase().replace(/\s+/g, '')}@nutsandspices.in`,
-      password: regPassword
+      password: regPassword,
+      pincode: regPincode.trim() || undefined
     });
 
     if (res && res.success) {
@@ -179,6 +186,27 @@ export default function RegisterPage() {
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#000000] outline-none focus:border-[#128C7E]"
                 />
               </div>
+            </div>
+
+            {/* Delivery Pincode */}
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#000000]">
+                Delivery Pincode (Optional)
+              </label>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="e.g. 600017"
+                  value={regPincode}
+                  onChange={(e) => setRegPincode(e.target.value.replace(/\D/g, ''))}
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-mono font-semibold text-[#000000] outline-none focus:border-[#128C7E]"
+                />
+              </div>
+              <p className="text-[10px] text-[#8C7A6B] pl-1">
+                Enter your 6-digit delivery pincode for automatic fixed local pricing on login.
+              </p>
             </div>
 
             {/* Create Password */}

@@ -226,7 +226,9 @@ export default function ComboDealsPage() {
     addToCart, 
     wishlist, 
     toggleWishlist, 
-    activeWhatsAppNumber 
+    activeWhatsAppNumber,
+    getProductFinalPrice,
+    hasPincodePrice
   } = useCart();
 
   const [activeCategory, setActiveCategory] = useState('all');
@@ -266,19 +268,20 @@ export default function ComboDealsPage() {
       ? combo.weights
       : [{ label: combo.packLabel || 'Standard Pack', price: Number(combo.price) || 499, originalPrice: Number(combo.originalPrice) || 699 }];
     const currentWeight = selectedWeights[combo.id] || weightsList[0];
+    const finalPrice = getProductFinalPrice ? getProductFinalPrice(combo, currentWeight) : currentWeight.price;
     const productPayload = {
       id: combo.id,
       name: combo.name,
       category: 'combos',
       categoryName: combo.categoryLabel || 'Special Combo',
       image: combo.image,
-      price: currentWeight.price,
+      price: finalPrice,
       originalPrice: currentWeight.originalPrice,
       weights: weightsList,
       badge: combo.badge
     };
 
-    addToCart(productPayload, currentWeight, 1);
+    addToCart(productPayload, { ...currentWeight, price: finalPrice }, 1);
     setAddedComboId(combo.id);
     setTimeout(() => setAddedComboId(null), 1800);
   };
@@ -608,19 +611,33 @@ export default function ComboDealsPage() {
                     <div className="pt-2 border-t border-slate-100 space-y-3">
                       
                       {/* Price Display */}
-                      <div className="flex items-baseline justify-between">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-xl font-black font-serif text-[#128C7E]">
-                            ₹{currentWeight.price}
-                          </span>
-                          <span className="text-xs text-slate-400 line-through font-mono">
-                            ₹{currentWeight.originalPrice}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
-                          {discount}% OFF
-                        </span>
-                      </div>
+                      {(() => {
+                        const finalPrice = getProductFinalPrice ? getProductFinalPrice(combo, currentWeight) : currentWeight.price;
+                        const isPincode = hasPincodePrice ? hasPincodePrice(combo, currentWeight) : false;
+                        const disc = currentWeight.originalPrice > 0 
+                          ? Math.round(((currentWeight.originalPrice - finalPrice) / currentWeight.originalPrice) * 100)
+                          : 0;
+                        return (
+                          <div className="flex items-baseline justify-between">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xl font-black font-serif text-[#128C7E]">
+                                ₹{finalPrice}
+                              </span>
+                              <span className="text-xs text-slate-400 line-through font-mono">
+                                ₹{currentWeight.originalPrice}
+                              </span>
+                              {isPincode && (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
+                                  Pincode Price
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                              {disc}% OFF
+                            </span>
+                          </div>
+                        );
+                      })()}
 
                       {/* Action Buttons */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

@@ -4,7 +4,7 @@ import ProductCard from '../components/ProductCard';
 import { LayoutGrid, List, ChevronDown, X } from 'lucide-react';
 
 export default function ShopPage() {
-  const { products, categories, selectedCategory, setSelectedCategory, searchQuery, setSearchQuery } = useCart();
+  const { products, categories, selectedCategory, setSelectedCategory, searchQuery, setSearchQuery, getProductFinalPrice } = useCart();
   const [activeCategory, setActiveCategory] = useState(selectedCategory || 'all');
   const [sortBy, setSortBy] = useState('relevant');
   const [searchFilter, setSearchFilter] = useState(searchQuery || '');
@@ -72,7 +72,7 @@ export default function ShopPage() {
   });
 
   // Sorting
-  const getPrice = (item) => Number(item?.weights?.[0]?.price) || Number(item?.price) || 0;
+  const getPrice = (item) => getProductFinalPrice ? getProductFinalPrice(item, item?.weights?.[0]) : (Number(item?.weights?.[0]?.price) || Number(item?.price) || 0);
   if (sortBy === 'relevant') {
     const categoryOrder = categories ? categories.map(c => c.id) : [];
     filtered.sort((a, b) => {

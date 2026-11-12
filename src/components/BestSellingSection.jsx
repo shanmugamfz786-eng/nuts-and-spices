@@ -3,7 +3,7 @@ import { useCart, isProductActive, isProductBestSeller } from '../context/CartCo
 import { ChevronLeft, ChevronRight, ShoppingCart, Check, ChevronDown, Heart, Eye } from 'lucide-react';
 
 function BestSellerCard({ product }) {
-  const { addToCart, wishlist, toggleWishlist, navigate } = useCart();
+  const { addToCart, wishlist, toggleWishlist, navigate, getProductFinalPrice } = useCart();
   
   const defaultWeight = (product && product.weights && product.weights[0]) 
     ? product.weights[0] 
@@ -19,7 +19,7 @@ function BestSellerCard({ product }) {
 
   const isWishlisted = Array.isArray(wishlist) && wishlist.includes(product.id);
 
-  const curP = Number(activeWeight.price) || 250;
+  const curP = getProductFinalPrice ? getProductFinalPrice(product, activeWeight) : (Number(activeWeight.price) || 250);
   const origP = Number(activeWeight.originalPrice) || ((product.discountPercent > 0) ? Math.round(curP / ((100 - product.discountPercent) / 100)) : Math.round(curP * 1.2));
   const discountPercent = (product.discountPercent !== undefined && product.discountPercent !== null) 
     ? Number(product.discountPercent) 
@@ -27,7 +27,7 @@ function BestSellerCard({ product }) {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    addToCart(product, activeWeight, 1);
+    addToCart(product, { ...activeWeight, price: curP }, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };

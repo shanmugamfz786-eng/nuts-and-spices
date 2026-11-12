@@ -16,7 +16,7 @@ export function roundCurrency(amount) {
  * Calculate items subtotal and validate requested items against catalog.
  * Throws an error with a clear message if an item or variant is missing or out of stock.
  */
-export function calculateItemsSubtotal(items, catalogProducts) {
+export function calculateItemsSubtotal(items, catalogProducts, pincodePricesMap = null) {
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error('Order items list is empty.');
   }
@@ -46,7 +46,8 @@ export function calculateItemsSubtotal(items, catalogProducts) {
       }
     }
 
-    let realPrice = null;
+    let defaultPrice = null;
+    let selectedWeightLabel = '';
 
     if (Array.isArray(productWeights) && productWeights.length > 0) {
       if (item.weight) {
@@ -55,17 +56,44 @@ export function calculateItemsSubtotal(items, catalogProducts) {
         if (!variant) {
           throw new Error(`Variant '${item.weight}' does not exist for product '${backendProduct.name}'.`);
         }
-        realPrice = Number(variant.price);
+        defaultPrice = Number(variant.price);
+        selectedWeightLabel = variant.label;
       } else {
-        realPrice = Number(productWeights[0].price);
+        defaultPrice = Number(productWeights[0].price);
+        selectedWeightLabel = productWeights[0].label;
       }
     } else if (backendProduct.price !== undefined && backendProduct.price !== null) {
-      realPrice = Number(backendProduct.price);
+      defaultPrice = Number(backendProduct.price);
+      selectedWeightLabel = 'Standard';
     } else {
       throw new Error(`Pricing configuration missing for product '${backendProduct.name}'.`);
     }
 
-    if (isNaN(realPrice) || realPrice < 0) {
+    // Check if an admin-configured pincode price override exists for this product & variant
+    let realPrice = defaultPrice;
+    if (pincodePricesMap && typeof pincodePricesMap === 'object') {
+      const prodKey = backendProduct.id;
+      const variantKey = String(selectedWeightLabel || item.weight || '').toLowerCase().trim();
+      const directKey = `${prodKey}:::${variantKey}`;
+      
+      if (pincodePricesMap[directKey] !== undefined && !isNaN(Number(pincodePricesMap[directKey]))) {
+        realPrice = Number(pincodePricesMap[directKey]);
+      } else if (pincodePricesMap[prodKey] && typeof pincodePricesMap[prodKey] === 'object' && pincodePricesMap[prodKey][variantKey] !== undefined) {
+        realPrice = Number(pincodePricesMap[prodKey][variantKey]);
+      } else if (pincodePricesMap['__STOREWIDE__']) {
+        const adj = pincodePricesMap['__STOREWIDE__'];
+        if (adj.type === 'percent_increase') {
+          realPrice = roundCurrency(defaultPrice * (1 + (Number(adj.value) || 0) / 100));
+        } else if (adj.type === 'fixed') {
+          realPrice = Number(adj.value);
+        } else {
+          // default: flat_increase (+₹X)
+          realPrice = roundCurrency(defaultPrice + (Number(adj.value) || 0));
+        }
+      }
+    }
+
+    if (isNaN(realPrice) || realPrice <= 0) {
       throw new Error(`Invalid catalog price for product '${backendProduct.name}'.`);
     }
 
@@ -83,6 +111,7 @@ export function calculateItemsSubtotal(items, catalogProducts) {
       productId: backendProduct.id,
       price: realPrice,
       name: backendProduct.name,
+      weight: selectedWeightLabel || item.weight,
       category: backendProduct.category || item.category,
       categoryId: backendProduct.category_id || backendProduct.category || item.categoryId
     });
