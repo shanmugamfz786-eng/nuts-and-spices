@@ -849,7 +849,7 @@ export default function AdminShippingRates() {
                       type="number"
                       min="0"
                       step="any"
-                      placeholder="30"
+                      placeholder=""
                       value={formData.additional_rate}
                       onChange={(e) => setFormData({ ...formData, additional_rate: e.target.value })}
                       className="w-full pl-7 pr-3 py-2 bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl text-xs font-mono font-bold text-gray-900 outline-none"
@@ -868,7 +868,7 @@ export default function AdminShippingRates() {
                       type="number"
                       min="0"
                       step="any"
-                      placeholder="0"
+                      placeholder=""
                       value={formData.free_shipping_threshold}
                       onChange={(e) => setFormData({ ...formData, free_shipping_threshold: e.target.value })}
                       className="w-full pl-7 pr-3.5 py-2 bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl text-xs font-mono font-bold outline-none"
