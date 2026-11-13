@@ -67,6 +67,14 @@ export default function AuthModal() {
       setSuccessMessage('Logged in successfully!');
       setTimeout(() => {
         setSuccessMessage('');
+        setIsAuthModalOpen(false);
+        try {
+          const redirect = localStorage.getItem('nuts_spices_login_redirect');
+          if (redirect) {
+            localStorage.removeItem('nuts_spices_login_redirect');
+            navigate(redirect);
+          }
+        } catch {}
       }, 600);
     } else {
       setErrorMessage(res ? res.message : 'Invalid credentials');
@@ -116,6 +124,14 @@ export default function AuthModal() {
       setSuccessMessage('Account created successfully!');
       setTimeout(() => {
         setSuccessMessage('');
+        setIsAuthModalOpen(false);
+        try {
+          const redirect = localStorage.getItem('nuts_spices_login_redirect');
+          if (redirect) {
+            localStorage.removeItem('nuts_spices_login_redirect');
+            navigate(redirect);
+          }
+        } catch {}
       }, 600);
     } else {
       setErrorMessage(res ? res.message : 'Registration failed');

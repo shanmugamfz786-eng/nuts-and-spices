@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { Trash2, ArrowRight, ArrowLeft, ShieldCheck, Tag, CheckCircle2, AlertCircle, X, MapPin, Scale, Truck } from 'lucide-react';
+import { Trash2, ArrowRight, ArrowLeft, ShieldCheck, Tag, CheckCircle2, AlertCircle, X, MapPin, Scale, Truck, Lock } from 'lucide-react';
 import PincodeSelectorModal from '../components/PincodeSelectorModal';
 
 export default function CartPage() {
@@ -92,6 +92,54 @@ export default function CartPage() {
     });
 
 
+
+  React.useEffect(() => {
+    if (!user) {
+      try {
+        localStorage.setItem('nuts_spices_login_redirect', 'cart');
+      } catch {}
+      navigate('login', { redirect: 'cart' });
+    }
+  }, [user, navigate]);
+
+  // LOGIN REQUIRED GATE: Unauthenticated users cannot view or access Cart
+  if (!user) {
+    return (
+      <div className="bg-[#FAF7F2]/40 min-h-[75vh] flex items-center justify-center py-12 px-4">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center space-y-6 shadow-xl border border-gray-200/80">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 text-[#128C7E] flex items-center justify-center mx-auto shadow-inner border border-emerald-100">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black font-serif text-slate-900">
+              Login Required
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Please sign in to your account to access your shopping cart and complete your order.
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => {
+                try { localStorage.setItem('nuts_spices_login_redirect', 'cart'); } catch {}
+                navigate('login', { redirect: 'cart' });
+              }}
+              className="w-full py-3.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-black text-xs rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              <span>Login to Access Cart</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => navigate('shop', { category: 'all' })}
+              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-colors cursor-pointer"
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#FAF7F2]/40 min-h-screen py-4 sm:py-8 pb-32 sm:pb-16">

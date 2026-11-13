@@ -957,7 +957,15 @@ export default function LoginPage() {
     if (res && res.success) {
       setSuccessMessage('Logged in successfully!');
       setTimeout(() => {
-        navigate('home');
+        let target = 'home';
+        try {
+          const redirect = localStorage.getItem('nuts_spices_login_redirect');
+          if (redirect) {
+            target = redirect;
+            localStorage.removeItem('nuts_spices_login_redirect');
+          }
+        } catch {}
+        navigate(target);
       }, 600);
     } else {
       setErrorMessage(res?.message || 'Invalid mobile/email or password.');

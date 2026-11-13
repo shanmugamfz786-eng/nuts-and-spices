@@ -82,7 +82,15 @@ export default function RegisterPage() {
     if (res && res.success) {
       setSuccessMessage('Account registered successfully!');
       setTimeout(() => {
-        navigate('home');
+        let target = 'home';
+        try {
+          const redirect = localStorage.getItem('nuts_spices_login_redirect');
+          if (redirect) {
+            target = redirect;
+            localStorage.removeItem('nuts_spices_login_redirect');
+          }
+        } catch {}
+        navigate(target);
       }, 600);
     } else {
       setErrorMessage(res ? res.message : 'Registration failed');

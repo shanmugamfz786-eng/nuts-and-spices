@@ -417,6 +417,7 @@ export const CartProvider = ({ children }) => {
   const activePageRef = useRef(activePage);
   const adminTabRef = useRef(adminTab);
   const isAdminLoggedInRef = useRef(isAdminLoggedIn);
+  const userRef = useRef(user);
 
   useEffect(() => {
     activePageRef.current = activePage;
@@ -429,6 +430,10 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     isAdminLoggedInRef.current = isAdminLoggedIn;
   }, [isAdminLoggedIn]);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   // Sync initial URL pathname and handle browser back/forward buttons
   useEffect(() => {
@@ -454,7 +459,15 @@ export const CartProvider = ({ children }) => {
       } else if (path === '/' || path === '') {
         setActivePage('home');
       } else {
-        setActivePage(path.substring(1));
+        const rawPage = path.substring(1).split('?')[0];
+        // CART & CHECKOUT ACCESS CONTROL: Must be logged in
+        if ((rawPage === 'cart' || rawPage === 'checkout') && !userRef.current) {
+          try { localStorage.setItem('nuts_spices_login_redirect', rawPage); } catch {}
+          window.history.pushState({}, '', '/login?redirect=' + rawPage);
+          setActivePage('login');
+          return;
+        }
+        setActivePage(rawPage);
       }
     };
 
@@ -1021,6 +1034,19 @@ export const CartProvider = ({ children }) => {
 
   // NAVIGATION & ROUTING
   const navigate = (page, params = {}) => {
+    // CART & CHECKOUT ACCESS CONTROL: Must be logged in
+    if ((page === 'cart' || page === 'checkout') && !userRef.current) {
+      try {
+        localStorage.setItem('nuts_spices_login_redirect', page);
+      } catch {}
+      setActivePage('login');
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', '/login?redirect=' + page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+
     if (params.category) {
       setSelectedCategory(params.category);
     }
