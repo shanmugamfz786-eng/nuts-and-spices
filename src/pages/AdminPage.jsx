@@ -308,7 +308,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Right: Desktop Search Bar & Mobile Dedicated Logout Button */}
+            {/* Right: Desktop Search Bar */}
             <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center relative w-72 max-w-xs">
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -320,17 +320,6 @@ export default function AdminPage() {
                   className="w-full bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl pl-9 pr-3 py-1.5 text-xs text-black placeholder-gray-400 outline-none transition-colors"
                 />
               </div>
-
-              {/* Mobile Dedicated Logout Button in Header */}
-              <button
-                type="button"
-                onClick={logoutAdmin}
-                className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 rounded-xl font-extrabold text-xs transition-all cursor-pointer shadow-xs active:scale-95 select-none shrink-0"
-                title="Logout of Admin"
-              >
-                <LogOut className="w-3.5 h-3.5 text-rose-600 stroke-[2.5]" />
-                <span>Logout</span>
-              </button>
             </div>
 
           </div>
