@@ -387,24 +387,29 @@ export default function AdminCombos() {
       finalCategoryLabel = catObj ? catObj.label : 'Special Combos';
     }
 
-    const pPrice = Number(formData.price) || 899;
-    const pOrigPrice = Number(formData.originalPrice) || Math.round(pPrice * 1.25);
+    const pPrice = Number(formData.price) || 0;
+    if (pPrice <= 0) {
+      alert('Please enter a valid Offer Price (₹).');
+      return;
+    }
+    const pOrigPrice = Number(formData.originalPrice) > 0 ? Number(formData.originalPrice) : pPrice;
+    const fallbackImage = comboComponents.find(c => c.image)?.image || '/images/combo_banner.jpg';
 
     const payload = {
       name: formData.name.trim(),
       category: finalCategory,
       categoryLabel: finalCategoryLabel,
       badge: formData.badge.trim(),
-      badgeColor: formData.badgeColor,
+      badgeColor: formData.badgeColor || 'from-amber-500 to-orange-500',
       price: pPrice,
       originalPrice: pOrigPrice,
-      description: formData.description.trim(),
+      description: formData.description.trim() || `Exclusive combo hamper featuring ${itemsList.slice(0, 3).join(', ')}.`,
       items: itemsList.length > 0 ? itemsList : ['Handpicked Luxury Selection'],
       weights: [
         { label: formData.packLabel.trim() || 'STANDARD BOX', price: pPrice, originalPrice: pOrigPrice },
         { label: '2 KG GRAND FAMILY HAMPER', price: Math.round(pPrice * 1.9), originalPrice: Math.round(pOrigPrice * 1.95) }
       ],
-      image: formData.image,
+      image: formData.image.trim() || fallbackImage,
       status: formData.status
     };
 
@@ -786,7 +791,7 @@ export default function AdminCombos() {
                 {/* Combo Title */}
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Combo Title / Hamper Name
+                    Combo Title / Hamper Name <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -869,15 +874,14 @@ export default function AdminCombos() {
 
                   <div>
                     <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Promotional Badge Text
+                      Promotional Badge Text <span className="text-[10px] font-normal text-slate-400">(Optional)</span>
                     </label>
                     <input
                       type="text"
-                      required
                       value={formData.badge}
                       onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
-                      placeholder="e.g. 👑 FESTIVE BESTSELLER"
+                      placeholder="e.g. 👑 FESTIVE BESTSELLER (or leave blank)"
                     />
                   </div>
                 </div>
@@ -886,7 +890,7 @@ export default function AdminCombos() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Offer Price (₹)
+                      Offer Price (₹) <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -900,29 +904,28 @@ export default function AdminCombos() {
 
                   <div>
                     <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Original MRP (₹)
+                      Original MRP (₹) <span className="text-[10px] font-normal text-slate-400">(Optional)</span>
                     </label>
                     <input
                       type="number"
-                      required
                       min="1"
                       value={formData.originalPrice}
                       onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
+                      placeholder="Leave blank for same price"
                     />
                   </div>
 
                   <div>
                     <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Pack Variant Label
+                      Pack Variant Label <span className="text-[10px] font-normal text-slate-400">(Optional)</span>
                     </label>
                     <input
                       type="text"
-                      required
                       value={formData.packLabel}
                       onChange={(e) => setFormData({ ...formData, packLabel: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
-                      placeholder="1 KG ROYAL BOX"
+                      placeholder="e.g. 1 KG ROYAL BOX (Default: STANDARD BOX)"
                     />
                   </div>
                 </div>
@@ -1136,7 +1139,7 @@ export default function AdminCombos() {
                 {/* Product Image URL with Device File Upload & Live Preview */}
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Product Image URL
+                    Product Image URL <span className="text-[10px] font-normal text-slate-400">(Optional)</span>
                   </label>
 
                   {/* Hidden File Input */}
@@ -1216,7 +1219,7 @@ export default function AdminCombos() {
                 {/* Description */}
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Product Description
+                    Product Description <span className="text-[10px] font-normal text-slate-400">(Optional)</span>
                   </label>
                   <textarea
                     rows={3}
