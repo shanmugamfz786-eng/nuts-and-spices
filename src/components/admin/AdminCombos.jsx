@@ -57,6 +57,7 @@ export default function AdminCombos() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCombo, setEditingCombo] = useState(null);
   const [deleteConfirmCombo, setDeleteConfirmCombo] = useState(null);
+  const [deleteConfirmCategory, setDeleteConfirmCategory] = useState(null);
 
   // Custom Category State inside modal
   const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -128,14 +129,19 @@ export default function AdminCombos() {
     return Array.from(map.values());
   }, [comboCategoriesList, deletedCategoryIds, comboDeals, categories]);
 
-  // Remove category from Combo Collections
+  // Trigger Custom Styled Modal to Delete Category
   const handleDeleteCategory = (catIdToDelete, catLabel) => {
     if (categoryOptions.length <= 1) {
       alert('You must keep at least one category in the list.');
       return;
     }
-    const confirmed = window.confirm(`Are you sure you want to delete "${catLabel}" from the Combo Categories collection?`);
-    if (!confirmed) return;
+    setDeleteConfirmCategory({ id: catIdToDelete, label: catLabel });
+  };
+
+  // Perform Delete after confirmation in custom styled modal
+  const executeDeleteCategory = () => {
+    if (!deleteConfirmCategory) return;
+    const { id: catIdToDelete } = deleteConfirmCategory;
 
     const updatedList = comboCategoriesList.filter(c => c.id !== catIdToDelete);
     const updatedDeletedIds = Array.from(new Set([...deletedCategoryIds, catIdToDelete]));
@@ -158,6 +164,7 @@ export default function AdminCombos() {
         categoryLabel: remaining[0].label
       }));
     }
+    setDeleteConfirmCategory(null);
   };
 
   // Add new category directly
@@ -1536,6 +1543,49 @@ export default function AdminCombos() {
                   className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl cursor-pointer"
                 >
                   Done
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 8. CUSTOM STYLED DELETE CATEGORY CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {deleteConfirmCategory && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-200"
+            >
+              <div className="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-sm">
+                <Trash2 className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black font-serif text-slate-900">
+                  Delete Category?
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Are you sure you want to remove <strong>"{deleteConfirmCategory.label}"</strong> from the Combo Categories collection?
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmCategory(null)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={executeDeleteCategory}
+                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer transition-transform active:scale-95"
+                >
+                  Confirm Delete
                 </button>
               </div>
             </motion.div>
