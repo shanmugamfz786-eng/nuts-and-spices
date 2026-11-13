@@ -186,7 +186,7 @@ export default function LoginPage() {
 
   if (user) {
     return (
-      <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-2 pb-20 sm:py-10">
+      <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-6 sm:pt-10 pb-20">
         
         {/* MOBILE EXCLUSIVE HEADER & SEGMENTED TABS (< lg) */}
         <div className="block lg:hidden mb-4 space-y-2.5">
@@ -547,23 +547,22 @@ export default function LoginPage() {
 
                     {/* Delivery Pincode */}
                     <div className="space-y-1 sm:space-y-1.5">
-                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000] flex items-center justify-between">
-                        <span>Default Delivery Pincode</span>
-                        <span className="text-[10px] text-[#128C7E] font-medium lowercase">auto local pricing</span>
+                      <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#000000]">
+                        Delivery Pincode
                       </label>
                       <div className="relative">
-                        <MapPin className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <MapPin className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <input
                           type="text"
                           maxLength={6}
                           placeholder="e.g. 600017"
                           value={editPincode}
                           onChange={(e) => setEditPincode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full pl-10 pr-4 py-2.5 sm:px-4 sm:py-3 bg-white border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-mono font-semibold text-[#000000] outline-none focus:border-[#128C7E] transition-colors shadow-xs"
+                          className="w-full pl-10 pr-4 py-2.5 sm:pl-10 sm:pr-4 sm:py-3 bg-white border border-[#E5E7EB] rounded-xl sm:rounded-2xl text-xs font-mono font-semibold text-[#000000] outline-none focus:border-[#128C7E] transition-colors shadow-xs"
                         />
                       </div>
                       <p className="text-[10px] text-[#8C7A6B]">
-                        Whenever you log in, this pincode automatically applies to show your fixed local prices.
+                        Saved for faster checkout and doorstep delivery.
                       </p>
                     </div>
 

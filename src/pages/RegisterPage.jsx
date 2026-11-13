@@ -205,7 +205,7 @@ export default function RegisterPage() {
                 />
               </div>
               <p className="text-[10px] text-[#8C7A6B] pl-1">
-                Enter your 6-digit delivery pincode for automatic fixed local pricing on login.
+                Enter your 6-digit delivery pincode for express checkout & delivery.
               </p>
             </div>
 
