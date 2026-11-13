@@ -50,3 +50,4 @@ export function formatWeight(grams) {
   }
   return `${g} g`;
 }
+

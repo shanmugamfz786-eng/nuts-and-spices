@@ -52,3 +52,4 @@ export const deleteAdminShippingRate = async (id) => {
     method: 'DELETE'
   });
 };
+

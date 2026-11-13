@@ -23,3 +23,4 @@ router.put('/admin/:id', authMiddleware, adminMiddleware, updateShippingRateAdmi
 router.delete('/admin/:id', authMiddleware, adminMiddleware, deleteShippingRateAdmin);
 
 export default router;
+
