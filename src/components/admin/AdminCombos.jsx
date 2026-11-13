@@ -972,52 +972,35 @@ export default function AdminCombos() {
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1.5">
-                        <select
-                          value={formData.category}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === '__custom__') {
-                              setIsCustomCategory(true);
-                              return;
-                            }
-                            if (val === '__manage__') {
-                              setIsManageCategoriesOpen(true);
-                              return;
-                            }
-                            const found = categoryOptions.find(c => c.id === val);
-                            setFormData({ 
-                              ...formData, 
-                              category: val,
-                              categoryLabel: found ? found.label : val
-                            });
-                          }}
-                          className="flex-1 bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
-                        >
-                          {categoryOptions.map(cat => (
-                            <option key={cat.id} value={cat.id}>
-                              {cat.label}
-                            </option>
-                          ))}
-                          <option value="__custom__">+ Add Custom Category...</option>
-                          <option value="__manage__">⚙️ Manage & Delete Categories...</option>
-                        </select>
-
-                        {/* Quick Delete Trash Button for Currently Selected Category */}
-                        {categoryOptions.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const currentCat = categoryOptions.find(c => c.id === formData.category) || categoryOptions[0];
-                              handleDeleteCategory(currentCat.id, currentCat.label);
-                            }}
-                            className="p-2 text-rose-500 hover:text-white hover:bg-rose-600 bg-rose-50 border border-rose-200 rounded-xl transition-all cursor-pointer shrink-0 shadow-2xs"
-                            title={`Delete '${formData.categoryLabel || formData.category}' category from collection`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '__custom__') {
+                            setIsCustomCategory(true);
+                            return;
+                          }
+                          if (val === '__manage__') {
+                            setIsManageCategoriesOpen(true);
+                            return;
+                          }
+                          const found = categoryOptions.find(c => c.id === val);
+                          setFormData({ 
+                            ...formData, 
+                            category: val,
+                            categoryLabel: found ? found.label : val
+                          });
+                        }}
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
+                      >
+                        {categoryOptions.map(cat => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.label}
+                          </option>
+                        ))}
+                        <option value="__custom__">+ Add Custom Category...</option>
+                        <option value="__manage__">⚙️ Manage & Delete Categories...</option>
+                      </select>
                     )}
                   </div>
 
