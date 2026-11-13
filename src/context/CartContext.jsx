@@ -379,25 +379,6 @@ export const CartProvider = ({ children }) => {
   const [lastOrder, setLastOrder] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Sync initial URL pathname and handle browser back/forward buttons
-  useEffect(() => {
-    const syncRouteFromPath = () => {
-      if (typeof window === 'undefined') return;
-      const path = window.location.pathname.toLowerCase();
-      if (path.startsWith('/admin')) {
-        setActivePage('admin');
-      } else if (path === '/' || path === '') {
-        setActivePage('home');
-      } else {
-        setActivePage(path.substring(1));
-      }
-    };
-
-    syncRouteFromPath();
-    window.addEventListener('popstate', syncRouteFromPath);
-    return () => window.removeEventListener('popstate', syncRouteFromPath);
-  }, []);
-
   // 9. AUTHENTICATION (USER & ADMIN)
   const [registeredUsers, setRegisteredUsers] = useState(() => {
     try {
@@ -420,6 +401,56 @@ export const CartProvider = ({ children }) => {
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
+
+  // Refs for tracking navigation state without closure staleness
+  const activePageRef = useRef(activePage);
+  const adminTabRef = useRef(adminTab);
+  const isAdminLoggedInRef = useRef(isAdminLoggedIn);
+
+  useEffect(() => {
+    activePageRef.current = activePage;
+  }, [activePage]);
+
+  useEffect(() => {
+    adminTabRef.current = adminTab;
+  }, [adminTab]);
+
+  useEffect(() => {
+    isAdminLoggedInRef.current = isAdminLoggedIn;
+  }, [isAdminLoggedIn]);
+
+  // Sync initial URL pathname and handle browser back/forward buttons
+  useEffect(() => {
+    const syncRouteFromPath = () => {
+      if (typeof window === 'undefined') return;
+      const path = window.location.pathname.toLowerCase();
+
+      // BLOCK BACK NAVIGATION OUT OF ADMIN TO USER STOREFRONT
+      if (activePageRef.current === 'admin' && !path.startsWith('/admin')) {
+        const currentTab = adminTabRef.current && adminTabRef.current !== 'dashboard' ? `?tab=${adminTabRef.current}` : '';
+        window.history.pushState({ isAdminPage: true, adminTab: adminTabRef.current }, '', `/admin${currentTab}`);
+        setActivePage('admin');
+        return;
+      }
+
+      if (path.startsWith('/admin')) {
+        setActivePage('admin');
+        const searchParams = new URLSearchParams(window.location.search);
+        const tabParam = searchParams.get('tab');
+        if (tabParam) {
+          setAdminTab(tabParam);
+        }
+      } else if (path === '/' || path === '') {
+        setActivePage('home');
+      } else {
+        setActivePage(path.substring(1));
+      }
+    };
+
+    syncRouteFromPath();
+    window.addEventListener('popstate', syncRouteFromPath);
+    return () => window.removeEventListener('popstate', syncRouteFromPath);
+  }, []);
 
   // Clear admin session on startup so /admin always requires Login first
   // Live orders fetcher from database (TiDB / Cloud Backend)
@@ -996,7 +1027,8 @@ export const CartProvider = ({ children }) => {
     // Update browser URL bar
     if (typeof window !== 'undefined') {
       if (page === 'admin') {
-        window.history.pushState({}, '', '/admin');
+        const currentTab = params.adminTab && params.adminTab !== 'dashboard' ? `?tab=${params.adminTab}` : '';
+        window.history.pushState({ isAdminPage: true, adminTab: params.adminTab || 'dashboard' }, '', `/admin${currentTab}`);
       } else if (page === 'home') {
         window.history.pushState({}, '', '/');
       } else if (page === 'order-details' && (params.order?.id || params.order?.order_id || params.order?.orderId || params.orderId)) {

@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useCart } from '../context/CartContext';
 
 // Admin Views (lazy loaded to prevent monolithic bundle)
@@ -92,9 +92,70 @@ export default function AdminPage() {
   const flatNavItems = navSections.flatMap(s => s.items);
   const currentTabMeta = flatNavItems.find(item => item.id === adminTab) || { label: adminTab.replace('-', ' ') };
 
+  // 1. Initial URL synchronization & history barrier to prevent browser back button from escaping to user page
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const initialTab = params.get('tab');
+    if (initialTab) {
+      setAdminTab(initialTab);
+    }
+
+    const currentTab = initialTab || adminTab;
+    const targetQuery = currentTab && currentTab !== 'dashboard' ? `?tab=${currentTab}` : '';
+    window.history.replaceState({ isAdminPage: true, adminTab: currentTab }, '', `/admin${targetQuery}`);
+    // Push one buffer entry so even the first back button stays within /admin
+    window.history.pushState({ isAdminPage: true, adminTab: currentTab }, '', `/admin${targetQuery}`);
+  }, []);
+
+  // 2. Intercept popstate (browser back/forward button) to keep admin inside Admin Portal
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handlePopState = (e) => {
+      const path = window.location.pathname.toLowerCase();
+
+      // BLOCK ESCAPE: If user presses back and browser attempts to leave /admin to user storefront:
+      if (!path.startsWith('/admin')) {
+        const stayQuery = adminTab && adminTab !== 'dashboard' ? `?tab=${adminTab}` : '';
+        window.history.pushState({ isAdminPage: true, adminTab }, '', `/admin${stayQuery}`);
+        return;
+      }
+
+      // If mobile sidebar is open, close it first
+      if (isMobileSidebarOpen) {
+        setIsMobileSidebarOpen(false);
+      }
+
+      // If order detail modal is open, close it on back button press
+      if (selectedOrderForDetails) {
+        setSelectedOrderForDetails(null);
+        return;
+      }
+
+      // Read target tab from URL or history state
+      const searchParams = new URLSearchParams(window.location.search);
+      const targetTab = searchParams.get('tab') || e.state?.adminTab || 'dashboard';
+      if (targetTab && targetTab !== adminTab) {
+        setAdminTab(targetTab);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [adminTab, selectedOrderForDetails, isMobileSidebarOpen, setAdminTab]);
+
   const handleNavigateTab = (tabId) => {
+    if (tabId === adminTab && !selectedOrderForDetails) return;
     setAdminTab(tabId);
+    setSelectedOrderForDetails(null);
     setIsMobileSidebarOpen(false);
+
+    if (typeof window !== 'undefined') {
+      const targetQuery = tabId === 'dashboard' ? '' : `?tab=${tabId}`;
+      window.history.pushState({ isAdminPage: true, adminTab: tabId }, '', `/admin${targetQuery}`);
+    }
   };
 
   const renderAdminTabContent = () => {
@@ -105,7 +166,7 @@ export default function AdminPage() {
             onNavigateTab={handleNavigateTab} 
             onViewOrderDetails={(ord) => {
               setSelectedOrderForDetails(ord);
-              setAdminTab('orders');
+              handleNavigateTab('orders');
             }} 
           />
         );
@@ -114,7 +175,7 @@ export default function AdminPage() {
           <AdminCustomers 
             onViewOrderDetails={(ord) => {
               setSelectedOrderForDetails(ord);
-              setAdminTab('orders');
+              handleNavigateTab('orders');
             }}
           />
         );
