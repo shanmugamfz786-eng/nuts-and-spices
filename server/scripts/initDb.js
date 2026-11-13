@@ -102,6 +102,22 @@ export async function initializeDatabase() {
       INDEX idx_pincode (pincode),
       INDEX idx_pincode_to (pincode_to),
       INDEX idx_product (product_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+    `CREATE TABLE IF NOT EXISTS shipping_delivery_rates (
+      id VARCHAR(50) PRIMARY KEY,
+      zone_name VARCHAR(100) NOT NULL,
+      pincode_from VARCHAR(10) NOT NULL,
+      pincode_to VARCHAR(10) NOT NULL,
+      base_weight_grams INT DEFAULT 1000,
+      base_rate DECIMAL(10,2) NOT NULL DEFAULT 50.00,
+      additional_weight_grams INT DEFAULT 1000,
+      additional_rate DECIMAL(10,2) NOT NULL DEFAULT 30.00,
+      free_shipping_threshold DECIMAL(10,2) DEFAULT 0.00,
+      is_active TINYINT(1) DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_shipping_pincode (pincode_from, pincode_to)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
   ];
 
@@ -141,6 +157,68 @@ export async function initializeDatabase() {
 
   memoryStore.categories = CATEGORIES;
   memoryStore.products = PRODUCTS;
+  memoryStore.shipping_delivery_rates = [
+    {
+      id: 'ship_tn',
+      zone_name: 'Tamil Nadu (All Districts)',
+      pincode_from: '600001',
+      pincode_to: '643999',
+      base_weight_grams: 1000,
+      base_rate: 50.00,
+      additional_weight_grams: 1000,
+      additional_rate: 30.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_kl',
+      zone_name: 'Kerala',
+      pincode_from: '670001',
+      pincode_to: '695999',
+      base_weight_grams: 1000,
+      base_rate: 70.00,
+      additional_weight_grams: 1000,
+      additional_rate: 40.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_ka',
+      zone_name: 'Karnataka',
+      pincode_from: '560001',
+      pincode_to: '591999',
+      base_weight_grams: 1000,
+      base_rate: 70.00,
+      additional_weight_grams: 1000,
+      additional_rate: 40.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_ap_tg',
+      zone_name: 'Andhra Pradesh & Telangana',
+      pincode_from: '500001',
+      pincode_to: '535999',
+      base_weight_grams: 1000,
+      base_rate: 70.00,
+      additional_weight_grams: 1000,
+      additional_rate: 40.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_default',
+      zone_name: 'Rest of India / Standard',
+      pincode_from: 'DEFAULT',
+      pincode_to: 'DEFAULT',
+      base_weight_grams: 1000,
+      base_rate: 80.00,
+      additional_weight_grams: 1000,
+      additional_rate: 50.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    }
+  ];
   memoryStore.orders = process.env.NODE_ENV !== 'production' ? [
     {
       id: 'NS-98124',
@@ -273,6 +351,27 @@ export async function initializeDatabase() {
           prod.origin || 'India',
           prod.shelfLife || '6 Months',
           100
+        ]
+      );
+    }
+
+    // Seed default shipping delivery rates if empty
+    for (const rate of memoryStore.shipping_delivery_rates) {
+      await pool.query(
+        `INSERT IGNORE INTO shipping_delivery_rates 
+        (id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          rate.id,
+          rate.zone_name,
+          rate.pincode_from,
+          rate.pincode_to,
+          rate.base_weight_grams,
+          rate.base_rate,
+          rate.additional_weight_grams,
+          rate.additional_rate,
+          rate.free_shipping_threshold,
+          rate.is_active
         ]
       );
     }

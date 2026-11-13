@@ -7,6 +7,8 @@ import { API_BASE_URL, fetchAdminStateApi, syncAdminStateApi } from '../api/inde
 import { login as loginAuthApi, register as registerAuthApi } from '../api/authApi.js';
 import { updateOrderStatusApi, deleteOrderApi } from '../api/orderApi.js';
 import { fetchPincodePrices, updateUserPincodeApi } from '../api/pincodePricingApi.js';
+import { fetchPublicShippingRates } from '../api/shippingRatesApi.js';
+import { calculateCartWeightGrams, parseWeightInGrams, formatWeight } from '../utils/weight.js';
 import { 
   INITIAL_STORE_SETTINGS, 
   INITIAL_ORDERS, 
@@ -337,6 +339,23 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     setTempPincode(null);
   }, [user]);
+
+  // 7b. SHIPPING DELIVERY RATES (WEIGHT & PINCODE-BASED)
+  const [shippingRates, setShippingRates] = useState([]);
+  const refreshShippingRates = async () => {
+    try {
+      const res = await fetchPublicShippingRates();
+      if (res && res.success && Array.isArray(res.rates)) {
+        setShippingRates(res.rates);
+      }
+    } catch (e) {
+      console.warn('Failed to load shipping rates:', e);
+    }
+  };
+
+  useEffect(() => {
+    refreshShippingRates();
+  }, []);
 
   // 8. NAVIGATION & ROUTING STATE
   const [activePage, setActivePage] = useState(() => {
@@ -1223,17 +1242,80 @@ export const CartProvider = ({ children }) => {
 
   const effectiveSubtotal = Math.max(0, cartTotal - discountAmount);
 
+  // Total cart package weight
+  const totalCartWeightGrams = useMemo(() => {
+    return calculateCartWeightGrams(cart);
+  }, [cart]);
+
+  const totalCartWeightKg = useMemo(() => {
+    return (totalCartWeightGrams / 1000).toFixed(2);
+  }, [totalCartWeightGrams]);
+
+  // Match active shipping delivery rule based on effective delivery pincode
+  const matchedShippingRule = useMemo(() => {
+    if (!effectivePincode || !Array.isArray(shippingRates) || shippingRates.length === 0) {
+      return (shippingRates || []).find(r => 
+        (r.is_active === 1 || r.is_active === true) && 
+        (String(r.pincode_from).toUpperCase() === 'DEFAULT' || String(r.zone_name).toLowerCase().includes('default'))
+      ) || null;
+    }
+    const cleanPin = String(effectivePincode).trim();
+    const pinNum = parseInt(cleanPin, 10);
+
+    // 1. Exact match
+    const exact = shippingRates.find(r => 
+      (r.is_active === 1 || r.is_active === true) && 
+      String(r.pincode_from).trim() === cleanPin && 
+      (!r.pincode_to || String(r.pincode_to).trim() === cleanPin || String(r.pincode_to).trim() === '')
+    );
+    if (exact) return exact;
+
+    // 2. Numeric Range match
+    if (!isNaN(pinNum)) {
+      const range = shippingRates.find(r => {
+        if (r.is_active !== 1 && r.is_active !== true) return false;
+        const fromNum = parseInt(r.pincode_from, 10);
+        const toNum = parseInt(r.pincode_to, 10);
+        if (!isNaN(fromNum) && !isNaN(toNum)) {
+          return pinNum >= Math.min(fromNum, toNum) && pinNum <= Math.max(fromNum, toNum);
+        }
+        return false;
+      });
+      if (range) return range;
+    }
+
+    // 3. Fallback to DEFAULT rule
+    return shippingRates.find(r => 
+      (r.is_active === 1 || r.is_active === true) && 
+      (String(r.pincode_from).toUpperCase() === 'DEFAULT' || String(r.zone_name).toLowerCase().includes('default'))
+    ) || null;
+  }, [effectivePincode, shippingRates]);
+
   const flatDeliveryFee = (storeSettings?.deliveryCharge !== undefined && storeSettings?.deliveryCharge !== null && !isNaN(Number(storeSettings.deliveryCharge)))
     ? Number(storeSettings.deliveryCharge)
     : ((storeSettings?.deliveryFee !== undefined && !isNaN(Number(storeSettings.deliveryFee))) ? Number(storeSettings.deliveryFee) : 0);
 
-  const freeDeliveryThreshold = (storeSettings?.minOrderAmount !== undefined && storeSettings?.minOrderAmount !== null && !isNaN(Number(storeSettings.minOrderAmount)))
-    ? Number(storeSettings.minOrderAmount)
-    : (Number(storeSettings?.freeDeliveryThreshold) || 500);
+  const deliveryCharge = useMemo(() => {
+    if (cart.length === 0 || effectiveSubtotal === 0) return 0;
+    if (matchedShippingRule) {
+      const freeThreshold = Number(matchedShippingRule.free_shipping_threshold) || 0;
+      if (freeThreshold > 0 && effectiveSubtotal >= freeThreshold) {
+        return 0; // Free delivery
+      }
+      const baseWeight = Number(matchedShippingRule.base_weight_grams) || 1000;
+      const baseRate = Number(matchedShippingRule.base_rate) || 0;
+      const additionalWeight = Number(matchedShippingRule.additional_weight_grams) || 1000;
+      const additionalRate = Number(matchedShippingRule.additional_rate) || 0;
 
-  const deliveryCharge = (flatDeliveryFee === 0 || effectiveSubtotal === 0 || (freeDeliveryThreshold > 0 && effectiveSubtotal >= freeDeliveryThreshold))
-    ? 0
-    : flatDeliveryFee;
+      if (totalCartWeightGrams <= baseWeight) {
+        return baseRate;
+      }
+      const extraWeight = totalCartWeightGrams - baseWeight;
+      const extraSlabs = Math.ceil(extraWeight / additionalWeight);
+      return baseRate + (extraSlabs * additionalRate);
+    }
+    return flatDeliveryFee;
+  }, [cart.length, effectiveSubtotal, matchedShippingRule, totalCartWeightGrams, flatDeliveryFee]);
 
   const grandTotal = Math.max(0, effectiveSubtotal + deliveryCharge);
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -2003,7 +2085,16 @@ export const CartProvider = ({ children }) => {
         hasPincodePrice,
         setDeliveryPincode,
         clearTempPincode,
-        clearDeliveryPincode
+        clearDeliveryPincode,
+
+        // Package Weight & Delivery Rates
+        totalCartWeightGrams,
+        totalCartWeightKg,
+        cartWeightKg: totalCartWeightKg,
+        matchedShippingZone: matchedShippingRule?.zone_name || 'Standard Delivery',
+        matchedShippingRule,
+        shippingRates,
+        refreshShippingRates
       }}
     >
       {children}

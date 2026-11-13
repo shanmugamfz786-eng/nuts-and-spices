@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, CreditCard } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, CreditCard, Scale } from 'lucide-react';
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
@@ -11,6 +11,9 @@ export default function CheckoutPage() {
     discountAmount, 
     deliveryCharge,
     grandTotal, 
+    totalCartWeightKg,
+    matchedShippingZone,
+    matchedShippingRule,
     createNewOrder, 
     clearPurchasedItems, 
     navigate, 
@@ -435,6 +438,16 @@ export default function CheckoutPage() {
               <span className="font-bold text-[#000000]">₹{cartTotal.toLocaleString('en-IN')}</span>
             </div>
 
+            {totalCartWeightKg > 0 && (
+              <div className="flex items-center justify-between text-[#8C7A6B]">
+                <span className="flex items-center gap-1.5">
+                  <Scale className="w-3.5 h-3.5 text-gray-500" />
+                  <span>Total Package Weight:</span>
+                </span>
+                <span className="font-bold text-[#000000]">{totalCartWeightKg} Kg</span>
+              </div>
+            )}
+
             {discountAmount > 0 && (
               <div className="flex items-center justify-between text-emerald-700 font-bold bg-emerald-50 p-2 rounded-xl border border-emerald-200">
                 <span>Coupon Applied ({appliedCoupon?.code}):</span>
@@ -443,7 +456,12 @@ export default function CheckoutPage() {
             )}
 
             <div className="flex items-center justify-between text-[#8C7A6B]">
-              <span>Delivery Charge:</span>
+              <span className="flex items-center gap-1">
+                <span>Delivery Charge:</span>
+                {matchedShippingZone && (
+                  <span className="text-[10px] text-gray-400 font-normal">({matchedShippingZone})</span>
+                )}
+              </span>
               <span className={`font-bold ${deliveryCharge === 0 ? 'text-emerald-700' : 'text-[#000000]'}`}>
                 {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toLocaleString('en-IN')}`}
               </span>

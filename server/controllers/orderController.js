@@ -1,7 +1,14 @@
 import { queryDb, memoryStore } from '../config/db.js';
 import { PRODUCTS } from '../../src/data/products.js';
 import { INITIAL_OFFERS, INITIAL_STORE_SETTINGS } from '../../src/data/mockAdminData.js';
-import { calculateItemsSubtotal, calculateCouponDiscount, calculateOrderTotals } from '../utils/pricing.js';
+import { 
+  calculateItemsSubtotal, 
+  calculateCouponDiscount, 
+  calculateOrderTotals,
+  calculateCartWeightGrams,
+  matchShippingDeliveryRule,
+  calculateDeliveryFeeByWeight
+} from '../utils/pricing.js';
 import crypto from 'crypto';
 
 const STORE_WHATSAPP_NUMBER = process.env.STORE_WHATSAPP_NUMBER || '919876543210';
@@ -199,11 +206,33 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: err.message });
     }
 
-    // 3. Compute final totals
+    // 3. Compute package weight & pincode-based delivery charge
+    const totalWeightGrams = calculateCartWeightGrams(validatedItems);
+    let shippingDeliveryRates = [];
+    try {
+      shippingDeliveryRates = await queryDb("SELECT * FROM shipping_delivery_rates WHERE is_active = 1");
+    } catch (sErr) {
+      console.warn('Notice on shipping rates query:', sErr.message);
+    }
+    if (!shippingDeliveryRates || shippingDeliveryRates.length === 0) {
+      shippingDeliveryRates = memoryStore.shipping_delivery_rates || [];
+    }
+
+    const matchedRule = matchShippingDeliveryRule(deliveryPincode, shippingDeliveryRates);
+    const weightDeliveryCharge = matchedRule 
+      ? calculateDeliveryFeeByWeight({ 
+          weightGrams: totalWeightGrams, 
+          subtotal: Math.max(0, subtotal - discountAmount), 
+          rule: matchedRule 
+        })
+      : null;
+
+    // 4. Compute final totals
     const totals = calculateOrderTotals({
       subtotal,
       discountAmount,
-      storeSettings
+      storeSettings,
+      deliveryCharge: weightDeliveryCharge
     });
 
     const deliveryCharge = totals.deliveryCharge;
@@ -211,7 +240,8 @@ export const createOrder = async (req, res) => {
     const itemsJson = JSON.stringify(validatedItems);
 
     const rawCouponCode = req.body.couponCode ? req.body.couponCode.trim().toUpperCase() : '';
-    const fullNotes = [notes, rawCouponCode ? `Coupon Applied: ${rawCouponCode} (-₹${discountAmount})` : '']
+    const weightNote = `Weight: ${(totalWeightGrams / 1000).toFixed(2)}kg${matchedRule ? ` (${matchedRule.zone_name})` : ''}`;
+    const fullNotes = [notes, rawCouponCode ? `Coupon Applied: ${rawCouponCode} (-₹${discountAmount})` : '', weightNote]
       .filter(Boolean)
       .join(' | ');
 

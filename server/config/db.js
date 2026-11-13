@@ -40,6 +40,68 @@ const memoryStore = {
   reviews: [],
   coupons: [],
   pincode_pricing: [],
+  shipping_delivery_rates: [
+    {
+      id: 'ship_tn',
+      zone_name: 'Tamil Nadu (All Districts)',
+      pincode_from: '600001',
+      pincode_to: '643999',
+      base_weight_grams: 1000,
+      base_rate: 50.00,
+      additional_weight_grams: 1000,
+      additional_rate: 30.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_kl',
+      zone_name: 'Kerala',
+      pincode_from: '670001',
+      pincode_to: '695999',
+      base_weight_grams: 1000,
+      base_rate: 70.00,
+      additional_weight_grams: 1000,
+      additional_rate: 40.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_ka',
+      zone_name: 'Karnataka',
+      pincode_from: '560001',
+      pincode_to: '591999',
+      base_weight_grams: 1000,
+      base_rate: 70.00,
+      additional_weight_grams: 1000,
+      additional_rate: 40.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_ap_tg',
+      zone_name: 'Andhra Pradesh & Telangana',
+      pincode_from: '500001',
+      pincode_to: '535999',
+      base_weight_grams: 1000,
+      base_rate: 70.00,
+      additional_weight_grams: 1000,
+      additional_rate: 40.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    },
+    {
+      id: 'ship_default',
+      zone_name: 'Rest of India / Standard',
+      pincode_from: 'DEFAULT',
+      pincode_to: 'DEFAULT',
+      base_weight_grams: 1000,
+      base_rate: 80.00,
+      additional_weight_grams: 1000,
+      additional_rate: 50.00,
+      free_shipping_threshold: 0.00,
+      is_active: 1
+    }
+  ],
   settings: {
     whatsapp_number: process.env.STORE_WHATSAPP_NUMBER || '919655298540',
     delivery_charge: '50'
@@ -137,6 +199,17 @@ function processMemoryQuery(sql, params) {
       }
       return memoryStore.pincode_pricing;
     }
+
+    if (queryLower.includes('from shipping_delivery_rates')) {
+      if (!memoryStore.shipping_delivery_rates) memoryStore.shipping_delivery_rates = [];
+      if (queryLower.includes('where id = ?')) {
+        return memoryStore.shipping_delivery_rates.filter(r => r.id === params[0]);
+      }
+      if (queryLower.includes('where is_active = 1') || queryLower.includes('is_active = 1')) {
+        return memoryStore.shipping_delivery_rates.filter(r => r.is_active === 1 || r.is_active === true);
+      }
+      return memoryStore.shipping_delivery_rates;
+    }
   }
 
   // 2. INSERT / REPLACE Queries
@@ -217,6 +290,27 @@ function processMemoryQuery(sql, params) {
       } else {
         memoryStore.pincode_pricing.push(newRule);
       }
+      return { insertId: id, affectedRows: 1 };
+    }
+
+    if (queryLower.includes('shipping_delivery_rates')) {
+      if (!memoryStore.shipping_delivery_rates) memoryStore.shipping_delivery_rates = [];
+      const [id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active] = params;
+      const newRate = {
+        id,
+        zone_name,
+        pincode_from: String(pincode_from || '').trim(),
+        pincode_to: String(pincode_to || '').trim(),
+        base_weight_grams: Number(base_weight_grams) || 1000,
+        base_rate: Number(base_rate) || 50,
+        additional_weight_grams: Number(additional_weight_grams) || 1000,
+        additional_rate: Number(additional_rate) || 30,
+        free_shipping_threshold: Number(free_shipping_threshold) || 0,
+        is_active: is_active !== undefined ? Number(is_active) : 1,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      memoryStore.shipping_delivery_rates.push(newRate);
       return { insertId: id, affectedRows: 1 };
     }
   }
@@ -310,10 +404,40 @@ function processMemoryQuery(sql, params) {
       }
       return { affectedRows: rule ? 1 : 0 };
     }
+
+    if (queryLower.includes('shipping_delivery_rates')) {
+      if (!memoryStore.shipping_delivery_rates) memoryStore.shipping_delivery_rates = [];
+      const id = params[params.length - 1];
+      const rate = memoryStore.shipping_delivery_rates.find(r => r.id === id);
+      if (rate) {
+        if (params.length >= 8) {
+          const [zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active] = params;
+          rate.zone_name = zone_name;
+          rate.pincode_from = pincode_from;
+          rate.pincode_to = pincode_to;
+          rate.base_weight_grams = Number(base_weight_grams) || 1000;
+          rate.base_rate = Number(base_rate) || 0;
+          rate.additional_weight_grams = Number(additional_weight_grams) || 1000;
+          rate.additional_rate = Number(additional_rate) || 0;
+          rate.free_shipping_threshold = Number(free_shipping_threshold) || 0;
+          if (is_active !== undefined) rate.is_active = Number(is_active);
+        } else if (queryLower.includes('is_active = ?')) {
+          rate.is_active = Number(params[0]);
+        }
+        rate.updated_at = new Date();
+      }
+      return { affectedRows: rate ? 1 : 0 };
+    }
   }
 
   // 4. DELETE Queries
   if (queryLower.startsWith('delete')) {
+    if (queryLower.includes('from shipping_delivery_rates')) {
+      const id = params[0];
+      if (!memoryStore.shipping_delivery_rates) memoryStore.shipping_delivery_rates = [];
+      memoryStore.shipping_delivery_rates = memoryStore.shipping_delivery_rates.filter(r => r.id !== id);
+      return { affectedRows: 1 };
+    }
     if (queryLower.includes('from pincode_pricing')) {
       const id = params[0];
       if (!memoryStore.pincode_pricing) memoryStore.pincode_pricing = [];

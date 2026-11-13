@@ -17,11 +17,12 @@ const AdminFeaturedProducts = lazy(() => import('../components/admin/AdminFeatur
 const AdminBestSellingProducts = lazy(() => import('../components/admin/AdminBestSellingProducts'));
 const AdminCombos = lazy(() => import('../components/admin/AdminCombos'));
 const AdminPincodePricing = lazy(() => import('../components/admin/AdminPincodePricing'));
+const AdminShippingRates = lazy(() => import('../components/admin/AdminShippingRates'));
 
 import { 
   LayoutDashboard, Package, Layers, ShoppingBag, 
   Users, Image as ImageIcon, FileText, Settings, LogOut, Menu, X, Star, Award,
-  Search, ArrowUpRight, Plus, RefreshCw, Gift, MapPin
+  Search, ArrowUpRight, Plus, RefreshCw, Gift, MapPin, Truck
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -67,6 +68,7 @@ export default function AdminPage() {
       group: 'CATALOG & INVENTORY',
       items: [
         { id: 'products', label: 'Products & Stock', shortLabel: 'Products', icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : null, badgeColor: 'bg-rose-500' },
+        { id: 'shipping-rates', label: 'Weight & Delivery Rates', shortLabel: 'Delivery Rates', icon: Truck },
         { id: 'pincode-pricing', label: 'Pincode-wise Pricing', shortLabel: 'Pincode Pricing', icon: MapPin },
         { id: 'categories', label: 'Product Categories', shortLabel: 'Categories', icon: Layers },
         { id: 'featured', label: 'Featured Showcase', shortLabel: 'Featured', icon: Star },
@@ -129,6 +131,8 @@ export default function AdminPage() {
         return <AdminCategories />;
       case 'products':
         return <AdminProducts />;
+      case 'shipping-rates':
+        return <AdminShippingRates />;
       case 'pincode-pricing':
         return <AdminPincodePricing />;
       case 'featured':

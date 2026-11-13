@@ -199,32 +199,148 @@ export function calculateCouponDiscount({
 }
 
 /**
+ * Parse weight string (e.g. '100g', '250g', '500g', '1kg', '2 kg', '500 gm') into integer grams.
+ */
+export function parseWeightInGrams(weightInput) {
+  if (!weightInput) return 500;
+  const str = String(weightInput).toLowerCase().trim();
+  
+  // match kg (e.g. "1kg", "1.5kg", "2 kg")
+  const kgMatch = str.match(/([0-9]+(?:\.[0-9]+)?)\s*kg/);
+  if (kgMatch) {
+    return Math.round(parseFloat(kgMatch[1]) * 1000);
+  }
+  
+  // match g / gm / grams (e.g. "100g", "250g", "500 gm", "750 grams")
+  const gMatch = str.match(/([0-9]+(?:\.[0-9]+)?)\s*(?:g|gm|gms|gram|grams)/);
+  if (gMatch) {
+    return Math.round(parseFloat(gMatch[1]));
+  }
+
+  // match plain numbers
+  const numMatch = str.match(/([0-9]+(?:\.[0-9]+)?)/);
+  if (numMatch) {
+    const val = parseFloat(numMatch[1]);
+    return val <= 10 ? Math.round(val * 1000) : Math.round(val);
+  }
+
+  return 500;
+}
+
+/**
+ * Calculate total package weight in grams from item list.
+ */
+export function calculateCartWeightGrams(items) {
+  if (!Array.isArray(items) || items.length === 0) return 0;
+  return items.reduce((sum, item) => {
+    const qty = Number(item.quantity) || 1;
+    const itemWeightStr = item.weight || item.selectedWeight || item.label || '500g';
+    const grams = parseWeightInGrams(itemWeightStr);
+    return sum + (qty * grams);
+  }, 0);
+}
+
+/**
+ * Match a pincode against list of shipping delivery rules.
+ */
+export function matchShippingDeliveryRule(pincode, rulesList) {
+  if (!pincode || !Array.isArray(rulesList) || rulesList.length === 0) return null;
+  const cleanPin = String(pincode).trim();
+  const pinNum = parseInt(cleanPin, 10);
+
+  // 1. Exact single pincode match
+  const exactMatch = rulesList.find(r => 
+    (r.is_active === 1 || r.is_active === true) && 
+    String(r.pincode_from).trim() === cleanPin && 
+    (!r.pincode_to || String(r.pincode_to).trim() === cleanPin || String(r.pincode_to).trim() === '')
+  );
+  if (exactMatch) return exactMatch;
+
+  // 2. Numeric Range match (e.g. 600001 to 643999)
+  if (!isNaN(pinNum)) {
+    const rangeMatch = rulesList.find(r => {
+      if (r.is_active !== 1 && r.is_active !== true) return false;
+      const fromNum = parseInt(r.pincode_from, 10);
+      const toNum = parseInt(r.pincode_to, 10);
+      if (!isNaN(fromNum) && !isNaN(toNum)) {
+        return pinNum >= Math.min(fromNum, toNum) && pinNum <= Math.max(fromNum, toNum);
+      }
+      return false;
+    });
+    if (rangeMatch) return rangeMatch;
+  }
+
+  // 3. Fallback to DEFAULT rule
+  const defaultRule = rulesList.find(r => 
+    (r.is_active === 1 || r.is_active === true) && 
+    (String(r.pincode_from).toUpperCase() === 'DEFAULT' || String(r.zone_name).toLowerCase().includes('default'))
+  );
+  return defaultRule || null;
+}
+
+/**
+ * Calculate delivery fee based on total weight (grams), subtotal, and matching shipping rule.
+ */
+export function calculateDeliveryFeeByWeight({ weightGrams, subtotal, rule }) {
+  if (!rule) {
+    return 0;
+  }
+
+  const freeThreshold = Number(rule.free_shipping_threshold) || 0;
+  if (freeThreshold > 0 && subtotal >= freeThreshold) {
+    return 0; // Free delivery
+  }
+
+  const baseWeight = Number(rule.base_weight_grams) || 1000;
+  const baseRate = Number(rule.base_rate) || 0;
+  const additionalWeight = Number(rule.additional_weight_grams) || 1000;
+  const additionalRate = Number(rule.additional_rate) || 0;
+
+  if (weightGrams <= baseWeight) {
+    return baseRate;
+  }
+
+  const extraWeight = weightGrams - baseWeight;
+  const extraSlabs = Math.ceil(extraWeight / additionalWeight);
+  return baseRate + (extraSlabs * additionalRate);
+}
+
+/**
  * Calculate final order totals (subtotal, delivery charge, totalAmount).
  */
 export function calculateOrderTotals({
   subtotal,
   discountAmount = 0,
-  storeSettings = {}
+  storeSettings = {},
+  deliveryCharge: explicitDeliveryCharge = null
 }) {
-  // Resolve Free Delivery Threshold (matches AdminSettings 'minOrderAmount' or legacy 'freeDeliveryThreshold')
-  const rawThreshold = storeSettings.minOrderAmount !== undefined && storeSettings.minOrderAmount !== null
-    ? storeSettings.minOrderAmount
-    : storeSettings.freeDeliveryThreshold;
-  const freeThreshold = rawThreshold !== undefined && rawThreshold !== null && !isNaN(Number(rawThreshold))
-    ? Number(rawThreshold)
-    : 500;
+  let deliveryCharge = 0;
 
-  // Resolve Standard Delivery Fee (matches AdminSettings 'deliveryCharge' or legacy 'deliveryFee')
-  const rawFee = storeSettings.deliveryCharge !== undefined && storeSettings.deliveryCharge !== null
-    ? storeSettings.deliveryCharge
-    : storeSettings.deliveryFee;
-  const flatFee = rawFee !== undefined && rawFee !== null && !isNaN(Number(rawFee))
-    ? Number(rawFee)
-    : 0;
+  if (explicitDeliveryCharge !== null && explicitDeliveryCharge !== undefined && !isNaN(Number(explicitDeliveryCharge))) {
+    deliveryCharge = Math.max(0, roundCurrency(Number(explicitDeliveryCharge)));
+  } else {
+    // Resolve Free Delivery Threshold (matches AdminSettings 'minOrderAmount' or legacy 'freeDeliveryThreshold')
+    const rawThreshold = storeSettings.minOrderAmount !== undefined && storeSettings.minOrderAmount !== null
+      ? storeSettings.minOrderAmount
+      : storeSettings.freeDeliveryThreshold;
+    const freeThreshold = rawThreshold !== undefined && rawThreshold !== null && !isNaN(Number(rawThreshold))
+      ? Number(rawThreshold)
+      : 500;
 
-  // Effective subtotal after discount
+    // Resolve Standard Delivery Fee (matches AdminSettings 'deliveryCharge' or legacy 'deliveryFee')
+    const rawFee = storeSettings.deliveryCharge !== undefined && storeSettings.deliveryCharge !== null
+      ? storeSettings.deliveryCharge
+      : storeSettings.deliveryFee;
+    const flatFee = rawFee !== undefined && rawFee !== null && !isNaN(Number(rawFee))
+      ? Number(rawFee)
+      : 0;
+
+    // Effective subtotal after discount
+    const effectiveSubtotal = Math.max(0, roundCurrency(subtotal - discountAmount));
+    deliveryCharge = (flatFee === 0 || effectiveSubtotal === 0 || (freeThreshold > 0 && effectiveSubtotal >= freeThreshold)) ? 0 : flatFee;
+  }
+
   const effectiveSubtotal = Math.max(0, roundCurrency(subtotal - discountAmount));
-  const deliveryCharge = (flatFee === 0 || effectiveSubtotal === 0 || (freeThreshold > 0 && effectiveSubtotal >= freeThreshold)) ? 0 : flatFee;
   const totalAmount = Math.max(0, roundCurrency(effectiveSubtotal + deliveryCharge));
 
   return {

@@ -9,6 +9,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import pincodePricingRoutes from './routes/pincodePricingRoutes.js';
+import shippingRatesRoutes from './routes/shippingRatesRoutes.js';
 import { initializeDatabase } from './scripts/initDb.js';
 import { queryDb } from './config/db.js';
 import { CATEGORIES, PRODUCTS } from '../src/data/products.js';
@@ -437,6 +438,7 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/pincode-pricing', pincodePricingRoutes);
+app.use('/api/shipping-rates', shippingRatesRoutes);
 
 // 404 Handler for undefined API routes
 app.use('/api/*', (req, res) => {
