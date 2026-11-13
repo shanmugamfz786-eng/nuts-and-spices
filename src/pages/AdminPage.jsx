@@ -172,7 +172,7 @@ export default function AdminPage() {
                 <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#075E54] rounded-full" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-base font-black tracking-wider text-white font-serif uppercase leading-tight flex items-center gap-1.5 truncate max-w-[150px]">
+                <span className="text-base font-black tracking-wider text-white font-serif uppercase leading-tight flex items-center gap-1.5">
                   <span>{storeSettings?.storeName || 'HAJI GOURMET'}</span>
                 </span>
                 <span className="text-[10px] font-mono font-bold text-amber-300 tracking-widest uppercase">
@@ -181,25 +181,13 @@ export default function AdminPage() {
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={logoutAdmin}
-                className="lg:hidden flex items-center gap-1 px-2.5 py-1 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-xs active:scale-95 select-none"
-                title="Logout of Admin"
-              >
-                <LogOut className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Logout</span>
-              </button>
-
-              <button 
-                onClick={() => setIsMobileSidebarOpen(false)}
-                className="lg:hidden text-emerald-200 hover:text-white p-1 rounded-lg hover:bg-[#043731] transition-colors cursor-pointer"
-                aria-label="Close sidebar"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            <button 
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className="lg:hidden text-emerald-200 hover:text-white p-1.5 rounded-lg hover:bg-[#043731] transition-colors cursor-pointer"
+              aria-label="Close sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
 
