@@ -88,22 +88,20 @@ export default function AdminCombos() {
     status: 'ACTIVE'
   });
 
-  // Dynamic list of all categories available for combos
+  // Dynamic list of all categories available for combos (Only pure Combo categories)
   const categoryOptions = useMemo(() => {
     const map = new Map();
     DEFAULT_COMBO_CATEGORIES.forEach(c => map.set(c.id, c));
-    (categories || []).filter(c => c && c.id !== 'all').forEach(c => {
-      if (!map.has(c.id)) {
-        map.set(c.id, { id: c.id, label: c.name || c.id });
-      }
-    });
+    
+    // Add any custom combo category created for combo deals (excluding generic grocery categories)
+    const storeCatIds = new Set((categories || []).map(gc => gc.id));
     (comboDeals || []).forEach(c => {
-      if (c.category && !map.has(c.category)) {
+      if (c.category && !map.has(c.category) && !storeCatIds.has(c.category)) {
         map.set(c.category, { id: c.category, label: c.categoryLabel || c.category });
       }
     });
     return Array.from(map.values());
-  }, [categories, comboDeals]);
+  }, [comboDeals, categories]);
 
   // Dynamic filter pills list
   const filterCategories = useMemo(() => {
