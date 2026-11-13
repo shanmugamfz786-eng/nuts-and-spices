@@ -13,7 +13,8 @@ import {
   Loader2,
   FolderPlus,
   Package,
-  Check
+  Check,
+  Image as ImageIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../api';
@@ -79,11 +80,11 @@ export default function AdminCombos() {
     categoryLabel: 'Royal Gift Hampers',
     badge: '👑 FESTIVE BESTSELLER',
     badgeColor: 'bg-amber-500 text-white',
-    price: 999,
-    originalPrice: 1299,
+    price: '',
+    originalPrice: '',
     packLabel: '1 KG ROYAL BOX',
     description: '',
-    image: '/images/combo_banner.jpg',
+    image: '',
     status: 'ACTIVE'
   });
 
@@ -230,7 +231,7 @@ export default function AdminCombos() {
       originalPrice: '',
       packLabel: '1 KG ROYAL BOX',
       description: '',
-      image: '/images/combo_banner.jpg',
+      image: '',
       status: 'ACTIVE'
     });
     setIsModalOpen(true);
@@ -311,7 +312,7 @@ export default function AdminCombos() {
       originalPrice: mainWeight.originalPrice || '',
       packLabel: mainWeight.label || '1 KG ROYAL BOX',
       description: combo.description || '',
-      image: combo.image || '/images/combo_banner.jpg',
+      image: combo.image || '',
       status: combo.status || 'ACTIVE'
     });
     setIsModalOpen(true);
@@ -1158,8 +1159,9 @@ export default function AdminCombos() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300">
-                          <Gift className="w-6 h-6" />
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50 p-1 text-center">
+                          <ImageIcon className="w-6 h-6 text-slate-300 mb-0.5" />
+                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight leading-none">No Image</span>
                         </div>
                       )}
                     </div>
@@ -1204,30 +1206,11 @@ export default function AdminCombos() {
                   {/* Direct Image URL input */}
                   <input
                     type="text"
-                    required
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="Or enter image URL (https://... or /images/...)"
+                    placeholder="Enter image link (or upload from device above)..."
                     className="w-full bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none mb-2"
                   />
-                  
-                  {/* Preset Quick Selectors */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                    {PRESET_IMAGES.map((img, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, image: img.url })}
-                        className={`text-[10px] px-2.5 py-1 rounded-lg border whitespace-nowrap transition-colors cursor-pointer ${
-                          formData.image === img.url 
-                            ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-bold'
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        {img.label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Description */}
