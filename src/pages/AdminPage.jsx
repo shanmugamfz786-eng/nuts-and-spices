@@ -16,7 +16,6 @@ const AdminSettings = lazy(() => import('../components/admin/AdminSettings'));
 const AdminFeaturedProducts = lazy(() => import('../components/admin/AdminFeaturedProducts'));
 const AdminBestSellingProducts = lazy(() => import('../components/admin/AdminBestSellingProducts'));
 const AdminCombos = lazy(() => import('../components/admin/AdminCombos'));
-const AdminPincodePricing = lazy(() => import('../components/admin/AdminPincodePricing'));
 const AdminShippingRates = lazy(() => import('../components/admin/AdminShippingRates'));
 
 import { 
@@ -69,7 +68,6 @@ export default function AdminPage() {
       items: [
         { id: 'products', label: 'Products & Stock', shortLabel: 'Products', icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : null, badgeColor: 'bg-rose-500' },
         { id: 'shipping-rates', label: 'Weight & Delivery Rates', shortLabel: 'Delivery Rates', icon: Truck },
-        { id: 'pincode-pricing', label: 'Pincode-wise Pricing', shortLabel: 'Pincode Pricing', icon: MapPin },
         { id: 'categories', label: 'Product Categories', shortLabel: 'Categories', icon: Layers },
         { id: 'featured', label: 'Featured Showcase', shortLabel: 'Featured', icon: Star },
         { id: 'bestselling', label: 'Top Bestsellers', shortLabel: 'Bestsellers', icon: Award }
@@ -133,8 +131,6 @@ export default function AdminPage() {
         return <AdminProducts />;
       case 'shipping-rates':
         return <AdminShippingRates />;
-      case 'pincode-pricing':
-        return <AdminPincodePricing />;
       case 'featured':
         return <AdminFeaturedProducts />;
       case 'bestselling':
