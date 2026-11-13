@@ -487,32 +487,7 @@ export default function AdminShippingRates() {
                   const isDefault = String(rate.pincode_from).toUpperCase() === 'DEFAULT';
                   const slabs = parseWeightSlabs(rate.weight_slabs_json || rate.weightSlabs);
 
-                  const filteredRates = useMemo(() => {
-    if (!searchTerm.trim()) return rates;
-    const term = searchTerm.trim().toLowerCase();
-
-    return rates.filter(rate => {
-      const zoneMatch = (rate.zone_name || '').toLowerCase().includes(term);
-      const idMatch = (rate.id || '').toLowerCase().includes(term);
-      const fromMatch = String(rate.pincode_from || '').toLowerCase().includes(term);
-      const toMatch = String(rate.pincode_to || '').toLowerCase().includes(term);
-
-      // Check if search term is a numeric pincode within zone range (e.g. typing 626125 matches TN 600001 - 643999)
-      const pinNum = parseInt(term, 10);
-      let rangeMatch = false;
-      if (!isNaN(pinNum) && term.length >= 3) {
-        const fromNum = parseInt(rate.pincode_from, 10);
-        const toNum = parseInt(rate.pincode_to, 10);
-        if (!isNaN(fromNum) && !isNaN(toNum)) {
-          rangeMatch = pinNum >= Math.min(fromNum, toNum) && pinNum <= Math.max(fromNum, toNum);
-        }
-      }
-
-      return zoneMatch || idMatch || fromMatch || toMatch || rangeMatch;
-    });
-  }, [rates, searchTerm]);
-
-  return (
+                  return (
                     <tr key={rate.id} className="hover:bg-gray-50/70 transition-colors">
                       
                       {/* Zone Name */}
@@ -748,32 +723,7 @@ export default function AdminShippingRates() {
 
                   {(formData.editable_slabs || []).map((slab, idx) => {
                     const parsed = editableToSlab(slab);
-                    const filteredRates = useMemo(() => {
-    if (!searchTerm.trim()) return rates;
-    const term = searchTerm.trim().toLowerCase();
-
-    return rates.filter(rate => {
-      const zoneMatch = (rate.zone_name || '').toLowerCase().includes(term);
-      const idMatch = (rate.id || '').toLowerCase().includes(term);
-      const fromMatch = String(rate.pincode_from || '').toLowerCase().includes(term);
-      const toMatch = String(rate.pincode_to || '').toLowerCase().includes(term);
-
-      // Check if search term is a numeric pincode within zone range (e.g. typing 626125 matches TN 600001 - 643999)
-      const pinNum = parseInt(term, 10);
-      let rangeMatch = false;
-      if (!isNaN(pinNum) && term.length >= 3) {
-        const fromNum = parseInt(rate.pincode_from, 10);
-        const toNum = parseInt(rate.pincode_to, 10);
-        if (!isNaN(fromNum) && !isNaN(toNum)) {
-          rangeMatch = pinNum >= Math.min(fromNum, toNum) && pinNum <= Math.max(fromNum, toNum);
-        }
-      }
-
-      return zoneMatch || idMatch || fromMatch || toMatch || rangeMatch;
-    });
-  }, [rates, searchTerm]);
-
-  return (
+                    return (
                       <div key={idx} className="bg-white p-2.5 rounded-xl border border-gray-200/80 shadow-2xs space-y-1.5">
                         <div className="grid grid-cols-12 gap-2 items-center">
                           
