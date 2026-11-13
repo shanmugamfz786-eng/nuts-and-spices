@@ -1098,9 +1098,8 @@ export default function AdminCombos() {
 
                     {/* Inline Product Results Grid / List - ALWAYS VISIBLE */}
                     <div className="bg-white border border-slate-200/90 rounded-xl p-2.5 max-h-56 overflow-y-auto space-y-1.5 shadow-2xs">
-                      <div className="px-1 text-[10px] font-black uppercase text-slate-400 tracking-wider flex items-center justify-between">
+                      <div className="px-1 text-[10px] font-black uppercase text-slate-400 tracking-wider">
                         <span>Select Products to Add ({filteredSearchProducts.length})</span>
-                        <span className="text-[10px] text-emerald-700 font-bold">Click "+ Add" to add to combo</span>
                       </div>
                       
                       {filteredSearchProducts.length === 0 ? (
