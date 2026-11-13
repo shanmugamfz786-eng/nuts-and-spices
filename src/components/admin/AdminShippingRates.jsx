@@ -117,6 +117,7 @@ export default function AdminShippingRates() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const [formData, setFormData] = useState({
     zone_name: '',
@@ -333,10 +334,15 @@ export default function AdminShippingRates() {
   };
 
   const filteredRates = useMemo(() => {
-    if (!searchTerm.trim()) return rates;
-    const term = searchTerm.trim().toLowerCase();
-
     return rates.filter(rate => {
+      // 1. Status Filter
+      if (statusFilter === 'active' && !rate.is_active) return false;
+      if (statusFilter === 'inactive' && rate.is_active) return false;
+
+      // 2. Search Filter
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.trim().toLowerCase();
+
       const zoneMatch = (rate.zone_name || '').toLowerCase().includes(term);
       const idMatch = (rate.id || '').toLowerCase().includes(term);
       const fromMatch = String(rate.pincode_from || '').toLowerCase().includes(term);
@@ -355,7 +361,7 @@ export default function AdminShippingRates() {
 
       return zoneMatch || idMatch || fromMatch || toMatch || rangeMatch;
     });
-  }, [rates, searchTerm]);
+  }, [rates, searchTerm, statusFilter]);
 
   return (
     <div className="space-y-6">
@@ -411,12 +417,46 @@ export default function AdminShippingRates() {
         </div>
       </div>
 
+      {/* FILTERS & SEARCH BAR (Identical to AdminProducts.jsx) */}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+        <div className="sm:col-span-8 relative">
+          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search delivery zones by name or pincode (e.g. Tamil Nadu, 600001)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold text-gray-900 outline-none"
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <div className="sm:col-span-4">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl py-2.5 px-3 text-xs font-bold text-gray-800 outline-none"
+          >
+            <option value="all">All Delivery Zones ({rates.length})</option>
+            <option value="active">Active Zones ({rates.filter(r => r.is_active).length})</option>
+            <option value="inactive">Inactive Zones ({rates.filter(r => !r.is_active).length})</option>
+          </select>
+        </div>
+      </div>
+
       {/* Rules Table */}
       <div className="bg-white border border-[#E5E7EB] rounded-3xl shadow-sm overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-[#E5E7EB] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50">
+        <div className="p-4 sm:p-5 border-b border-[#E5E7EB] flex items-center justify-between bg-gray-50/50">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-gray-700">
-              Delivery Zones ({filteredRates.length})
+              Active Delivery Zones ({filteredRates.length})
             </span>
             {searchTerm && (
               <span className="text-[11px] text-[#128C7E] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 font-bold">
@@ -424,28 +464,9 @@ export default function AdminShippingRates() {
               </span>
             )}
           </div>
-
-          {/* Search Box */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search zone name or pincode (e.g. Tamil, 600001)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-80 pl-8 pr-8 py-2 bg-white border border-gray-200 focus:border-[#128C7E] rounded-xl text-xs font-medium text-gray-800 outline-none shadow-2xs placeholder:text-gray-400"
-            />
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
-                title="Clear search"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+          <span className="text-[11px] text-gray-400 font-medium hidden sm:inline">
+            Configured in Grams & Kilograms with exact rates
+          </span>
         </div>
 
         {loading ? (
