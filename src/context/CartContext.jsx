@@ -302,37 +302,11 @@ export const CartProvider = ({ children }) => {
 
   const isTempPincode = Boolean(user && tempPincode && /^\d{6}$/.test(String(tempPincode).trim()) && tempPincode !== user.pincode);
 
-  // Fetch active pincode prices whenever effective delivery pincode changes
+  // Pincode-wise pricing is completely disabled: all products strictly use catalog prices
   useEffect(() => {
-    let isCancelled = false;
-    if (effectivePincode && /^\d{6}$/.test(effectivePincode)) {
-      setIsPincodeLoading(true);
-      fetchPincodePrices(effectivePincode)
-        .then(res => {
-          if (!isCancelled) {
-            if (res && res.success && res.priceMap) {
-              setPincodePrices(res.priceMap);
-              setPincodeAddedAmount(res.storewideAdjustment ? Number(res.storewideAdjustment.value) : 0);
-            } else {
-              setPincodePrices({});
-              setPincodeAddedAmount(0);
-            }
-            setIsPincodeLoading(false);
-          }
-        })
-        .catch(() => {
-          if (!isCancelled) {
-            setPincodePrices({});
-            setPincodeAddedAmount(0);
-            setIsPincodeLoading(false);
-          }
-        });
-    } else {
-      setPincodePrices({});
-      setPincodeAddedAmount(0);
-      setIsPincodeLoading(false);
-    }
-    return () => { isCancelled = true; };
+    setPincodePrices({});
+    setPincodeAddedAmount(0);
+    setIsPincodeLoading(false);
   }, [effectivePincode]);
 
   // Reset temporary pincode when user changes (login / logout)
@@ -1080,36 +1054,14 @@ export const CartProvider = ({ children }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // PINCODE PRICING HELPERS & RESOLUTION
+  // AUTHENTIC CATALOG PRICING RESOLUTION (Pincode overrides fully disconnected)
   const getProductFinalPrice = (product, weightObj) => {
     if (!product) return 100;
-    const normWeight = String(weightObj?.label || (product.weights && product.weights[0] ? product.weights[0].label : '') || '').toLowerCase().trim();
-    if (pincodePrices && pincodePrices[product.id]) {
-      if (pincodePrices[product.id][normWeight] !== undefined) {
-        return Number(pincodePrices[product.id][normWeight]);
-      }
-      if (pincodePrices[product.id]['standard'] !== undefined) {
-        return Number(pincodePrices[product.id]['standard']);
-      }
-    }
     const base = weightObj ? Number(weightObj.price) : (product.weights && product.weights[0] ? Number(product.weights[0].price) : (Number(product.price) || 100));
-    if (pincodeAddedAmount > 0) {
-      return base + pincodeAddedAmount;
-    }
-    return base;
+    return isNaN(base) ? 100 : base;
   };
 
-  const hasPincodePrice = (product, weightObj) => {
-    if (pincodeAddedAmount > 0) return true;
-    if (!product || !pincodePrices) return false;
-    const normWeight = String(weightObj?.label || (product.weights && product.weights[0] ? product.weights[0].label : '') || '').toLowerCase().trim();
-    return Boolean(
-      pincodePrices[product.id] && (
-        pincodePrices[product.id][normWeight] !== undefined ||
-        pincodePrices[product.id]['standard'] !== undefined
-      )
-    );
-  };
+  const hasPincodePrice = () => false;
 
   const setDeliveryPincode = async (newPin, saveToProfile = false) => {
     const cleanPin = String(newPin || '').trim();
@@ -1151,7 +1103,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Dynamically refresh all existing cart items whenever pincodePrices change
+  // Ensure cart items always reflect authentic catalog variant prices
   useEffect(() => {
     setCart(prevCart => {
       if (!prevCart || prevCart.length === 0) return prevCart;
@@ -1162,23 +1114,15 @@ export const CartProvider = ({ children }) => {
         const normWeight = String(item.weight || '').toLowerCase().trim();
         let targetPrice = item.price;
 
-        if (pincodePrices && pincodePrices[prod.id] && pincodePrices[prod.id][normWeight] !== undefined) {
-          targetPrice = Number(pincodePrices[prod.id][normWeight]);
-        } else {
-          // Fallback to default catalog variant price (+ pincodeAddedAmount if set)
-          let pWeights = prod.weights || prod.weights_json;
-          if (typeof pWeights === 'string') {
-            try { pWeights = JSON.parse(pWeights); } catch { pWeights = []; }
-          }
-          if (Array.isArray(pWeights) && pWeights.length > 0) {
-            const v = pWeights.find(w => String(w.label || '').toLowerCase().trim() === normWeight);
-            if (v && v.price !== undefined) targetPrice = Number(v.price);
-          } else if (prod.price !== undefined) {
-            targetPrice = Number(prod.price);
-          }
-          if (pincodeAddedAmount > 0) {
-            targetPrice = targetPrice + pincodeAddedAmount;
-          }
+        let pWeights = prod.weights || prod.weights_json;
+        if (typeof pWeights === 'string') {
+          try { pWeights = JSON.parse(pWeights); } catch { pWeights = []; }
+        }
+        if (Array.isArray(pWeights) && pWeights.length > 0) {
+          const v = pWeights.find(w => String(w.label || '').toLowerCase().trim() === normWeight);
+          if (v && v.price !== undefined) targetPrice = Number(v.price);
+        } else if (prod.price !== undefined) {
+          targetPrice = Number(prod.price);
         }
 
         if (targetPrice !== item.price) {
@@ -1193,7 +1137,7 @@ export const CartProvider = ({ children }) => {
       });
       return changed ? updated : prevCart;
     });
-  }, [pincodePrices, pincodeAddedAmount, products]);
+  }, [products]);
 
   // CART HANDLERS
   const addToCart = (product, weightObj, quantity = 1) => {

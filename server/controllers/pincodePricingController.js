@@ -378,126 +378,15 @@ export const deletePincodePricing = async (req, res) => {
  * GET /api/pincode-pricing?pincode=600017 OR /api/pincode-pricing/:pincode
  */
 export const getCustomerPincodePrices = async (req, res) => {
-  try {
-    const pincode = req.params.pincode || req.query.pincode;
-
-    if (!pincode) {
-      return res.status(400).json({
-        success: false,
-        message: 'Pincode parameter is required.'
-      });
-    }
-
-    const cleanPincode = String(pincode).trim();
-    if (!/^\d{6}$/.test(cleanPincode)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Pincode must be exactly 6 digits.'
-      });
-    }
-
-    const rows = await queryDb(
-      `SELECT id, product_id, variant_weight, pincode, pincode_to, price, adjustment_type 
-       FROM pincode_pricing 
-       WHERE status = 'active'
-         AND (
-           pincode = ? 
-           OR (pincode_to IS NOT NULL AND pincode_to != '' AND pincode <= ? AND pincode_to >= ?)
-         )
-       ORDER BY 
-         CASE WHEN product_id = 'ALL' THEN 1 ELSE 2 END ASC,
-         CASE WHEN pincode = ? AND (pincode_to IS NULL OR pincode_to = '' OR pincode_to = pincode) THEN 2 ELSE 1 END ASC`,
-      [cleanPincode, cleanPincode, cleanPincode, cleanPincode]
-    );
-
-    // Build priceMap: { [productId]: { [normalizedWeight]: price } }
-    const priceMap = {};
-    const prices = [];
-    let storewideAdjustment = null;
-
-    if (Array.isArray(rows)) {
-      // 1. If any storewide rule applies to this pincode, pre-populate priceMap for all products
-      const storewideRule = rows.find(r => (r.product_id || r.productId) === 'ALL');
-      if (storewideRule) {
-        storewideAdjustment = {
-          type: storewideRule.adjustment_type || 'flat_increase',
-          value: Number(storewideRule.price),
-          pincode: storewideRule.pincode,
-          pincodeTo: storewideRule.pincode_to || null
-        };
-
-        const catalog = await getCatalogProducts();
-        for (const prod of catalog) {
-          if (!priceMap[prod.id]) priceMap[prod.id] = {};
-          let weights = prod.weights || prod.weights_json || [];
-          if (typeof weights === 'string') {
-            try { weights = JSON.parse(weights); } catch { weights = []; }
-          }
-          if (Array.isArray(weights) && weights.length > 0) {
-            for (const w of weights) {
-              const baseP = Number(w.price) || Number(prod.price) || 0;
-              let adj = baseP;
-              if (storewideRule.adjustment_type === 'percent_increase') {
-                adj = Math.round(baseP * (1 + Number(storewideRule.price) / 100));
-              } else if (storewideRule.adjustment_type === 'fixed') {
-                adj = Number(storewideRule.price);
-              } else {
-                // flat_increase (+₹X)
-                adj = Math.round(baseP + Number(storewideRule.price));
-              }
-              priceMap[prod.id][normalizeWeight(w.label)] = adj;
-            }
-          } else if (prod.price !== undefined) {
-            const baseP = Number(prod.price) || 0;
-            let adj = baseP;
-            if (storewideRule.adjustment_type === 'percent_increase') {
-              adj = Math.round(baseP * (1 + Number(storewideRule.price) / 100));
-            } else if (storewideRule.adjustment_type === 'fixed') {
-              adj = Number(storewideRule.price);
-            } else {
-              adj = Math.round(baseP + Number(storewideRule.price));
-            }
-            priceMap[prod.id]['standard'] = adj;
-          }
-        }
-      }
-
-      // 2. Specific product rules override storewide adjustments
-      for (const row of rows) {
-        const prodId = row.product_id || row.productId;
-        if (prodId === 'ALL') continue; // Already processed into priceMap
-
-        const variant = normalizeWeight(row.variant_weight || row.variantWeight);
-        const price = Number(row.price);
-
-        if (!priceMap[prodId]) {
-          priceMap[prodId] = {};
-        }
-        priceMap[prodId][variant] = price;
-
-        prices.push({
-          id: row.id,
-          productId: prodId,
-          variantWeight: row.variant_weight || row.variantWeight,
-          price
-        });
-      }
-    }
-
-    res.json({
-      success: true,
-      pincode: cleanPincode,
-      count: prices.length,
-      storewideAdjustment,
-      priceMap,
-      prices
-    });
-  } catch (error) {
-    console.error('Get Customer Pincode Prices Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch prices for pincode.'
-    });
-  }
+  // Pincode-wise pricing is completely disabled across the store.
+  // All products strictly use standard catalog pricing.
+  return res.json({
+    success: true,
+    pincode: req.params.pincode || req.query.pincode || '',
+    count: 0,
+    storewideAdjustment: null,
+    priceMap: {},
+    prices: []
+  });
 };
 

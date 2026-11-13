@@ -107,43 +107,8 @@ export const createOrder = async (req, res) => {
         console.warn('Failed to parse catalog state json', e);
       }
 
-    // Fetch active pincode pricing rules for the order's delivery pincode (supports exact pincode & pincode ranges)
-    const deliveryPincode = String(customer.pincode || '').trim();
+    // Pincode pricing is disabled: orders strictly use authentic catalog prices
     const pincodePricesMap = {};
-    if (/^\d{6}$/.test(deliveryPincode)) {
-      try {
-        const pRules = await queryDb(
-          `SELECT product_id, variant_weight, pincode, pincode_to, price, adjustment_type 
-           FROM pincode_pricing 
-           WHERE status = 'active'
-             AND (
-               pincode = ? 
-               OR (pincode_to IS NOT NULL AND pincode_to != '' AND pincode <= ? AND pincode_to >= ?)
-             )
-           ORDER BY 
-             CASE WHEN product_id = 'ALL' THEN 1 ELSE 2 END ASC,
-             CASE WHEN pincode = ? AND (pincode_to IS NULL OR pincode_to = '' OR pincode_to = pincode) THEN 2 ELSE 1 END ASC`,
-          [deliveryPincode, deliveryPincode, deliveryPincode, deliveryPincode]
-        );
-        if (Array.isArray(pRules)) {
-          for (const rule of pRules) {
-            const pId = rule.product_id || rule.productId;
-            if (pId === 'ALL') {
-              pincodePricesMap['__STOREWIDE__'] = {
-                type: rule.adjustment_type || 'flat_increase',
-                value: Number(rule.price)
-              };
-            } else {
-              const vWeight = String(rule.variant_weight || rule.variantWeight || '').toLowerCase().trim();
-              const key = `${pId}:::${vWeight}`;
-              pincodePricesMap[key] = Number(rule.price);
-            }
-          }
-        }
-      } catch (pErr) {
-        console.warn('Notice on pincode prices query for order:', pErr.message);
-      }
-    }
 
     // 1. Calculate and validate items against catalog (strict variant existence check & pincode pricing)
     let subtotal = 0;
