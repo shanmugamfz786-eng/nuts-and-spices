@@ -499,8 +499,8 @@ export default function AdminShippingRates() {
                 <Scale className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="number"
-                  min="0.1"
-                  step={simWeightUnit === 'kg' ? '0.1' : '50'}
+                  min="0"
+                  step="any"
                   value={simWeightVal}
                   onChange={(e) => setSimWeightVal(e.target.value)}
                   className="w-full pl-9 pr-2 py-2 bg-white text-gray-900 rounded-l-xl font-mono font-bold text-xs outline-none shadow-inner"
@@ -824,7 +824,7 @@ export default function AdminShippingRates() {
                               <input
                                 type="number"
                                 min="0"
-                                step={slab.minUnit === 'kg' ? '0.1' : '1'}
+                                step="any"
                                 value={slab.minVal}
                                 onChange={(e) => handleUpdateSlab(idx, 'minVal', e.target.value)}
                                 className="w-full px-2 py-1.5 bg-gray-50 text-xs font-mono font-bold text-gray-900 outline-none"
@@ -845,8 +845,8 @@ export default function AdminShippingRates() {
                             <div className="flex rounded-lg overflow-hidden border border-gray-200 focus-within:border-[#128C7E]">
                               <input
                                 type="number"
-                                min="0.1"
-                                step={slab.maxUnit === 'kg' ? '0.1' : '1'}
+                                min="0"
+                                step="any"
                                 value={slab.maxVal}
                                 onChange={(e) => handleUpdateSlab(idx, 'maxVal', e.target.value)}
                                 className="w-full px-2 py-1.5 bg-gray-50 text-xs font-mono font-bold text-gray-900 outline-none"
@@ -869,7 +869,7 @@ export default function AdminShippingRates() {
                               <input
                                 type="number"
                                 min="0"
-                                step="1"
+                                step="any"
                                 value={slab.rate}
                                 onChange={(e) => handleUpdateSlab(idx, 'rate', e.target.value)}
                                 className="w-full pl-6 pr-2 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-mono font-black text-[#128C7E] outline-none focus:border-[#075E54]"
@@ -927,7 +927,7 @@ export default function AdminShippingRates() {
                     <input
                       type="number"
                       min="0"
-                      step="1"
+                      step="any"
                       placeholder="30"
                       value={formData.additional_rate}
                       onChange={(e) => setFormData({ ...formData, additional_rate: e.target.value })}
@@ -946,6 +946,7 @@ export default function AdminShippingRates() {
                     <input
                       type="number"
                       min="0"
+                      step="any"
                       placeholder="0"
                       value={formData.free_shipping_threshold}
                       onChange={(e) => setFormData({ ...formData, free_shipping_threshold: e.target.value })}
