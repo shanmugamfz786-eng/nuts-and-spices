@@ -341,12 +341,23 @@ export const CartProvider = ({ children }) => {
   }, [user]);
 
   // 7b. SHIPPING DELIVERY RATES (WEIGHT & PINCODE-BASED)
-  const [shippingRates, setShippingRates] = useState([]);
+  const [shippingRates, setShippingRates] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_shipping_rates');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const refreshShippingRates = async () => {
     try {
       const res = await fetchPublicShippingRates();
       if (res && res.success && Array.isArray(res.rates)) {
         setShippingRates(res.rates);
+        try {
+          localStorage.setItem('nuts_spices_shipping_rates', JSON.stringify(res.rates));
+        } catch {}
       }
     } catch (e) {
       console.warn('Failed to load shipping rates:', e);
