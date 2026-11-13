@@ -214,11 +214,11 @@ export default function AdminPage() {
       
       {/* 1. ULTRA-PROFESSIONAL ENTERPRISE SIDEBAR */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-40 w-72 bg-[#075E54] text-white flex flex-col justify-between shrink-0 h-screen overflow-hidden
+        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-[#075E54] text-white flex flex-col justify-between shrink-0 h-[100dvh] overflow-hidden
         transform ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
         transition-transform duration-300 ease-in-out shadow-2xl select-none border-r border-[#05463e]
       `}>
-        <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           
           {/* Brand Header */}
           <div className="p-5 flex items-center justify-between border-b border-emerald-800/80 bg-[#05463e] shrink-0">
@@ -262,7 +262,7 @@ export default function AdminPage() {
           </div>
 
           {/* Grouped Navigation Links */}
-          <nav className="px-3 py-4 space-y-6 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-800">
+          <nav className="px-3 py-4 space-y-6 flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-800">
             {navSections.map((section, sIdx) => (
               <div key={sIdx} className="space-y-1">
                 <span className="px-3 text-[10px] font-black uppercase tracking-wider text-emerald-200/80 block mb-1.5">
@@ -303,13 +303,13 @@ export default function AdminPage() {
         </div>
 
         {/* Bottom Logout */}
-        <div className="p-4 border-t border-emerald-800/80 bg-[#05463e] shrink-0 pb-24 lg:pb-4">
+        <div className="p-3.5 sm:p-4 border-t border-emerald-800/80 bg-[#05463e] shrink-0 pb-6 lg:pb-4">
           <button
             onClick={logoutAdmin}
-            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-[#043731] hover:bg-rose-600 text-emerald-100 hover:text-white border border-emerald-700/50 hover:border-rose-500 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs active:scale-95"
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-rose-500/15 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/30 hover:border-rose-500 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs active:scale-95 group"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
+            <LogOut className="w-4 h-4 text-rose-300 group-hover:text-white transition-colors" />
+            <span>Logout Admin</span>
           </button>
         </div>
       </aside>
@@ -317,7 +317,7 @@ export default function AdminPage() {
       {/* Backdrop overlay for mobile sidebar */}
       {isMobileSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 lg:hidden" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden" 
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
@@ -369,7 +369,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Right: Desktop Search Bar */}
+            {/* Right: Desktop Search Bar & Mobile Quick Logout */}
             <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center relative w-72 max-w-xs">
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -381,6 +381,17 @@ export default function AdminPage() {
                   className="w-full bg-gray-50 border border-gray-200 focus:border-[#128C7E] rounded-xl pl-9 pr-3 py-1.5 text-xs text-black placeholder-gray-400 outline-none transition-colors"
                 />
               </div>
+
+              {/* Mobile Quick Logout */}
+              <button
+                type="button"
+                onClick={logoutAdmin}
+                className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-xs"
+                title="Logout Admin"
+              >
+                <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                <span>Logout</span>
+              </button>
             </div>
 
           </div>
