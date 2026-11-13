@@ -278,67 +278,6 @@ export default function CartPage() {
                   </span>
                 </h2>
 
-                {/* Delivery Location & Weight Pill */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2.5 bg-emerald-50/80 border border-emerald-200/80 rounded-xl text-xs">
-                    <div className="flex items-center gap-1.5 font-medium text-emerald-950 flex-wrap">
-                      <MapPin className="w-3.5 h-3.5 text-[#128C7E] shrink-0" />
-                      <span>Deliver to:</span>
-                      <span className="font-mono font-black text-emerald-800">
-                        {effectivePincode || 'Not Set'}
-                      </span>
-                      {matchedShippingRule && (
-                        <span className="text-[10px] text-emerald-700 bg-white px-2 py-0.5 rounded-md border border-emerald-200 font-bold ml-1">
-                          {matchedShippingZone}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsPincodeModalOpen(true)}
-                      className="text-[11px] font-extrabold text-[#128C7E] hover:underline cursor-pointer shrink-0"
-                    >
-                      Change
-                    </button>
-                  </div>
-
-                  {totalCartWeightKg > 0 && (
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-[11px] text-gray-600">
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <Scale className="w-3.5 h-3.5 text-gray-500" />
-                        Total Package Weight:
-                      </span>
-                      <span className="font-black text-gray-800 font-mono">
-                        {totalCartWeightKg} Kg
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Coupon Code Input */}
-                <form onSubmit={handleApplyCoupon} className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Coupon Code"
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                      className="flex-1 px-3 py-2 text-xs font-medium uppercase tracking-wider bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#128C7E]"
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                  {couponMessage && (
-                    <p className={`text-[11px] font-semibold ${couponMessage.type === 'success' ? 'text-emerald-700' : 'text-red-600'}`}>
-                      {couponMessage.text}
-                    </p>
-                  )}
-                </form>
-
                 {/* Bill Details */}
                 <div className="space-y-2.5 text-xs">
                   <div className="flex justify-between text-gray-600">
