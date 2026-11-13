@@ -62,6 +62,27 @@ export default function AdminCombos() {
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState('');
 
+  // Manage Categories Modal State
+  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
+  const [newCategoryInput, setNewCategoryInput] = useState('');
+
+  // Manageable combo categories with persistent local storage
+  const [comboCategoriesList, setComboCategoriesList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_combo_categories_custom');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return DEFAULT_COMBO_CATEGORIES;
+  });
+
+  const [deletedCategoryIds, setDeletedCategoryIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuts_spices_deleted_combo_cat_ids');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
+
   // What's Inside - Search & Select State
   const [comboComponents, setComboComponents] = useState([]);
   const [productSearchTerm, setProductSearchTerm] = useState('');
@@ -88,20 +109,85 @@ export default function AdminCombos() {
     status: 'ACTIVE'
   });
 
-  // Dynamic list of all categories available for combos (Only pure Combo categories)
+  // Dynamic list of all categories available for combos (Only pure Combo categories, reactive to deletion)
   const categoryOptions = useMemo(() => {
     const map = new Map();
-    DEFAULT_COMBO_CATEGORIES.forEach(c => map.set(c.id, c));
+    comboCategoriesList.forEach(c => {
+      if (!deletedCategoryIds.includes(c.id)) {
+        map.set(c.id, c);
+      }
+    });
     
-    // Add any custom combo category created for combo deals (excluding generic grocery categories)
+    // Add any custom combo category created for combo deals (excluding generic grocery categories and deleted categories)
     const storeCatIds = new Set((categories || []).map(gc => gc.id));
     (comboDeals || []).forEach(c => {
-      if (c.category && !map.has(c.category) && !storeCatIds.has(c.category)) {
+      if (c.category && !map.has(c.category) && !storeCatIds.has(c.category) && !deletedCategoryIds.includes(c.category)) {
         map.set(c.category, { id: c.category, label: c.categoryLabel || c.category });
       }
     });
     return Array.from(map.values());
-  }, [comboDeals, categories]);
+  }, [comboCategoriesList, deletedCategoryIds, comboDeals, categories]);
+
+  // Remove category from Combo Collections
+  const handleDeleteCategory = (catIdToDelete, catLabel) => {
+    if (categoryOptions.length <= 1) {
+      alert('You must keep at least one category in the list.');
+      return;
+    }
+    const confirmed = window.confirm(`Are you sure you want to delete "${catLabel}" from the Combo Categories collection?`);
+    if (!confirmed) return;
+
+    const updatedList = comboCategoriesList.filter(c => c.id !== catIdToDelete);
+    const updatedDeletedIds = Array.from(new Set([...deletedCategoryIds, catIdToDelete]));
+
+    setComboCategoriesList(updatedList);
+    setDeletedCategoryIds(updatedDeletedIds);
+
+    try {
+      localStorage.setItem('nuts_spices_combo_categories_custom', JSON.stringify(updatedList));
+      localStorage.setItem('nuts_spices_deleted_combo_cat_ids', JSON.stringify(updatedDeletedIds));
+    } catch (e) {
+      console.warn('Storage error:', e);
+    }
+
+    const remaining = categoryOptions.filter(c => c.id !== catIdToDelete);
+    if (formData.category === catIdToDelete && remaining.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        category: remaining[0].id,
+        categoryLabel: remaining[0].label
+      }));
+    }
+  };
+
+  // Add new category directly
+  const handleAddCategoryDirect = (label) => {
+    const trimmed = (label || '').trim();
+    if (!trimmed) return;
+    const slug = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    if (comboCategoriesList.some(c => c.id === slug || c.label.toLowerCase() === trimmed.toLowerCase())) {
+      alert('This category already exists in the list.');
+      return;
+    }
+    const newCat = { id: slug, label: trimmed };
+    const updatedList = [...comboCategoriesList, newCat];
+    const updatedDeleted = deletedCategoryIds.filter(id => id !== slug);
+
+    setComboCategoriesList(updatedList);
+    setDeletedCategoryIds(updatedDeleted);
+
+    try {
+      localStorage.setItem('nuts_spices_combo_categories_custom', JSON.stringify(updatedList));
+      localStorage.setItem('nuts_spices_deleted_combo_cat_ids', JSON.stringify(updatedDeleted));
+    } catch {}
+
+    setFormData(prev => ({
+      ...prev,
+      category: slug,
+      categoryLabel: trimmed
+    }));
+    setNewCategoryInput('');
+  };
 
   // Dynamic filter pills list
   const filterCategories = useMemo(() => {
@@ -380,6 +466,16 @@ export default function AdminCombos() {
     if (isCustomCategory && customCategoryName.trim()) {
       finalCategoryLabel = customCategoryName.trim();
       finalCategory = customCategoryName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      if (!comboCategoriesList.some(c => c.id === finalCategory)) {
+        const updated = [...comboCategoriesList, { id: finalCategory, label: finalCategoryLabel }];
+        const updatedDeleted = deletedCategoryIds.filter(id => id !== finalCategory);
+        setComboCategoriesList(updated);
+        setDeletedCategoryIds(updatedDeleted);
+        try {
+          localStorage.setItem('nuts_spices_combo_categories_custom', JSON.stringify(updated));
+          localStorage.setItem('nuts_spices_deleted_combo_cat_ids', JSON.stringify(updatedDeleted));
+        } catch {}
+      }
     } else {
       const catObj = categoryOptions.find(c => c.id === formData.category);
       finalCategoryLabel = catObj ? catObj.label : 'Special Combos';
@@ -808,65 +904,113 @@ export default function AdminCombos() {
                       <label className="text-xs font-bold text-slate-700">
                         Collection Category
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => setIsCustomCategory(!isCustomCategory)}
-                        className="text-[11px] font-bold text-[#128C7E] hover:underline cursor-pointer flex items-center gap-1"
-                      >
-                        {isCustomCategory ? (
-                          <span>← Choose Existing</span>
-                        ) : (
-                          <>
-                            <FolderPlus className="w-3 h-3" />
-                            <span>+ Add New Category</span>
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setIsCustomCategory(!isCustomCategory)}
+                          className="text-[11px] font-bold text-[#128C7E] hover:underline cursor-pointer flex items-center gap-1"
+                        >
+                          {isCustomCategory ? (
+                            <span>← Existing</span>
+                          ) : (
+                            <>
+                              <FolderPlus className="w-3 h-3" />
+                              <span>+ Add New</span>
+                            </>
+                          )}
+                        </button>
+                        <span className="text-slate-300">|</span>
+                        <button
+                          type="button"
+                          onClick={() => setIsManageCategoriesOpen(true)}
+                          className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer flex items-center gap-1"
+                          title="Open Category Manager to delete or add categories"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Delete / Manage</span>
+                        </button>
+                      </div>
                     </div>
 
                     {isCustomCategory ? (
-                      <input
-                        type="text"
-                        value={customCategoryName}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setCustomCategoryName(val);
-                          const slug = val.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
-                          setFormData({ 
-                            ...formData, 
-                            category: slug || 'custom-combo',
-                            categoryLabel: val.trim() || 'Custom Category'
-                          });
-                        }}
-                        className="w-full bg-slate-50 border border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
-                        placeholder="Type category name (e.g. Wedding Hampers)"
-                        autoFocus
-                      />
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          value={customCategoryName}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCustomCategoryName(val);
+                            const slug = val.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+                            setFormData({ 
+                              ...formData, 
+                              category: slug || 'custom-combo',
+                              categoryLabel: val.trim() || 'Custom Category'
+                            });
+                          }}
+                          className="flex-1 bg-slate-50 border border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
+                          placeholder="Type new category (e.g. Wedding Hampers)"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (customCategoryName.trim()) {
+                              handleAddCategoryDirect(customCategoryName.trim());
+                              setIsCustomCategory(false);
+                            }
+                          }}
+                          className="px-3 py-2 bg-[#128C7E] text-white text-xs font-bold rounded-xl hover:bg-[#075E54] cursor-pointer shrink-0"
+                        >
+                          Save
+                        </button>
+                      </div>
                     ) : (
-                      <select
-                        value={formData.category}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '__custom__') {
-                            setIsCustomCategory(true);
-                            return;
-                          }
-                          const found = categoryOptions.find(c => c.id === val);
-                          setFormData({ 
-                            ...formData, 
-                            category: val,
-                            categoryLabel: found ? found.label : val
-                          });
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
-                      >
-                        {categoryOptions.map(cat => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.label}
-                          </option>
-                        ))}
-                        <option value="__custom__">+ Add Custom Category...</option>
-                      </select>
+                      <div className="flex items-center gap-1.5">
+                        <select
+                          value={formData.category}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '__custom__') {
+                              setIsCustomCategory(true);
+                              return;
+                            }
+                            if (val === '__manage__') {
+                              setIsManageCategoriesOpen(true);
+                              return;
+                            }
+                            const found = categoryOptions.find(c => c.id === val);
+                            setFormData({ 
+                              ...formData, 
+                              category: val,
+                              categoryLabel: found ? found.label : val
+                            });
+                          }}
+                          className="flex-1 bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
+                        >
+                          {categoryOptions.map(cat => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.label}
+                            </option>
+                          ))}
+                          <option value="__custom__">+ Add Custom Category...</option>
+                          <option value="__manage__">⚙️ Manage & Delete Categories...</option>
+                        </select>
+
+                        {/* Quick Delete Trash Button for Currently Selected Category */}
+                        {categoryOptions.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentCat = categoryOptions.find(c => c.id === formData.category) || categoryOptions[0];
+                              handleDeleteCategory(currentCat.id, currentCat.label);
+                            }}
+                            className="p-2 text-rose-500 hover:text-white hover:bg-rose-600 bg-rose-50 border border-rose-200 rounded-xl transition-all cursor-pointer shrink-0 shadow-2xs"
+                            title={`Delete '${formData.categoryLabel || formData.category}' category from collection`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -1291,6 +1435,107 @@ export default function AdminCombos() {
                   className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer"
                 >
                   Confirm Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 7. MANAGE COMBO CATEGORIES MODAL (DELETE & ADD) */}
+      <AnimatePresence>
+        {isManageCategoriesOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[85vh] flex flex-col"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-teal-50 text-[#128C7E] flex items-center justify-center">
+                    <FolderPlus className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-slate-900">Manage Combo Categories</h3>
+                    <p className="text-[11px] text-slate-400">Delete or add categories for your Combo Collections</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsManageCategoriesOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Add New Category Direct Input */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newCategoryInput}
+                  onChange={(e) => setNewCategoryInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCategoryDirect(newCategoryInput);
+                    }
+                  }}
+                  placeholder="Type new category name..."
+                  className="flex-1 bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleAddCategoryDirect(newCategoryInput)}
+                  className="px-3.5 py-2 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 flex items-center gap-1 shadow-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add</span>
+                </button>
+              </div>
+
+              {/* Category List with Direct Delete Buttons */}
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-64">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Active Collection Categories ({categoryOptions.length})
+                </p>
+                {categoryOptions.map((cat, idx) => (
+                  <div
+                    key={cat.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 transition-all"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-6 h-6 rounded-lg bg-white text-slate-600 font-bold text-[11px] flex items-center justify-center border border-slate-200 shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xs font-bold text-slate-800 truncate">
+                        {cat.label}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cat.id, cat.label)}
+                      disabled={categoryOptions.length <= 1}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 border border-rose-200 rounded-lg text-[11px] font-bold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                      title={`Delete "${cat.label}" from collection`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsManageCategoriesOpen(false)}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl cursor-pointer"
+                >
+                  Done
                 </button>
               </div>
             </motion.div>
