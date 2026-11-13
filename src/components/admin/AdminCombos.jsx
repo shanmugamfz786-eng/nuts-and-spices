@@ -922,7 +922,7 @@ export default function AdminCombos() {
                           ) : (
                             <>
                               <FolderPlus className="w-3 h-3" />
-                              <span>+ Add New</span>
+                              <span>Add New</span>
                             </>
                           )}
                         </button>
@@ -1079,8 +1079,8 @@ export default function AdminCombos() {
                       onClick={() => setIsAddingCustom(!isAddingCustom)}
                       className="text-[11px] font-bold text-[#128C7E] hover:underline cursor-pointer flex items-center gap-1 self-start sm:self-auto"
                     >
-                      <Plus className="w-3 h-3" />
-                      <span>{isAddingCustom ? 'Cancel Custom' : '+ Add Custom Item (e.g. Gift Box)'}</span>
+                      {isAddingCustom ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                      <span>{isAddingCustom ? 'Cancel Custom' : 'Add Custom Item (e.g. Gift Box)'}</span>
                     </button>
                   </div>
 
