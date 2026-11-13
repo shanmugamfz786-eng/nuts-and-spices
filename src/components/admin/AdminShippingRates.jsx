@@ -126,10 +126,12 @@ export default function AdminShippingRates() {
     base_weight_grams: 1000,
     base_rate: 50,
     additional_weight_grams: 1000,
-    additional_rate: 30,
-    free_shipping_threshold: 0,
+    additional_rate: '',
+    free_shipping_threshold: '',
     is_active: 1,
-    editable_slabs: STANDARD_SLABS_TN.map(slabToEditable)
+    editable_slabs: [
+      { minVal: 0, minUnit: 'g', maxVal: '', maxUnit: 'g', rate: '' }
+    ]
   });
 
   const loadRates = async () => {
@@ -162,12 +164,14 @@ export default function AdminShippingRates() {
       pincode_from: '',
       pincode_to: '',
       base_weight_grams: 1000,
-      base_rate: 50,
+      base_rate: '',
       additional_weight_grams: 1000,
-      additional_rate: 30,
-      free_shipping_threshold: 0,
+      additional_rate: '',
+      free_shipping_threshold: '',
       is_active: 1,
-      editable_slabs: STANDARD_SLABS_TN.map(slabToEditable)
+      editable_slabs: [
+        { minVal: 0, minUnit: 'g', maxVal: '', maxUnit: 'g', rate: '' }
+      ]
     });
     setIsModalOpen(true);
   };
@@ -175,35 +179,21 @@ export default function AdminShippingRates() {
   const handleOpenEdit = (rate) => {
     setEditingId(rate.id);
     const existingSlabs = parseWeightSlabs(rate.weight_slabs_json || rate.weightSlabs);
-    const sourceSlabs = existingSlabs.length > 0 ? existingSlabs : STANDARD_SLABS_TN;
+    const sourceSlabs = existingSlabs.length > 0 ? existingSlabs : [{ minWeightGrams: 0, maxWeightGrams: 500, rate: Number(rate.base_rate) || 50 }];
 
     setFormData({
       zone_name: rate.zone_name,
       pincode_from: rate.pincode_from,
       pincode_to: rate.pincode_to || rate.pincode_from,
       base_weight_grams: Number(rate.base_weight_grams) || 1000,
-      base_rate: Number(rate.base_rate),
+      base_rate: Number(rate.base_rate) || '',
       additional_weight_grams: Number(rate.additional_weight_grams) || 1000,
-      additional_rate: Number(rate.additional_rate),
-      free_shipping_threshold: Number(rate.free_shipping_threshold) || 0,
+      additional_rate: rate.additional_rate !== null && rate.additional_rate !== undefined ? Number(rate.additional_rate) : '',
+      free_shipping_threshold: Number(rate.free_shipping_threshold) || '',
       is_active: rate.is_active ? 1 : 0,
       editable_slabs: sourceSlabs.map(slabToEditable)
     });
     setIsModalOpen(true);
-  };
-
-  const applyPreset = (preset) => {
-    const slabs = preset.slabs || STANDARD_SLABS_TN;
-    setFormData(prev => ({
-      ...prev,
-      zone_name: preset.name,
-      pincode_from: preset.from,
-      pincode_to: preset.to,
-      base_rate: preset.baseRate,
-      additional_rate: preset.addRate,
-      free_shipping_threshold: preset.freeAbove,
-      editable_slabs: slabs.map(slabToEditable)
-    }));
   };
 
   const handleAddSlab = () => {
@@ -212,26 +202,18 @@ export default function AdminShippingRates() {
       const last = current[current.length - 1];
       let nextMinVal = 0;
       let nextMinUnit = 'g';
-      let nextMaxVal = 500;
       let nextMaxUnit = 'g';
-      let nextRate = 50;
 
-      if (last) {
-        const lastSlab = editableToSlab(last);
-        const lastMaxG = lastSlab.maxWeightGrams;
-        nextRate = Number(last.rate) + 30;
-
-        if (lastMaxG >= 1000) {
-          nextMinVal = Number(lastMaxG / 1000);
+      if (last && last.maxVal !== '' && !isNaN(Number(last.maxVal))) {
+        const lastMaxNum = Number(last.maxVal);
+        if (last.maxUnit === 'kg') {
+          nextMinVal = lastMaxNum;
           nextMinUnit = 'kg';
-          nextMaxVal = Number((lastMaxG / 1000) + 1);
           nextMaxUnit = 'kg';
         } else {
-          nextMinVal = lastMaxG + 1;
+          nextMinVal = lastMaxNum + 1;
           nextMinUnit = 'g';
-          nextMaxVal = lastMaxG + 500;
-          nextMaxUnit = nextMaxVal >= 1000 ? 'kg' : 'g';
-          if (nextMaxVal >= 1000) nextMaxVal = nextMaxVal / 1000;
+          nextMaxUnit = 'g';
         }
       }
 
@@ -239,7 +221,7 @@ export default function AdminShippingRates() {
         ...prev,
         editable_slabs: [
           ...current,
-          { minVal: nextMinVal, minUnit: nextMinUnit, maxVal: nextMaxVal, maxUnit: nextMaxUnit, rate: nextRate }
+          { minVal: nextMinVal, minUnit: nextMinUnit, maxVal: '', maxUnit: nextMaxUnit, rate: '' }
         ]
       };
     });
@@ -270,10 +252,32 @@ export default function AdminShippingRates() {
       return;
     }
 
-    const calculatedSlabs = (formData.editable_slabs || []).map(editableToSlab);
+    const slabs = formData.editable_slabs || [];
+    if (slabs.length === 0) {
+      showNotification('error', 'Please add at least one weight slab.');
+      return;
+    }
+
+    for (let i = 0; i < slabs.length; i++) {
+      const s = slabs[i];
+      if (s.maxVal === '' || isNaN(Number(s.maxVal)) || Number(s.maxVal) <= 0) {
+        showNotification('error', `Slab #${i + 1}: Please enter a valid Max Weight.`);
+        return;
+      }
+      if (s.rate === '' || isNaN(Number(s.rate)) || Number(s.rate) < 0) {
+        showNotification('error', `Slab #${i + 1}: Please enter a valid Delivery Fee.`);
+        return;
+      }
+    }
+
+    const calculatedSlabs = slabs.map(editableToSlab);
+    const firstRate = calculatedSlabs[0]?.rate || 50;
 
     const payload = {
       ...formData,
+      base_rate: Number(formData.base_rate) || firstRate,
+      additional_rate: Number(formData.additional_rate) || 0,
+      free_shipping_threshold: Number(formData.free_shipping_threshold) || 0,
       weight_slabs_json: JSON.stringify(calculatedSlabs)
     };
 
@@ -647,25 +651,6 @@ export default function AdminShippingRates() {
               </p>
             </div>
 
-            {/* Quick Presets */}
-            <div className="mb-5 p-3.5 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-2">
-              <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">
-                Quick Region Presets:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {PRESETS.map((p, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => applyPreset(p)}
-                    className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-[#128C7E] border border-gray-200 hover:border-emerald-300 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-2xs"
-                  >
-                    {p.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-5">
               
               {/* Zone Name */}
@@ -721,13 +706,13 @@ export default function AdminShippingRates() {
                       <span>Manual Weight Slabs (Grams & Kilograms ➡️ Delivery Price)</span>
                     </h4>
                     <p className="text-[10.5px] text-gray-500 mt-0.5">
-                      You can enter weights in <b>grams (g)</b> or <b>Kilograms (Kg)</b>!
+                      Enter your custom weight range and delivery fee manually.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddSlab}
-                    className="px-3 py-1 bg-[#128C7E] hover:bg-[#075E54] text-white rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer shadow-xs transition-all"
+                    className="px-3.5 py-1.5 bg-[#128C7E] hover:bg-[#075E54] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Slab</span>
@@ -744,6 +729,8 @@ export default function AdminShippingRates() {
 
                   {(formData.editable_slabs || []).map((slab, idx) => {
                     const parsed = editableToSlab(slab);
+                    const canDelete = (formData.editable_slabs || []).length > 1;
+
                     return (
                       <div key={idx} className="bg-white p-2.5 rounded-xl border border-gray-200/80 shadow-2xs space-y-1.5">
                         <div className="grid grid-cols-12 gap-2 items-center">
@@ -755,6 +742,7 @@ export default function AdminShippingRates() {
                                 type="number"
                                 min="0"
                                 step="any"
+                                placeholder="0"
                                 value={slab.minVal}
                                 onChange={(e) => handleUpdateSlab(idx, 'minVal', e.target.value)}
                                 className="w-full px-2 py-1.5 bg-gray-50 text-xs font-mono font-bold text-gray-900 outline-none"
@@ -777,6 +765,7 @@ export default function AdminShippingRates() {
                                 type="number"
                                 min="0"
                                 step="any"
+                                placeholder="e.g. 500"
                                 value={slab.maxVal}
                                 onChange={(e) => handleUpdateSlab(idx, 'maxVal', e.target.value)}
                                 className="w-full px-2 py-1.5 bg-gray-50 text-xs font-mono font-bold text-gray-900 outline-none"
@@ -800,6 +789,7 @@ export default function AdminShippingRates() {
                                 type="number"
                                 min="0"
                                 step="any"
+                                placeholder="Fee"
                                 value={slab.rate}
                                 onChange={(e) => handleUpdateSlab(idx, 'rate', e.target.value)}
                                 className="w-full pl-6 pr-2 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-mono font-black text-[#128C7E] outline-none focus:border-[#075E54]"
@@ -812,8 +802,13 @@ export default function AdminShippingRates() {
                             <button
                               type="button"
                               onClick={() => handleRemoveSlab(idx)}
-                              className="p-1 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
-                              title="Delete slab"
+                              disabled={!canDelete}
+                              className={`p-1 rounded-md transition-colors ${
+                                !canDelete 
+                                  ? 'text-gray-300 cursor-not-allowed' 
+                                  : 'text-gray-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer'
+                              }`}
+                              title={!canDelete ? "At least one slab is required" : "Delete slab"}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -824,25 +819,21 @@ export default function AdminShippingRates() {
                         {/* Readable Preview pill */}
                         <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5 px-1 border-t border-gray-100">
                           <span className="font-medium">
-                            Range: <b className="text-gray-800">{formatWeight(parsed.minWeightGrams)}</b> to <b className="text-gray-800">{formatWeight(parsed.maxWeightGrams)}</b>
+                            {slab.maxVal !== '' ? (
+                              <>
+                                Range: <b className="text-gray-800">{formatWeight(parsed.minWeightGrams)}</b> to <b className="text-gray-800">{formatWeight(parsed.maxWeightGrams)}</b>
+                              </>
+                            ) : (
+                              <span className="text-amber-600 font-medium italic">Enter max weight & fee</span>
+                            )}
                           </span>
                           <span className="text-emerald-700 font-bold font-mono">
-                            Fee: ₹{parsed.rate}
+                            {slab.rate !== '' ? `Fee: ₹${slab.rate}` : <span className="text-gray-400">₹—</span>}
                           </span>
                         </div>
                       </div>
                     );
                   })}
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, editable_slabs: STANDARD_SLABS_TN.map(slabToEditable) }))}
-                    className="text-[10px] text-[#128C7E] hover:underline font-bold cursor-pointer"
-                  >
-                    ⚡ Reset to Standard Slabs (250g, 500g, 1 Kg, 2 Kg, 3 Kg)
-                  </button>
                 </div>
               </div>
 
