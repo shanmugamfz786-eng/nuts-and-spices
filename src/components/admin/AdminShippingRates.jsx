@@ -84,6 +84,31 @@ const PRESETS = [
   }
 ];
 
+function slabToEditable(s) {
+  const minG = Number(s.minWeightGrams) || 0;
+  const maxG = Number(s.maxWeightGrams) || 0;
+  const minIsKg = minG >= 1000 && minG % 1000 === 0;
+  const maxIsKg = maxG >= 1000 && maxG % 1000 === 0;
+
+  return {
+    minVal: minIsKg ? (minG / 1000) : minG,
+    minUnit: minIsKg ? 'kg' : 'g',
+    maxVal: maxIsKg ? (maxG / 1000) : maxG,
+    maxUnit: maxIsKg ? 'kg' : 'g',
+    rate: Number(s.rate) || 0
+  };
+}
+
+function editableToSlab(e) {
+  const minG = e.minUnit === 'kg' ? Math.round(Number(e.minVal) * 1000) : Math.round(Number(e.minVal));
+  const maxG = e.maxUnit === 'kg' ? Math.round(Number(e.maxVal) * 1000) : Math.round(Number(e.maxVal));
+  return {
+    minWeightGrams: Math.max(0, minG),
+    maxWeightGrams: Math.max(1, maxG),
+    rate: Math.max(0, Number(e.rate) || 0)
+  };
+}
+
 export default function AdminShippingRates() {
   const { refreshShippingRates } = useCart();
   const [rates, setRates] = useState([]);
@@ -94,7 +119,8 @@ export default function AdminShippingRates() {
 
   // Live Simulator state
   const [simPincode, setSimPincode] = useState('600001');
-  const [simWeightGrams, setSimWeightGrams] = useState(250);
+  const [simWeightVal, setSimWeightVal] = useState('250');
+  const [simWeightUnit, setSimWeightUnit] = useState('g'); // 'g' or 'kg'
 
   const [formData, setFormData] = useState({
     zone_name: '',
@@ -106,7 +132,7 @@ export default function AdminShippingRates() {
     additional_rate: 30,
     free_shipping_threshold: 0,
     is_active: 1,
-    weight_slabs: [...STANDARD_SLABS_TN]
+    editable_slabs: STANDARD_SLABS_TN.map(slabToEditable)
   });
 
   const loadRates = async () => {
@@ -144,7 +170,7 @@ export default function AdminShippingRates() {
       additional_rate: 30,
       free_shipping_threshold: 0,
       is_active: 1,
-      weight_slabs: [...STANDARD_SLABS_TN]
+      editable_slabs: STANDARD_SLABS_TN.map(slabToEditable)
     });
     setIsModalOpen(true);
   };
@@ -152,6 +178,8 @@ export default function AdminShippingRates() {
   const handleOpenEdit = (rate) => {
     setEditingId(rate.id);
     const existingSlabs = parseWeightSlabs(rate.weight_slabs_json || rate.weightSlabs);
+    const sourceSlabs = existingSlabs.length > 0 ? existingSlabs : STANDARD_SLABS_TN;
+
     setFormData({
       zone_name: rate.zone_name,
       pincode_from: rate.pincode_from,
@@ -162,12 +190,13 @@ export default function AdminShippingRates() {
       additional_rate: Number(rate.additional_rate),
       free_shipping_threshold: Number(rate.free_shipping_threshold) || 0,
       is_active: rate.is_active ? 1 : 0,
-      weight_slabs: existingSlabs.length > 0 ? existingSlabs : [...STANDARD_SLABS_TN]
+      editable_slabs: sourceSlabs.map(slabToEditable)
     });
     setIsModalOpen(true);
   };
 
   const applyPreset = (preset) => {
+    const slabs = preset.slabs || STANDARD_SLABS_TN;
     setFormData(prev => ({
       ...prev,
       zone_name: preset.name,
@@ -176,22 +205,44 @@ export default function AdminShippingRates() {
       base_rate: preset.baseRate,
       additional_rate: preset.addRate,
       free_shipping_threshold: preset.freeAbove,
-      weight_slabs: preset.slabs ? [...preset.slabs] : [...STANDARD_SLABS_TN]
+      editable_slabs: slabs.map(slabToEditable)
     }));
   };
 
   const handleAddSlab = () => {
     setFormData(prev => {
-      const current = prev.weight_slabs || [];
+      const current = prev.editable_slabs || [];
       const last = current[current.length - 1];
-      const nextMin = last ? Number(last.maxWeightGrams) + 1 : 0;
-      const nextMax = last ? Number(last.maxWeightGrams) + 1000 : 500;
-      const nextRate = last ? Number(last.rate) + 30 : 50;
+      let nextMinVal = 0;
+      let nextMinUnit = 'g';
+      let nextMaxVal = 500;
+      let nextMaxUnit = 'g';
+      let nextRate = 50;
+
+      if (last) {
+        const lastSlab = editableToSlab(last);
+        const lastMaxG = lastSlab.maxWeightGrams;
+        nextRate = Number(last.rate) + 30;
+
+        if (lastMaxG >= 1000) {
+          nextMinVal = Number(lastMaxG / 1000);
+          nextMinUnit = 'kg';
+          nextMaxVal = Number((lastMaxG / 1000) + 1);
+          nextMaxUnit = 'kg';
+        } else {
+          nextMinVal = lastMaxG + 1;
+          nextMinUnit = 'g';
+          nextMaxVal = lastMaxG + 500;
+          nextMaxUnit = nextMaxVal >= 1000 ? 'kg' : 'g';
+          if (nextMaxVal >= 1000) nextMaxVal = nextMaxVal / 1000;
+        }
+      }
+
       return {
         ...prev,
-        weight_slabs: [
+        editable_slabs: [
           ...current,
-          { minWeightGrams: nextMin, maxWeightGrams: nextMax, rate: nextRate }
+          { minVal: nextMinVal, minUnit: nextMinUnit, maxVal: nextMaxVal, maxUnit: nextMaxUnit, rate: nextRate }
         ]
       };
     });
@@ -199,19 +250,19 @@ export default function AdminShippingRates() {
 
   const handleUpdateSlab = (index, field, value) => {
     setFormData(prev => {
-      const updated = [...prev.weight_slabs];
+      const updated = [...prev.editable_slabs];
       updated[index] = {
         ...updated[index],
-        [field]: Number(value) || 0
+        [field]: value
       };
-      return { ...prev, weight_slabs: updated };
+      return { ...prev, editable_slabs: updated };
     });
   };
 
   const handleRemoveSlab = (index) => {
     setFormData(prev => {
-      const updated = prev.weight_slabs.filter((_, i) => i !== index);
-      return { ...prev, weight_slabs: updated };
+      const updated = prev.editable_slabs.filter((_, i) => i !== index);
+      return { ...prev, editable_slabs: updated };
     });
   };
 
@@ -222,9 +273,11 @@ export default function AdminShippingRates() {
       return;
     }
 
+    const calculatedSlabs = (formData.editable_slabs || []).map(editableToSlab);
+
     const payload = {
       ...formData,
-      weight_slabs_json: JSON.stringify(formData.weight_slabs || [])
+      weight_slabs_json: JSON.stringify(calculatedSlabs)
     };
 
     try {
@@ -282,6 +335,11 @@ export default function AdminShippingRates() {
       console.error(err);
     }
   };
+
+  // Convert simulator weight to grams
+  const simWeightGrams = simWeightUnit === 'kg' 
+    ? Math.round(Number(simWeightVal || 0) * 1000) 
+    : Math.round(Number(simWeightVal || 0));
 
   // Find simulation match
   const matchedSimRule = (() => {
@@ -341,7 +399,7 @@ export default function AdminShippingRates() {
                 Weight & Pincode Delivery Charges
               </h2>
               <p className="text-xs text-[#8C7A6B] mt-0.5">
-                Set manual weight slabs (e.g. 0-250g, 250-500g, 500g-1kg, 1-2kg) with exact delivery charges per zone.
+                Set manual weight slabs in <b>Grams (g)</b> or <b>Kilograms (Kg)</b> with exact delivery charges per zone.
               </p>
             </div>
           </div>
@@ -379,26 +437,29 @@ export default function AdminShippingRates() {
               </span>
             </div>
             <h3 className="text-lg font-black font-serif mt-1">
-              Test Any Pincode & Weight Combo
+              Test Any Pincode & Weight Combo (Grams / Kg)
             </h3>
           </div>
 
           {/* Quick Weight Selectors */}
           <div className="flex flex-wrap items-center gap-1.5">
             {[
-              { label: '250 g', g: 250 },
-              { label: '500 g', g: 500 },
-              { label: '1 Kg', g: 1000 },
-              { label: '1.5 Kg', g: 1500 },
-              { label: '2 Kg', g: 2000 },
-              { label: '3 Kg', g: 3000 }
-            ].map(w => (
+              { label: '250 g', val: '250', unit: 'g' },
+              { label: '500 g', val: '500', unit: 'g' },
+              { label: '1 Kg', val: '1', unit: 'kg' },
+              { label: '1.5 Kg', val: '1.5', unit: 'kg' },
+              { label: '2 Kg', val: '2', unit: 'kg' },
+              { label: '3 Kg', val: '3', unit: 'kg' }
+            ].map((w, idx) => (
               <button
-                key={w.g}
+                key={idx}
                 type="button"
-                onClick={() => setSimWeightGrams(w.g)}
+                onClick={() => {
+                  setSimWeightVal(w.val);
+                  setSimWeightUnit(w.unit);
+                }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  simWeightGrams === w.g 
+                  simWeightVal === w.val && simWeightUnit === w.unit
                     ? 'bg-white text-[#075E54] shadow-md scale-105' 
                     : 'bg-white/10 hover:bg-white/20 text-white'
                 }`}
@@ -428,33 +489,43 @@ export default function AdminShippingRates() {
             </div>
           </div>
 
-          {/* Package Weight Input */}
+          {/* Package Weight Input with Unit Selector (g / kg) */}
           <div className="space-y-1">
             <label className="text-[11px] font-bold uppercase text-emerald-200">
-              Package Weight (Grams):
+              Package Weight:
             </label>
-            <div className="relative">
-              <Scale className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="number"
-                min="50"
-                step="50"
-                value={simWeightGrams}
-                onChange={(e) => setSimWeightGrams(Math.max(1, Number(e.target.value) || 0))}
-                className="w-full pl-9 pr-3 py-2 bg-white text-gray-900 rounded-xl font-mono font-bold text-xs outline-none shadow-inner"
-              />
+            <div className="relative flex">
+              <div className="relative flex-1">
+                <Scale className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="number"
+                  min="0.1"
+                  step={simWeightUnit === 'kg' ? '0.1' : '50'}
+                  value={simWeightVal}
+                  onChange={(e) => setSimWeightVal(e.target.value)}
+                  className="w-full pl-9 pr-2 py-2 bg-white text-gray-900 rounded-l-xl font-mono font-bold text-xs outline-none shadow-inner"
+                />
+              </div>
+              <select
+                value={simWeightUnit}
+                onChange={(e) => setSimWeightUnit(e.target.value)}
+                className="bg-emerald-100 text-emerald-950 font-bold font-mono text-xs px-3 rounded-r-xl outline-none cursor-pointer border-l border-emerald-200"
+              >
+                <option value="g">grams (g)</option>
+                <option value="kg">Kilograms (Kg)</option>
+              </select>
             </div>
           </div>
 
           {/* Result Calculation Pill */}
           <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/20 flex items-center justify-between">
             <div>
-              <span className="text-[10px] uppercase font-bold text-emerald-200 block">
+              <span className="text-[10px] uppercase font-bold text-emerald-200 block truncate max-w-[150px]">
                 {matchedSimRule ? matchedSimRule.zone_name : 'Default Rule'}
               </span>
               <span className="text-xs text-white/80 font-mono">
                 {matchedSimSlab 
-                  ? `Slab: ${formatWeight(matchedSimSlab.minWeightGrams)} - ${formatWeight(matchedSimSlab.maxWeightGrams)}` 
+                  ? `Slab: ${formatWeight(matchedSimSlab.minWeightGrams)} – ${formatWeight(matchedSimSlab.maxWeightGrams)}` 
                   : `${formatWeight(simWeightGrams)}`}
               </span>
             </div>
@@ -475,7 +546,7 @@ export default function AdminShippingRates() {
             Active Delivery Zones & Manual Weight Slabs ({rates.length})
           </span>
           <span className="text-[11px] text-gray-500 font-medium">
-            Direct weight-tier pricing with zero guesswork
+            Configured in Grams & Kilograms with exact rates
           </span>
         </div>
 
@@ -494,7 +565,7 @@ export default function AdminShippingRates() {
                 <tr>
                   <th className="py-3.5 px-6">Zone / Region Name</th>
                   <th className="py-3.5 px-6">Pincode Coverage</th>
-                  <th className="py-3.5 px-6">Manual Weight Slabs & Prices</th>
+                  <th className="py-3.5 px-6">Manual Weight Slabs (g & Kg)</th>
                   <th className="py-3.5 px-6">Extra Above Max Slab</th>
                   <th className="py-3.5 px-6">Free Delivery Above</th>
                   <th className="py-3.5 px-6 text-center">Status</th>
@@ -540,10 +611,10 @@ export default function AdminShippingRates() {
                             {slabs.map((s, idx) => (
                               <span 
                                 key={idx}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-900 border border-emerald-200/80 rounded-lg text-[11px] font-mono"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-900 border border-emerald-200/80 rounded-lg text-[11px] font-mono shadow-2xs"
                               >
                                 <span className="text-gray-500 font-sans font-medium">
-                                  {formatWeight(s.minWeightGrams)}–{formatWeight(s.maxWeightGrams)}:
+                                  {formatWeight(s.minWeightGrams)} – {formatWeight(s.maxWeightGrams)}:
                                 </span>
                                 <span className="font-black text-[#128C7E]">
                                   ₹{s.rate}
@@ -642,7 +713,7 @@ export default function AdminShippingRates() {
                 <span>{editingId ? 'Edit Delivery Zone & Weight Slabs' : 'New Delivery Zone & Weight Slabs'}</span>
               </h3>
               <p className="text-xs text-[#8C7A6B] mt-0.5">
-                Set manual weight ranges (grams) and exact courier charges for this destination zone.
+                Set manual weight ranges in <b>Grams (g)</b> or <b>Kilograms (Kg)</b> with exact courier charges.
               </p>
             </div>
 
@@ -711,16 +782,16 @@ export default function AdminShippingRates() {
                 </div>
               </div>
 
-              {/* Manual Weight Slabs Section */}
+              {/* Manual Weight Slabs Section (Supports both g and kg) */}
               <div className="p-4 bg-emerald-50/40 border border-emerald-200/80 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-xs font-extrabold uppercase text-emerald-950 flex items-center gap-1.5">
                       <Layers className="w-4 h-4 text-[#128C7E]" />
-                      <span>Manual Weight Slabs (Custom Grams ➡️ Price)</span>
+                      <span>Manual Weight Slabs (Grams & Kilograms ➡️ Delivery Price)</span>
                     </h4>
                     <p className="text-[10.5px] text-gray-500 mt-0.5">
-                      Client can set exact prices for 250g, 500g, 1kg, 2kg etc.
+                      You can enter weights in <b>grams (g)</b> or <b>Kilograms (Kg)</b>!
                     </p>
                   </div>
                   <button
@@ -733,87 +804,114 @@ export default function AdminShippingRates() {
                   </button>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="grid grid-cols-12 gap-2 text-[10px] font-black uppercase text-gray-500 px-1">
-                    <span className="col-span-4">Min Weight (g)</span>
-                    <span className="col-span-4">Max Weight (g)</span>
+                    <span className="col-span-4">From (Min Weight)</span>
+                    <span className="col-span-4">To (Max Weight)</span>
                     <span className="col-span-3">Delivery Fee (₹)</span>
                     <span className="col-span-1 text-center">Del</span>
                   </div>
 
-                  {(formData.weight_slabs || []).map((slab, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-white p-2 rounded-xl border border-gray-200/80 shadow-2xs">
-                      
-                      {/* Min Weight */}
-                      <div className="col-span-4">
-                        <div className="relative">
-                          <input
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={slab.minWeightGrams}
-                            onChange={(e) => handleUpdateSlab(idx, 'minWeightGrams', e.target.value)}
-                            className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono font-bold text-gray-900 outline-none focus:border-[#128C7E]"
-                          />
-                          <span className="text-[9px] text-gray-400 absolute right-2 top-1/2 -translate-y-1/2">g</span>
-                        </div>
-                      </div>
+                  {(formData.editable_slabs || []).map((slab, idx) => {
+                    const parsed = editableToSlab(slab);
+                    return (
+                      <div key={idx} className="bg-white p-2.5 rounded-xl border border-gray-200/80 shadow-2xs space-y-1.5">
+                        <div className="grid grid-cols-12 gap-2 items-center">
+                          
+                          {/* Min Weight Input + Unit Select */}
+                          <div className="col-span-4">
+                            <div className="flex rounded-lg overflow-hidden border border-gray-200 focus-within:border-[#128C7E]">
+                              <input
+                                type="number"
+                                min="0"
+                                step={slab.minUnit === 'kg' ? '0.1' : '1'}
+                                value={slab.minVal}
+                                onChange={(e) => handleUpdateSlab(idx, 'minVal', e.target.value)}
+                                className="w-full px-2 py-1.5 bg-gray-50 text-xs font-mono font-bold text-gray-900 outline-none"
+                              />
+                              <select
+                                value={slab.minUnit}
+                                onChange={(e) => handleUpdateSlab(idx, 'minUnit', e.target.value)}
+                                className="bg-gray-100 text-gray-700 text-[11px] font-bold px-1.5 outline-none cursor-pointer border-l border-gray-200"
+                              >
+                                <option value="g">g</option>
+                                <option value="kg">Kg</option>
+                              </select>
+                            </div>
+                          </div>
 
-                      {/* Max Weight */}
-                      <div className="col-span-4">
-                        <div className="relative">
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            value={slab.maxWeightGrams}
-                            onChange={(e) => handleUpdateSlab(idx, 'maxWeightGrams', e.target.value)}
-                            className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono font-bold text-gray-900 outline-none focus:border-[#128C7E]"
-                          />
-                          <span className="text-[9px] text-gray-400 absolute right-2 top-1/2 -translate-y-1/2">
-                            {slab.maxWeightGrams >= 1000 ? `${(slab.maxWeightGrams / 1000).toFixed(1)}kg` : 'g'}
+                          {/* Max Weight Input + Unit Select */}
+                          <div className="col-span-4">
+                            <div className="flex rounded-lg overflow-hidden border border-gray-200 focus-within:border-[#128C7E]">
+                              <input
+                                type="number"
+                                min="0.1"
+                                step={slab.maxUnit === 'kg' ? '0.1' : '1'}
+                                value={slab.maxVal}
+                                onChange={(e) => handleUpdateSlab(idx, 'maxVal', e.target.value)}
+                                className="w-full px-2 py-1.5 bg-gray-50 text-xs font-mono font-bold text-gray-900 outline-none"
+                              />
+                              <select
+                                value={slab.maxUnit}
+                                onChange={(e) => handleUpdateSlab(idx, 'maxUnit', e.target.value)}
+                                className="bg-gray-100 text-gray-700 text-[11px] font-bold px-1.5 outline-none cursor-pointer border-l border-gray-200"
+                              >
+                                <option value="g">g</option>
+                                <option value="kg">Kg</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Delivery Rate */}
+                          <div className="col-span-3">
+                            <div className="relative">
+                              <span className="text-xs text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 font-bold">₹</span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={slab.rate}
+                                onChange={(e) => handleUpdateSlab(idx, 'rate', e.target.value)}
+                                className="w-full pl-6 pr-2 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-mono font-black text-[#128C7E] outline-none focus:border-[#075E54]"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Delete Slab */}
+                          <div className="col-span-1 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSlab(idx)}
+                              className="p-1 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                              title="Delete slab"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                        </div>
+
+                        {/* Readable Preview pill */}
+                        <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5 px-1 border-t border-gray-100">
+                          <span className="font-medium">
+                            Range: <b className="text-gray-800">{formatWeight(parsed.minWeightGrams)}</b> to <b className="text-gray-800">{formatWeight(parsed.maxWeightGrams)}</b>
+                          </span>
+                          <span className="text-emerald-700 font-bold font-mono">
+                            Fee: ₹{parsed.rate}
                           </span>
                         </div>
                       </div>
-
-                      {/* Delivery Rate */}
-                      <div className="col-span-3">
-                        <div className="relative">
-                          <span className="text-xs text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 font-bold">₹</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={slab.rate}
-                            onChange={(e) => handleUpdateSlab(idx, 'rate', e.target.value)}
-                            className="w-full pl-6 pr-2 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-mono font-black text-[#128C7E] outline-none focus:border-[#075E54]"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Delete Slab */}
-                      <div className="col-span-1 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSlab(idx)}
-                          className="p-1 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
-                          title="Delete slab"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, weight_slabs: [...STANDARD_SLABS_TN] }))}
+                    onClick={() => setFormData(prev => ({ ...prev, editable_slabs: STANDARD_SLABS_TN.map(slabToEditable) }))}
                     className="text-[10px] text-[#128C7E] hover:underline font-bold cursor-pointer"
                   >
-                    ⚡ Reset to Standard Slabs (250g, 500g, 1kg, 2kg, 3kg)
+                    ⚡ Reset to Standard Slabs (250g, 500g, 1 Kg, 2 Kg, 3 Kg)
                   </button>
                 </div>
               </div>
