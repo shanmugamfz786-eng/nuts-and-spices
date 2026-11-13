@@ -8,7 +8,7 @@ import { login as loginAuthApi, register as registerAuthApi } from '../api/authA
 import { updateOrderStatusApi, deleteOrderApi } from '../api/orderApi.js';
 import { fetchPincodePrices, updateUserPincodeApi } from '../api/pincodePricingApi.js';
 import { fetchPublicShippingRates } from '../api/shippingRatesApi.js';
-import { calculateCartWeightGrams, parseWeightInGrams, formatWeight } from '../utils/weight.js';
+import { calculateCartWeightGrams, parseWeightInGrams, formatWeight, calculateDeliveryFeeFromRule } from '../utils/weight.js';
 import { 
   INITIAL_STORE_SETTINGS, 
   INITIAL_ORDERS, 
@@ -1298,21 +1298,11 @@ export const CartProvider = ({ children }) => {
   const deliveryCharge = useMemo(() => {
     if (cart.length === 0 || effectiveSubtotal === 0) return 0;
     if (matchedShippingRule) {
-      const freeThreshold = Number(matchedShippingRule.free_shipping_threshold) || 0;
-      if (freeThreshold > 0 && effectiveSubtotal >= freeThreshold) {
-        return 0; // Free delivery
-      }
-      const baseWeight = Number(matchedShippingRule.base_weight_grams) || 1000;
-      const baseRate = Number(matchedShippingRule.base_rate) || 0;
-      const additionalWeight = Number(matchedShippingRule.additional_weight_grams) || 1000;
-      const additionalRate = Number(matchedShippingRule.additional_rate) || 0;
-
-      if (totalCartWeightGrams <= baseWeight) {
-        return baseRate;
-      }
-      const extraWeight = totalCartWeightGrams - baseWeight;
-      const extraSlabs = Math.ceil(extraWeight / additionalWeight);
-      return baseRate + (extraSlabs * additionalRate);
+      return calculateDeliveryFeeFromRule({
+        weightGrams: totalCartWeightGrams,
+        subtotal: effectiveSubtotal,
+        rule: matchedShippingRule
+      });
     }
     return flatDeliveryFee;
   }, [cart.length, effectiveSubtotal, matchedShippingRule, totalCartWeightGrams, flatDeliveryFee]);

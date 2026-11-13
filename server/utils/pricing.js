@@ -279,7 +279,25 @@ export function matchShippingDeliveryRule(pincode, rulesList) {
 }
 
 /**
+ * Parse weight slabs JSON safely into an array of objects.
+ */
+export function parseWeightSlabs(slabsField) {
+  if (!slabsField) return [];
+  if (Array.isArray(slabsField)) return slabsField;
+  if (typeof slabsField === 'string') {
+    try {
+      const parsed = JSON.parse(slabsField);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+/**
  * Calculate delivery fee based on total weight (grams), subtotal, and matching shipping rule.
+ * Supports explicit manual weight slabs (e.g. 0-250g, 251-500g, 501-1000g) with fallback to base/extra rate.
  */
 export function calculateDeliveryFeeByWeight({ weightGrams, subtotal, rule }) {
   if (!rule) {
@@ -291,6 +309,45 @@ export function calculateDeliveryFeeByWeight({ weightGrams, subtotal, rule }) {
     return 0; // Free delivery
   }
 
+  const slabs = parseWeightSlabs(rule.weight_slabs_json || rule.weightSlabs);
+  if (slabs.length > 0) {
+    // Sort slabs by minWeightGrams ascending
+    const sortedSlabs = [...slabs]
+      .filter(s => s && !isNaN(Number(s.rate)))
+      .sort((a, b) => (Number(a.minWeightGrams) || 0) - (Number(b.minWeightGrams) || 0));
+
+    if (sortedSlabs.length > 0) {
+      // 1. Direct slab match
+      for (const slab of sortedSlabs) {
+        const minW = Number(slab.minWeightGrams) || 0;
+        const maxW = Number(slab.maxWeightGrams) || 0;
+        const rate = Number(slab.rate) || 0;
+        if (weightGrams >= minW && weightGrams <= maxW) {
+          return rate;
+        }
+      }
+
+      // 2. If weight is below the lowest slab's minimum
+      const firstSlab = sortedSlabs[0];
+      if (weightGrams < (Number(firstSlab.minWeightGrams) || 0)) {
+        return Number(firstSlab.rate) || 0;
+      }
+
+      // 3. If weight exceeds the highest slab's maximum:
+      // Take the highest slab rate + additional rate per extra additional_weight_grams
+      const lastSlab = sortedSlabs[sortedSlabs.length - 1];
+      const highestMax = Number(lastSlab.maxWeightGrams) || 1000;
+      const highestRate = Number(lastSlab.rate) || 0;
+      const additionalWeight = Number(rule.additional_weight_grams) || 1000;
+      const additionalRate = Number(rule.additional_rate) || 30;
+
+      const extraWeight = weightGrams - highestMax;
+      const extraSlabs = Math.ceil(extraWeight / additionalWeight);
+      return highestRate + (extraSlabs * additionalRate);
+    }
+  }
+
+  // Fallback to base/extra formula if no custom slabs
   const baseWeight = Number(rule.base_weight_grams) || 1000;
   const baseRate = Number(rule.base_rate) || 0;
   const additionalWeight = Number(rule.additional_weight_grams) || 1000;

@@ -115,6 +115,7 @@ export async function initializeDatabase() {
       additional_rate DECIMAL(10,2) NOT NULL DEFAULT 30.00,
       free_shipping_threshold DECIMAL(10,2) DEFAULT 0.00,
       is_active TINYINT(1) DEFAULT 1,
+      weight_slabs_json TEXT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX idx_shipping_pincode (pincode_from, pincode_to)
@@ -168,7 +169,14 @@ export async function initializeDatabase() {
       additional_weight_grams: 1000,
       additional_rate: 30.00,
       free_shipping_threshold: 0.00,
-      is_active: 1
+      is_active: 1,
+      weight_slabs_json: JSON.stringify([
+        { minWeightGrams: 0, maxWeightGrams: 250, rate: 35 },
+        { minWeightGrams: 251, maxWeightGrams: 500, rate: 45 },
+        { minWeightGrams: 501, maxWeightGrams: 1000, rate: 50 },
+        { minWeightGrams: 1001, maxWeightGrams: 2000, rate: 80 },
+        { minWeightGrams: 2001, maxWeightGrams: 3000, rate: 110 }
+      ])
     },
     {
       id: 'ship_kl',
@@ -180,7 +188,14 @@ export async function initializeDatabase() {
       additional_weight_grams: 1000,
       additional_rate: 40.00,
       free_shipping_threshold: 0.00,
-      is_active: 1
+      is_active: 1,
+      weight_slabs_json: JSON.stringify([
+        { minWeightGrams: 0, maxWeightGrams: 250, rate: 45 },
+        { minWeightGrams: 251, maxWeightGrams: 500, rate: 55 },
+        { minWeightGrams: 501, maxWeightGrams: 1000, rate: 70 },
+        { minWeightGrams: 1001, maxWeightGrams: 2000, rate: 110 },
+        { minWeightGrams: 2001, maxWeightGrams: 3000, rate: 150 }
+      ])
     },
     {
       id: 'ship_ka',
@@ -192,7 +207,14 @@ export async function initializeDatabase() {
       additional_weight_grams: 1000,
       additional_rate: 40.00,
       free_shipping_threshold: 0.00,
-      is_active: 1
+      is_active: 1,
+      weight_slabs_json: JSON.stringify([
+        { minWeightGrams: 0, maxWeightGrams: 250, rate: 45 },
+        { minWeightGrams: 251, maxWeightGrams: 500, rate: 55 },
+        { minWeightGrams: 501, maxWeightGrams: 1000, rate: 70 },
+        { minWeightGrams: 1001, maxWeightGrams: 2000, rate: 110 },
+        { minWeightGrams: 2001, maxWeightGrams: 3000, rate: 150 }
+      ])
     },
     {
       id: 'ship_ap_tg',
@@ -204,7 +226,14 @@ export async function initializeDatabase() {
       additional_weight_grams: 1000,
       additional_rate: 40.00,
       free_shipping_threshold: 0.00,
-      is_active: 1
+      is_active: 1,
+      weight_slabs_json: JSON.stringify([
+        { minWeightGrams: 0, maxWeightGrams: 250, rate: 45 },
+        { minWeightGrams: 251, maxWeightGrams: 500, rate: 55 },
+        { minWeightGrams: 501, maxWeightGrams: 1000, rate: 70 },
+        { minWeightGrams: 1001, maxWeightGrams: 2000, rate: 110 },
+        { minWeightGrams: 2001, maxWeightGrams: 3000, rate: 150 }
+      ])
     },
     {
       id: 'ship_default',
@@ -216,7 +245,14 @@ export async function initializeDatabase() {
       additional_weight_grams: 1000,
       additional_rate: 50.00,
       free_shipping_threshold: 0.00,
-      is_active: 1
+      is_active: 1,
+      weight_slabs_json: JSON.stringify([
+        { minWeightGrams: 0, maxWeightGrams: 250, rate: 55 },
+        { minWeightGrams: 251, maxWeightGrams: 500, rate: 65 },
+        { minWeightGrams: 501, maxWeightGrams: 1000, rate: 80 },
+        { minWeightGrams: 1001, maxWeightGrams: 2000, rate: 130 },
+        { minWeightGrams: 2001, maxWeightGrams: 3000, rate: 180 }
+      ])
     }
   ];
   memoryStore.orders = process.env.NODE_ENV !== 'production' ? [
@@ -309,6 +345,21 @@ export async function initializeDatabase() {
       console.warn("Notice on pincode_pricing adjustment_type migration:", migrationErr.message);
     }
 
+    // Safe idempotent migration for shipping_delivery_rates weight_slabs_json column
+    try {
+      const [slabCols] = await pool.query(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'shipping_delivery_rates' AND COLUMN_NAME = 'weight_slabs_json'"
+      );
+      if (!slabCols || slabCols.length === 0) {
+        await pool.query(
+          "ALTER TABLE shipping_delivery_rates ADD COLUMN weight_slabs_json TEXT NULL"
+        );
+        console.log("🛠️ Migrated shipping_delivery_rates table: added weight_slabs_json column.");
+      }
+    } catch (migrationErr) {
+      console.warn("Notice on shipping_delivery_rates weight_slabs_json migration:", migrationErr.message);
+    }
+
     console.log('✅ TiDB / MySQL database tables created successfully!');
 
     // Seed Admin User in MySQL/TiDB
@@ -358,9 +409,11 @@ export async function initializeDatabase() {
     // Seed default shipping delivery rates if empty
     for (const rate of memoryStore.shipping_delivery_rates) {
       await pool.query(
-        `INSERT IGNORE INTO shipping_delivery_rates 
-        (id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO shipping_delivery_rates 
+        (id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active, weight_slabs_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+          weight_slabs_json = COALESCE(shipping_delivery_rates.weight_slabs_json, VALUES(weight_slabs_json))`,
         [
           rate.id,
           rate.zone_name,
@@ -371,7 +424,8 @@ export async function initializeDatabase() {
           rate.additional_weight_grams,
           rate.additional_rate,
           rate.free_shipping_threshold,
-          rate.is_active
+          rate.is_active,
+          rate.weight_slabs_json || null
         ]
       );
     }

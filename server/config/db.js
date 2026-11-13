@@ -295,7 +295,7 @@ function processMemoryQuery(sql, params) {
 
     if (queryLower.includes('shipping_delivery_rates')) {
       if (!memoryStore.shipping_delivery_rates) memoryStore.shipping_delivery_rates = [];
-      const [id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active] = params;
+      const [id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active, weight_slabs_json] = params;
       const newRate = {
         id,
         zone_name,
@@ -307,6 +307,7 @@ function processMemoryQuery(sql, params) {
         additional_rate: Number(additional_rate) || 30,
         free_shipping_threshold: Number(free_shipping_threshold) || 0,
         is_active: is_active !== undefined ? Number(is_active) : 1,
+        weight_slabs_json: weight_slabs_json || null,
         created_at: new Date(),
         updated_at: new Date()
       };
@@ -411,7 +412,7 @@ function processMemoryQuery(sql, params) {
       const rate = memoryStore.shipping_delivery_rates.find(r => r.id === id);
       if (rate) {
         if (params.length >= 8) {
-          const [zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active] = params;
+          const [zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active, weight_slabs_json] = params;
           rate.zone_name = zone_name;
           rate.pincode_from = pincode_from;
           rate.pincode_to = pincode_to;
@@ -421,6 +422,7 @@ function processMemoryQuery(sql, params) {
           rate.additional_rate = Number(additional_rate) || 0;
           rate.free_shipping_threshold = Number(free_shipping_threshold) || 0;
           if (is_active !== undefined) rate.is_active = Number(is_active);
+          if (weight_slabs_json !== undefined) rate.weight_slabs_json = weight_slabs_json;
         } else if (queryLower.includes('is_active = ?')) {
           rate.is_active = Number(params[0]);
         }

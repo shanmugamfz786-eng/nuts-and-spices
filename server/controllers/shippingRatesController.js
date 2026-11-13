@@ -2,7 +2,8 @@ import { queryDb, memoryStore } from '../config/db.js';
 import { 
   calculateCartWeightGrams, 
   matchShippingDeliveryRule, 
-  calculateDeliveryFeeByWeight 
+  calculateDeliveryFeeByWeight,
+  parseWeightSlabs
 } from '../utils/pricing.js';
 import crypto from 'crypto';
 
@@ -71,6 +72,8 @@ export const calculateShippingFee = async (req, res) => {
     });
 
     const isFree = Number(matchedRule.free_shipping_threshold) > 0 && Number(subtotal) >= Number(matchedRule.free_shipping_threshold);
+    const slabs = parseWeightSlabs(matchedRule.weight_slabs_json || matchedRule.weightSlabs);
+    const matchedSlab = slabs.find(s => totalWeightGrams >= Number(s.minWeightGrams) && totalWeightGrams <= Number(s.maxWeightGrams)) || null;
 
     return res.json({
       success: true,
@@ -84,7 +87,8 @@ export const calculateShippingFee = async (req, res) => {
       additionalRate: Number(matchedRule.additional_rate),
       freeThreshold: Number(matchedRule.free_shipping_threshold),
       deliveryFee,
-      isFreeDelivery: isFree
+      isFreeDelivery: isFree,
+      matchedSlab
     });
   } catch (error) {
     console.error('calculateShippingFee error:', error);
@@ -121,35 +125,40 @@ export const createShippingRateAdmin = async (req, res) => {
       pincode_from,
       pincode_to,
       base_weight_grams = 1000,
-      base_rate,
+      base_rate = 50,
       additional_weight_grams = 1000,
-      additional_rate,
+      additional_rate = 30,
       free_shipping_threshold = 0,
-      is_active = 1
+      is_active = 1,
+      weight_slabs_json,
+      weightSlabs
     } = req.body;
 
-    if (!zone_name || !pincode_from || base_rate === undefined || additional_rate === undefined) {
+    if (!zone_name || !pincode_from) {
       return res.status(400).json({ 
         success: false, 
-        message: 'zone_name, pincode_from, base_rate, and additional_rate are required.' 
+        message: 'zone_name and pincode_from are required.' 
       });
     }
 
     const id = `ship_${crypto.randomBytes(4).toString('hex')}`;
     const cleanFrom = String(pincode_from).trim();
     const cleanTo = String(pincode_to || pincode_from).trim();
-    const bRate = Number(base_rate);
-    const addRate = Number(additional_rate);
+    const bRate = Number(base_rate) || 50;
+    const addRate = Number(additional_rate) || 30;
     const bWeight = Number(base_weight_grams) || 1000;
     const addWeight = Number(additional_weight_grams) || 1000;
     const freeThresh = Number(free_shipping_threshold) || 0;
     const activeVal = is_active ? 1 : 0;
+    const slabsString = typeof weight_slabs_json === 'string'
+      ? weight_slabs_json
+      : (Array.isArray(weightSlabs) ? JSON.stringify(weightSlabs) : (Array.isArray(weight_slabs_json) ? JSON.stringify(weight_slabs_json) : null));
 
     await queryDb(
       `INSERT INTO shipping_delivery_rates 
-      (id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, zone_name.trim(), cleanFrom, cleanTo, bWeight, bRate, addWeight, addRate, freeThresh, activeVal]
+      (id, zone_name, pincode_from, pincode_to, base_weight_grams, base_rate, additional_weight_grams, additional_rate, free_shipping_threshold, is_active, weight_slabs_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, zone_name.trim(), cleanFrom, cleanTo, bWeight, bRate, addWeight, addRate, freeThresh, activeVal, slabsString]
     );
 
     return res.status(201).json({
@@ -165,7 +174,8 @@ export const createShippingRateAdmin = async (req, res) => {
         additional_weight_grams: addWeight,
         additional_rate: addRate,
         free_shipping_threshold: freeThresh,
-        is_active: activeVal
+        is_active: activeVal,
+        weight_slabs_json: slabsString
       }
     });
   } catch (error) {
@@ -185,29 +195,34 @@ export const updateShippingRateAdmin = async (req, res) => {
       pincode_from,
       pincode_to,
       base_weight_grams = 1000,
-      base_rate,
+      base_rate = 50,
       additional_weight_grams = 1000,
-      additional_rate,
+      additional_rate = 30,
       free_shipping_threshold = 0,
-      is_active
+      is_active,
+      weight_slabs_json,
+      weightSlabs
     } = req.body;
 
     if (!id) {
       return res.status(400).json({ success: false, message: 'Rule ID is required.' });
     }
 
-    const bRate = Number(base_rate);
-    const addRate = Number(additional_rate);
+    const bRate = Number(base_rate) || 50;
+    const addRate = Number(additional_rate) || 30;
     const bWeight = Number(base_weight_grams) || 1000;
     const addWeight = Number(additional_weight_grams) || 1000;
     const freeThresh = Number(free_shipping_threshold) || 0;
     const activeVal = is_active !== undefined ? (is_active ? 1 : 0) : 1;
+    const slabsString = typeof weight_slabs_json === 'string'
+      ? weight_slabs_json
+      : (Array.isArray(weightSlabs) ? JSON.stringify(weightSlabs) : (Array.isArray(weight_slabs_json) ? JSON.stringify(weight_slabs_json) : null));
 
     await queryDb(
       `UPDATE shipping_delivery_rates 
-      SET zone_name = ?, pincode_from = ?, pincode_to = ?, base_weight_grams = ?, base_rate = ?, additional_weight_grams = ?, additional_rate = ?, free_shipping_threshold = ?, is_active = ?
+      SET zone_name = ?, pincode_from = ?, pincode_to = ?, base_weight_grams = ?, base_rate = ?, additional_weight_grams = ?, additional_rate = ?, free_shipping_threshold = ?, is_active = ?, weight_slabs_json = ?
       WHERE id = ?`,
-      [zone_name, pincode_from, pincode_to, bWeight, bRate, addWeight, addRate, freeThresh, activeVal, id]
+      [zone_name, pincode_from, pincode_to, bWeight, bRate, addWeight, addRate, freeThresh, activeVal, slabsString, id]
     );
 
     return res.json({ success: true, message: 'Shipping rate updated successfully.' });
