@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Truck, Plus, Trash2, Edit2, CheckCircle2, 
-  MapPin, RefreshCw, X, AlertCircle, Scale, Layers
+  MapPin, RefreshCw, X, AlertCircle, Scale, Layers, Search
 } from 'lucide-react';
 import { 
   fetchAdminShippingRates, 
@@ -116,6 +116,7 @@ export default function AdminShippingRates() {
   const [message, setMessage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState({
     zone_name: '',
@@ -331,6 +332,31 @@ export default function AdminShippingRates() {
     }
   };
 
+  const filteredRates = useMemo(() => {
+    if (!searchTerm.trim()) return rates;
+    const term = searchTerm.trim().toLowerCase();
+
+    return rates.filter(rate => {
+      const zoneMatch = (rate.zone_name || '').toLowerCase().includes(term);
+      const idMatch = (rate.id || '').toLowerCase().includes(term);
+      const fromMatch = String(rate.pincode_from || '').toLowerCase().includes(term);
+      const toMatch = String(rate.pincode_to || '').toLowerCase().includes(term);
+
+      // Check if search term is a numeric pincode within zone range (e.g. typing 626125 matches TN 600001 - 643999)
+      const pinNum = parseInt(term, 10);
+      let rangeMatch = false;
+      if (!isNaN(pinNum) && term.length >= 3) {
+        const fromNum = parseInt(rate.pincode_from, 10);
+        const toNum = parseInt(rate.pincode_to, 10);
+        if (!isNaN(fromNum) && !isNaN(toNum)) {
+          rangeMatch = pinNum >= Math.min(fromNum, toNum) && pinNum <= Math.max(fromNum, toNum);
+        }
+      }
+
+      return zoneMatch || idMatch || fromMatch || toMatch || rangeMatch;
+    });
+  }, [rates, searchTerm]);
+
   return (
     <div className="space-y-6">
       
@@ -387,22 +413,59 @@ export default function AdminShippingRates() {
 
       {/* Rules Table */}
       <div className="bg-white border border-[#E5E7EB] rounded-3xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-[#E5E7EB] flex items-center justify-between bg-gray-50/50">
-          <span className="text-xs font-black uppercase tracking-wider text-gray-700">
-            Active Delivery Zones & Manual Weight Slabs ({rates.length})
-          </span>
-          <span className="text-[11px] text-gray-500 font-medium">
-            Configured in Grams & Kilograms with exact rates
-          </span>
+        <div className="p-4 sm:p-5 border-b border-[#E5E7EB] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase tracking-wider text-gray-700">
+              Delivery Zones ({filteredRates.length})
+            </span>
+            {searchTerm && (
+              <span className="text-[11px] text-[#128C7E] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 font-bold">
+                Filtered from {rates.length}
+              </span>
+            )}
+          </div>
+
+          {/* Search Box */}
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search zone name or pincode (e.g. Tamil, 600001)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-80 pl-8 pr-8 py-2 bg-white border border-gray-200 focus:border-[#128C7E] rounded-xl text-xs font-medium text-gray-800 outline-none shadow-2xs placeholder:text-gray-400"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {loading ? (
           <div className="p-12 text-center text-xs text-gray-400">Loading delivery rates...</div>
-        ) : rates.length === 0 ? (
+        ) : filteredRates.length === 0 ? (
           <div className="p-12 text-center space-y-3">
             <Scale className="w-10 h-10 text-gray-300 mx-auto" />
-            <p className="text-sm font-bold text-gray-700">No Shipping Rates Configured</p>
-            <p className="text-xs text-gray-400">Click "+ Add Delivery Zone" to configure your first rate.</p>
+            <p className="text-sm font-bold text-gray-700">No Shipping Rates Found</p>
+            <p className="text-xs text-gray-400">
+              {searchTerm ? `No delivery zones match "${searchTerm}".` : 'Click "+ Add Delivery Zone" to configure your first rate.'}
+            </p>
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold cursor-pointer"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -419,12 +482,37 @@ export default function AdminShippingRates() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 font-medium">
-                {rates.map((rate) => {
+                {filteredRates.map((rate) => {
                   const isRange = rate.pincode_from !== rate.pincode_to && rate.pincode_to;
                   const isDefault = String(rate.pincode_from).toUpperCase() === 'DEFAULT';
                   const slabs = parseWeightSlabs(rate.weight_slabs_json || rate.weightSlabs);
 
-                  return (
+                  const filteredRates = useMemo(() => {
+    if (!searchTerm.trim()) return rates;
+    const term = searchTerm.trim().toLowerCase();
+
+    return rates.filter(rate => {
+      const zoneMatch = (rate.zone_name || '').toLowerCase().includes(term);
+      const idMatch = (rate.id || '').toLowerCase().includes(term);
+      const fromMatch = String(rate.pincode_from || '').toLowerCase().includes(term);
+      const toMatch = String(rate.pincode_to || '').toLowerCase().includes(term);
+
+      // Check if search term is a numeric pincode within zone range (e.g. typing 626125 matches TN 600001 - 643999)
+      const pinNum = parseInt(term, 10);
+      let rangeMatch = false;
+      if (!isNaN(pinNum) && term.length >= 3) {
+        const fromNum = parseInt(rate.pincode_from, 10);
+        const toNum = parseInt(rate.pincode_to, 10);
+        if (!isNaN(fromNum) && !isNaN(toNum)) {
+          rangeMatch = pinNum >= Math.min(fromNum, toNum) && pinNum <= Math.max(fromNum, toNum);
+        }
+      }
+
+      return zoneMatch || idMatch || fromMatch || toMatch || rangeMatch;
+    });
+  }, [rates, searchTerm]);
+
+  return (
                     <tr key={rate.id} className="hover:bg-gray-50/70 transition-colors">
                       
                       {/* Zone Name */}
@@ -660,7 +748,32 @@ export default function AdminShippingRates() {
 
                   {(formData.editable_slabs || []).map((slab, idx) => {
                     const parsed = editableToSlab(slab);
-                    return (
+                    const filteredRates = useMemo(() => {
+    if (!searchTerm.trim()) return rates;
+    const term = searchTerm.trim().toLowerCase();
+
+    return rates.filter(rate => {
+      const zoneMatch = (rate.zone_name || '').toLowerCase().includes(term);
+      const idMatch = (rate.id || '').toLowerCase().includes(term);
+      const fromMatch = String(rate.pincode_from || '').toLowerCase().includes(term);
+      const toMatch = String(rate.pincode_to || '').toLowerCase().includes(term);
+
+      // Check if search term is a numeric pincode within zone range (e.g. typing 626125 matches TN 600001 - 643999)
+      const pinNum = parseInt(term, 10);
+      let rangeMatch = false;
+      if (!isNaN(pinNum) && term.length >= 3) {
+        const fromNum = parseInt(rate.pincode_from, 10);
+        const toNum = parseInt(rate.pincode_to, 10);
+        if (!isNaN(fromNum) && !isNaN(toNum)) {
+          rangeMatch = pinNum >= Math.min(fromNum, toNum) && pinNum <= Math.max(fromNum, toNum);
+        }
+      }
+
+      return zoneMatch || idMatch || fromMatch || toMatch || rangeMatch;
+    });
+  }, [rates, searchTerm]);
+
+  return (
                       <div key={idx} className="bg-white p-2.5 rounded-xl border border-gray-200/80 shadow-2xs space-y-1.5">
                         <div className="grid grid-cols-12 gap-2 items-center">
                           
