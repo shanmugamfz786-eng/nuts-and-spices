@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Truck, Plus, Trash2, Edit2, CheckCircle2, 
-  MapPin, RefreshCw, X, AlertCircle, Info, Scale, Sparkles, Layers
+  MapPin, RefreshCw, X, AlertCircle, Scale, Layers
 } from 'lucide-react';
 import { 
   fetchAdminShippingRates, 
@@ -10,7 +10,7 @@ import {
   deleteAdminShippingRate 
 } from '../../api/shippingRatesApi.js';
 import { useCart } from '../../context/CartContext';
-import { parseWeightSlabs, calculateDeliveryFeeFromRule, formatWeight } from '../../utils/weight.js';
+import { parseWeightSlabs, formatWeight } from '../../utils/weight.js';
 
 const STANDARD_SLABS_TN = [
   { minWeightGrams: 0, maxWeightGrams: 250, rate: 35 },
@@ -116,11 +116,6 @@ export default function AdminShippingRates() {
   const [message, setMessage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
-
-  // Live Simulator state
-  const [simPincode, setSimPincode] = useState('600001');
-  const [simWeightVal, setSimWeightVal] = useState('250');
-  const [simWeightUnit, setSimWeightUnit] = useState('g'); // 'g' or 'kg'
 
   const [formData, setFormData] = useState({
     zone_name: '',
@@ -336,42 +331,6 @@ export default function AdminShippingRates() {
     }
   };
 
-  // Convert simulator weight to grams
-  const simWeightGrams = simWeightUnit === 'kg' 
-    ? Math.round(Number(simWeightVal || 0) * 1000) 
-    : Math.round(Number(simWeightVal || 0));
-
-  // Find simulation match
-  const matchedSimRule = (() => {
-    const pin = String(simPincode || '').trim();
-    const pinNum = parseInt(pin, 10);
-    const activeRates = rates.filter(r => r.is_active === 1 || r.is_active === true);
-    
-    // Exact
-    const exact = activeRates.find(r => String(r.pincode_from).trim() === pin && (!r.pincode_to || String(r.pincode_to).trim() === pin));
-    if (exact) return exact;
-
-    // Range
-    if (!isNaN(pinNum)) {
-      const range = activeRates.find(r => {
-        const f = parseInt(r.pincode_from, 10);
-        const t = parseInt(r.pincode_to, 10);
-        return !isNaN(f) && !isNaN(t) && pinNum >= Math.min(f, t) && pinNum <= Math.max(f, t);
-      });
-      if (range) return range;
-    }
-
-    // Default
-    return activeRates.find(r => String(r.pincode_from).toUpperCase() === 'DEFAULT' || String(r.zone_name).toLowerCase().includes('default')) || null;
-  })();
-
-  const simFee = matchedSimRule 
-    ? calculateDeliveryFeeFromRule({ weightGrams: simWeightGrams, subtotal: 500, rule: matchedSimRule })
-    : 50;
-
-  const simSlabs = matchedSimRule ? parseWeightSlabs(matchedSimRule.weight_slabs_json || matchedSimRule.weightSlabs) : [];
-  const matchedSimSlab = simSlabs.find(s => simWeightGrams >= Number(s.minWeightGrams) && simWeightGrams <= Number(s.maxWeightGrams));
-
   return (
     <div className="space-y-6">
       
@@ -423,119 +382,6 @@ export default function AdminShippingRates() {
             <Plus className="w-4 h-4" />
             <span>Add Delivery Zone</span>
           </button>
-        </div>
-      </div>
-
-      {/* Live Rate Simulator */}
-      <div className="bg-gradient-to-r from-emerald-900 to-[#075E54] text-white rounded-3xl p-5 sm:p-6 shadow-lg">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-white/10">
-          <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-300" />
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-200">
-                Live Rate Simulator
-              </span>
-            </div>
-            <h3 className="text-lg font-black font-serif mt-1">
-              Test Any Pincode & Weight Combo (Grams / Kg)
-            </h3>
-          </div>
-
-          {/* Quick Weight Selectors */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {[
-              { label: '250 g', val: '250', unit: 'g' },
-              { label: '500 g', val: '500', unit: 'g' },
-              { label: '1 Kg', val: '1', unit: 'kg' },
-              { label: '1.5 Kg', val: '1.5', unit: 'kg' },
-              { label: '2 Kg', val: '2', unit: 'kg' },
-              { label: '3 Kg', val: '3', unit: 'kg' }
-            ].map((w, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  setSimWeightVal(w.val);
-                  setSimWeightUnit(w.unit);
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  simWeightVal === w.val && simWeightUnit === w.unit
-                    ? 'bg-white text-[#075E54] shadow-md scale-105' 
-                    : 'bg-white/10 hover:bg-white/20 text-white'
-                }`}
-              >
-                {w.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 items-center">
-          {/* Destination Pincode Input */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold uppercase text-emerald-200">
-              Customer Pincode:
-            </label>
-            <div className="relative">
-              <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                maxLength={6}
-                value={simPincode}
-                onChange={(e) => setSimPincode(e.target.value.replace(/\D/g, ''))}
-                placeholder="e.g. 600001"
-                className="w-full pl-9 pr-3 py-2 bg-white text-gray-900 rounded-xl font-mono font-bold text-xs outline-none shadow-inner"
-              />
-            </div>
-          </div>
-
-          {/* Package Weight Input with Unit Selector (g / kg) */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold uppercase text-emerald-200">
-              Package Weight:
-            </label>
-            <div className="relative flex">
-              <div className="relative flex-1">
-                <Scale className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={simWeightVal}
-                  onChange={(e) => setSimWeightVal(e.target.value)}
-                  className="w-full pl-9 pr-2 py-2 bg-white text-gray-900 rounded-l-xl font-mono font-bold text-xs outline-none shadow-inner"
-                />
-              </div>
-              <select
-                value={simWeightUnit}
-                onChange={(e) => setSimWeightUnit(e.target.value)}
-                className="bg-emerald-100 text-emerald-950 font-bold font-mono text-xs px-3 rounded-r-xl outline-none cursor-pointer border-l border-emerald-200"
-              >
-                <option value="g">grams (g)</option>
-                <option value="kg">Kilograms (Kg)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Result Calculation Pill */}
-          <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/20 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-emerald-200 block truncate max-w-[150px]">
-                {matchedSimRule ? matchedSimRule.zone_name : 'Default Rule'}
-              </span>
-              <span className="text-xs text-white/80 font-mono">
-                {matchedSimSlab 
-                  ? `Slab: ${formatWeight(matchedSimSlab.minWeightGrams)} – ${formatWeight(matchedSimSlab.maxWeightGrams)}` 
-                  : `${formatWeight(simWeightGrams)}`}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-emerald-300 font-bold block uppercase">Delivery Fee</span>
-              <span className="text-2xl font-black font-mono text-emerald-300">
-                ₹{simFee}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
