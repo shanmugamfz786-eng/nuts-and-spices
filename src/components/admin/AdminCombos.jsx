@@ -11,7 +11,9 @@ import {
   Table as TableIcon,
   Upload,
   Loader2,
-  FolderPlus
+  FolderPlus,
+  Package,
+  Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../api';
@@ -38,6 +40,7 @@ export default function AdminCombos() {
   const { 
     comboDeals = [], 
     categories = [],
+    products = [],
     addComboDeal, 
     updateComboDeal, 
     deleteComboDeal, 
@@ -57,6 +60,13 @@ export default function AdminCombos() {
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState('');
 
+  // What's Inside - Search & Select State
+  const [comboComponents, setComboComponents] = useState([]);
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
+  const [customItemInput, setCustomItemInput] = useState('');
+  const [isAddingCustom, setIsAddingCustom] = useState(false);
+
   // Image Upload State
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
@@ -72,7 +82,6 @@ export default function AdminCombos() {
     originalPrice: 1299,
     packLabel: '1 KG ROYAL BOX',
     description: '',
-    itemsString: '250g Almonds, 250g Cashews, 250g Pista, 250g Dates',
     image: '/images/combo_banner.jpg',
     status: 'ACTIVE'
   });
@@ -129,21 +138,84 @@ export default function AdminCombos() {
       )
     : 24;
 
+  const filteredSearchProducts = useMemo(() => {
+    if (!productSearchTerm.trim()) return (products || []).slice(0, 10);
+    const q = productSearchTerm.trim().toLowerCase();
+    return (products || []).filter(p => 
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.id || '').toLowerCase().includes(q) ||
+      (p.category || '').toLowerCase().includes(q)
+    ).slice(0, 15);
+  }, [products, productSearchTerm]);
+
+  const handleSelectProduct = (product) => {
+    const defaultWeight = product.weights?.[0]?.label || product.weights?.[0]?.weight || '250g';
+    const availableWeights = (product.weights || []).map(w => w.label || w.weight).filter(Boolean);
+    if (!availableWeights.includes('100g')) availableWeights.unshift('100g');
+    if (!availableWeights.includes('250g')) availableWeights.push('250g');
+    if (!availableWeights.includes('500g')) availableWeights.push('500g');
+    if (!availableWeights.includes('1 Kg')) availableWeights.push('1 Kg');
+
+    setComboComponents(prev => [
+      ...prev,
+      {
+        id: `${product.id}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        productId: product.id,
+        name: product.name,
+        weight: defaultWeight,
+        availableWeights,
+        image: product.image || '/images/products/product_1.jpg',
+        isCustom: false
+      }
+    ]);
+    setProductSearchTerm('');
+    setIsProductDropdownOpen(false);
+  };
+
+  const handleUpdateComponentWeight = (id, newWeight) => {
+    setComboComponents(prev => prev.map(c => c.id === id ? { ...c, weight: newWeight } : c));
+  };
+
+  const handleRemoveComponent = (id) => {
+    setComboComponents(prev => prev.filter(c => c.id !== id));
+  };
+
+  const handleAddCustomComponent = () => {
+    if (!customItemInput.trim()) return;
+    setComboComponents(prev => [
+      ...prev,
+      {
+        id: `custom_${Date.now()}`,
+        name: customItemInput.trim(),
+        weight: '',
+        availableWeights: [],
+        image: null,
+        isCustom: true
+      }
+    ]);
+    setCustomItemInput('');
+    setIsAddingCustom(false);
+  };
+
   const handleOpenAdd = () => {
     setEditingCombo(null);
     setIsCustomCategory(false);
     setCustomCategoryName('');
+    setComboComponents([]);
+    setProductSearchTerm('');
+    setIsProductDropdownOpen(false);
+    setIsAddingCustom(false);
+    setCustomItemInput('');
     setFormData({
-      name: 'Diwali Grand Royal Celebration Hamper',
+      name: '',
       category: 'gift-hampers',
       categoryLabel: 'Royal Gift Hampers',
       badge: '👑 FESTIVE BESTSELLER',
       badgeColor: 'bg-amber-500 text-white',
-      price: 1399,
-      originalPrice: 1799,
-      packLabel: '1 KG LUXURY BOX',
-      description: 'Handcrafted luxury gift presentation packed with jumbo California almonds, royal cashews, roasted pistachios and Arabian dates.',
-      itemsString: '250g Jumbo Badam, 250g W240 Kaju, 250g Pista, 250g Safawi Dates, Velvet Gift Box',
+      price: '',
+      originalPrice: '',
+      packLabel: '1 KG ROYAL BOX',
+      description: '',
       image: '/images/combo_banner.jpg',
       status: 'ACTIVE'
     });
@@ -162,17 +234,69 @@ export default function AdminCombos() {
       setCustomCategoryName('');
     }
 
+    setProductSearchTerm('');
+    setIsProductDropdownOpen(false);
+    setIsAddingCustom(false);
+    setCustomItemInput('');
+
+    // Parse existing combo items into components
+    const existingComponents = (combo.items || []).map((itemStr, idx) => {
+      const cleanStr = String(itemStr || '').trim();
+      const matchedProd = (products || []).find(p => 
+        p && p.name && (cleanStr.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(cleanStr.toLowerCase()))
+      );
+
+      if (matchedProd) {
+        const weightMatch = cleanStr.match(/^(\d+\s*(?:g|kg|gms|grams|kg\b))/i);
+        const extractedWeight = weightMatch ? weightMatch[1].trim() : (matchedProd.weights?.[0]?.label || '250g');
+        const availableWeights = (matchedProd.weights || []).map(w => w.label || w.weight).filter(Boolean);
+        if (!availableWeights.includes(extractedWeight)) {
+          availableWeights.unshift(extractedWeight);
+        }
+        return {
+          id: `${matchedProd.id}_${idx}_${Date.now()}`,
+          productId: matchedProd.id,
+          name: matchedProd.name,
+          weight: extractedWeight,
+          availableWeights,
+          image: matchedProd.image || '/images/products/product_1.jpg',
+          isCustom: false
+        };
+      }
+
+      const weightMatch = cleanStr.match(/^(\d+\s*(?:g|kg|gms|grams|kg\b))\s+(.*)$/i);
+      if (weightMatch) {
+        return {
+          id: `item_${idx}_${Date.now()}`,
+          name: weightMatch[2].trim(),
+          weight: weightMatch[1].trim(),
+          availableWeights: ['100g', '250g', '500g', '1 Kg'],
+          image: null,
+          isCustom: false
+        };
+      }
+
+      return {
+        id: `custom_${idx}_${Date.now()}`,
+        name: cleanStr,
+        weight: '',
+        availableWeights: [],
+        image: null,
+        isCustom: true
+      };
+    });
+    setComboComponents(existingComponents);
+
     setFormData({
       name: combo.name,
       category: combo.category || 'gift-hampers',
       categoryLabel: combo.categoryLabel || 'Royal Gift Hampers',
       badge: combo.badge || 'SPECIAL COMBO',
       badgeColor: combo.badgeColor || 'bg-amber-500 text-white',
-      price: mainWeight.price || 999,
-      originalPrice: mainWeight.originalPrice || 1299,
+      price: mainWeight.price || '',
+      originalPrice: mainWeight.originalPrice || '',
       packLabel: mainWeight.label || '1 KG ROYAL BOX',
       description: combo.description || '',
-      itemsString: (combo.items || []).join(', '),
       image: combo.image || '/images/combo_banner.jpg',
       status: combo.status || 'ACTIVE'
     });
@@ -220,10 +344,22 @@ export default function AdminCombos() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const itemsList = formData.itemsString
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
+
+    if (!formData.name.trim()) {
+      alert('Please enter a combo name.');
+      return;
+    }
+
+    if (comboComponents.length === 0) {
+      alert('Please select at least one product for this combo pack.');
+      return;
+    }
+
+    const itemsList = comboComponents.map(c => {
+      if (c.isCustom || !c.weight) return c.name.trim();
+      if (c.name.toLowerCase().includes(c.weight.toLowerCase())) return c.name.trim();
+      return `${c.weight} ${c.name}`.trim();
+    }).filter(Boolean);
 
     let finalCategory = formData.category;
     let finalCategoryLabel = formData.categoryLabel;
@@ -776,22 +912,209 @@ export default function AdminCombos() {
                   </div>
                 </div>
 
-                {/* Included Items Pills */}
-                <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    What's Inside (Comma separated components)
-                  </label>
-                  <textarea
-                    rows={2}
-                    required
-                    value={formData.itemsString}
-                    onChange={(e) => setFormData({ ...formData, itemsString: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#128C7E] rounded-xl px-3 py-2 text-xs text-slate-900 outline-none"
-                    placeholder="250g Almonds, 250g Cashews, 250g Pista, 250g Dates, Gift Box"
-                  />
-                  <span className="text-[10px] text-slate-400 mt-0.5 block">
-                    Each item separated by a comma will appear as a verified check pill on the storefront card.
-                  </span>
+                {/* What's Inside - Search & Select Store Products with Weight Picker */}
+                <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/90 rounded-2xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                        <Package className="w-4 h-4 text-[#128C7E]" />
+                        <span>What's Inside This Combo ({comboComponents.length} items) *</span>
+                      </label>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Search and select store products, then pick the exact weight.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingCustom(!isAddingCustom)}
+                      className="text-[11px] font-bold text-[#128C7E] hover:underline cursor-pointer flex items-center gap-1 self-start sm:self-auto"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>{isAddingCustom ? 'Cancel Custom' : '+ Add Custom Item (e.g. Gift Box)'}</span>
+                    </button>
+                  </div>
+
+                  {/* Custom non-product item input (e.g. Gift Box, Velvet Potli) */}
+                  {isAddingCustom && (
+                    <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-200 shadow-2xs">
+                      <input
+                        type="text"
+                        placeholder="e.g. Velvet Gift Box, Brass Diya, Luxury Hamper Basket..."
+                        value={customItemInput}
+                        onChange={(e) => setCustomItemInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomComponent(); } }}
+                        className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none text-slate-800"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCustomComponent}
+                        className="px-3.5 py-1.5 bg-[#128C7E] text-white text-xs font-bold rounded-lg hover:bg-[#075E54] cursor-pointer shadow-xs active:scale-95"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Product Search Input with Dropdown */}
+                  <div className="relative">
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Type product name to search (e.g. Badam, Cashew, Pista, Dates)..."
+                        value={productSearchTerm}
+                        onChange={(e) => {
+                          setProductSearchTerm(e.target.value);
+                          setIsProductDropdownOpen(true);
+                        }}
+                        onFocus={() => setIsProductDropdownOpen(true)}
+                        className="w-full bg-white border border-slate-200 focus:border-[#128C7E] rounded-xl py-2.5 pl-10 pr-8 text-xs font-semibold text-slate-900 outline-none shadow-2xs"
+                      />
+                      {productSearchTerm && (
+                        <button
+                          type="button"
+                          onClick={() => { setProductSearchTerm(''); setIsProductDropdownOpen(false); }}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Dropdown list of matching products */}
+                    {isProductDropdownOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-30" 
+                          onClick={() => setIsProductDropdownOpen(false)} 
+                        />
+                        <div className="absolute top-full left-0 right-0 mt-1.5 z-40 bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-slate-100">
+                          {filteredSearchProducts.length === 0 ? (
+                            <div className="p-4 text-center text-xs text-slate-400">
+                              No products found matching "{productSearchTerm}".
+                            </div>
+                          ) : (
+                            filteredSearchProducts.map((p) => {
+                              const weights = (p.weights || []).map(w => w.label || w.weight).join(', ');
+                              return (
+                                <div
+                                  key={p.id}
+                                  onClick={() => handleSelectProduct(p)}
+                                  className="p-2.5 flex items-center justify-between gap-3 hover:bg-emerald-50/70 cursor-pointer transition-colors"
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <img
+                                      src={p.image || '/images/products/product_1.jpg'}
+                                      alt={p.name}
+                                      className="w-9 h-9 object-cover rounded-lg border border-slate-100 shrink-0"
+                                    />
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-bold text-slate-900 truncate">{p.name}</p>
+                                      <p className="text-[10px] text-slate-400 truncate">
+                                        Weights: {weights || 'Standard'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="px-2.5 py-1 bg-[#128C7E] text-white text-[10px] font-black uppercase rounded-lg hover:bg-[#075E54] shrink-0 cursor-pointer"
+                                  >
+                                    + Add
+                                  </button>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Selected Components List */}
+                  {comboComponents.length === 0 ? (
+                    <div className="py-5 px-4 text-center border-2 border-dashed border-slate-200 rounded-xl bg-white/60">
+                      <Package className="w-8 h-8 text-slate-300 mx-auto mb-1.5" />
+                      <p className="text-xs font-bold text-slate-600">No Items Added Yet</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Search products above to add components to this combo pack.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {comboComponents.map((item, idx) => (
+                        <div
+                          key={item.id}
+                          className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {item.image ? (
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-10 h-10 object-cover rounded-lg border border-slate-100 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-amber-50 text-amber-700 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 border border-amber-200">
+                                🎁
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                                Item #{idx + 1}
+                              </span>
+                              <p className="text-xs font-bold text-slate-900 truncate">
+                                {item.name}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 justify-end flex-wrap sm:flex-nowrap">
+                            {/* Weight Picker for this product */}
+                            {!item.isCustom ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-bold text-slate-500 uppercase">Weight:</span>
+                                <select
+                                  value={item.weight}
+                                  onChange={(e) => handleUpdateComponentWeight(item.id, e.target.value)}
+                                  className="bg-slate-50 border border-slate-200 focus:border-[#128C7E] text-slate-800 font-bold text-xs px-2.5 py-1.5 rounded-lg outline-none cursor-pointer"
+                                >
+                                  {(item.availableWeights || []).map((w, wIdx) => (
+                                    <option key={wIdx} value={w}>{w}</option>
+                                  ))}
+                                  <option value="50g">50g</option>
+                                  <option value="100g">100g</option>
+                                  <option value="200g">200g</option>
+                                  <option value="250g">250g</option>
+                                  <option value="500g">500g</option>
+                                  <option value="1 Kg">1 Kg</option>
+                                  <option value="2 Kg">2 Kg</option>
+                                </select>
+                              </div>
+                            ) : (
+                              <span className="px-2 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-md text-[10px] font-bold">
+                                Packaging / Gift Item
+                              </span>
+                            )}
+
+                            {/* Preview Pill */}
+                            <span className="inline-flex px-2 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md text-[11px] font-mono font-bold">
+                              {item.weight ? `${item.weight} ${item.name}` : item.name}
+                            </span>
+
+                            {/* Remove Button */}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveComponent(item.id)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="Remove item"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Product Image URL with Device File Upload & Live Preview */}
