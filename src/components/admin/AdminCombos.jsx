@@ -1064,46 +1064,15 @@ export default function AdminCombos() {
 
                 {/* What's Inside - Search & Select Store Products with Weight Picker */}
                 <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/90 rounded-2xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                    <div>
-                      <label className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                        <Package className="w-4 h-4 text-[#128C7E]" />
-                        <span>What's Inside This Combo ({comboComponents.length} items) *</span>
-                      </label>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Search and select store products, then pick the exact weight.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsAddingCustom(!isAddingCustom)}
-                      className="text-[11px] font-bold text-[#128C7E] hover:underline cursor-pointer flex items-center gap-1 self-start sm:self-auto"
-                    >
-                      {isAddingCustom ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-                      <span>{isAddingCustom ? 'Cancel Custom' : 'Add Custom Item (e.g. Gift Box)'}</span>
-                    </button>
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                      <Package className="w-4 h-4 text-[#128C7E]" />
+                      <span>What's Inside This Combo ({comboComponents.length} items) *</span>
+                    </label>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Search and select store products, then pick the exact weight.
+                    </p>
                   </div>
-
-                  {/* Custom non-product item input (e.g. Gift Box, Velvet Potli) */}
-                  {isAddingCustom && (
-                    <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-200 shadow-2xs">
-                      <input
-                        type="text"
-                        placeholder="e.g. Velvet Gift Box, Brass Diya, Luxury Hamper Basket..."
-                        value={customItemInput}
-                        onChange={(e) => setCustomItemInput(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomComponent(); } }}
-                        className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none text-slate-800"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddCustomComponent}
-                        className="px-3.5 py-1.5 bg-[#128C7E] text-white text-xs font-bold rounded-lg hover:bg-[#075E54] cursor-pointer shadow-xs active:scale-95"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  )}
 
                   {/* Product Search & Selection Box */}
                   <div className="space-y-2">
