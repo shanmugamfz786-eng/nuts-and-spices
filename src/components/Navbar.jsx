@@ -123,7 +123,7 @@ export default function Navbar() {
               {/* Left TV News Right-to-Left Scrolling Ticker */}
               <div className="flex-1 w-full sm:w-auto overflow-hidden flex items-center pr-4 lg:pr-8">
                 <marquee behavior="scroll" direction="left" scrollamount="5" className="font-extrabold text-[#F9FAFB] tracking-wider text-[11px] sm:text-[12px] leading-relaxed block my-auto">
-                  ORDER ABOVE ₹3500 GET FREE SHIPPING &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; WE DELIVER ACROSS INDIA &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; AUTHENTIC GOURMET SELECTION &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; ORDER ABOVE ₹3500 GET FREE SHIPPING &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; WE DELIVER ACROSS INDIA
+                  WE DELIVER ACROSS SOUTH INDIA &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; AUTHENTIC GOURMET SELECTION &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; WE DELIVER ACROSS SOUTH INDIA &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; AUTHENTIC GOURMET SELECTION
                 </marquee>
               </div>
 
