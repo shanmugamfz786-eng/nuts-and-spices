@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../api';
+import { PRODUCTS as SEED_PRODUCTS } from '../../data/products';
 
 const DEFAULT_COMBO_CATEGORIES = [
   { id: 'gift-hampers', label: 'Royal Gift Hampers' },
@@ -138,15 +139,30 @@ export default function AdminCombos() {
       )
     : 24;
 
+  const allAvailableProducts = useMemo(() => {
+    return (products && products.length > 0) ? products : SEED_PRODUCTS;
+  }, [products]);
+
   const filteredSearchProducts = useMemo(() => {
-    if (!productSearchTerm.trim()) return (products || []).slice(0, 10);
+    const list = allAvailableProducts || [];
+    if (!productSearchTerm.trim()) return list.slice(0, 12);
     const q = productSearchTerm.trim().toLowerCase();
-    return (products || []).filter(p => 
-      (p.name || '').toLowerCase().includes(q) ||
-      (p.id || '').toLowerCase().includes(q) ||
-      (p.category || '').toLowerCase().includes(q)
-    ).slice(0, 15);
-  }, [products, productSearchTerm]);
+    const words = q.split(/\s+/).filter(Boolean);
+
+    return list.filter(p => {
+      const name = (p.name || '').toLowerCase();
+      const id = String(p.id || '').toLowerCase();
+      const cat = (p.category || p.categoryName || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+
+      return words.every(w => 
+        name.includes(w) || 
+        cat.includes(w) || 
+        desc.includes(w) || 
+        id.includes(w)
+      );
+    }).slice(0, 20);
+  }, [allAvailableProducts, productSearchTerm]);
 
   const handleSelectProduct = (product) => {
     const defaultWeight = product.weights?.[0]?.label || product.weights?.[0]?.weight || '250g';
@@ -168,8 +184,6 @@ export default function AdminCombos() {
         isCustom: false
       }
     ]);
-    setProductSearchTerm('');
-    setIsProductDropdownOpen(false);
   };
 
   const handleUpdateComponentWeight = (id, newWeight) => {
@@ -955,25 +969,21 @@ export default function AdminCombos() {
                     </div>
                   )}
 
-                  {/* Product Search Input with Dropdown */}
-                  <div className="relative">
+                  {/* Product Search & Selection Box */}
+                  <div className="space-y-2">
                     <div className="relative">
                       <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
-                        placeholder="Type product name to search (e.g. Badam, Cashew, Pista, Dates)..."
+                        placeholder="Search product from store catalog (e.g. Badam, Cashew, Pista, Dates, Chips)..."
                         value={productSearchTerm}
-                        onChange={(e) => {
-                          setProductSearchTerm(e.target.value);
-                          setIsProductDropdownOpen(true);
-                        }}
-                        onFocus={() => setIsProductDropdownOpen(true)}
+                        onChange={(e) => setProductSearchTerm(e.target.value)}
                         className="w-full bg-white border border-slate-200 focus:border-[#128C7E] rounded-xl py-2.5 pl-10 pr-8 text-xs font-semibold text-slate-900 outline-none shadow-2xs"
                       />
                       {productSearchTerm && (
                         <button
                           type="button"
-                          onClick={() => { setProductSearchTerm(''); setIsProductDropdownOpen(false); }}
+                          onClick={() => setProductSearchTerm('')}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -981,53 +991,58 @@ export default function AdminCombos() {
                       )}
                     </div>
 
-                    {/* Dropdown list of matching products */}
-                    {isProductDropdownOpen && (
-                      <>
-                        <div 
-                          className="fixed inset-0 z-30" 
-                          onClick={() => setIsProductDropdownOpen(false)} 
-                        />
-                        <div className="absolute top-full left-0 right-0 mt-1.5 z-40 bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-slate-100">
-                          {filteredSearchProducts.length === 0 ? (
-                            <div className="p-4 text-center text-xs text-slate-400">
-                              No products found matching "{productSearchTerm}".
-                            </div>
-                          ) : (
-                            filteredSearchProducts.map((p) => {
-                              const weights = (p.weights || []).map(w => w.label || w.weight).join(', ');
-                              return (
-                                <div
-                                  key={p.id}
-                                  onClick={() => handleSelectProduct(p)}
-                                  className="p-2.5 flex items-center justify-between gap-3 hover:bg-emerald-50/70 cursor-pointer transition-colors"
-                                >
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    <img
-                                      src={p.image || '/images/products/product_1.jpg'}
-                                      alt={p.name}
-                                      className="w-9 h-9 object-cover rounded-lg border border-slate-100 shrink-0"
-                                    />
-                                    <div className="min-w-0">
-                                      <p className="text-xs font-bold text-slate-900 truncate">{p.name}</p>
-                                      <p className="text-[10px] text-slate-400 truncate">
-                                        Weights: {weights || 'Standard'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="px-2.5 py-1 bg-[#128C7E] text-white text-[10px] font-black uppercase rounded-lg hover:bg-[#075E54] shrink-0 cursor-pointer"
-                                  >
-                                    + Add
-                                  </button>
-                                </div>
-                              );
-                            })
-                          )}
+                    {/* Inline Product Results Grid / List - ALWAYS VISIBLE */}
+                    <div className="bg-white border border-slate-200/90 rounded-xl p-2.5 max-h-56 overflow-y-auto space-y-1.5 shadow-2xs">
+                      <div className="px-1 text-[10px] font-black uppercase text-slate-400 tracking-wider flex items-center justify-between">
+                        <span>Select Products to Add ({filteredSearchProducts.length})</span>
+                        <span className="text-[10px] text-emerald-700 font-bold">Click "+ Add" to add to combo</span>
+                      </div>
+                      
+                      {filteredSearchProducts.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-slate-400">
+                          No products found matching "{productSearchTerm}".
                         </div>
-                      </>
-                    )}
+                      ) : (
+                        filteredSearchProducts.map((p) => {
+                          const weights = (p.weights || []).map(w => w.label || w.weight).join(', ');
+                          const alreadyCount = comboComponents.filter(c => c.productId === p.id).length;
+
+                          return (
+                            <div
+                              key={p.id}
+                              className="p-2 flex items-center justify-between gap-2.5 rounded-lg hover:bg-emerald-50/60 border border-slate-100 hover:border-emerald-200/80 transition-all"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <img
+                                  src={p.image || '/images/products/product_1.jpg'}
+                                  alt={p.name}
+                                  className="w-9 h-9 object-cover rounded-lg border border-slate-200 bg-white shrink-0"
+                                />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-900 truncate">{p.name}</p>
+                                  <p className="text-[10px] text-slate-400 truncate">
+                                    Weights: {weights || 'Standard'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => handleSelectProduct(p)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shrink-0 transition-all cursor-pointer active:scale-95 shadow-2xs ${
+                                  alreadyCount > 0 
+                                    ? 'bg-emerald-100 hover:bg-emerald-200 text-[#075E54] border border-emerald-300'
+                                    : 'bg-[#128C7E] hover:bg-[#075E54] text-white'
+                                }`}
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>{alreadyCount > 0 ? `Added (${alreadyCount})` : 'Add'}</span>
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
 
                   {/* Selected Components List */}
