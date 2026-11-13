@@ -115,6 +115,7 @@ export default function AdminShippingRates() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteConfirmRate, setDeleteConfirmRate] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -305,12 +306,12 @@ export default function AdminShippingRates() {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (!confirm(`Are you sure you want to delete shipping rate rule "${name}"?`)) return;
+  const handleDelete = async (rate) => {
+    if (!rate) return;
     try {
-      const res = await deleteAdminShippingRate(id);
+      const res = await deleteAdminShippingRate(rate.id);
       if (res.success) {
-        showNotification('success', 'Rule deleted successfully.');
+        showNotification('success', 'Delivery zone rule deleted successfully.');
         await loadRates();
         if (refreshShippingRates) refreshShippingRates();
       } else {
@@ -318,6 +319,8 @@ export default function AdminShippingRates() {
       }
     } catch (err) {
       showNotification('error', err.message || 'Server error occurred.');
+    } finally {
+      setDeleteConfirmRate(null);
     }
   };
 
@@ -612,7 +615,7 @@ export default function AdminShippingRates() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDelete(rate.id, rate.zone_name)}
+                            onClick={() => setDeleteConfirmRate(rate)}
                             className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                             title="Delete Rate Rule"
                           >
@@ -631,24 +634,31 @@ export default function AdminShippingRates() {
 
       {/* Add / Edit Rate Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-gray-100 relative max-h-[92vh] overflow-y-auto">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-5 right-5 p-1.5 text-gray-400 hover:text-black rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="mb-5">
-              <h3 className="text-lg font-black font-serif text-[#000000] flex items-center gap-2">
-                <Truck className="w-5 h-5 text-[#128C7E]" />
-                <span>{editingId ? 'Edit Delivery Zone & Weight Slabs' : 'New Delivery Zone & Weight Slabs'}</span>
-              </h3>
-              <p className="text-xs text-[#8C7A6B] mt-0.5">
-                Set manual weight ranges in <b>Grams (g)</b> or <b>Kilograms (Kg)</b> with exact courier charges.
-              </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/35 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto my-8">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-amber-50 text-amber-800 rounded-xl border border-amber-200/60">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-gray-900">
+                    {editingId ? 'Edit Delivery Zone & Rates' : 'Add New Delivery Zone'}
+                  </h2>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">
+                    Configure weight-wise delivery slabs and pincode coverage
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -879,23 +889,54 @@ export default function AdminShippingRates() {
               </div>
 
               {/* Actions */}
-              <div className="pt-3 flex items-center justify-end gap-3 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 text-xs font-bold text-gray-600 hover:text-black rounded-xl cursor-pointer"
+                  className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all"
+                  className="px-6 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-extrabold rounded-xl shadow-md transition-all cursor-pointer"
                 >
                   {editingId ? 'Save Changes' : 'Create Delivery Zone'}
                 </button>
               </div>
 
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteConfirmRate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-100 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">Confirm Delete</h3>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              Are you sure you want to delete delivery zone <strong className="text-gray-900">{deleteConfirmRate.zone_name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmRate(null)}
+                className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteConfirmRate)}
+                className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
