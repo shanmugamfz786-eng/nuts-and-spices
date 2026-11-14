@@ -241,6 +241,26 @@ export default function ComboDealsPage() {
     return (comboDeals || []).filter(c => c.status !== 'INACTIVE');
   }, [comboDeals]);
 
+  // Dynamically derive category tabs from actual combos present in Admin
+  const comboCategoryTabs = useMemo(() => {
+    const tabs = [{ id: 'all', label: 'All Combos', icon: '✨' }];
+    const seen = new Set();
+    
+    (activeCombosList || []).forEach(c => {
+      if (c && c.category && !seen.has(c.category)) {
+        seen.add(c.category);
+        const predefined = COMBO_CATEGORIES.find(pc => pc.id === c.category);
+        tabs.push({
+          id: c.category,
+          label: c.categoryLabel || predefined?.label || (c.category.charAt(0).toUpperCase() + c.category.slice(1).replace(/-/g, ' ')),
+          icon: predefined?.icon || '🎁'
+        });
+      }
+    });
+
+    return tabs;
+  }, [activeCombosList]);
+
   // Filter combos based on active category and live search
   const filteredCombos = useMemo(() => {
     return activeCombosList.filter(combo => {
@@ -411,7 +431,7 @@ export default function ComboDealsPage() {
           
           {/* Category Tabs */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-            {COMBO_CATEGORIES.map(cat => {
+            {comboCategoryTabs.map(cat => {
               const isActive = activeCategory === cat.id;
               const count = cat.id === 'all' 
                 ? activeCombosList.length 

@@ -151,12 +151,13 @@ app.get('/api', (req, res) => {
 export let inMemoryCatalog = {
   products: null,
   categories: null,
+  comboDeals: null,
   updatedAt: null
 };
 
 const seedProductImageMap = new Map(PRODUCTS.map(p => [p.id, p.image]));
 
-export const syncServerCatalog = async (products, categories) => {
+export const syncServerCatalog = async (products, categories, comboDeals = null) => {
   if (Array.isArray(products) && products.length > 0) {
     inMemoryCatalog.products = products.map(p => {
       const feat = p.isFeaturedToday === true || p.isFeaturedToday === 'true' || p.is_featured_today === 1 || p.is_featured_today === '1';
@@ -183,12 +184,18 @@ export const syncServerCatalog = async (products, categories) => {
   } else if (!inMemoryCatalog.categories || inMemoryCatalog.categories.length === 0) {
     inMemoryCatalog.categories = CATEGORIES;
   }
+
+  if (Array.isArray(comboDeals)) {
+    inMemoryCatalog.comboDeals = comboDeals;
+  }
+
   inMemoryCatalog.updatedAt = new Date().toISOString();
 
   try {
     const catalogJson = JSON.stringify({
       products: inMemoryCatalog.products || PRODUCTS,
       categories: inMemoryCatalog.categories || CATEGORIES,
+      comboDeals: inMemoryCatalog.comboDeals || [],
       updatedAt: inMemoryCatalog.updatedAt
     });
 
@@ -245,6 +252,7 @@ export const syncServerCatalog = async (products, categories) => {
 app.get('/api/catalog', async (req, res) => {
   let products = inMemoryCatalog.products;
   let categories = inMemoryCatalog.categories;
+  let comboDeals = inMemoryCatalog.comboDeals;
   let updatedAt = inMemoryCatalog.updatedAt || new Date().toISOString();
   let hasMasterCatalog = false;
 
@@ -271,12 +279,28 @@ app.get('/api/catalog', async (req, res) => {
           };
         });
         categories = parsed.categories;
+        if (Array.isArray(parsed.comboDeals)) {
+          comboDeals = parsed.comboDeals;
+        }
         updatedAt = parsed.updatedAt || updatedAt;
         hasMasterCatalog = true;
       }
     }
   } catch (err) {
     console.warn('DB catalog fetch note:', err.message);
+  }
+
+  // Fallback for comboDeals from master_admin_state_json if not yet in master_catalog_json
+  if (!comboDeals) {
+    try {
+      const aRows = await queryDb("SELECT setting_value FROM settings WHERE setting_key = 'master_admin_state_json'");
+      if (aRows && aRows.length > 0 && aRows[0].setting_value) {
+        const aParsed = JSON.parse(aRows[0].setting_value);
+        if (Array.isArray(aParsed.comboDeals)) {
+          comboDeals = aParsed.comboDeals;
+        }
+      }
+    } catch {}
   }
 
   // 2. Only if NO master catalog was ever saved, initialize from seed PRODUCTS and CATEGORIES
@@ -287,6 +311,7 @@ app.get('/api/catalog', async (req, res) => {
 
   inMemoryCatalog.products = products;
   inMemoryCatalog.categories = categories;
+  if (comboDeals) inMemoryCatalog.comboDeals = comboDeals;
   inMemoryCatalog.updatedAt = updatedAt;
 
   // Deliver products with authentic image URLs intact
@@ -330,6 +355,7 @@ app.get('/api/catalog', async (req, res) => {
     success: true,
     products: finalProducts,
     categories,
+    comboDeals: comboDeals || [],
     storeSettings,
     updatedAt
   });
@@ -395,7 +421,7 @@ app.post('/api/store-settings', authMiddleware, adminMiddleware, async (req, res
 });
 
 app.post('/api/catalog', authMiddleware, adminMiddleware, async (req, res) => {
-  const { products, categories, storeSettings } = req.body || {};
+  const { products, categories, comboDeals, storeSettings } = req.body || {};
   if (!Array.isArray(products) || !Array.isArray(categories)) {
     return res.status(400).json({ success: false, message: 'Invalid payload: products and categories must be arrays' });
   }
@@ -425,7 +451,7 @@ app.post('/api/catalog', authMiddleware, adminMiddleware, async (req, res) => {
     }
   }
 
-  await syncServerCatalog(products, categories);
+  await syncServerCatalog(products, categories, comboDeals);
   return res.json({ success: true, message: 'Catalog updated across all devices successfully' });
 });
 

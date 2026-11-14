@@ -198,10 +198,10 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // 6.5 COMBO DEALS & ACCESS CONTROL (Session Cached)
+  // 6.5 COMBO DEALS & ACCESS CONTROL (Session & Local Storage Cached)
   const [comboDeals, setComboDeals] = useState(() => {
     try {
-      const saved = sessionStorage.getItem('nuts_spices_combo_deals');
+      const saved = localStorage.getItem('nuts_spices_combo_deals') || sessionStorage.getItem('nuts_spices_combo_deals');
       return saved ? JSON.parse(saved) : INITIAL_COMBO_DEALS;
     } catch {
       return INITIAL_COMBO_DEALS;
@@ -732,6 +732,13 @@ export const CartProvider = ({ children }) => {
               return adminOnlyCats;
             });
           }
+          if (Array.isArray(cloudData.comboDeals)) {
+            setComboDeals(cloudData.comboDeals);
+            try { 
+              sessionStorage.setItem('nuts_spices_combo_deals', JSON.stringify(cloudData.comboDeals));
+              localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(cloudData.comboDeals));
+            } catch {}
+          }
           if (cloudData.storeSettings && typeof cloudData.storeSettings === 'object') {
             const cleanSettings = { ...cloudData.storeSettings };
             if (!cleanSettings.logoUrl || cleanSettings.logoUrl.includes('unsplash.com')) {
@@ -785,6 +792,13 @@ export const CartProvider = ({ children }) => {
             }
           if (res.data.offers && res.data.offers.length > 0) setOffers(res.data.offers);
           if (res.data.reviews && res.data.reviews.length > 0) setReviews(res.data.reviews);
+          if (res.data.comboDeals && Array.isArray(res.data.comboDeals)) {
+            setComboDeals(res.data.comboDeals);
+            try {
+              sessionStorage.setItem('nuts_spices_combo_deals', JSON.stringify(res.data.comboDeals));
+              localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(res.data.comboDeals));
+            } catch {}
+          }
           if (res.data.storeSettings) setStoreSettings(res.data.storeSettings);
           if (res.data.registeredUsers && res.data.registeredUsers.length > 0) setRegisteredUsers(res.data.registeredUsers);
         }
@@ -1872,7 +1886,7 @@ export const CartProvider = ({ children }) => {
     setOffers(prev => { const upd = prev.filter(off => off.id !== offerId); syncAdminStateToCloud({ offers: upd }); return upd; });
   };
 
-  // ADMIN - COMBO DEALS CRUD & ACCESS CONTROL
+  // ADMIN - COMBO DEALS CRUD & ACCESS CONTROL (Live synced to TiDB & Cloud Catalog)
   const addComboDeal = (comboData) => {
     const newCombo = {
       id: `combo-${Date.now()}`,
@@ -1882,22 +1896,54 @@ export const CartProvider = ({ children }) => {
       fastDelivery: true,
       ...comboData
     };
-    setComboDeals(prev => { const upd = [newCombo, ...prev]; syncAdminStateToCloud({ comboDeals: upd }); return upd; });
+    setComboDeals(prev => { 
+      const upd = [newCombo, ...prev]; 
+      try {
+        localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+        sessionStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+      } catch {}
+      saveCloudCatalog(productsRef.current, categoriesRef.current, upd, storeSettings).catch(() => {});
+      syncAdminStateToCloud({ comboDeals: upd }).catch(() => {}); 
+      return upd; 
+    });
     return newCombo;
   };
 
   const updateComboDeal = (comboId, updatedFields) => {
-    setComboDeals(prev => { const upd = prev.map(c => c.id === comboId ? { ...c, ...updatedFields } : c); syncAdminStateToCloud({ comboDeals: upd }); return upd; });
+    setComboDeals(prev => { 
+      const upd = prev.map(c => c.id === comboId ? { ...c, ...updatedFields } : c); 
+      try {
+        localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+        sessionStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+      } catch {}
+      saveCloudCatalog(productsRef.current, categoriesRef.current, upd, storeSettings).catch(() => {});
+      syncAdminStateToCloud({ comboDeals: upd }).catch(() => {}); 
+      return upd; 
+    });
   };
 
   const deleteComboDeal = (comboId) => {
-    setComboDeals(prev => { const upd = prev.filter(c => c.id !== comboId); syncAdminStateToCloud({ comboDeals: upd }); return upd; });
+    setComboDeals(prev => { 
+      const upd = prev.filter(c => c.id !== comboId); 
+      try {
+        localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+        sessionStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+      } catch {}
+      saveCloudCatalog(productsRef.current, categoriesRef.current, upd, storeSettings).catch(() => {});
+      syncAdminStateToCloud({ comboDeals: upd }).catch(() => {}); 
+      return upd; 
+    });
   };
 
   const toggleComboStatus = (comboId) => {
     setComboDeals(prev => {
       const upd = prev.map(c => c.id === comboId ? { ...c, status: c.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' } : c);
-      syncAdminStateToCloud({ comboDeals: upd });
+      try {
+        localStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+        sessionStorage.setItem('nuts_spices_combo_deals', JSON.stringify(upd));
+      } catch {}
+      saveCloudCatalog(productsRef.current, categoriesRef.current, upd, storeSettings).catch(() => {});
+      syncAdminStateToCloud({ comboDeals: upd }).catch(() => {});
       return upd;
     });
   };

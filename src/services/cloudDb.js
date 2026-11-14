@@ -70,9 +70,12 @@ export async function fetchCloudCatalog() {
           } catch (e) {}
         }
 
+        let comboList = Array.isArray(data.comboDeals) ? data.comboDeals : null;
+
         return { 
           products: Array.isArray(hydratedProducts) ? hydratedProducts : null, 
           categories: Array.isArray(catList) ? catList : null,
+          comboDeals: comboList,
           storeSettings,
           updatedAt: data.updatedAt
         };
@@ -85,7 +88,7 @@ export async function fetchCloudCatalog() {
   return null;
 }
 
-export async function saveCloudCatalog(products, categories, storeSettings = null) {
+export async function saveCloudCatalog(products, categories, comboDeals = null, storeSettings = null) {
   try {
     // Ensure all products retain authentic image URLs
     const sanitizedProducts = (products || []).map(p => {
@@ -97,12 +100,20 @@ export async function saveCloudCatalog(products, categories, storeSettings = nul
       };
     });
 
+    let combos = Array.isArray(comboDeals) ? comboDeals : null;
+    let settings = storeSettings;
+    if (comboDeals && !Array.isArray(comboDeals) && typeof comboDeals === 'object') {
+      settings = comboDeals;
+      combos = null;
+    }
+
     const payloadObj = {
       products: sanitizedProducts,
       categories,
       updatedAt: new Date().toISOString()
     };
-    if (storeSettings) payloadObj.storeSettings = storeSettings;
+    if (combos) payloadObj.comboDeals = combos;
+    if (settings) payloadObj.storeSettings = settings;
 
     const payload = JSON.stringify(payloadObj);
 
