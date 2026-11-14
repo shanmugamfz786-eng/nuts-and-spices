@@ -63,58 +63,67 @@ export default function OrderDetailsPage() {
       setIsCancelModalOpen(true);
     }
 
+    // Determine targetId from URL, selectedOrder or state
+    const targetId = orderIdFromUrl || selectedOrder?.order_id || selectedOrder?.orderId || selectedOrder?.id;
+
+    // Fast initial hydrate from memory
     if (selectedOrder) {
       setOrderData(selectedOrder);
       setIsLoading(false);
-      return;
+    } else if (orders && orders.length > 0 && targetId) {
+      const found = orders.find(o => 
+        (o.id === targetId) || 
+        (o.orderId === targetId) || 
+        (o.order_id === targetId)
+      );
+      if (found) {
+        setOrderData(found);
+        setIsLoading(false);
+      }
     }
 
-    const findAndFetchOrder = async () => {
-      setIsLoading(true);
-      const targetId = orderIdFromUrl;
-
-      // 1. Check in context orders first
-      if (orders && orders.length > 0 && targetId) {
-        const found = orders.find(o => 
-          (o.id === targetId) || 
-          (o.orderId === targetId) || 
-          (o.order_id === targetId)
+    // Always fetch latest live status from backend so admin updates reflect in real-time
+    const fetchLatestOrder = async (isInitial = false) => {
+      if (!targetId) {
+        if (isInitial) setIsLoading(false);
+        return;
+      }
+      try {
+        const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+          typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+            ? 'https://nuts-and-spices-dqzp.onrender.com'
+            : ''
         );
-        if (found) {
-          setOrderData(found);
-          setIsLoading(false);
-          return;
-        }
-      }
+        const token = localStorage.getItem('nuts_spices_auth_token');
+        const guestPhone = (localStorage.getItem('last_order_phone') || '').replace(/\D/g, '');
+        const phone4Param = guestPhone ? `?phone4=${guestPhone.slice(-4)}` : '';
 
-      // 2. Fetch directly from API
-      if (targetId) {
-        try {
-          const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
-            typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-              ? 'https://nuts-and-spices-dqzp.onrender.com'
-              : ''
-          );
-          const token = localStorage.getItem('nuts_spices_auth_token');
-          const guestPhone = (localStorage.getItem('last_order_phone') || '').replace(/\D/g, '');
-          const phone4Param = guestPhone ? `?phone4=${guestPhone.slice(-4)}` : '';
-
-          const res = await fetch(`${BASE}/api/orders/${targetId}${phone4Param}`, {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-          });
-          const data = await res.json();
-          if (data && data.success && data.order) {
-            setOrderData(data.order);
+        const res = await fetch(`${BASE}/api/orders/${targetId}${phone4Param}`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+        const data = await res.json();
+        if (data && data.success && data.order) {
+          setOrderData(data.order);
+          if (setSelectedOrder) {
+            setSelectedOrder(prev => (prev && (prev.id === targetId || prev.order_id === targetId || prev.orderId === targetId) ? { ...prev, ...data.order } : prev));
           }
-        } catch (err) {
-          console.warn('Could not fetch order from API:', err);
         }
+      } catch (err) {
+        console.warn('Could not fetch latest order from API:', err);
+      } finally {
+        if (isInitial) setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
-    findAndFetchOrder();
-  }, [selectedOrder, orders]);
+    fetchLatestOrder(!selectedOrder && !orderData);
+
+    // Auto-poll every 3.5 seconds to instantly reflect Admin status changes live without manual page reload
+    const pollInterval = setInterval(() => {
+      fetchLatestOrder(false);
+    }, 3500);
+
+    return () => clearInterval(pollInterval);
+  }, [selectedOrder?.order_id, selectedOrder?.id, orders]);
 
   // Check if order is DELIVERED and prompt customer feedback popup
   useEffect(() => {
@@ -663,7 +672,7 @@ export default function OrderDetailsPage() {
                 return (
                   <div 
                     className="absolute left-8 top-6 h-1.5 bg-gradient-to-r from-[#128C7E] to-[#075E54] rounded-full transition-all duration-700 -z-0"
-                    style={{ width: `calc(${progressPercent}% * (1 - 64px / 100%))` }}
+                    style={{ width: isCancelled ? '0%' : `calc((100% - 4rem) * ${progressPercent / 100})` }}
                   />
                 );
               })()}
