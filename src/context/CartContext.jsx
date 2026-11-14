@@ -132,7 +132,7 @@ export const CartProvider = ({ children }) => {
     return sanitizeProductList(PRODUCTS);
   });
 
-  // 3. CATEGORIES STATE (Session Cached: 1-time backend load, instant page switches, auto-clears on tab close)
+  // 3. CATEGORIES STATE (Authoritative: only categories configured in Admin are shown)
   const [categories, setCategories] = useState(() => {
     try {
       const storedVer = localStorage.getItem('nuts_spices_catalog_version');
@@ -140,7 +140,7 @@ export const CartProvider = ({ children }) => {
         const saved = sessionStorage.getItem('nuts_spices_categories') || localStorage.getItem('nuts_spices_categories');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 3) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
             return parsed.map(c => ({
               ...c,
               image: (!c.image || c.image.includes('unsplash.com')) ? (c.id === 'all' ? '/images/combo_banner.jpg' : '/images/products/product_1.jpg') : c.image,
@@ -150,22 +150,15 @@ export const CartProvider = ({ children }) => {
         }
       }
     } catch {}
-    const defaultCats = CATEGORIES.map(c => ({
-      ...c,
-      isPremium: c.isPremium !== undefined ? c.isPremium : (c.id !== 'all')
-    }));
-    
-    if (!defaultCats.find(c => c.id === 'featured-today')) {
-      defaultCats.splice(1, 0, {
-        id: "featured-today",
-        name: "Featured Today",
-        icon: "⭐",
+    return [
+      {
+        id: "all",
+        name: "All Products",
+        icon: "✨",
         image: "/images/combo_banner.jpg",
-        isPremium: true
-      });
-    }
-    
-    return defaultCats;
+        isPremium: false
+      }
+    ];
   });
 
   const productsRef = useRef(products);
@@ -730,19 +723,18 @@ export const CartProvider = ({ children }) => {
             });
           }
           if (Array.isArray(cloudData.categories) && cloudData.categories.length > 0) {
-            setCategories(prevCats => {
-              const cloudCatMap = new Map(cloudData.categories.map(c => [c.id, c]));
-              (prevCats || []).forEach(c => {
-                if (c && c.id && !cloudCatMap.has(c.id)) {
-                  cloudCatMap.set(c.id, c);
-                }
-              });
-              const mergedCats = Array.from(cloudCatMap.values());
+            setCategories(() => {
+              // Strictly Authoritative: ONLY show categories configured by Admin in TiDB Cloud
+              const adminOnlyCats = cloudData.categories.map(c => ({
+                ...c,
+                image: (!c.image || c.image.includes('unsplash.com')) ? (c.id === 'all' ? '/images/combo_banner.jpg' : '/images/products/product_1.jpg') : c.image,
+                isPremium: c.isPremium !== undefined ? c.isPremium : (c.id !== 'all')
+              }));
               try { 
-                sessionStorage.setItem('nuts_spices_categories', JSON.stringify(mergedCats));
-                localStorage.setItem('nuts_spices_categories', JSON.stringify(mergedCats));
+                sessionStorage.setItem('nuts_spices_categories', JSON.stringify(adminOnlyCats));
+                localStorage.setItem('nuts_spices_categories', JSON.stringify(adminOnlyCats));
               } catch {}
-              return mergedCats;
+              return adminOnlyCats;
             });
           }
           if (cloudData.storeSettings && typeof cloudData.storeSettings === 'object') {
