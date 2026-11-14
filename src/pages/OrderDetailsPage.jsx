@@ -352,7 +352,7 @@ export default function OrderDetailsPage() {
   const normalizedStatus = currentStatus.replace(/[\s-]+/g, '_');
   const isCancelled = normalizedStatus === 'cancelled';
   const isDelivered = normalizedStatus === 'delivered';
-  const canCancel = ['pending', 'new', 'confirmed'].includes(normalizedStatus);
+  const canCancel = ['pending', 'new', 'prepare', 'preparing'].includes(normalizedStatus);
 
   // 5-stage enterprise tracker definition
   const TRACKER_STEPS = [
@@ -371,8 +371,8 @@ export default function OrderDetailsPage() {
       description: 'Vacuum sealed in moisture-proof zip bags',
       time: 'Facility Hub',
       icon: Package,
-      isCompleted: !isCancelled && ['confirmed', 'processing', 'preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
-      isCurrent: normalizedStatus === 'confirmed' || normalizedStatus === 'processing'
+      isCompleted: !isCancelled && ['prepare', 'preparing', 'confirmed', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCurrent: ['prepare', 'preparing'].includes(normalizedStatus)
     },
     {
       id: 'shipped',
@@ -380,8 +380,8 @@ export default function OrderDetailsPage() {
       description: `In transit via Express Logistics (${awbNumber})`,
       time: 'Central Hub',
       icon: Truck,
-      isCompleted: !isCancelled && ['preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
-      isCurrent: normalizedStatus === 'preparing' || normalizedStatus === 'shipped'
+      isCompleted: !isCancelled && ['confirmed', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCurrent: ['confirmed', 'shipped'].includes(normalizedStatus)
     },
     {
       id: 'out_for_delivery',
@@ -407,8 +407,8 @@ export default function OrderDetailsPage() {
     if (isCancelled) return 'Cancelled';
     if (isDelivered) return 'Delivered';
     if (normalizedStatus === 'out_for_delivery') return 'Out for Delivery';
-    if (['preparing', 'shipped'].includes(normalizedStatus)) return 'Dispatched (Air Express)';
-    if (normalizedStatus === 'confirmed') return 'Hygienically Packed';
+    if (['confirmed', 'shipped'].includes(normalizedStatus)) return 'Dispatched (Air Express)';
+    if (['prepare', 'preparing'].includes(normalizedStatus)) return 'Hygienically Packed';
     if (['new', 'pending'].includes(normalizedStatus)) return 'Order Confirmed';
     return currentStatus.replace(/_/g, ' ');
   };
@@ -416,8 +416,8 @@ export default function OrderDetailsPage() {
   const getDisplayStatusStyle = () => {
     if (isCancelled) return 'bg-gray-100 text-gray-700 border-gray-300';
     if (isDelivered) return 'bg-emerald-50 text-emerald-800 border-emerald-200 ring-2 ring-emerald-500/20';
-    if (['preparing', 'shipped', 'out_for_delivery'].includes(normalizedStatus)) return 'bg-blue-50 text-blue-800 border-blue-200 ring-2 ring-blue-500/20';
-    if (normalizedStatus === 'confirmed') return 'bg-emerald-50 text-emerald-800 border-emerald-200 ring-2 ring-emerald-500/20';
+    if (['confirmed', 'shipped', 'out_for_delivery'].includes(normalizedStatus)) return 'bg-blue-50 text-blue-800 border-blue-200 ring-2 ring-blue-500/20';
+    if (['prepare', 'preparing'].includes(normalizedStatus)) return 'bg-purple-50 text-purple-800 border-purple-200 ring-2 ring-purple-500/20';
     return 'bg-amber-50 text-amber-800 border-amber-200';
   };
 

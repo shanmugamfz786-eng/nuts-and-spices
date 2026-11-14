@@ -507,13 +507,14 @@ export const updateOrderStatus = async (req, res) => {
 
     const normalizedStatus = (status || '').toLowerCase().trim();
     const validTransitions = {
-      pending: ['new', 'confirmed', 'cancelled'],
-      new: ['confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
-      confirmed: ['new', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
-      preparing: ['new', 'confirmed', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
-      shipped: ['preparing', 'out for delivery', 'delivered', 'cancelled'],
-      'out for delivery': ['preparing', 'shipped', 'delivered', 'cancelled'],
-      delivered: [],
+      pending: ['new', 'preparing', 'prepare', 'confirmed', 'cancelled'],
+      new: ['preparing', 'prepare', 'confirmed', 'out for delivery', 'delivered', 'cancelled'],
+      prepare: ['new', 'preparing', 'confirmed', 'out for delivery', 'delivered', 'cancelled'],
+      preparing: ['new', 'prepare', 'confirmed', 'out for delivery', 'delivered', 'cancelled'],
+      confirmed: ['new', 'preparing', 'prepare', 'out for delivery', 'delivered', 'cancelled'],
+      shipped: ['preparing', 'confirmed', 'out for delivery', 'delivered', 'cancelled'],
+      'out for delivery': ['preparing', 'confirmed', 'delivered', 'cancelled'],
+      delivered: ['out for delivery', 'cancelled'],
       cancelled: []
     };
 

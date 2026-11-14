@@ -28,7 +28,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     }
   };
 
-  const statusOptions = ['All Statuses', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'Unpaid Attempts'];
+  const statusOptions = ['All Statuses', 'NEW', 'PREPARING', 'CONFIRMED', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'Unpaid Attempts'];
 
   // Normalize order items for consistent rendering
   const normalizedOrders = (orders || []).map(o => ({
@@ -87,10 +87,11 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
         return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
       case 'NEW':
         return 'bg-amber-100 text-amber-800 font-bold hover:bg-amber-200 border border-amber-300/60 shadow-2xs';
-      case 'CONFIRMED':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200 font-bold';
+      case 'PREPARE':
       case 'PREPARING':
         return 'bg-purple-100 text-purple-800 hover:bg-purple-200 font-bold';
+      case 'CONFIRMED':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200 font-bold';
       case 'OUT FOR DELIVERY':
         return 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 font-bold';
       case 'DELIVERED':
@@ -270,11 +271,11 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                             }}
                             className={`appearance-none text-[11px] font-semibold rounded-md pl-3 pr-6 py-1 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(currentStatus)}`}
                           >
-                            <option value="new" className="bg-white text-gray-800">NEW</option>
-                            <option value="confirmed" className="bg-white text-gray-800">Confirmed (Hygienically Packed)</option>
-                            <option value="preparing" className="bg-white text-gray-800">Preparing (Dispatched)</option>
-                            <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
-                            <option value="delivered" className="bg-white text-gray-800">Delivered</option>
+                            <option value="new" className="bg-white text-gray-800">1. New (Confirmed)</option>
+                            <option value="preparing" className="bg-white text-gray-800">2. Prepare (Hygienically Packed)</option>
+                            <option value="confirmed" className="bg-white text-gray-800">3. Confirmed (Dispatched via Air Express)</option>
+                            <option value="out for delivery" className="bg-white text-gray-800">4. Out for Delivery</option>
+                            <option value="delivered" className="bg-white text-gray-800">5. Delivered</option>
                             <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
                           </select>
                           <ChevronDown className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
@@ -410,11 +411,11 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                     }}
                     className={`appearance-none text-xs font-bold rounded-lg pl-3 pr-7 py-2 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(selectedOrder.status)}`}
                   >
-                    <option value="new" className="bg-white text-gray-800">NEW</option>
-                    <option value="confirmed" className="bg-white text-gray-800">Confirmed (Hygienically Packed)</option>
-                    <option value="preparing" className="bg-white text-gray-800">Preparing (Dispatched)</option>
-                    <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
-                    <option value="delivered" className="bg-white text-gray-800">Delivered</option>
+                    <option value="new" className="bg-white text-gray-800">1. New (Confirmed)</option>
+                    <option value="preparing" className="bg-white text-gray-800">2. Prepare (Hygienically Packed)</option>
+                    <option value="confirmed" className="bg-white text-gray-800">3. Confirmed (Dispatched via Air Express)</option>
+                    <option value="out for delivery" className="bg-white text-gray-800">4. Out for Delivery</option>
+                    <option value="delivered" className="bg-white text-gray-800">5. Delivered</option>
                     <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
                   </select>
                   <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
