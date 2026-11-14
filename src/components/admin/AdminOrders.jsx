@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { 
   Search, Trash2, Eye, Phone, MapPin, 
-  Calendar, X, MessageSquare, ChevronDown, Check, RefreshCw
+  Calendar, X, MessageSquare, ChevronDown, Check, RefreshCw, ArrowRight
 } from 'lucide-react';
 
 export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
   const { orders, updateOrderStatus, deleteOrder, storeSettings, refreshOrders } = useCart();
   const [activeFilter, setActiveFilter] = useState('All Statuses');
   const [searchTerm, setSearchTerm] = useState('');
-  const [pendingStatusUpdates, setPendingStatusUpdates] = useState({});
+  const [statusConfirmModal, setStatusConfirmModal] = useState(null);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   // Fetch fresh orders on component mount
@@ -210,7 +210,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                   const formattedDate = formatDate(ord.date);
                   const displayCity = ord.city || ord.address || 'Location';
                   const isCancelled = (ord.status || '').toLowerCase() === 'cancelled';
-                  const currentStatus = pendingStatusUpdates[ord.orderId] || ord.status || 'pending';
+                  const currentStatus = ord.status || 'pending';
 
                   return (
                     <tr 
@@ -254,37 +254,30 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
 
                       {/* Status Dropdown Pill */}
                       <td className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center gap-2">
-                          <div className="relative inline-block">
-                            <select
-                              value={currentStatus.toLowerCase()}
-                              onChange={(e) => setPendingStatusUpdates({ ...pendingStatusUpdates, [ord.orderId]: e.target.value })}
-                              className={`appearance-none text-[11px] font-semibold rounded-md pl-3 pr-6 py-1 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(currentStatus)}`}
-                            >
-                              <option value="new" className="bg-white text-gray-800">NEW</option>
-                              <option value="confirmed" className="bg-white text-gray-800">Confirmed (Hygienically Packed)</option>
-                              <option value="preparing" className="bg-white text-gray-800">Preparing (Dispatched)</option>
-                              <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
-                              <option value="delivered" className="bg-white text-gray-800">Delivered</option>
-                              <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
-                            </select>
-                            <ChevronDown className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
-                          </div>
-                          {pendingStatusUpdates[ord.orderId] && pendingStatusUpdates[ord.orderId].toLowerCase() !== (ord.status || '').toLowerCase() && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateOrderStatus(ord.orderId, pendingStatusUpdates[ord.orderId]);
-                                const newPending = { ...pendingStatusUpdates };
-                                delete newPending[ord.orderId];
-                                setPendingStatusUpdates(newPending);
-                              }}
-                              title="Confirm Status Update"
-                              className="p-1 text-green-600 bg-green-50 hover:bg-green-100 rounded-md transition-colors cursor-pointer"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                        <div className="relative inline-block">
+                          <select
+                            value={currentStatus.toLowerCase()}
+                            onChange={(e) => {
+                              const nextVal = e.target.value;
+                              if (nextVal.toLowerCase() !== currentStatus.toLowerCase()) {
+                                setStatusConfirmModal({
+                                  orderId: ord.orderId,
+                                  currentStatus,
+                                  newStatus: nextVal,
+                                  isInsideModal: false
+                                });
+                              }
+                            }}
+                            className={`appearance-none text-[11px] font-semibold rounded-md pl-3 pr-6 py-1 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(currentStatus)}`}
+                          >
+                            <option value="new" className="bg-white text-gray-800">NEW</option>
+                            <option value="confirmed" className="bg-white text-gray-800">Confirmed (Hygienically Packed)</option>
+                            <option value="preparing" className="bg-white text-gray-800">Preparing (Dispatched)</option>
+                            <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
+                            <option value="delivered" className="bg-white text-gray-800">Delivered</option>
+                            <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
+                          </select>
+                          <ChevronDown className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                         </div>
                       </td>
 
@@ -402,9 +395,20 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <select
-                    value={(pendingStatusUpdates[selectedOrder.orderId] || selectedOrder.status || 'pending').toLowerCase()}
-                    onChange={(e) => setPendingStatusUpdates({ ...pendingStatusUpdates, [selectedOrder.orderId]: e.target.value })}
-                    className={`appearance-none text-xs font-bold rounded-lg pl-3 pr-7 py-2 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(pendingStatusUpdates[selectedOrder.orderId] || selectedOrder.status)}`}
+                    value={(selectedOrder.status || 'pending').toLowerCase()}
+                    onChange={(e) => {
+                      const nextVal = e.target.value;
+                      const cur = (selectedOrder.status || 'pending').toLowerCase();
+                      if (nextVal.toLowerCase() !== cur) {
+                        setStatusConfirmModal({
+                          orderId: selectedOrder.orderId,
+                          currentStatus: cur,
+                          newStatus: nextVal,
+                          isInsideModal: true
+                        });
+                      }
+                    }}
+                    className={`appearance-none text-xs font-bold rounded-lg pl-3 pr-7 py-2 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(selectedOrder.status)}`}
                   >
                     <option value="new" className="bg-white text-gray-800">NEW</option>
                     <option value="confirmed" className="bg-white text-gray-800">Confirmed (Hygienically Packed)</option>
@@ -415,23 +419,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                   </select>
                   <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                 </div>
-                {pendingStatusUpdates[selectedOrder.orderId] && pendingStatusUpdates[selectedOrder.orderId].toLowerCase() !== (selectedOrder.status || '').toLowerCase() && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const targetStatus = pendingStatusUpdates[selectedOrder.orderId].toLowerCase();
-                      updateOrderStatus(selectedOrder.orderId, targetStatus);
-                      setSelectedOrder({ ...selectedOrder, status: targetStatus });
-                      const newPending = { ...pendingStatusUpdates };
-                      delete newPending[selectedOrder.orderId];
-                      setPendingStatusUpdates(newPending);
-                    }}
-                    title="Confirm Status Update"
-                    className="p-1.5 text-green-600 bg-green-50 hover:bg-green-100 rounded-md transition-colors cursor-pointer"
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -456,6 +443,61 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* STATUS UPDATE CONFIRMATION MODAL */}
+      {statusConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3D2314]/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-gray-200 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl my-auto text-gray-800 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto border border-blue-100">
+              <RefreshCw className="w-6 h-6" />
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className="text-lg font-black text-gray-900 tracking-tight">Confirm Status Update</h3>
+              <p className="text-xs text-gray-500">
+                Change status for Order <strong className="text-gray-900">#{statusConfirmModal.orderId}</strong>?
+              </p>
+            </div>
+
+            {/* Visual From -> To Transition Pills */}
+            <div className="bg-gray-50 p-3 rounded-xl border border-gray-200/80 flex items-center justify-center gap-2 text-xs">
+              <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold ${getStatusBadgeStyle(statusConfirmModal.currentStatus)}`}>
+                {statusConfirmModal.currentStatus.toUpperCase()}
+              </span>
+              <ArrowRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold ${getStatusBadgeStyle(statusConfirmModal.newStatus)}`}>
+                {statusConfirmModal.newStatus.toUpperCase()}
+              </span>
+            </div>
+
+            <p className="text-[11px] text-gray-400 leading-normal">
+              Customer tracking timeline will immediately update to reflect this status.
+            </p>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setStatusConfirmModal(null)}
+                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  const { orderId, newStatus, isInsideModal } = statusConfirmModal;
+                  await updateOrderStatus(orderId, newStatus);
+                  if (isInsideModal && selectedOrder) {
+                    setSelectedOrder({ ...selectedOrder, status: newStatus });
+                  }
+                  setStatusConfirmModal(null);
+                }}
+                className="flex-1 py-2.5 bg-[#128C7E] hover:bg-[#0e6f63] text-white font-extrabold rounded-xl text-xs shadow-md shadow-[#128C7E]/20 cursor-pointer transition-colors"
+              >
+                Confirm Update
+              </button>
+            </div>
           </div>
         </div>
       )}
