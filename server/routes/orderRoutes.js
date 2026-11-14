@@ -12,6 +12,7 @@ import { createOrderSchema, validateBody } from '../middleware/validationMiddlew
 const createOrderLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
+  skip: () => process.env.NODE_ENV === 'test',
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many order requests from this IP. Please try again after 15 minutes.' }
@@ -21,6 +22,7 @@ const createOrderLimiter = rateLimit({
 const getOrderLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 60, // 60 lookups per 15 min window per IP
+  skip: () => process.env.NODE_ENV === 'test',
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many order lookup requests. Please try again later.' }
