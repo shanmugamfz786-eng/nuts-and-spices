@@ -7,15 +7,13 @@ import crypto from 'crypto';
 
 export const ORDER_STATUS_TRANSITIONS = {
   pending: ['new', 'confirmed', 'cancelled'],
-  new: ['confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-  confirmed: ['new', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-  preparing: ['new', 'confirmed', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-  shipped: ['preparing', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-  'out for delivery': ['preparing', 'shipped', 'delivered', 'cancelled', 'refunded'],
-  delivered: ['refunded'],
-  cancelled: ['refund_pending', 'refunded'],
-  refund_pending: ['refunded'],
-  refunded: []
+  new: ['confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
+  confirmed: ['new', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
+  preparing: ['new', 'confirmed', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
+  shipped: ['preparing', 'out for delivery', 'delivered', 'cancelled'],
+  'out for delivery': ['preparing', 'shipped', 'delivered', 'cancelled'],
+  delivered: [],
+  cancelled: []
 };
 
 export class OrderService {

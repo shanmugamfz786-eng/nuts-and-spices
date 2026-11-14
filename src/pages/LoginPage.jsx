@@ -400,7 +400,6 @@ export default function LoginPage() {
                   {myOrders.map((order, idx) => {
                     const orderDate = new Date(order.created_at || order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                     const total = Number(order.total_amount || order.totalAmount || order.total || 0).toLocaleString('en-IN');
-                    const isRefunded = (order.status || '').toLowerCase() === 'refunded';
                     const isCancelled = (order.status || '').toLowerCase() === 'cancelled';
                     const canCancel = ['pending', 'new', 'confirmed'].includes((order.status || '').toLowerCase());
 
@@ -412,16 +411,13 @@ export default function LoginPage() {
                         key={order.id} 
                         onClick={() => navigate('order-details', { order, orderId: order.order_id || order.orderId || order.id })}
                         className={`p-5 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4 border ${
-                          isRefunded
-                            ? 'bg-red-50/95 border-red-500 shadow-red-100 ring-2 ring-red-400/30'
-                            : isCancelled
+                          isCancelled
                             ? 'bg-gray-50/90 border-gray-300'
                             : 'bg-white border-[#E5E7EB] hover:border-[#128C7E]'
                         }`}
                       >
                         <div className="flex items-center gap-4 sm:gap-6">
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
-                            isRefunded ? 'bg-red-200 text-red-700' :
                             isCancelled ? 'bg-gray-200 text-gray-600' :
                             ['pending', 'new'].includes(order.status) ? 'bg-amber-100 text-amber-500' : 
                             order.status === 'delivered' ? 'bg-green-100 text-green-500' : 'bg-blue-100 text-blue-500'
@@ -431,19 +427,14 @@ export default function LoginPage() {
                           
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className={`text-xs font-black tracking-widest font-mono block ${isRefunded ? 'text-red-900 font-extrabold' : 'text-[#000000]'}`}>
+                              <span className="text-xs font-black tracking-widest font-mono block text-[#000000]">
                                 #{order.order_id || order.orderId || order.id}
                               </span>
-                              {isRefunded && (
-                                <span className="px-2 py-0.5 bg-red-600 text-white text-[9px] font-black rounded uppercase tracking-wider">
-                                  Refunded
-                                </span>
-                              )}
                             </div>
-                            <p className={`text-xs font-bold flex items-center gap-2 ${isRefunded ? 'text-red-700' : 'text-[#8C7A6B]'}`}>
+                            <p className="text-xs font-bold flex items-center gap-2 text-[#8C7A6B]">
                               {orderDate}
                               <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                              <span className={isRefunded ? 'text-red-900 font-black' : 'text-[#000000]'}>₹{total}</span>
+                              <span className="text-[#000000]">₹{total}</span>
                             </p>
                           </div>
                         </div>
@@ -466,7 +457,6 @@ export default function LoginPage() {
                             </button>
                           )}
                           <span className={`text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 ${
-                            isRefunded ? 'bg-red-600 text-white shadow-sm' :
                             isCancelled ? 'bg-gray-200 text-gray-700 border border-gray-300' :
                             ['pending', 'new'].includes(order.status) ? 'bg-amber-50 text-amber-700 border border-amber-200' : 
                             order.status === 'delivered' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -474,9 +464,7 @@ export default function LoginPage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                             {order.status}
                           </span>
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                            isRefunded ? 'bg-red-100 text-red-600 group-hover:bg-red-600 group-hover:text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-[#128C7E] group-hover:text-white'
-                          }`}>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center transition-colors bg-gray-50 text-gray-400 group-hover:bg-[#128C7E] group-hover:text-white">
                             <ChevronRight className="w-4 h-4" />
                           </div>
                         </div>

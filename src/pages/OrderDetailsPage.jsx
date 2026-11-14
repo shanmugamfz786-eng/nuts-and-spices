@@ -351,7 +351,6 @@ export default function OrderDetailsPage() {
   const currentStatus = (orderData.status || 'new').toLowerCase().trim();
   const normalizedStatus = currentStatus.replace(/[\s-]+/g, '_');
   const isCancelled = normalizedStatus === 'cancelled';
-  const isRefunded = normalizedStatus === 'refunded';
   const isDelivered = normalizedStatus === 'delivered';
   const canCancel = ['pending', 'new', 'confirmed'].includes(normalizedStatus);
 
@@ -363,7 +362,7 @@ export default function OrderDetailsPage() {
       description: 'Order logged & payment verified in ERP',
       time: rawDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
       icon: CheckCircle2,
-      isCompleted: !isCancelled && !isRefunded,
+      isCompleted: !isCancelled,
       isCurrent: ['pending', 'new'].includes(normalizedStatus)
     },
     {
@@ -372,7 +371,7 @@ export default function OrderDetailsPage() {
       description: 'Vacuum sealed in moisture-proof zip bags',
       time: 'Facility Hub',
       icon: Package,
-      isCompleted: !isCancelled && !isRefunded && ['confirmed', 'processing', 'preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCompleted: !isCancelled && ['confirmed', 'processing', 'preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
       isCurrent: normalizedStatus === 'confirmed' || normalizedStatus === 'processing'
     },
     {
@@ -381,7 +380,7 @@ export default function OrderDetailsPage() {
       description: `In transit via Express Logistics (${awbNumber})`,
       time: 'Central Hub',
       icon: Truck,
-      isCompleted: !isCancelled && !isRefunded && ['preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCompleted: !isCancelled && ['preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
       isCurrent: normalizedStatus === 'preparing' || normalizedStatus === 'shipped'
     },
     {
@@ -390,7 +389,7 @@ export default function OrderDetailsPage() {
       description: 'Courier agent on route to doorstep',
       time: 'Local Hub',
       icon: Navigation,
-      isCompleted: !isCancelled && !isRefunded && ['out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCompleted: !isCancelled && ['out_for_delivery', 'delivered'].includes(normalizedStatus),
       isCurrent: normalizedStatus === 'out_for_delivery'
     },
     {
@@ -399,13 +398,12 @@ export default function OrderDetailsPage() {
       description: 'Safely handed over with OTP verification',
       time: isDelivered ? 'Completed' : 'Expected soon',
       icon: Award,
-      isCompleted: !isCancelled && !isRefunded && isDelivered,
+      isCompleted: !isCancelled && isDelivered,
       isCurrent: isDelivered
     }
   ];
 
   const getDisplayStatusLabel = () => {
-    if (isRefunded) return 'Refunded';
     if (isCancelled) return 'Cancelled';
     if (isDelivered) return 'Delivered';
     if (normalizedStatus === 'out_for_delivery') return 'Out for Delivery';
@@ -416,7 +414,6 @@ export default function OrderDetailsPage() {
   };
 
   const getDisplayStatusStyle = () => {
-    if (isRefunded) return 'bg-red-50 text-red-700 border-red-200';
     if (isCancelled) return 'bg-gray-100 text-gray-700 border-gray-300';
     if (isDelivered) return 'bg-emerald-50 text-emerald-800 border-emerald-200 ring-2 ring-emerald-500/20';
     if (['preparing', 'shipped', 'out_for_delivery'].includes(normalizedStatus)) return 'bg-blue-50 text-blue-800 border-blue-200 ring-2 ring-blue-500/20';
@@ -489,7 +486,7 @@ export default function OrderDetailsPage() {
               <div className="flex items-center gap-3 flex-wrap">
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-2xs ${getDisplayStatusStyle()}`}>
                   <span className={`w-2 h-2 rounded-full ${
-                    isRefunded ? 'bg-red-500' : isCancelled ? 'bg-gray-500' : isDelivered ? 'bg-emerald-500' : 'bg-current animate-pulse'
+                    isCancelled ? 'bg-gray-500' : isDelivered ? 'bg-emerald-500' : 'bg-current animate-pulse'
                   }`} />
                   {getDisplayStatusLabel()}
                 </span>
@@ -636,9 +633,9 @@ export default function OrderDetailsPage() {
                 <div className="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
                   <span className="text-[10px] font-black uppercase text-gray-400">Step 3</span>
                   <p className="font-bold text-black flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Refund Processed
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Inventory Restocked
                   </p>
-                  <span className="text-[10px] text-gray-500">Credited to source account</span>
+                  <span className="text-[10px] text-gray-500">Reconciled at central hub</span>
                 </div>
 
                 <div className="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
@@ -648,20 +645,6 @@ export default function OrderDetailsPage() {
                   </p>
                   <span className="text-[10px] text-gray-500">Ref: HNS-REC-{orderId}</span>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {isRefunded && (
-            <div className="p-5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start sm:items-center gap-4">
-              <div className="w-11 h-11 rounded-2xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-md">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-sm font-black">Full Refund Credited</p>
-                <p className="text-xs text-rose-700 leading-relaxed">
-                  ₹{totalAmount.toLocaleString('en-IN')} has been refunded back to your bank/UPI account under reference #{orderId}.
-                </p>
               </div>
             </div>
           )}
@@ -676,7 +659,7 @@ export default function OrderDetailsPage() {
               {/* Colored progress line */}
               {(() => {
                 const completedCount = TRACKER_STEPS.filter(s => s.isCompleted).length;
-                const progressPercent = isCancelled || isRefunded ? 0 : Math.max(0, (completedCount - 1) / (TRACKER_STEPS.length - 1)) * 100;
+                const progressPercent = isCancelled ? 0 : Math.max(0, (completedCount - 1) / (TRACKER_STEPS.length - 1)) * 100;
                 return (
                   <div 
                     className="absolute left-8 top-6 h-1.5 bg-gradient-to-r from-[#128C7E] to-[#075E54] rounded-full transition-all duration-700 -z-0"
@@ -688,7 +671,7 @@ export default function OrderDetailsPage() {
               {TRACKER_STEPS.map((step) => {
                 const Icon = step.icon;
                 const isPassed = step.isCompleted;
-                const isCurrent = step.isCurrent && !isCancelled && !isRefunded;
+                const isCurrent = step.isCurrent && !isCancelled;
 
                 return (
                   <div key={step.id} className="relative z-10 flex flex-col items-center text-center max-w-[170px]">
@@ -725,7 +708,7 @@ export default function OrderDetailsPage() {
             {TRACKER_STEPS.map((step, idx) => {
               const Icon = step.icon;
               const isPassed = step.isCompleted;
-              const isCurrent = step.isCurrent && !isCancelled && !isRefunded;
+              const isCurrent = step.isCurrent && !isCancelled;
               const isLast = idx === TRACKER_STEPS.length - 1;
 
               return (
@@ -1292,20 +1275,20 @@ export default function OrderDetailsPage() {
 
                   <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-xs text-left space-y-2">
                     <div className="flex justify-between text-gray-600">
-                      <span>Refund Status:</span>
-                      <strong className="text-emerald-700">Initiated (100% Full Refund)</strong>
+                      <span>Cancellation Status:</span>
+                      <strong className="text-rose-700">Confirmed & Closed</strong>
                     </div>
                     <div className="flex justify-between text-gray-600">
-                      <span>Refund Amount:</span>
+                      <span>Order Value:</span>
                       <strong className="font-mono text-black">₹{totalAmount.toLocaleString('en-IN')}</strong>
                     </div>
                     <div className="flex justify-between text-gray-600">
-                      <span>Settlement Mode:</span>
-                      <span className="uppercase text-black font-semibold">{orderData.payment_method || 'Source Bank / UPI'}</span>
+                      <span>Inventory:</span>
+                      <span className="text-black font-semibold">Restocked to Hub</span>
                     </div>
                     <div className="flex justify-between text-gray-600">
-                      <span>Reference ARN:</span>
-                      <span className="font-mono text-gray-700">REF-HNS-{orderId}</span>
+                      <span>Reference ID:</span>
+                      <span className="font-mono text-gray-700">CAN-HNS-{orderId}</span>
                     </div>
                   </div>
 
@@ -1406,10 +1389,10 @@ export default function OrderDetailsPage() {
                       />
                     </div>
 
-                    {/* Refund Assurance Box */}
+                    {/* Cancellation Policy Box */}
                     <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-200/80 space-y-1.5 text-[11px]">
                       <div className="flex justify-between items-center text-gray-600">
-                        <span>Refundable Amount:</span>
+                        <span>Order Total:</span>
                         <span className="font-black font-mono text-black text-xs">₹{totalAmount.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between items-center text-gray-600">
@@ -1417,8 +1400,8 @@ export default function OrderDetailsPage() {
                         <span className="font-bold text-emerald-700">₹0 (ZERO FEE)</span>
                       </div>
                       <div className="flex justify-between items-center text-gray-600">
-                        <span>Estimated Credit:</span>
-                        <span className="font-semibold text-gray-800">Instant to 24–48 Business Hours</span>
+                        <span>Dispatch Notice:</span>
+                        <span className="font-semibold text-gray-800">Shipment will be stopped immediately</span>
                       </div>
                     </div>
 

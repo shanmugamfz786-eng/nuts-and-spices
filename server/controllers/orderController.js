@@ -508,14 +508,13 @@ export const updateOrderStatus = async (req, res) => {
     const normalizedStatus = (status || '').toLowerCase().trim();
     const validTransitions = {
       pending: ['new', 'confirmed', 'cancelled'],
-      new: ['confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-      confirmed: ['new', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-      preparing: ['new', 'confirmed', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-      shipped: ['preparing', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
-      'out for delivery': ['preparing', 'shipped', 'delivered', 'cancelled', 'refunded'],
-      delivered: ['refunded'],
-      cancelled: ['refund_pending', 'refunded'],
-      refunded: []
+      new: ['confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
+      confirmed: ['new', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
+      preparing: ['new', 'confirmed', 'shipped', 'out for delivery', 'delivered', 'cancelled'],
+      shipped: ['preparing', 'out for delivery', 'delivered', 'cancelled'],
+      'out for delivery': ['preparing', 'shipped', 'delivered', 'cancelled'],
+      delivered: [],
+      cancelled: []
     };
 
     const orders = await queryDb('SELECT * FROM orders WHERE id = ? OR order_id = ? LIMIT 1', [id, id]);
@@ -538,13 +537,7 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // If order was paid and is cancelled/refunded, update payment_status accordingly
-    let paymentStatusUpdateSql = '';
-    if ((normalizedStatus === 'cancelled' || normalizedStatus === 'refunded') && currentOrder.payment_status === 'paid') {
-      paymentStatusUpdateSql = ", payment_status = 'refund_pending'";
-    }
-
-    await queryDb(`UPDATE orders SET status = ? ${paymentStatusUpdateSql} WHERE id = ? OR order_id = ?`, [normalizedStatus, id, id]);
+    await queryDb(`UPDATE orders SET status = ? WHERE id = ? OR order_id = ?`, [normalizedStatus, id, id]);
 
     const memOrder = memoryStore.orders.find(o => o.id === id || o.orderId === id);
     if (memOrder) memOrder.status = normalizedStatus;
@@ -679,27 +672,17 @@ export const cancelOrder = async (req, res) => {
        return res.status(400).json({ success: false, message: 'Only pending, new, or confirmed orders can be cancelled' });
     }
 
-    let paymentStatusSql = '';
-    if (order.payment_status === 'paid') {
-      paymentStatusSql = ", payment_status = 'refund_pending'";
-    }
-
-    await queryDb(`UPDATE orders SET status = 'cancelled' ${paymentStatusSql} WHERE id = ? OR order_id = ?`, [id, id]);
+    await queryDb(`UPDATE orders SET status = 'cancelled' WHERE id = ? OR order_id = ?`, [id, id]);
 
     // Also update in memoryStore if present
     const memoryIdx = memoryStore.orders.findIndex(o => o.id === id || o.orderId === id);
     if (memoryIdx !== -1) {
       memoryStore.orders[memoryIdx].status = 'cancelled';
-      if (order.payment_status === 'paid') {
-        memoryStore.orders[memoryIdx].payment_status = 'refund_pending';
-      }
     }
 
     res.json({
       success: true,
-      message: order.payment_status === 'paid'
-        ? 'Order cancelled successfully. Refund has been initiated.'
-        : 'Order cancelled successfully'
+      message: 'Order cancelled successfully'
     });
   } catch (error) {
     console.error('Cancel order error:', error);

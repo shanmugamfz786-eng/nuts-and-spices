@@ -28,7 +28,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     }
   };
 
-  const statusOptions = ['All Statuses', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED', 'Unpaid Attempts'];
+  const statusOptions = ['All Statuses', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'Unpaid Attempts'];
 
   // Normalize order items for consistent rendering
   const normalizedOrders = (orders || []).map(o => ({
@@ -71,16 +71,12 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     return matchesFilter && matchesSearch;
   });
 
-  // Prioritize CANCELLED orders at the top, then REFUNDED orders, then by newest
+  // Prioritize CANCELLED orders at the top, then by newest
   const sortedOrders = [...filteredOrders].sort((a, b) => {
     const aIsCancelled = (a.status || '').toLowerCase() === 'cancelled';
     const bIsCancelled = (b.status || '').toLowerCase() === 'cancelled';
     if (aIsCancelled && !bIsCancelled) return -1;
     if (!aIsCancelled && bIsCancelled) return 1;
-    const aIsRefunded = (a.status || '').toLowerCase() === 'refunded';
-    const bIsRefunded = (b.status || '').toLowerCase() === 'refunded';
-    if (aIsRefunded && !bIsRefunded) return -1;
-    if (!aIsRefunded && bIsRefunded) return 1;
     return new Date(b.date || 0) - new Date(a.date || 0);
   });
 
@@ -101,8 +97,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
         return 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold';
       case 'CANCELLED':
         return 'bg-rose-100 text-rose-800 hover:bg-rose-200 font-bold';
-      case 'REFUNDED':
-        return 'bg-red-600 text-white font-extrabold hover:bg-red-700 shadow-sm';
       default:
         return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
     }
@@ -174,7 +168,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               <option value="OUT FOR DELIVERY">Out for Delivery</option>
               <option value="DELIVERED">Delivered</option>
               <option value="CANCELLED">Cancelled</option>
-              <option value="REFUNDED">Refunded</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -217,7 +210,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                   const formattedDate = formatDate(ord.date);
                   const displayCity = ord.city || ord.address || 'Location';
                   const isCancelled = (ord.status || '').toLowerCase() === 'cancelled';
-                  const isRefunded = (ord.status || '').toLowerCase() === 'refunded';
                   const currentStatus = pendingStatusUpdates[ord.orderId] || ord.status || 'pending';
 
                   return (
@@ -226,7 +218,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                       onClick={() => setSelectedOrder(ord)}
                       className={`transition-colors cursor-pointer ${
                         isCancelled ? 'bg-rose-50/70 hover:bg-rose-100/70' :
-                        isRefunded ? 'bg-red-50/60 hover:bg-red-100/60' :
                         'hover:bg-gray-50/70'
                       }`}
                     >
@@ -238,11 +229,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                           {isCancelled && (
                             <span className="px-1.5 py-0.5 bg-rose-200 text-rose-800 text-[9px] font-black rounded uppercase">
                               Cancelled
-                            </span>
-                          )}
-                          {isRefunded && (
-                            <span className="px-1.5 py-0.5 bg-red-600 text-white text-[9px] font-black rounded uppercase">
-                              Refunded
                             </span>
                           )}
                         </div>
@@ -281,7 +267,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                               <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
                               <option value="delivered" className="bg-white text-gray-800">Delivered</option>
                               <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
-                              <option value="refunded" className="bg-white text-red-700 font-bold">REFUNDED</option>
                             </select>
                             <ChevronDown className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                           </div>
@@ -306,24 +291,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                       {/* Actions */}
                       <td className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-2">
-                          {isRefunded ? (
-                            <span className="px-2 py-1 bg-red-100 text-red-700 font-extrabold text-[10px] rounded-lg border border-red-300">
-                              ✓ Refunded
-                            </span>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (window.confirm(`Mark Order #${ord.orderId} as REFUNDED? Customer will see their order card turn RED.`)) {
-                                  updateOrderStatus(ord.orderId, 'refunded');
-                                }
-                              }}
-                              title="Refund Order"
-                              className="px-2.5 py-1 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 rounded-lg text-[10px] font-black transition-colors cursor-pointer"
-                            >
-                              Refund
-                            </button>
-                          )}
                           <button
                             onClick={() => setSelectedOrder(ord)}
                             title="View Order Details"
@@ -445,7 +412,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                     <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
                     <option value="delivered" className="bg-white text-gray-800">Delivered</option>
                     <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
-                    <option value="refunded" className="bg-white text-red-700 font-bold">REFUNDED</option>
                   </select>
                   <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-80" />
                 </div>
@@ -481,23 +447,6 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                   <MessageSquare className="w-4 h-4" />
                   <span>WhatsApp Customer</span>
                 </a>
-                {String(selectedOrder.status || '').toLowerCase() === 'refunded' ? (
-                  <span className="px-3 py-2 bg-red-100 text-red-700 font-extrabold text-xs rounded-lg border border-red-300">
-                    ✓ Refunded
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Mark order #${selectedOrder.orderId} as REFUNDED? Customer order card will turn RED.`)) {
-                        updateOrderStatus(selectedOrder.orderId, 'refunded');
-                        setSelectedOrder({ ...selectedOrder, status: 'refunded' });
-                      }
-                    }}
-                    className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
-                  >
-                    Process Refund
-                  </button>
-                )}
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}

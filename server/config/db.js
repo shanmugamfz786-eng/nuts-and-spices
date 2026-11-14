@@ -377,9 +377,6 @@ function processMemoryQuery(sql, params) {
         } else if (queryLower.includes("payment_status = 'failed'")) {
           order.payment_status = 'failed';
           order.paymentStatus = 'failed';
-        } else if (queryLower.includes("payment_status = 'refund_pending'")) {
-          order.payment_status = 'refund_pending';
-          order.paymentStatus = 'refund_pending';
         }
         if (params.length > 1 && typeof params[0] === 'string' && !params[0].startsWith('HNS-')) {
           order.status = params[0];

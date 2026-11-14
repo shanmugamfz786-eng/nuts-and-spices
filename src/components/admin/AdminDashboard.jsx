@@ -64,7 +64,7 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
     ['pending', 'new'].includes(o.statusNorm)
   );
   const deliveredOrders = filteredOrders.filter(o => o.statusNorm === 'delivered');
-  const cancelledOrders = filteredOrders.filter(o => o.statusNorm === 'cancelled' || o.statusNorm === 'refunded');
+  const cancelledOrders = filteredOrders.filter(o => o.statusNorm === 'cancelled');
 
   const totalGrossSales = filteredOrders.reduce((sum, o) => sum + o.totalVal, 0);
   const confirmedSales = confirmedOrders.reduce((sum, o) => sum + o.totalVal, 0);
@@ -123,7 +123,6 @@ export default function AdminDashboard({ onNavigateTab, onViewOrderDetails }) {
           </span>
         );
       case 'cancelled':
-      case 'refunded':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-200">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />

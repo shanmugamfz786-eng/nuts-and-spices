@@ -389,7 +389,6 @@ export default function CartPage() {
                     navigate('order-details', { order, orderId: order.orderId || order.id });
                   }}
                   className={`p-4 rounded-2xl border shadow-xs hover:shadow-md transition-all cursor-pointer ${
-                    String(order.status || '').toLowerCase() === 'refunded' ? 'bg-red-50/90 border-red-300' : 
                     String(order.status || '').toLowerCase() === 'cancelled' ? 'bg-gray-50/90 border-gray-300' : 
                     'bg-white border-gray-200 hover:border-[#128C7E]'
                   }`}
@@ -430,7 +429,6 @@ export default function CartPage() {
                     <div>
                       <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-1">Status</span>
                       <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                        String(order.status || '').toLowerCase() === 'refunded' ? 'bg-red-600 text-white' :
                         String(order.status || '').toLowerCase() === 'cancelled' ? 'bg-gray-200 text-gray-700' :
                         order.status === 'delivered' ? 'bg-green-100 text-green-700' : 
                         order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :

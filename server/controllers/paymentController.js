@@ -242,7 +242,7 @@ export const verifyPayment = async (req, res) => {
     if (isStatusPaid && amountMatches && orderIdMatches) {
       // Idempotently update order status in DB to 'new' upon successful payment
       await queryDb(
-        "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'refunded', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid' WHERE id = ?",
+        "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid' WHERE id = ?",
         [dbOrder.id]
       );
 
@@ -349,7 +349,7 @@ export const handleCashfreeWebhook = async (req, res) => {
 
         if (isPaid && amountMatches) {
           await queryDb(
-            "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'refunded', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid' WHERE id = ?",
+            "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid' WHERE id = ?",
             [dbOrder.id]
           );
           console.log(`Cashfree webhook: Order ${orderId} marked as paid`);
