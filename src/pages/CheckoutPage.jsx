@@ -405,7 +405,7 @@ export default function CheckoutPage() {
             ) : (
               <>
                 <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                <span>Pay ₹{grandTotal.toLocaleString('en-IN')} via UPI Securely</span>
+                <span>Pay ₹{grandTotal.toLocaleString('en-IN')} Securely</span>
               </>
             )}
           </button>
