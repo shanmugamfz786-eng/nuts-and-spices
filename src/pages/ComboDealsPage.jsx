@@ -210,7 +210,7 @@ const CURATED_COMBOS = [
 ];
 
 const COMBO_CATEGORIES = [
-  { id: 'all', label: 'All Combos', icon: '✨' },
+  { id: 'all', label: 'All Combos' },
   { id: 'gift-hampers', label: 'Royal Gift Hampers', icon: '👑' },
   { id: 'wellness', label: 'Health & Wellness', icon: '💪' },
   { id: 'spices', label: 'Masterchef Spices', icon: '🌶️' },
@@ -243,7 +243,7 @@ export default function ComboDealsPage() {
 
   // Dynamically derive category tabs from actual combos present in Admin
   const comboCategoryTabs = useMemo(() => {
-    const tabs = [{ id: 'all', label: 'All Combos', icon: '✨' }];
+    const tabs = [{ id: 'all', label: 'All Combos' }];
     const seen = new Set();
     
     (activeCombosList || []).forEach(c => {
@@ -447,7 +447,7 @@ export default function ComboDealsPage() {
                       : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90'
                   }`}
                 >
-                  <span>{cat.icon}</span>
+                  {cat.icon ? <span>{cat.icon}</span> : null}
                   <span>{cat.label}</span>
                   <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
                     isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
@@ -600,67 +600,42 @@ export default function ComboDealsPage() {
                     )}
 
                     {/* Price & Action Row */}
-                    <div className="pt-2 border-t border-slate-100 space-y-3">
+                    <div className="pt-2 border-t border-slate-100 space-y-2">
                       
                       {/* Price Display */}
                       {(() => {
-                        const finalPrice = getProductFinalPrice ? getProductFinalPrice(combo, currentWeight) : currentWeight.price;
-                        const isPincode = hasPincodePrice ? hasPincodePrice(combo, currentWeight) : false;
-                        const disc = currentWeight.originalPrice > 0 
-                          ? Math.round(((currentWeight.originalPrice - finalPrice) / currentWeight.originalPrice) * 100)
-                          : 0;
+                        const adminPrice = Number(combo.price || currentWeight?.price || 0);
                         return (
-                          <div className="flex items-baseline justify-between">
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-xl font-black font-serif text-[#128C7E]">
-                                ₹{finalPrice}
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
-                              {disc}% OFF
+                          <div className="flex flex-col">
+                            <span className="text-base sm:text-lg font-black text-[#222222] font-serif leading-tight">
+                              ₹{adminPrice}.00
                             </span>
                           </div>
                         );
                       })()}
 
-                      {/* Action Buttons */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        
-                        {/* 1. Add to Cart Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleAddToCart(combo)}
-                          className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs ${
-                            isAdded
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-[#128C7E] hover:bg-[#0e7064] text-white hover:shadow-md'
-                          }`}
-                        >
-                          {isAdded ? (
-                            <>
-                              <Check className="w-4 h-4" />
-                              <span>Added!</span>
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingCart className="w-3.5 h-3.5" />
-                              <span>Add to Cart</span>
-                            </>
-                          )}
-                        </button>
-
-                        {/* 2. Direct WhatsApp Order Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleWhatsAppOrder(combo)}
-                          className="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-[#128C7E]/10 hover:bg-[#128C7E] text-[#128C7E] hover:text-white border border-[#128C7E]/30 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                          title="Instant Order on WhatsApp"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white" />
-                          <span>WhatsApp</span>
-                        </button>
-
-                      </div>
+                      {/* Add to Cart Button (Matching ProductCard) */}
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(combo)}
+                        className={`w-full py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
+                          isAdded
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-[#128C7E] hover:bg-[#0e7064] text-white'
+                        }`}
+                      >
+                        {isAdded ? (
+                          <>
+                            <Check className="w-4 h-4 text-white" />
+                            <span>ADDED!</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-4 h-4" />
+                            <span>ADD TO CART</span>
+                          </>
+                        )}
+                      </button>
 
                     </div>
 
