@@ -599,34 +599,6 @@ export default function ComboDealsPage() {
                       </div>
                     )}
 
-                    {/* Weight / Pack Variant Selector Buttons */}
-                    {comboWeights.length > 1 && (
-                      <div className="space-y-1.5 pt-1">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                          Select Pack Size:
-                        </span>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {comboWeights.map((w, wIdx) => {
-                            const isSelected = currentWeight.label === w.label;
-                            return (
-                              <button
-                                key={wIdx}
-                                type="button"
-                                onClick={() => handleSelectWeight(combo.id, w)}
-                                className={`px-2 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer text-center truncate ${
-                                  isSelected
-                                    ? 'bg-[#128C7E] text-white border-[#128C7E] shadow-2xs'
-                                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                                }`}
-                              >
-                                {w.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Price & Action Row */}
                     <div className="pt-2 border-t border-slate-100 space-y-3">
                       
