@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, CreditCard, Scale } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, ShieldCheck, Scale } from 'lucide-react';
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
@@ -404,8 +404,8 @@ export default function CheckoutPage() {
               <span className="animate-pulse">Processing Payment...</span>
             ) : (
               <>
-                <CreditCard className="w-4 h-4" />
-                <span>Pay ₹{grandTotal.toLocaleString('en-IN')} Securely</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-200" />
+                <span>Pay ₹{grandTotal.toLocaleString('en-IN')} via UPI Securely</span>
               </>
             )}
           </button>

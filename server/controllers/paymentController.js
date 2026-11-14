@@ -93,7 +93,8 @@ export const createPaymentSession = async (req, res) => {
         customer_name: customerName
       },
       order_meta: {
-        return_url: req.body.returnUrl || `${frontendBaseUrl}/order-success?order_id={order_id}`
+        return_url: req.body.returnUrl || `${frontendBaseUrl}/order-success?order_id={order_id}`,
+        payment_methods: 'upi'
       }
     };
 
