@@ -14,7 +14,10 @@ import {
   FolderPlus,
   Package,
   Check,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Eye,
+  Info,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../api';
@@ -56,6 +59,7 @@ export default function AdminCombos() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCombo, setEditingCombo] = useState(null);
+  const [viewingCombo, setViewingCombo] = useState(null);
   const [deleteConfirmCombo, setDeleteConfirmCombo] = useState(null);
   const [deleteConfirmCategory, setDeleteConfirmCategory] = useState(null);
 
@@ -303,6 +307,32 @@ export default function AdminCombos() {
     setIsAddingCustom(false);
   };
 
+  // Helper to resolve all components/products of a combo with pictures and weights
+  const getComboComponentsList = (combo) => {
+    if (!combo) return [];
+    if (Array.isArray(combo.components) && combo.components.length > 0) {
+      return combo.components;
+    }
+    const items = Array.isArray(combo.items) ? combo.items : [];
+    return items.map((it, idx) => {
+      const cleanName = String(it).replace(/^[0-9]+(?:\.[0-9]+)?\s*(?:kg|g|gm|ml|l)?\s*/i, '').trim();
+      const weightMatch = String(it).match(/^[0-9]+(?:\.[0-9]+)?\s*(?:kg|g|gm|ml|l)?/i);
+      const weight = weightMatch ? weightMatch[0].trim() : '';
+      const matched = (products || []).find(p => 
+        p && p.name && (p.name.toLowerCase() === cleanName.toLowerCase() ||
+        p.name.toLowerCase().includes(cleanName.toLowerCase()) ||
+        cleanName.toLowerCase().includes(p.name.toLowerCase()))
+      );
+      return {
+        id: matched?.id || `comp_${idx}`,
+        name: matched?.name || cleanName,
+        weight: weight,
+        image: matched?.image || combo.image || '/images/combo_banner.jpg',
+        price: matched?.weights?.[0]?.price || 0
+      };
+    });
+  };
+
   const handleOpenAdd = () => {
     setEditingCombo(null);
     setIsCustomCategory(false);
@@ -346,51 +376,71 @@ export default function AdminCombos() {
     setCustomItemInput('');
 
     // Parse existing combo items into components
-    const existingComponents = (combo.items || []).map((itemStr, idx) => {
-      const cleanStr = String(itemStr || '').trim();
-      const matchedProd = (products || []).find(p => 
-        p && p.name && (cleanStr.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(cleanStr.toLowerCase()))
-      );
-
-      if (matchedProd) {
-        const weightMatch = cleanStr.match(/^(\d+\s*(?:g|kg|gms|grams|kg\b))/i);
-        const extractedWeight = weightMatch ? weightMatch[1].trim() : (matchedProd.weights?.[0]?.label || '250g');
-        const availableWeights = (matchedProd.weights || []).map(w => w.label || w.weight).filter(Boolean);
-        if (!availableWeights.includes(extractedWeight)) {
-          availableWeights.unshift(extractedWeight);
+    let existingComponents = [];
+    if (Array.isArray(combo.components) && combo.components.length > 0) {
+      existingComponents = combo.components.map((c, idx) => {
+        const matchedProd = (products || []).find(p => p && (p.id === c.id || p.name.toLowerCase() === c.name.toLowerCase()));
+        const availableWeights = (matchedProd?.weights || []).map(w => w.label || w.weight).filter(Boolean);
+        if (c.weight && !availableWeights.includes(c.weight)) {
+          availableWeights.unshift(c.weight);
         }
         return {
-          id: `${matchedProd.id}_${idx}_${Date.now()}`,
-          productId: matchedProd.id,
-          name: matchedProd.name,
-          weight: extractedWeight,
-          availableWeights,
-          image: matchedProd.image || '/images/products/product_1.jpg',
-          isCustom: false
+          id: c.id || `comp_${idx}_${Date.now()}`,
+          productId: matchedProd?.id || c.id,
+          name: c.name,
+          weight: c.weight || '250g',
+          availableWeights: availableWeights.length > 0 ? availableWeights : ['100g', '250g', '500g', '1 Kg'],
+          image: c.image || matchedProd?.image || '/images/products/product_1.jpg',
+          isCustom: !matchedProd
         };
-      }
+      });
+    } else {
+      existingComponents = (combo.items || []).map((itemStr, idx) => {
+        const cleanStr = String(itemStr || '').trim();
+        const matchedProd = (products || []).find(p => 
+          p && p.name && (cleanStr.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(cleanStr.toLowerCase()))
+        );
 
-      const weightMatch = cleanStr.match(/^(\d+\s*(?:g|kg|gms|grams|kg\b))\s+(.*)$/i);
-      if (weightMatch) {
+        if (matchedProd) {
+          const weightMatch = cleanStr.match(/^(\d+\s*(?:g|kg|gms|grams|kg\b))/i);
+          const extractedWeight = weightMatch ? weightMatch[1].trim() : (matchedProd.weights?.[0]?.label || '250g');
+          const availableWeights = (matchedProd.weights || []).map(w => w.label || w.weight).filter(Boolean);
+          if (!availableWeights.includes(extractedWeight)) {
+            availableWeights.unshift(extractedWeight);
+          }
+          return {
+            id: `${matchedProd.id}_${idx}_${Date.now()}`,
+            productId: matchedProd.id,
+            name: matchedProd.name,
+            weight: extractedWeight,
+            availableWeights,
+            image: matchedProd.image || '/images/products/product_1.jpg',
+            isCustom: false
+          };
+        }
+
+        const weightMatch = cleanStr.match(/^(\d+\s*(?:g|kg|gms|grams|kg\b))\s+(.*)$/i);
+        if (weightMatch) {
+          return {
+            id: `item_${idx}_${Date.now()}`,
+            name: weightMatch[2].trim(),
+            weight: weightMatch[1].trim(),
+            availableWeights: ['100g', '250g', '500g', '1 Kg'],
+            image: null,
+            isCustom: false
+          };
+        }
+
         return {
-          id: `item_${idx}_${Date.now()}`,
-          name: weightMatch[2].trim(),
-          weight: weightMatch[1].trim(),
-          availableWeights: ['100g', '250g', '500g', '1 Kg'],
+          id: `custom_${idx}_${Date.now()}`,
+          name: cleanStr,
+          weight: '',
+          availableWeights: [],
           image: null,
-          isCustom: false
+          isCustom: true
         };
-      }
-
-      return {
-        id: `custom_${idx}_${Date.now()}`,
-        name: cleanStr,
-        weight: '',
-        availableWeights: [],
-        image: null,
-        isCustom: true
-      };
-    });
+      });
+    }
     setComboComponents(existingComponents);
 
     setFormData({
@@ -506,6 +556,14 @@ export default function AdminCombos() {
       originalPrice: pOrigPrice,
       description: formData.description.trim() || `Exclusive combo hamper featuring ${itemsList.slice(0, 3).join(', ')}.`,
       items: itemsList.length > 0 ? itemsList : ['Handpicked Luxury Selection'],
+      components: comboComponents.map(c => ({
+        id: c.productId || c.id,
+        name: c.name,
+        weight: c.weight,
+        image: c.image || null,
+        price: c.price || 0,
+        category: c.category || ''
+      })),
       weights: [
         { label: formData.packLabel.trim() || 'STANDARD BOX', price: pPrice, originalPrice: pOrigPrice },
         { label: '2 KG GRAND FAMILY HAMPER', price: Math.round(pPrice * 1.9), originalPrice: Math.round(pOrigPrice * 1.95) }
@@ -720,19 +778,40 @@ export default function AdminCombos() {
 
                   {/* Included Items Pills */}
                   <div className="space-y-1 pt-1 border-t border-slate-100">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                      Included Items:
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        Included Items:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setViewingCombo(combo)}
+                        className="text-[9px] font-bold text-[#128C7E] hover:underline flex items-center gap-0.5 cursor-pointer"
+                        title="View product info"
+                      >
+                        <Eye className="w-2.5 h-2.5" />
+                        <span>View Info</span>
+                      </button>
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       {(combo.items || []).slice(0, 3).map((it, idx) => (
-                        <span key={idx} className="text-[9px] font-medium bg-slate-50 border border-slate-200 px-1.5 py-0.2 rounded text-slate-600 truncate max-w-[150px]">
+                        <button 
+                          key={idx} 
+                          type="button"
+                          onClick={() => setViewingCombo(combo)}
+                          className="text-[9px] font-medium bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 px-1.5 py-0.2 rounded text-slate-600 hover:text-[#128C7E] truncate max-w-[150px] cursor-pointer transition-colors"
+                          title="Click to view product info"
+                        >
                           ✓ {it}
-                        </span>
+                        </button>
                       ))}
                       {(combo.items || []).length > 3 && (
-                        <span className="text-[9px] font-bold text-[#128C7E] px-1">
+                        <button 
+                          type="button"
+                          onClick={() => setViewingCombo(combo)}
+                          className="text-[9px] font-bold text-[#128C7E] hover:underline px-1 cursor-pointer"
+                        >
                           +{(combo.items || []).length - 3} more
-                        </span>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -749,6 +828,13 @@ export default function AdminCombos() {
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setViewingCombo(combo)}
+                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer"
+                        title="View Products Info"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         onClick={() => handleOpenEdit(combo)}
                         className="p-1.5 bg-slate-100 hover:bg-emerald-50 hover:text-[#128C7E] text-slate-700 rounded-xl transition-colors cursor-pointer"
@@ -814,9 +900,15 @@ export default function AdminCombos() {
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        <span className="text-[11px] text-slate-600 font-mono">
-                          {(combo.items || []).length} components
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setViewingCombo(combo)}
+                          className="text-[11px] text-[#128C7E] hover:underline font-mono font-bold flex items-center gap-1 cursor-pointer bg-emerald-50 hover:bg-emerald-100/70 border border-emerald-200/60 px-2 py-1 rounded-lg transition-colors"
+                          title="Click to view all products in this combo"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>{(combo.items || []).length} components</span>
+                        </button>
                       </td>
                       <td className="py-3 px-4">
                         <span className="font-bold text-[#128C7E]">₹{mainW.price}</span>
@@ -835,8 +927,16 @@ export default function AdminCombos() {
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            onClick={() => setViewingCombo(combo)}
+                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors cursor-pointer"
+                            title="View Products Info"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={() => handleOpenEdit(combo)}
                             className="p-1.5 hover:bg-emerald-50 hover:text-[#128C7E] rounded-lg text-slate-600 transition-colors cursor-pointer"
+                            title="Edit Combo"
                           >
                             <Edit className="w-3.5 h-3.5" />
                           </button>
@@ -1537,6 +1637,111 @@ export default function AdminCombos() {
                   className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer transition-transform active:scale-95"
                 >
                   Confirm Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 9. VIEW COMBO INFO & PRODUCTS MODAL */}
+      <AnimatePresence>
+        {viewingCombo && (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 flex flex-col max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="p-5 bg-slate-900 text-white flex items-start justify-between">
+                <div className="space-y-1 pr-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                      {viewingCombo.categoryLabel || 'Combo Details'}
+                    </span>
+                    <span className={`px-2 py-0.2 rounded-full text-[9px] font-black uppercase ${viewingCombo.status === 'ACTIVE' ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300'}`}>
+                      {viewingCombo.status}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-black font-serif text-white">
+                    {viewingCombo.name}
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Offer Price: <span className="font-bold text-emerald-400">₹{viewingCombo.price || viewingCombo.weights?.[0]?.price || 0}.00</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setViewingCombo(null)}
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-5 overflow-y-auto space-y-4 flex-1">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Package className="w-4 h-4 text-[#128C7E]" />
+                    <span>Included Store Products ({getComboComponentsList(viewingCombo).length})</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    Selected in Admin
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {getComboComponentsList(viewingCombo).map((prod, idx) => (
+                    <div
+                      key={prod.id || idx}
+                      className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80"
+                    >
+                      <img
+                        src={prod.image || '/images/combo_banner.jpg'}
+                        alt={prod.name}
+                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 bg-white shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-900 truncate">
+                          {prod.name}
+                        </p>
+                        {prod.weight && (
+                          <span className="inline-block text-[11px] font-semibold text-[#128C7E]">
+                            Weight: {prod.weight}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
+                        ✓ In Combo
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const c = viewingCombo;
+                    setViewingCombo(null);
+                    handleOpenEdit(c);
+                  }}
+                  className="py-2 px-4 rounded-xl text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer flex items-center gap-1.5 transition-colors"
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit in Form</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewingCombo(null)}
+                  className="py-2 px-5 rounded-xl text-xs font-bold bg-[#128C7E] hover:bg-[#0e7064] text-white cursor-pointer transition-colors"
+                >
+                  Close
                 </button>
               </div>
             </motion.div>

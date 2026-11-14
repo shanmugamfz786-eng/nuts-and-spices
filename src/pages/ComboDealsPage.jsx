@@ -18,7 +18,9 @@ import {
   PackageCheck,
   Zap,
   SlidersHorizontal,
-  Clock
+  Clock,
+  Info,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -235,6 +237,34 @@ export default function ComboDealsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWeights, setSelectedWeights] = useState({});
   const [addedComboId, setAddedComboId] = useState(null);
+  const [selectedInfoCombo, setSelectedInfoCombo] = useState(null);
+
+  // Helper to resolve all components/products of a combo with pictures and weights
+  const getComboProducts = (combo) => {
+    if (!combo) return [];
+    if (Array.isArray(combo.components) && combo.components.length > 0) {
+      return combo.components;
+    }
+    const items = Array.isArray(combo.items) ? combo.items : [];
+    return items.map((it, idx) => {
+      const cleanName = String(it).replace(/^[0-9]+(?:\.[0-9]+)?\s*(?:kg|g|gm|ml|l)?\s*/i, '').trim();
+      const weightMatch = String(it).match(/^[0-9]+(?:\.[0-9]+)?\s*(?:kg|g|gm|ml|l)?/i);
+      const weight = weightMatch ? weightMatch[0].trim() : '';
+      const matched = (products || []).find(p => 
+        p && p.name && (p.name.toLowerCase() === cleanName.toLowerCase() ||
+        p.name.toLowerCase().includes(cleanName.toLowerCase()) ||
+        cleanName.toLowerCase().includes(p.name.toLowerCase()))
+      );
+      return {
+        id: matched?.id || `comp_${idx}`,
+        name: matched?.name || cleanName,
+        weight: weight,
+        image: matched?.image || combo.image || '/images/combo_banner.jpg',
+        price: matched?.weights?.[0]?.price || 0,
+        category: matched?.category || ''
+      };
+    });
+  };
 
   // Live Combos: only display active ones to customers
   const activeCombosList = useMemo(() => {
@@ -539,6 +569,16 @@ export default function ComboDealsPage() {
                       {combo.badge || 'SPECIAL DEAL'}
                     </span>
 
+                    {/* View Product Info Button */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedInfoCombo(combo)}
+                      className="absolute top-3 right-12 p-2 bg-white/90 backdrop-blur-xs rounded-full shadow-md text-slate-600 hover:text-[#128C7E] transition-colors cursor-pointer"
+                      title="View Included Products Info"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
+
                     {/* Wishlist Button */}
                     <button
                       onClick={() => toggleWishlist(combo.id)}
@@ -582,18 +622,32 @@ export default function ComboDealsPage() {
                     {/* "What's Inside" Included Items Section */}
                     {comboItems.length > 0 && (
                       <div className="space-y-1.5 pt-1 border-t border-slate-100">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                          <PackageCheck className="w-3 h-3 text-[#128C7E]" />
-                          <span>Included in this Box:</span>
-                        </span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                            <PackageCheck className="w-3.5 h-3.5 text-[#128C7E]" />
+                            <span>Included in this Box:</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInfoCombo(combo)}
+                            className="text-[10px] font-bold text-[#128C7E] hover:underline flex items-center gap-1 cursor-pointer bg-emerald-50 hover:bg-emerald-100/70 border border-emerald-200/60 px-2 py-0.5 rounded-full transition-colors"
+                            title="View all included products"
+                          >
+                            <Info className="w-3 h-3" />
+                            <span>View Info</span>
+                          </button>
+                        </div>
                         <div className="flex flex-wrap gap-1.5">
                           {comboItems.map((item, idx) => (
-                            <span 
+                            <button 
                               key={idx} 
-                              className="text-[10px] font-medium bg-slate-50 border border-slate-200/80 text-slate-700 px-2 py-0.5 rounded-lg"
+                              type="button"
+                              onClick={() => setSelectedInfoCombo(combo)}
+                              className="text-[10px] font-medium bg-slate-50 hover:bg-emerald-50 border border-slate-200/80 hover:border-emerald-200 text-slate-700 hover:text-[#128C7E] px-2 py-0.5 rounded-lg cursor-pointer transition-colors text-left"
+                              title="Click to view product info"
                             >
                               ✓ {item}
-                            </span>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -727,6 +781,116 @@ export default function ComboDealsPage() {
         </div>
 
       </div>
+
+      {/* COMBO PRODUCT INFO MODAL */}
+      <AnimatePresence>
+        {selectedInfoCombo && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="relative bg-slate-900 text-white p-5 flex items-start justify-between">
+                <div className="space-y-1 pr-6">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                    {selectedInfoCombo.categoryLabel || 'COMBO PACK'}
+                  </span>
+                  <h3 className="text-lg font-black font-serif text-white leading-tight">
+                    {selectedInfoCombo.name}
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    {selectedInfoCombo.description || 'Specially curated combo pack with fresh products.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedInfoCombo(null)}
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Products List (Scrollable) */}
+              <div className="p-5 overflow-y-auto space-y-4 flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <PackageCheck className="w-4 h-4 text-[#128C7E]" />
+                    <span>Included Products In This Combo</span>
+                  </span>
+                  <span className="text-[10px] font-bold bg-emerald-50 text-[#128C7E] border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                    {getComboProducts(selectedInfoCombo).length} Items Selected
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {getComboProducts(selectedInfoCombo).map((prod, idx) => (
+                    <div
+                      key={prod.id || idx}
+                      className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100/80 rounded-2xl border border-slate-200/80 transition-all"
+                    >
+                      <img
+                        src={prod.image || '/images/combo_banner.jpg'}
+                        alt={prod.name}
+                        className="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0 bg-white"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-xs font-bold text-slate-900 truncate">
+                          {prod.name}
+                        </h4>
+                        {prod.weight && (
+                          <p className="text-[11px] font-semibold text-[#128C7E] mt-0.5">
+                            Pack: {prod.weight}
+                          </p>
+                        )}
+                        <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded mt-1 font-medium">
+                          ✓ 100% Pure & Fresh Sealed
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Assurance banner */}
+                <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-2xl flex items-center gap-2.5 text-amber-900">
+                  <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0" />
+                  <p className="text-[11px] leading-tight">
+                    Every product in this combo is individually vacuum sealed for maximum crunch, aroma, and freshness.
+                  </p>
+                </div>
+              </div>
+
+              {/* Modal Footer with Price & Add to Cart */}
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    Combo Price
+                  </span>
+                  <span className="text-xl font-black font-serif text-[#222222]">
+                    ₹{Number(selectedInfoCombo.price || selectedInfoCombo.weights?.[0]?.price || 0)}.00
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleAddToCart(selectedInfoCombo);
+                    setSelectedInfoCombo(null);
+                  }}
+                  className="flex-1 max-w-xs py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#128C7E] hover:bg-[#0e7064] text-white flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>ADD TO CART</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
