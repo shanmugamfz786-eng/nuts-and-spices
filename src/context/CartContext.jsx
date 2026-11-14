@@ -225,19 +225,81 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // 7. CART & WISHLIST STATE
-  const [cart, setCart] = useState([]);
-
-  // Load correct cart when user changes
-  useEffect(() => {
+  // 7. CART & WISHLIST STATE - Synchronous Lazy Initialization from LocalStorage
+  const [cart, setCart] = useState(() => {
     try {
-      const cartKey = user ? `nuts_spices_cart_${user.phone || user.email}` : 'nuts_spices_cart_guest';
+      let currentUser = null;
+      try {
+        const savedUser = localStorage.getItem('nuts_spices_user');
+        if (savedUser) currentUser = JSON.parse(savedUser);
+      } catch {}
+
+      const cartKey = currentUser && (currentUser.phone || currentUser.email)
+        ? `nuts_spices_cart_${currentUser.phone || currentUser.email}`
+        : 'nuts_spices_cart_guest';
+
       const saved = localStorage.getItem(cartKey);
       if (saved) {
-        setCart(JSON.parse(saved));
-      } else {
-        setCart([]);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
+
+      // Fallback 1: If user is logged in, check guest cart (so items added before login aren't lost)
+      if (currentUser) {
+        const guestSaved = localStorage.getItem('nuts_spices_cart_guest');
+        if (guestSaved) {
+          const parsedGuest = JSON.parse(guestSaved);
+          if (Array.isArray(parsedGuest) && parsedGuest.length > 0) return parsedGuest;
+        }
+      }
+
+      // Fallback 2: Check generic 'nuts_spices_cart' key
+      const legacySaved = localStorage.getItem('nuts_spices_cart');
+      if (legacySaved) {
+        const parsedLegacy = JSON.parse(legacySaved);
+        if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) return parsedLegacy;
+      }
+
+      return [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Track initial mount so we don't wipe out localStorage on first render
+  const isInitialCartMount = useRef(true);
+
+  // Load correct cart when user changes (login / logout)
+  useEffect(() => {
+    if (isInitialCartMount.current) {
+      isInitialCartMount.current = false;
+      return;
+    }
+    try {
+      const cartKey = user && (user.phone || user.email) 
+        ? `nuts_spices_cart_${user.phone || user.email}` 
+        : 'nuts_spices_cart_guest';
+      const saved = localStorage.getItem(cartKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setCart(parsed);
+          return;
+        }
+      }
+      // If user logged in and user cart is empty, transfer guest cart into user cart
+      if (user) {
+        const guestSaved = localStorage.getItem('nuts_spices_cart_guest');
+        if (guestSaved) {
+          const parsedGuest = JSON.parse(guestSaved);
+          if (Array.isArray(parsedGuest) && parsedGuest.length > 0) {
+            setCart(parsedGuest);
+            localStorage.setItem(cartKey, JSON.stringify(parsedGuest));
+            return;
+          }
+        }
+      }
+      setCart([]);
     } catch {
       setCart([]);
     }
@@ -535,8 +597,11 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     try { 
-      const cartKey = user ? `nuts_spices_cart_${user.phone || user.email}` : 'nuts_spices_cart_guest';
+      const cartKey = user && (user.phone || user.email)
+        ? `nuts_spices_cart_${user.phone || user.email}` 
+        : 'nuts_spices_cart_guest';
       localStorage.setItem(cartKey, JSON.stringify(cart)); 
+      localStorage.setItem('nuts_spices_cart', JSON.stringify(cart));
     } catch (err) { console.warn('localStorage error:', err); }
   }, [cart, user]);
 
