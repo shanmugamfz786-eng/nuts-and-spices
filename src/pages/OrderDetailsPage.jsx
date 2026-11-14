@@ -348,11 +348,12 @@ export default function OrderDetailsPage() {
     }, 4500);
   };
 
-  const currentStatus = (orderData.status || 'pending').toLowerCase();
-  const isCancelled = currentStatus === 'cancelled';
-  const isRefunded = currentStatus === 'refunded';
-  const isDelivered = currentStatus === 'delivered';
-  const canCancel = currentStatus === 'pending' || currentStatus === 'confirmed';
+  const currentStatus = (orderData.status || 'new').toLowerCase().trim();
+  const normalizedStatus = currentStatus.replace(/[\s-]+/g, '_');
+  const isCancelled = normalizedStatus === 'cancelled';
+  const isRefunded = normalizedStatus === 'refunded';
+  const isDelivered = normalizedStatus === 'delivered';
+  const canCancel = ['pending', 'new', 'confirmed'].includes(normalizedStatus);
 
   // 5-stage enterprise tracker definition
   const TRACKER_STEPS = [
@@ -363,7 +364,7 @@ export default function OrderDetailsPage() {
       time: rawDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
       icon: CheckCircle2,
       isCompleted: !isCancelled && !isRefunded,
-      isCurrent: currentStatus === 'pending'
+      isCurrent: ['pending', 'new'].includes(normalizedStatus)
     },
     {
       id: 'packed',
@@ -371,8 +372,8 @@ export default function OrderDetailsPage() {
       description: 'Vacuum sealed in moisture-proof zip bags',
       time: 'Facility Hub',
       icon: Package,
-      isCompleted: !isCancelled && !isRefunded && ['confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'].includes(currentStatus),
-      isCurrent: currentStatus === 'confirmed' || currentStatus === 'processing'
+      isCompleted: !isCancelled && !isRefunded && ['confirmed', 'processing', 'preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCurrent: normalizedStatus === 'confirmed' || normalizedStatus === 'processing'
     },
     {
       id: 'shipped',
@@ -380,8 +381,8 @@ export default function OrderDetailsPage() {
       description: `In transit via Express Logistics (${awbNumber})`,
       time: 'Central Hub',
       icon: Truck,
-      isCompleted: !isCancelled && !isRefunded && ['shipped', 'out_for_delivery', 'delivered'].includes(currentStatus),
-      isCurrent: currentStatus === 'shipped'
+      isCompleted: !isCancelled && !isRefunded && ['preparing', 'shipped', 'out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCurrent: normalizedStatus === 'preparing' || normalizedStatus === 'shipped'
     },
     {
       id: 'out_for_delivery',
@@ -389,8 +390,8 @@ export default function OrderDetailsPage() {
       description: 'Courier agent on route to doorstep',
       time: 'Local Hub',
       icon: Navigation,
-      isCompleted: !isCancelled && !isRefunded && ['out_for_delivery', 'delivered'].includes(currentStatus),
-      isCurrent: currentStatus === 'out_for_delivery'
+      isCompleted: !isCancelled && !isRefunded && ['out_for_delivery', 'delivered'].includes(normalizedStatus),
+      isCurrent: normalizedStatus === 'out_for_delivery'
     },
     {
       id: 'delivered',
@@ -402,6 +403,26 @@ export default function OrderDetailsPage() {
       isCurrent: isDelivered
     }
   ];
+
+  const getDisplayStatusLabel = () => {
+    if (isRefunded) return 'Refunded';
+    if (isCancelled) return 'Cancelled';
+    if (isDelivered) return 'Delivered';
+    if (normalizedStatus === 'out_for_delivery') return 'Out for Delivery';
+    if (['preparing', 'shipped'].includes(normalizedStatus)) return 'Dispatched (Air Express)';
+    if (normalizedStatus === 'confirmed') return 'Hygienically Packed';
+    if (['new', 'pending'].includes(normalizedStatus)) return 'Order Confirmed';
+    return currentStatus.replace(/_/g, ' ');
+  };
+
+  const getDisplayStatusStyle = () => {
+    if (isRefunded) return 'bg-red-50 text-red-700 border-red-200';
+    if (isCancelled) return 'bg-gray-100 text-gray-700 border-gray-300';
+    if (isDelivered) return 'bg-emerald-50 text-emerald-800 border-emerald-200 ring-2 ring-emerald-500/20';
+    if (['preparing', 'shipped', 'out_for_delivery'].includes(normalizedStatus)) return 'bg-blue-50 text-blue-800 border-blue-200 ring-2 ring-blue-500/20';
+    if (normalizedStatus === 'confirmed') return 'bg-emerald-50 text-emerald-800 border-emerald-200 ring-2 ring-emerald-500/20';
+    return 'bg-amber-50 text-amber-800 border-amber-200';
+  };
 
   const subtotal = Number(orderData.subtotal || orderData.total_amount || orderData.totalAmount || orderData.total || 0);
   const deliveryCharge = Number(orderData.delivery_charge || orderData.deliveryCharge || 0);
@@ -466,17 +487,11 @@ export default function OrderDetailsPage() {
             {/* Left: Identity & Status */}
             <div className="space-y-2 shrink-0">
               <div className="flex items-center gap-3 flex-wrap">
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-2xs ${
-                  isRefunded ? 'bg-red-50 text-red-700 border-red-200' :
-                  isCancelled ? 'bg-gray-100 text-gray-700 border-gray-300' :
-                  isDelivered ? 'bg-emerald-50 text-emerald-800 border-emerald-200 ring-2 ring-emerald-500/20' :
-                  currentStatus === 'shipped' || currentStatus === 'out_for_delivery' ? 'bg-blue-50 text-blue-800 border-blue-200 ring-2 ring-blue-500/20' :
-                  'bg-amber-50 text-amber-800 border-amber-200'
-                }`}>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-2xs ${getDisplayStatusStyle()}`}>
                   <span className={`w-2 h-2 rounded-full ${
-                    isRefunded ? 'bg-red-500' : isCancelled ? 'bg-gray-500' : isDelivered ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+                    isRefunded ? 'bg-red-500' : isCancelled ? 'bg-gray-500' : isDelivered ? 'bg-emerald-500' : 'bg-current animate-pulse'
                   }`} />
-                  {isRefunded ? 'Refunded' : isCancelled ? 'Cancelled' : isDelivered ? 'Delivered' : currentStatus.replace('_', ' ')}
+                  {getDisplayStatusLabel()}
                 </span>
 
                 <span className="text-xs text-gray-300">|</span>

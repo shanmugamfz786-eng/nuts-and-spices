@@ -507,14 +507,14 @@ export const updateOrderStatus = async (req, res) => {
 
     const normalizedStatus = (status || '').toLowerCase().trim();
     const validTransitions = {
-      pending: ['confirmed', 'cancelled'],
-      new: ['confirmed', 'cancelled'],
-      confirmed: ['preparing', 'shipped', 'cancelled', 'refunded'],
-      preparing: ['shipped', 'cancelled', 'refunded'],
-      shipped: ['out for delivery', 'delivered', 'refunded'],
-      'out for delivery': ['delivered', 'refunded'],
+      pending: ['new', 'confirmed', 'cancelled'],
+      new: ['confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+      confirmed: ['new', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+      preparing: ['new', 'confirmed', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+      shipped: ['preparing', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+      'out for delivery': ['preparing', 'shipped', 'delivered', 'cancelled', 'refunded'],
       delivered: ['refunded'],
-      cancelled: [],
+      cancelled: ['refund_pending', 'refunded'],
       refunded: []
     };
 
@@ -675,8 +675,8 @@ export const cancelOrder = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Unauthorized to cancel this order' });
     }
     
-    if (order.status !== 'pending' && order.status !== 'confirmed') {
-       return res.status(400).json({ success: false, message: 'Only pending or confirmed orders can be cancelled' });
+    if (order.status !== 'pending' && order.status !== 'new' && order.status !== 'confirmed') {
+       return res.status(400).json({ success: false, message: 'Only pending, new, or confirmed orders can be cancelled' });
     }
 
     let paymentStatusSql = '';

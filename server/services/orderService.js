@@ -6,11 +6,12 @@ import crypto from 'crypto';
  */
 
 export const ORDER_STATUS_TRANSITIONS = {
-  pending: ['confirmed', 'cancelled'],
-  new: ['confirmed', 'cancelled'],
-  confirmed: ['shipped', 'cancelled', 'refunded'],
-  preparing: ['shipped', 'cancelled', 'refunded'],
-  shipped: ['delivered', 'cancelled', 'refunded'],
+  pending: ['new', 'confirmed', 'cancelled'],
+  new: ['confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+  confirmed: ['new', 'preparing', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+  preparing: ['new', 'confirmed', 'shipped', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+  shipped: ['preparing', 'out for delivery', 'delivered', 'cancelled', 'refunded'],
+  'out for delivery': ['preparing', 'shipped', 'delivered', 'cancelled', 'refunded'],
   delivered: ['refunded'],
   cancelled: ['refund_pending', 'refunded'],
   refund_pending: ['refunded'],

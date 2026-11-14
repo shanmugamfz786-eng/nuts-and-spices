@@ -28,7 +28,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     }
   };
 
-  const statusOptions = ['All Statuses', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED', 'Unpaid Attempts'];
+  const statusOptions = ['All Statuses', 'NEW', 'CONFIRMED', 'PREPARING', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED', 'Unpaid Attempts'];
 
   // Normalize order items for consistent rendering
   const normalizedOrders = (orders || []).map(o => ({
@@ -88,18 +88,19 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     const s = (status || '').toUpperCase();
     switch (s) {
       case 'PENDING':
+        return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
       case 'NEW':
-        return 'bg-[#fef3c7] text-[#b45309] hover:bg-[#fde68a]';
+        return 'bg-amber-100 text-amber-800 font-bold hover:bg-amber-200 border border-amber-300/60 shadow-2xs';
       case 'CONFIRMED':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200 font-bold';
       case 'PREPARING':
-        return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
+        return 'bg-purple-100 text-purple-800 hover:bg-purple-200 font-bold';
       case 'OUT FOR DELIVERY':
-        return 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200';
+        return 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 font-bold';
       case 'DELIVERED':
-        return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
+        return 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold';
       case 'CANCELLED':
-        return 'bg-rose-100 text-rose-800 hover:bg-rose-200';
+        return 'bg-rose-100 text-rose-800 hover:bg-rose-200 font-bold';
       case 'REFUNDED':
         return 'bg-red-600 text-white font-extrabold hover:bg-red-700 shadow-sm';
       default:
@@ -274,10 +275,9 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                               onChange={(e) => setPendingStatusUpdates({ ...pendingStatusUpdates, [ord.orderId]: e.target.value })}
                               className={`appearance-none text-[11px] font-semibold rounded-md pl-3 pr-6 py-1 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(currentStatus)}`}
                             >
-                              <option value="pending" className="bg-white text-gray-800">Pending</option>
                               <option value="new" className="bg-white text-gray-800">NEW</option>
-                              <option value="confirmed" className="bg-white text-gray-800">Confirmed</option>
-                              <option value="preparing" className="bg-white text-gray-800">Preparing</option>
+                              <option value="confirmed" className="bg-white text-gray-800">Confirmed (Hygienically Packed)</option>
+                              <option value="preparing" className="bg-white text-gray-800">Preparing (Dispatched)</option>
                               <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
                               <option value="delivered" className="bg-white text-gray-800">Delivered</option>
                               <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>
@@ -439,10 +439,9 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                     onChange={(e) => setPendingStatusUpdates({ ...pendingStatusUpdates, [selectedOrder.orderId]: e.target.value })}
                     className={`appearance-none text-xs font-bold rounded-lg pl-3 pr-7 py-2 cursor-pointer outline-none transition-colors ${getStatusBadgeStyle(pendingStatusUpdates[selectedOrder.orderId] || selectedOrder.status)}`}
                   >
-                    <option value="pending" className="bg-white text-gray-800">Pending</option>
                     <option value="new" className="bg-white text-gray-800">NEW</option>
-                    <option value="confirmed" className="bg-white text-gray-800">Confirmed</option>
-                    <option value="preparing" className="bg-white text-gray-800">Preparing</option>
+                    <option value="confirmed" className="bg-white text-gray-800">Confirmed (Hygienically Packed)</option>
+                    <option value="preparing" className="bg-white text-gray-800">Preparing (Dispatched)</option>
                     <option value="out for delivery" className="bg-white text-gray-800">Out for Delivery</option>
                     <option value="delivered" className="bg-white text-gray-800">Delivered</option>
                     <option value="cancelled" className="bg-white text-gray-800">Cancelled</option>

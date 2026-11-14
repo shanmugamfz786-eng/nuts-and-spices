@@ -373,7 +373,7 @@ function processMemoryQuery(sql, params) {
         if (queryLower.includes("payment_status = 'paid'")) {
           order.payment_status = 'paid';
           order.paymentStatus = 'paid';
-          order.status = 'confirmed';
+          order.status = 'new';
         } else if (queryLower.includes("payment_status = 'failed'")) {
           order.payment_status = 'failed';
           order.paymentStatus = 'failed';

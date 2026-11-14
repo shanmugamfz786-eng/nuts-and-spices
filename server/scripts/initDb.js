@@ -57,7 +57,7 @@ export async function initializeDatabase() {
       subtotal DECIMAL(10,2) NOT NULL,
       delivery_charge DECIMAL(10,2) DEFAULT 0,
       total_amount DECIMAL(10,2) NOT NULL,
-      status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+      status VARCHAR(50) DEFAULT 'pending',
       payment_status ENUM('pending', 'paid', 'failed', 'refund_pending', 'refunded') DEFAULT 'pending',
       items_json JSON NOT NULL,
       notes TEXT,

@@ -402,7 +402,7 @@ export default function LoginPage() {
                     const total = Number(order.total_amount || order.totalAmount || order.total || 0).toLocaleString('en-IN');
                     const isRefunded = (order.status || '').toLowerCase() === 'refunded';
                     const isCancelled = (order.status || '').toLowerCase() === 'cancelled';
-                    const canCancel = (order.status || '').toLowerCase() === 'pending' || (order.status || '').toLowerCase() === 'confirmed';
+                    const canCancel = ['pending', 'new', 'confirmed'].includes((order.status || '').toLowerCase());
 
                     return (
                       <motion.div 
@@ -423,7 +423,7 @@ export default function LoginPage() {
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
                             isRefunded ? 'bg-red-200 text-red-700' :
                             isCancelled ? 'bg-gray-200 text-gray-600' :
-                            order.status === 'pending' ? 'bg-amber-100 text-amber-500' : 
+                            ['pending', 'new'].includes(order.status) ? 'bg-amber-100 text-amber-500' : 
                             order.status === 'delivered' ? 'bg-green-100 text-green-500' : 'bg-blue-100 text-blue-500'
                           }`}>
                             <Package className="w-6 h-6" />
@@ -468,7 +468,7 @@ export default function LoginPage() {
                           <span className={`text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 ${
                             isRefunded ? 'bg-red-600 text-white shadow-sm' :
                             isCancelled ? 'bg-gray-200 text-gray-700 border border-gray-300' :
-                            order.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 
+                            ['pending', 'new'].includes(order.status) ? 'bg-amber-50 text-amber-700 border border-amber-200' : 
                             order.status === 'delivered' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-blue-50 text-blue-700 border border-blue-200'
                           }`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
