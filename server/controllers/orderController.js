@@ -108,6 +108,7 @@ export const createOrder = async (req, res) => {
       }
 
     // Pincode pricing is disabled: orders strictly use authentic catalog prices
+    const deliveryPincode = String(customer.pincode || '').trim();
     const pincodePricesMap = {};
 
     // 1. Calculate and validate items against catalog (strict variant existence check & pincode pricing)
