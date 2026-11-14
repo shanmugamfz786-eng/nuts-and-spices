@@ -150,15 +150,10 @@ export const CartProvider = ({ children }) => {
         }
       }
     } catch {}
-    return [
-      {
-        id: "all",
-        name: "All Products",
-        icon: "✨",
-        image: "/images/combo_banner.jpg",
-        isPremium: false
-      }
-    ];
+    return CATEGORIES.map(c => ({
+      ...c,
+      isPremium: c.isPremium !== undefined ? c.isPremium : (c.id !== 'all')
+    }));
   });
 
   const productsRef = useRef(products);
