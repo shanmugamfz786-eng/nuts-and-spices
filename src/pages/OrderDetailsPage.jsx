@@ -1748,9 +1748,8 @@ export default function OrderDetailsPage() {
 
                   <button
                     type="submit"
-                    className="w-2/3 py-3 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
+                    className="w-2/3 py-3 bg-[#128C7E] hover:bg-[#075E54] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all cursor-pointer active:scale-95 flex items-center justify-center"
                   >
-                    <Sparkles className="w-4 h-4" />
                     <span>Submit Review</span>
                   </button>
                 </div>
