@@ -117,6 +117,7 @@ export const CartProvider = ({ children }) => {
         localStorage.removeItem('nuts_spices_products');
         sessionStorage.removeItem('nuts_spices_products');
         sessionStorage.removeItem('nuts_spices_categories');
+        localStorage.removeItem('nuts_spices_categories');
         localStorage.setItem('nuts_spices_catalog_version', CATALOG_VERSION);
         return sanitizeProductList(PRODUCTS);
       }
@@ -134,15 +135,18 @@ export const CartProvider = ({ children }) => {
   // 3. CATEGORIES STATE (Session Cached: 1-time backend load, instant page switches, auto-clears on tab close)
   const [categories, setCategories] = useState(() => {
     try {
-      const saved = sessionStorage.getItem('nuts_spices_categories');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(c => ({
-            ...c,
-            image: (!c.image || c.image.includes('unsplash.com')) ? (c.id === 'all' ? '/images/combo_banner.jpg' : '/images/products/product_1.jpg') : c.image,
-            isPremium: c.isPremium !== undefined ? c.isPremium : (c.id !== 'all')
-          }));
+      const storedVer = localStorage.getItem('nuts_spices_catalog_version');
+      if (storedVer === CATALOG_VERSION) {
+        const saved = sessionStorage.getItem('nuts_spices_categories') || localStorage.getItem('nuts_spices_categories');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 3) {
+            return parsed.map(c => ({
+              ...c,
+              image: (!c.image || c.image.includes('unsplash.com')) ? (c.id === 'all' ? '/images/combo_banner.jpg' : '/images/products/product_1.jpg') : c.image,
+              isPremium: c.isPremium !== undefined ? c.isPremium : (c.id !== 'all')
+            }));
+          }
         }
       }
     } catch {}
