@@ -41,17 +41,32 @@ export default function OrderDetailsPage() {
   const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState(false);
   const [reviewCommentError, setReviewCommentError] = useState('');
 
+  // Permanent dismissal helper for delivered feedback popup
+  const handleDismissFeedback = () => {
+    const rawId = orderData?.order_id || orderData?.orderId || orderData?.id || '';
+    const cleanId = String(rawId).replace(/^#/, '').trim();
+    if (cleanId) {
+      try {
+        localStorage.setItem(`feedback_dismissed_${cleanId}`, 'true');
+        localStorage.setItem(`feedback_dismissed_#${cleanId}`, 'true');
+        localStorage.setItem(`feedback_submitted_${cleanId}`, 'true');
+        localStorage.setItem(`feedback_submitted_#${cleanId}`, 'true');
+      } catch {}
+    }
+    setIsFeedbackModalOpen(false);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setIsCancelModalOpen(false);
         setIsInvoiceModalOpen(false);
-        setIsFeedbackModalOpen(false);
+        handleDismissFeedback();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [orderData]);
 
   // Extract order ID from params or URL if not directly in state
   useEffect(() => {
@@ -125,14 +140,19 @@ export default function OrderDetailsPage() {
     return () => clearInterval(pollInterval);
   }, [selectedOrder?.order_id, selectedOrder?.id, orders]);
 
-  // Check if order is DELIVERED and prompt customer feedback popup
+  // Check if order is DELIVERED and prompt customer feedback popup (only if not already submitted or dismissed)
   useEffect(() => {
     if (orderData && String(orderData.status || '').toLowerCase() === 'delivered') {
-      const oid = orderData.order_id || orderData.orderId || orderData.id;
-      const feedbackKey = `feedback_submitted_${oid}`;
-      const alreadySubmitted = localStorage.getItem(feedbackKey);
+      const rawId = orderData.order_id || orderData.orderId || orderData.id || '';
+      const cleanId = String(rawId).replace(/^#/, '').trim();
       
-      if (!alreadySubmitted) {
+      const isAlreadyHandled = 
+        localStorage.getItem(`feedback_submitted_${cleanId}`) ||
+        localStorage.getItem(`feedback_submitted_#${cleanId}`) ||
+        localStorage.getItem(`feedback_dismissed_${cleanId}`) ||
+        localStorage.getItem(`feedback_dismissed_#${cleanId}`);
+      
+      if (!isAlreadyHandled) {
         // Pre-select first item if available
         let orderItems = [];
         try {
@@ -145,17 +165,26 @@ export default function OrderDetailsPage() {
         }
 
         const timer = setTimeout(() => {
-          setIsFeedbackModalOpen(true);
+          // Re-check right before opening to prevent race conditions
+          const stillNotHandled = 
+            !localStorage.getItem(`feedback_submitted_${cleanId}`) &&
+            !localStorage.getItem(`feedback_submitted_#${cleanId}`) &&
+            !localStorage.getItem(`feedback_dismissed_${cleanId}`) &&
+            !localStorage.getItem(`feedback_dismissed_#${cleanId}`);
+          if (stillNotHandled) {
+            setIsFeedbackModalOpen(true);
+          }
         }, 1200);
         return () => clearTimeout(timer);
       }
     }
-  }, [orderData]);
+  }, [orderData?.status, orderData?.id, orderData?.order_id, orderData?.orderId]);
 
   const handleSubmitFeedback = (e) => {
     e.preventDefault();
     if (!orderData) return;
-    const oid = orderData.order_id || orderData.orderId || orderData.id;
+    const rawId = orderData.order_id || orderData.orderId || orderData.id || '';
+    const cleanId = String(rawId).replace(/^#/, '').trim();
 
     addReview({
       customerName: user?.name || orderData.customer_name || 'Valued Patron',
@@ -168,7 +197,15 @@ export default function OrderDetailsPage() {
       tag: 'Verified Delivery'
     });
 
-    localStorage.setItem(`feedback_submitted_${oid}`, 'true');
+    if (cleanId) {
+      try {
+        localStorage.setItem(`feedback_submitted_${cleanId}`, 'true');
+        localStorage.setItem(`feedback_submitted_#${cleanId}`, 'true');
+        localStorage.setItem(`feedback_dismissed_${cleanId}`, 'true');
+        localStorage.setItem(`feedback_dismissed_#${cleanId}`, 'true');
+      } catch {}
+    }
+
     setFeedbackSubmitted(true);
     setTimeout(() => {
       setFeedbackSubmitted(false);
@@ -1640,8 +1677,10 @@ export default function OrderDetailsPage() {
             >
               {/* Close Button */}
               <button
-                onClick={() => setIsFeedbackModalOpen(false)}
+                type="button"
+                onClick={handleDismissFeedback}
                 className="absolute top-5 right-5 p-2 rounded-full text-gray-400 hover:text-black hover:bg-gray-100 transition-colors cursor-pointer"
+                title="Close and don't show again"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1736,11 +1775,7 @@ export default function OrderDetailsPage() {
                 <div className="flex items-center gap-2 pt-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      const oid = orderData.order_id || orderData.orderId || orderData.id;
-                      localStorage.setItem(`feedback_submitted_${oid}`, 'true');
-                      setIsFeedbackModalOpen(false);
-                    }}
+                    onClick={handleDismissFeedback}
                     className="w-1/3 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
                   >
                     Maybe Later
