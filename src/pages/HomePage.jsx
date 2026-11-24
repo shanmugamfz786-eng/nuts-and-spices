@@ -49,13 +49,14 @@ export default function HomePage() {
               <img
                 src={slide.image}
                 alt="Haji Nuts & Spices Banner"
-                className={`w-full h-full object-cover select-none brightness-105 contrast-105 filter transform transition-transform duration-[6500ms] ease-out ${
-                  isActive ? 'scale-[1.03]' : 'scale-100'
+                className={`w-full h-full object-cover select-none transform transition-transform duration-[6500ms] ease-out ${
+                  isActive ? 'scale-[1.02]' : 'scale-100'
                 }`}
+                style={{ imageRendering: 'high-quality' }}
                 draggable={false}
                 fetchPriority={index === 0 ? "high" : "auto"}
                 loading={index === 0 ? "eager" : "lazy"}
-                decoding="async"
+                decoding="sync"
               />
             </div>
           );
