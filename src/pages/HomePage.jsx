@@ -6,7 +6,7 @@ import FeaturedTodaySection from '../components/FeaturedTodaySection';
 import BestSellingSection from '../components/BestSellingSection';
 
 const HERO_SLIDES = [
-  { id: 1, image: '/images/hero1.png' },
+  { id: 1, image: '/images/hero1.jpg' },
   { id: 2, image: '/images/hero2.jpg' },
   { id: 3, image: '/images/hero3.jpg' }
 ];
@@ -30,7 +30,11 @@ export default function HomePage() {
     <div className="space-y-16 pb-16">
       
       {/* CINEMATIC ZOOM & CROSSFADE HERO BANNER (ONLY IMAGES - NO EXTRA OVERLAYS) */}
-      <section className="relative w-full m-0 p-0 overflow-hidden shadow-md h-[190px] sm:h-[280px] md:h-[350px] lg:h-[420px] bg-[#F9FAFB]">
+      <section 
+        onClick={() => navigate('shop')}
+        className="relative w-full m-0 p-0 overflow-hidden shadow-md aspect-[1024/408] bg-[#F9FAFB] cursor-pointer"
+        title="Click to Shop Now"
+      >
         
         {/* STACKED ZOOM & CROSSFADE BANNER SLIDES */}
         {HERO_SLIDES.map((slide, index) => {
@@ -44,9 +48,9 @@ export default function HomePage() {
             >
               <img
                 src={slide.image}
-                alt="Nuts & Spices Premium Banner"
+                alt="Haji Nuts & Spices Banner"
                 className={`w-full h-full object-cover select-none brightness-105 contrast-105 filter transform transition-transform duration-[6500ms] ease-out ${
-                  isActive ? 'scale-110' : 'scale-100'
+                  isActive ? 'scale-[1.03]' : 'scale-100'
                 }`}
                 draggable={false}
                 fetchPriority={index === 0 ? "high" : "auto"}
@@ -56,6 +60,26 @@ export default function HomePage() {
             </div>
           );
         })}
+
+        {/* Slide Indicators / Dots */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+          {HERO_SLIDES.map((_, dotIdx) => (
+            <button
+              key={dotIdx}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentSlide(dotIdx);
+              }}
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                dotIdx === currentSlide 
+                  ? 'w-6 bg-[#128C7E] shadow-sm' 
+                  : 'w-2 bg-white/70 hover:bg-white shadow-2xs'
+              }`}
+              aria-label={`Go to slide ${dotIdx + 1}`}
+            />
+          ))}
+        </div>
 
       </section>
 
