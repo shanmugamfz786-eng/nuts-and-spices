@@ -3,7 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { 
   Search, Trash2, Eye, Phone, MapPin, 
   Calendar, X, MessageSquare, ChevronDown, Check, RefreshCw, ArrowRight,
-  CreditCard, Banknote, ShieldCheck
+  CreditCard, Banknote, ShieldCheck, Smartphone, Landmark, Wallet
 } from 'lucide-react';
 
 export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
@@ -48,9 +48,10 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
   }));
 
   const renderPaymentBadge = (ord) => {
-    const method = ord.paymentMethod || ord.payment_method || 'Online (Cashfree)';
+    const method = String(ord.paymentMethod || ord.payment_method || 'Online (Cashfree)').trim();
     const pStatus = (ord.paymentStatus || ord.payment_status || 'paid').toLowerCase();
 
+    // 1. Cash on Delivery
     if (method === 'Cash on Delivery') {
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/90 shadow-2xs whitespace-nowrap">
@@ -60,11 +61,83 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
       );
     }
 
+    // 2. Google Pay / GPay
+    if (method.includes('Google Pay') || method.includes('GPay')) {
+      const upiIdMatch = method.match(/\((.*?)\)/);
+      const isCard = method.includes('Card');
+      return (
+        <div className="flex flex-col gap-0.5">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-900 border border-blue-200/90 shadow-2xs whitespace-nowrap">
+            {isCard ? <CreditCard className="w-3.5 h-3.5 text-blue-600 shrink-0" /> : <Smartphone className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
+            <span>{isCard ? 'Google Pay Card' : 'Google Pay (GPay)'}</span>
+          </span>
+          {upiIdMatch && (
+            <span className="text-[10px] text-gray-500 font-medium pl-1 truncate max-w-[150px]" title={upiIdMatch[1]}>
+              {upiIdMatch[1]}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    // 3. PhonePe
+    if (method.includes('PhonePe')) {
+      const upiIdMatch = method.match(/\((.*?)\)/);
+      return (
+        <div className="flex flex-col gap-0.5">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-50 text-purple-900 border border-purple-200/90 shadow-2xs whitespace-nowrap">
+            <Smartphone className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+            <span>PhonePe UPI</span>
+          </span>
+          {upiIdMatch && (
+            <span className="text-[10px] text-gray-500 font-medium pl-1 truncate max-w-[150px]" title={upiIdMatch[1]}>
+              {upiIdMatch[1]}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    // 4. Net Banking (e.g. Net Banking · State Bank of India)
+    if (method.includes('Net Banking') || method.includes('Netbanking')) {
+      const bankName = method.split('·')[1]?.trim() || method;
+      return (
+        <div className="flex flex-col gap-0.5">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-50 text-indigo-900 border border-indigo-200/90 shadow-2xs whitespace-nowrap">
+            <Landmark className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+            <span>{bankName}</span>
+          </span>
+          <span className="text-[10px] text-gray-500 font-medium pl-1">Net Banking</span>
+        </div>
+      );
+    }
+
+    // 5. Card (Credit/Debit with Scheme and Bank)
+    if (method.includes('Card')) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-200/90 shadow-2xs whitespace-nowrap">
+          <CreditCard className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span>{method}</span>
+        </span>
+      );
+    }
+
+    // 6. Generic UPI / Paytm / Amazon Pay
+    if (method.includes('UPI') || method.includes('Paytm') || method.includes('Wallet')) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-teal-50 text-teal-900 border border-teal-200/90 shadow-2xs whitespace-nowrap">
+          <Smartphone className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+          <span>{method}</span>
+        </span>
+      );
+    }
+
+    // 7. General Paid
     if (pStatus === 'paid') {
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/90 shadow-2xs whitespace-nowrap">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-          <span>Online (Cashfree)</span>
+          <span>{method}</span>
         </span>
       );
     }
@@ -72,7 +145,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200 shadow-2xs whitespace-nowrap">
         <CreditCard className="w-3.5 h-3.5 text-gray-500 shrink-0" />
-        <span>Online ({pStatus.toUpperCase()})</span>
+        <span>{method} ({pStatus.toUpperCase()})</span>
       </span>
     );
   };
@@ -409,17 +482,17 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               )}
 
               {/* Payment Information Card */}
-              <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200/80 space-y-2 text-xs">
+              <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200/90 space-y-2.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-extrabold uppercase text-emerald-950 tracking-wider flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>Payment Information</span>
+                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                    <span>Payment & Transaction Details</span>
                   </span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
                     (selectedOrder.paymentStatus || 'paid').toLowerCase() === 'paid' 
-                      ? 'bg-emerald-200 text-emerald-900' 
+                      ? 'bg-emerald-200 text-emerald-900 border border-emerald-300' 
                       : (selectedOrder.paymentMethod || selectedOrder.payment_method) === 'Cash on Delivery'
-                      ? 'bg-amber-200 text-amber-900'
+                      ? 'bg-amber-200 text-amber-900 border border-amber-300'
                       : 'bg-gray-200 text-gray-800'
                   }`}>
                     {(selectedOrder.paymentStatus || 'paid').toLowerCase() === 'paid'
@@ -429,16 +502,16 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                       : (selectedOrder.paymentStatus || 'PENDING').toUpperCase()}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-emerald-200/60 text-gray-700">
-                  <div>
-                    <span className="text-[10px] text-gray-500 block">Payment Option</span>
-                    <span className="font-bold text-gray-900">
-                      {selectedOrder.paymentMethod || selectedOrder.payment_method || 'Online (Cashfree)'}
-                    </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-emerald-200/70 text-gray-700">
+                  <div className="bg-white/80 p-2.5 rounded-lg border border-emerald-100">
+                    <span className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Method / Instrument Used</span>
+                    <div>
+                      {renderPaymentBadge(selectedOrder)}
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] text-gray-500 block">Gateway / Channel</span>
-                    <span className="font-bold text-gray-900">
+                  <div className="bg-white/80 p-2.5 rounded-lg border border-emerald-100 flex flex-col justify-center">
+                    <span className="text-[10px] text-gray-500 uppercase font-bold block">Gateway / Processing Channel</span>
+                    <span className="font-bold text-gray-900 text-xs mt-0.5">
                       {(selectedOrder.paymentMethod || selectedOrder.payment_method) === 'Cash on Delivery'
                         ? 'Doorstep Cash Collection'
                         : 'Cashfree Payment Gateway'}

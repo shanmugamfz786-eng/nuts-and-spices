@@ -1,6 +1,63 @@
 import crypto from 'crypto';
 import { queryDb } from '../config/db.js';
 
+export function extractPaymentMethodDetails(payment) {
+  if (!payment) return 'Online (Cashfree)';
+  const method = payment.payment_method || {};
+  const group = (payment.payment_group || '').toLowerCase();
+
+  // 1. UPI
+  if (method.upi || group === 'upi') {
+    const upi = method.upi || {};
+    const upiId = upi.upi_id || '';
+    let app = 'UPI';
+    const lowerId = upiId.toLowerCase();
+    const channel = (upi.channel || '').toLowerCase();
+
+    if (lowerId.endsWith('@okaxis') || lowerId.endsWith('@okhdfcbank') || lowerId.endsWith('@oksbi') || lowerId.endsWith('@okicici') || channel.includes('gpay') || lowerId.includes('gpay')) {
+      app = 'Google Pay (GPay)';
+    } else if (lowerId.endsWith('@ybl') || lowerId.endsWith('@ibl') || lowerId.endsWith('@axl') || channel.includes('phonepe') || lowerId.includes('phonepe')) {
+      app = 'PhonePe';
+    } else if (lowerId.endsWith('@paytm') || lowerId.includes('paytm')) {
+      app = 'Paytm';
+    } else if (lowerId.endsWith('@apl') || lowerId.includes('amazon')) {
+      app = 'Amazon Pay';
+    } else if (channel) {
+      app = channel.toUpperCase();
+    }
+    return upiId ? `UPI · ${app} (${upiId})` : `UPI · ${app}`;
+  }
+
+  // 2. Net Banking
+  if (method.netbanking || group === 'netbanking') {
+    const nb = method.netbanking || {};
+    const bankName = nb.netbanking_bank_name || nb.bank_name || 'Bank';
+    return `Net Banking · ${bankName}`;
+  }
+
+  // 3. Card (Credit/Debit/GPay Card)
+  if (method.card || group.includes('card')) {
+    const card = method.card || {};
+    const scheme = card.card_scheme ? card.card_scheme.toUpperCase() : 'Card';
+    const bank = card.card_bank_name || '';
+    const last4 = card.card_last4 ? ` ****${card.card_last4}` : '';
+    const cardType = card.card_type ? ` ${card.card_type.replace(/_/g, ' ').toUpperCase()}` : '';
+    const bankInfo = bank ? ` (${bank}${last4})` : (last4 ? ` (${last4})` : '');
+    const channel = (card.channel || '').toLowerCase();
+    const gpayPrefix = channel.includes('gpay') ? 'GPay ' : '';
+    return `${gpayPrefix}Card · ${scheme}${cardType}${bankInfo}`;
+  }
+
+  // 4. App / Wallets
+  if (method.app || group === 'app' || group === 'wallet') {
+    const app = method.app || {};
+    const provider = (app.provider || payment.payment_group || 'Wallet').toUpperCase();
+    return `Wallet · ${provider}`;
+  }
+
+  return 'Online (Cashfree)';
+}
+
 export const getPaymentConfig = async (req, res) => {
   try {
     const appId = (process.env.CASHFREE_APP_ID || '').trim();
@@ -260,16 +317,44 @@ export const verifyPayment = async (req, res) => {
       String(data.order_id).startsWith(String(dbOrder.order_id) + '_');
 
     if (isStatusPaid && amountMatches && orderIdMatches) {
-      // Idempotently update order status in DB to 'new' upon successful payment
+      // Query Cashfree payments array to extract exact instrument (e.g. Google Pay, PhonePe, Card, Bank)
+      let detailedPaymentMethod = 'Online (Cashfree)';
+      try {
+        const paymentsUrl = isProduction 
+          ? `https://api.cashfree.com/pg/orders/${encodedOrderId}/payments` 
+          : `https://sandbox.cashfree.com/pg/orders/${encodedOrderId}/payments`;
+        
+        const payRes = await fetch(paymentsUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-client-id': process.env.CASHFREE_APP_ID,
+            'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+            'x-api-version': '2023-08-01'
+          }
+        });
+        if (payRes.ok) {
+          const payments = await payRes.json();
+          if (Array.isArray(payments) && payments.length > 0) {
+            const successfulPayment = payments.find(p => p.payment_status === 'SUCCESS') || payments[0];
+            detailedPaymentMethod = extractPaymentMethodDetails(successfulPayment);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch detailed payment method from Cashfree:', err);
+      }
+
+      // Idempotently update order status in DB to 'new' and record exact payment method
       await queryDb(
-        "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid' WHERE id = ?",
-        [dbOrder.id]
+        "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid', payment_method = ? WHERE id = ?",
+        [detailedPaymentMethod, dbOrder.id]
       );
 
       return res.json({
         success: true,
         isPaid: true,
-        status: data.order_status
+        status: data.order_status,
+        paymentMethod: detailedPaymentMethod
       });
     }
 
@@ -368,11 +453,12 @@ export const handleCashfreeWebhook = async (req, res) => {
         const amountMatches = !orderAmount || Math.abs(parseFloat(orderAmount) - parseFloat(dbOrder.total_amount)) < 0.01;
 
         if (isPaid && amountMatches) {
+          const detailedMethod = extractPaymentMethodDetails(payment);
           await queryDb(
-            "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid' WHERE id = ?",
-            [dbOrder.id]
+            "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid', payment_method = ? WHERE id = ?",
+            [detailedMethod, dbOrder.id]
           );
-          console.log(`Cashfree webhook: Order ${orderId} marked as paid`);
+          console.log(`Cashfree webhook: Order ${orderId} marked as paid with method: ${detailedMethod}`);
         } else if (orderStatus === 'FAILED' || paymentStatus === 'FAILED') {
           await queryDb("UPDATE orders SET payment_status = 'failed' WHERE id = ? AND payment_status != 'paid'", [dbOrder.id]);
         }

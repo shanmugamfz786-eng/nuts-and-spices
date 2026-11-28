@@ -59,7 +59,7 @@ export async function initializeDatabase() {
       total_amount DECIMAL(10,2) NOT NULL,
       status VARCHAR(50) DEFAULT 'pending',
       payment_status ENUM('pending', 'paid', 'failed', 'refund_pending', 'refunded') DEFAULT 'pending',
-      payment_method VARCHAR(100) DEFAULT 'Online (Cashfree)',
+      payment_method VARCHAR(255) DEFAULT 'Online (Cashfree)',
       items_json JSON NOT NULL,
       notes TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
