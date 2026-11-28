@@ -8,6 +8,7 @@ export default function OrderSuccessPage() {
   const { lastOrder, getWhatsAppUrl, navigate, storeSettings, clearCart } = useCart();
   const [orderData, setOrderData] = useState(lastOrder || null);
   const [paymentStatus, setPaymentStatus] = useState('verifying');
+  const [blockedMessage, setBlockedMessage] = useState(null);
   const [isCashfreeCallback, setIsCashfreeCallback] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -56,6 +57,9 @@ export default function OrderSuccessPage() {
         if (data.success && data.isPaid) {
           setPaymentStatus('success');
           clearCart();
+        } else if (data.isBlockedInstrument) {
+          setPaymentStatus('blocked');
+          setBlockedMessage(data.message || 'RuPay Credit Card / Card payments are not accepted.');
         } else {
           setPaymentStatus('failed');
         }
@@ -93,6 +97,26 @@ export default function OrderSuccessPage() {
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold text-[#000000] animate-pulse">Verifying Payment with Cashfree...</h2>
         <div className="w-12 h-12 border-4 border-[#128C7E] border-t-transparent rounded-full animate-spin mx-auto"></div>
+      </div>
+    );
+  }
+
+  if (isCashfreeCallback && paymentStatus === 'blocked') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto text-orange-600">
+          <span className="text-4xl font-bold">🚫</span>
+        </div>
+        <h2 className="text-xl font-bold text-red-600">Card / RuPay Credit Payment Blocked</h2>
+        <div className="p-4 bg-orange-50 rounded-2xl border border-orange-200 text-xs text-orange-950 font-medium leading-relaxed">
+          {blockedMessage || 'RuPay Credit Card / Card payments are not accepted. The amount has been automatically refunded to your source card/account.'}
+        </div>
+        <p className="text-xs text-gray-600">
+          Please place your order again using Savings/Current Bank Account UPI (Google Pay, PhonePe, Paytm) or Net Banking.
+        </p>
+        <button onClick={() => navigate('checkout')} className="px-6 py-2.5 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs rounded-xl shadow-md cursor-pointer">
+          Return to Checkout
+        </button>
       </div>
     );
   }

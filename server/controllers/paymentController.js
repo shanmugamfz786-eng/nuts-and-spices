@@ -1,6 +1,61 @@
 import crypto from 'crypto';
 import { queryDb } from '../config/db.js';
 
+export function isPaymentInstrumentBlocked(payment, detailedMethod = '') {
+  if (!payment) return false;
+  const method = payment.payment_method || {};
+  const group = (payment.payment_group || '').toLowerCase();
+  const upi = method.upi || {};
+  const lowerMethod = (detailedMethod || '').toLowerCase();
+
+  // 1. Direct card check
+  if (method.card || group.includes('card') || lowerMethod.includes('card')) {
+    return true;
+  }
+
+  // 2. RuPay Credit Card on UPI check
+  const isRupayUpi = (upi.account_type || '').toLowerCase() === 'credit' ||
+                     (upi.payer_account_type || '').toLowerCase() === 'credit' ||
+                     (upi.instrument || '').toLowerCase().includes('rupay') ||
+                     (upi.channel || '').toLowerCase().includes('rupay') ||
+                     (upi.payer_bank_name || '').toLowerCase().includes('rupay') ||
+                     lowerMethod.includes('rupay') ||
+                     lowerMethod.includes('credit card');
+
+  return Boolean(isRupayUpi);
+}
+
+async function triggerCashfreeAutoRefund(orderId, amount, isProduction, reason = 'RuPay Credit Card / Card payments not accepted') {
+  try {
+    const encodedOrderId = encodeURIComponent(String(orderId));
+    const refundUrl = isProduction
+      ? `https://api.cashfree.com/pg/orders/${encodedOrderId}/refunds`
+      : `https://sandbox.cashfree.com/pg/orders/${encodedOrderId}/refunds`;
+
+    const refundRes = await fetch(refundUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-client-id': process.env.CASHFREE_APP_ID,
+        'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+        'x-api-version': '2023-08-01'
+      },
+      body: JSON.stringify({
+        refund_amount: parseFloat(amount),
+        refund_id: `ref_${Date.now()}_${Math.random().toString(36).slice(-4)}`,
+        refund_note: reason,
+        refund_speed: 'INSTANT'
+      })
+    });
+    const refundData = await refundRes.json();
+    console.log('Cashfree Auto-Refund Triggered:', refundData);
+    return refundData;
+  } catch (err) {
+    console.error('Failed to trigger Cashfree auto-refund:', err);
+    return null;
+  }
+}
+
 export function extractPaymentMethodDetails(payment) {
   if (!payment) return 'Online (Cashfree)';
   const method = payment.payment_method || {};
@@ -389,6 +444,23 @@ export const verifyPayment = async (req, res) => {
           if (Array.isArray(payments) && payments.length > 0) {
             const successfulPayment = payments.find(p => p.payment_status === 'SUCCESS') || payments[0];
             detailedPaymentMethod = extractPaymentMethodDetails(successfulPayment);
+
+            if (isPaymentInstrumentBlocked(successfulPayment, detailedPaymentMethod)) {
+              console.warn(`Blocked payment method detected: ${detailedPaymentMethod}. Initiating auto-refund...`);
+              await triggerCashfreeAutoRefund(dbOrder.id, dbOrder.total_amount, isProduction, 'RuPay Credit Card / Card blocked by merchant');
+              await queryDb(
+                "UPDATE orders SET status = 'cancelled', payment_status = 'refunded', payment_method = ? WHERE id = ?",
+                [`Blocked: ${detailedPaymentMethod} (Refunded)`, dbOrder.id]
+              );
+              return res.json({
+                success: false,
+                isPaid: false,
+                isBlockedInstrument: true,
+                status: 'REFUNDED',
+                paymentMethod: detailedPaymentMethod,
+                message: 'RuPay Credit Card / Card payments are not accepted. The amount has been refunded to your source card/account. Please pay using Bank Account UPI (Google Pay / PhonePe) or Net Banking.'
+              });
+            }
           }
         }
       } catch (err) {
@@ -505,6 +577,18 @@ export const handleCashfreeWebhook = async (req, res) => {
 
         if (isPaid && amountMatches) {
           const detailedMethod = extractPaymentMethodDetails(payment);
+
+          if (isPaymentInstrumentBlocked(payment, detailedMethod)) {
+            console.warn(`Webhook: Blocked payment method detected: ${detailedMethod}. Initiating auto-refund...`);
+            const isProduction = (process.env.CASHFREE_ENV || '').trim().toUpperCase() === 'PRODUCTION';
+            await triggerCashfreeAutoRefund(dbOrder.id, dbOrder.total_amount, isProduction, 'RuPay Credit Card / Card blocked by merchant');
+            await queryDb(
+              "UPDATE orders SET status = 'cancelled', payment_status = 'refunded', payment_method = ? WHERE id = ?",
+              [`Blocked: ${detailedMethod} (Refunded)`, dbOrder.id]
+            );
+            return res.status(200).json({ status: 'OK', message: 'Payment blocked and refunded' });
+          }
+
           await queryDb(
             "UPDATE orders SET status = CASE WHEN status IN ('cancelled', 'confirmed', 'preparing', 'shipped', 'out for delivery', 'delivered') THEN status ELSE 'new' END, payment_status = 'paid', payment_method = ? WHERE id = ?",
             [detailedMethod, dbOrder.id]
