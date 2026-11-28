@@ -44,15 +44,11 @@ export default function CheckoutPage() {
 
   const testPaymentOptions = [
     { id: 'gpay', label: 'Google Pay (GPay UPI)', method: 'UPI · Google Pay (testuser@okhdfcbank)', icon: Smartphone, color: 'text-blue-600' },
-    { id: 'gpay_rupay_credit', label: 'Google Pay (RuPay Card Used)', method: 'GPay · RuPay Card Used (HDFC Bank ****7890)', icon: CreditCard, color: 'text-orange-600' },
-    { id: 'gpay_card', label: 'Google Pay (Visa Card)', method: 'GPay Card · VISA (HDFC Bank ****4123)', icon: CreditCard, color: 'text-blue-600' },
     { id: 'phonepe', label: 'PhonePe UPI', method: 'UPI · PhonePe (testuser@ybl)', icon: Smartphone, color: 'text-purple-600' },
+    { id: 'paytm', label: 'Paytm UPI', method: 'UPI · Paytm (testuser@paytm)', icon: Smartphone, color: 'text-teal-600' },
     { id: 'sbi', label: 'SBI Net Banking', method: 'Net Banking · State Bank of India', icon: Landmark, color: 'text-indigo-600' },
     { id: 'hdfc', label: 'HDFC Net Banking', method: 'Net Banking · HDFC Bank', icon: Landmark, color: 'text-indigo-600' },
-    { id: 'icici', label: 'ICICI Net Banking', method: 'Net Banking · ICICI Bank', icon: Landmark, color: 'text-indigo-600' },
-    { id: 'card_visa', label: 'Visa Debit Card (HDFC)', method: 'Card · VISA DEBIT CARD (HDFC Bank ****4123)', icon: CreditCard, color: 'text-emerald-600' },
-    { id: 'card_master', label: 'Mastercard Credit (SBI)', method: 'Card · MASTERCARD CREDIT (SBI ****9876)', icon: CreditCard, color: 'text-emerald-600' },
-    { id: 'paytm', label: 'Paytm UPI', method: 'UPI · Paytm (testuser@paytm)', icon: Smartphone, color: 'text-teal-600' }
+    { id: 'icici', label: 'ICICI Net Banking', method: 'Net Banking · ICICI Bank', icon: Landmark, color: 'text-indigo-600' }
   ];
 
   useEffect(() => {
@@ -525,7 +521,7 @@ export default function CheckoutPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="w-9 h-9 rounded-xl bg-emerald-100/80 text-[#128C7E] flex items-center justify-center">
-                    <CreditCard className="w-5 h-5" />
+                    <Smartphone className="w-5 h-5" />
                   </div>
                   {paymentMethod === 'Online (Cashfree)' ? (
                     <span className="w-5 h-5 rounded-full bg-[#128C7E] text-white flex items-center justify-center text-[10px] font-bold">✓</span>
@@ -549,11 +545,11 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <p className="text-[11px] text-[#8C7A6B] leading-tight">
-                    UPI, Google Pay, PhonePe, Cards, NetBanking
+                    UPI (Google Pay, PhonePe, Paytm) & Net Banking (Instant)
                   </p>
                   {paymentConfig.isTestMode && paymentMethod === 'Online (Cashfree)' && (
                     <p className="text-[10px] text-amber-700 font-medium pt-0.5">
-                      🧪 Test Mode: Test cards & test UPI enabled
+                      🧪 Test Mode: UPI & Net Banking enabled (All Cards Blocked)
                     </p>
                   )}
                 </div>
