@@ -77,8 +77,9 @@ export const createPaymentSession = async (req, res) => {
     // Stable customer ID derived from phone
     const customerId = `cust_${cleanPhone}`;
     const frontendBaseUrl = (process.env.FRONTEND_URL || 'https://www.hajinutsandspices.com').split(',')[0].trim();
+    const isProduction = (process.env.CASHFREE_ENV || '').trim().toUpperCase() === 'PRODUCTION';
 
-    const apiUrl = process.env.CASHFREE_ENV === 'PRODUCTION' 
+    const apiUrl = isProduction 
       ? 'https://api.cashfree.com/pg/orders' 
       : 'https://sandbox.cashfree.com/pg/orders';
 
@@ -161,7 +162,7 @@ export const createPaymentSession = async (req, res) => {
     }
 
     const paymentUrl = data.payments?.url || (
-      process.env.CASHFREE_ENV === 'PRODUCTION'
+      isProduction
         ? `https://payments.cashfree.com/order/#${data.payment_session_id}`
         : `https://sandbox.cashfree.com/order/#${data.payment_session_id}`
     );
@@ -171,7 +172,7 @@ export const createPaymentSession = async (req, res) => {
       paymentSessionId: data.payment_session_id,
       paymentUrl,
       orderId: data.order_id,
-      environment: process.env.CASHFREE_ENV === 'PRODUCTION' ? 'production' : 'sandbox'
+      environment: isProduction ? 'production' : 'sandbox'
     });
   } catch (error) {
     console.error('Payment Session Error:', error);
@@ -211,7 +212,8 @@ export const verifyPayment = async (req, res) => {
 
     // Use encoded string of dbOrder.id (same ID used at creation)
     const encodedOrderId = encodeURIComponent(String(dbOrder.id));
-    const apiUrl = process.env.CASHFREE_ENV === 'PRODUCTION' 
+    const isProduction = (process.env.CASHFREE_ENV || '').trim().toUpperCase() === 'PRODUCTION';
+    const apiUrl = isProduction 
       ? `https://api.cashfree.com/pg/orders/${encodedOrderId}` 
       : `https://sandbox.cashfree.com/pg/orders/${encodedOrderId}`;
 
