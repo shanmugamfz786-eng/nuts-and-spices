@@ -76,6 +76,39 @@ export const getPaymentConfig = async (req, res) => {
   }
 };
 
+export const simulateTestPaymentOrder = async (req, res) => {
+  try {
+    const appId = (process.env.CASHFREE_APP_ID || '').trim();
+    const envVar = (process.env.CASHFREE_ENV || '').trim().toUpperCase();
+    const isTest = envVar !== 'PRODUCTION' || appId.toUpperCase().startsWith('TEST');
+
+    if (!isTest) {
+      return res.status(403).json({ success: false, message: 'Simulation only allowed in Test Mode.' });
+    }
+
+    const { orderId, simulatedMethod } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'orderId is required.' });
+    }
+
+    const method = simulatedMethod || 'UPI · Google Pay (testuser@okaxis)';
+    await queryDb(
+      "UPDATE orders SET status = 'new', payment_status = 'paid', payment_method = ? WHERE id = ? OR order_id = ?",
+      [method, orderId, orderId]
+    );
+
+    return res.json({
+      success: true,
+      orderId,
+      paymentMethod: method,
+      message: 'Test payment simulated successfully'
+    });
+  } catch (err) {
+    console.error('Simulate Test Payment Error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 /**
  * Check if the caller is authorized to operate on this order (for payment session creation & verification).
  * If authenticated token is provided, must be admin or order owner (matching phone/email).

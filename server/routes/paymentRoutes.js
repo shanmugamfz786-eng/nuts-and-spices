@@ -1,6 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { createPaymentSession, verifyPayment, getPaymentConfig } from '../controllers/paymentController.js';
+import { createPaymentSession, verifyPayment, getPaymentConfig, simulateTestPaymentOrder } from '../controllers/paymentController.js';
 import { optionalAuthMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -14,6 +14,7 @@ const paymentRateLimiter = rateLimit({
 });
 
 router.get('/config', getPaymentConfig);
+router.post('/simulate-test-order', simulateTestPaymentOrder);
 router.post('/create-session', paymentRateLimiter, optionalAuthMiddleware, createPaymentSession);
 router.post('/verify', paymentRateLimiter, optionalAuthMiddleware, verifyPayment);
 

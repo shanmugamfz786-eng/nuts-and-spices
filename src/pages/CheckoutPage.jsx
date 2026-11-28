@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, ShieldCheck, Scale, CreditCard, Banknote } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, ShieldCheck, Scale, CreditCard, Banknote, Smartphone, Landmark, Sparkles, Zap } from 'lucide-react';
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
@@ -37,8 +37,21 @@ export default function CheckoutPage() {
     isTestMode: true,
     label: 'Testing Mode'
   });
+  const [selectedSimulatedOption, setSelectedSimulatedOption] = useState('UPI · Google Pay (testuser@okhdfcbank)');
+  const [isSimulating, setIsSimulating] = useState(false);
   const [errors, setErrors] = useState({});
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const testPaymentOptions = [
+    { id: 'gpay', label: 'Google Pay (GPay UPI)', method: 'UPI · Google Pay (testuser@okhdfcbank)', icon: Smartphone, color: 'text-blue-600' },
+    { id: 'phonepe', label: 'PhonePe UPI', method: 'UPI · PhonePe (testuser@ybl)', icon: Smartphone, color: 'text-purple-600' },
+    { id: 'sbi', label: 'SBI Net Banking', method: 'Net Banking · State Bank of India', icon: Landmark, color: 'text-indigo-600' },
+    { id: 'hdfc', label: 'HDFC Net Banking', method: 'Net Banking · HDFC Bank', icon: Landmark, color: 'text-indigo-600' },
+    { id: 'icici', label: 'ICICI Net Banking', method: 'Net Banking · ICICI Bank', icon: Landmark, color: 'text-indigo-600' },
+    { id: 'card_visa', label: 'Visa Debit Card (HDFC)', method: 'Card · VISA DEBIT CARD (HDFC Bank ****4123)', icon: CreditCard, color: 'text-emerald-600' },
+    { id: 'card_master', label: 'Mastercard Credit (SBI)', method: 'Card · MASTERCARD CREDIT (SBI ****9876)', icon: CreditCard, color: 'text-emerald-600' },
+    { id: 'paytm', label: 'Paytm UPI', method: 'UPI · Paytm (testuser@paytm)', icon: Smartphone, color: 'text-teal-600' }
+  ];
 
   useEffect(() => {
     const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
@@ -256,6 +269,76 @@ export default function CheckoutPage() {
       console.error('Payment initialization error', err);
       alert('Error initiating payment: ' + (err.message || 'Please try again.'));
       setIsProcessingPayment(false);
+    }
+  };
+
+  const handleSimulatedTestPayment = async () => {
+    if (isProcessingPayment || isSimulating) return;
+    if (!validate()) return;
+
+    setIsSimulating(true);
+    try {
+      const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+        typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'https://nuts-and-spices-dqzp.onrender.com'
+          : ''
+      );
+      const token = localStorage.getItem('nuts_spices_auth_token') || '';
+
+      // 1. Create real order record in DB
+      const orderRes = await fetch(BASE + '/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          customer: {
+            ...formData,
+            email: user?.email || formData.email || `${(formData.phone || '').replace(/\D/g, '')}@customer.local`
+          }, 
+          items: cart.map(item => ({
+            ...item,
+            id: item.id || item.productId,
+            productId: item.productId || item.id
+          })), 
+          notes: formData.notes || '',
+          couponCode: appliedCoupon?.code || '',
+          discountAmount: discountAmount || 0,
+          paymentMethod: selectedSimulatedOption
+        })
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderData.success) {
+        alert(orderData.message || 'Failed to place test order');
+        setIsSimulating(false);
+        return;
+      }
+
+      const backendOrderId = orderData.order?.id || orderData.orderId;
+
+      // 2. Simulate payment success with chosen instrument
+      await fetch(BASE + '/api/payment/simulate-test-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          orderId: backendOrderId,
+          simulatedMethod: selectedSimulatedOption
+        })
+      });
+
+      // 3. Clear cart & redirect to order tracking/success page
+      clearPurchasedItems();
+      const phone4 = (formData.phone || '').replace(/\D/g, '').slice(-4);
+      window.location.href = `${window.location.origin}/order-success?order_id=${backendOrderId}&phone4=${phone4}&track=true`;
+    } catch (err) {
+      console.error('Simulated test payment error', err);
+      alert('Error simulating payment: ' + (err.message || 'Please try again.'));
+      setIsSimulating(false);
     }
   };
 
@@ -505,6 +588,60 @@ export default function CheckoutPage() {
               </div>
             </div>
           </div>
+
+          {/* Test Mode Simulator Box */}
+          {paymentConfig.isTestMode && (
+            <div className="bg-amber-50/70 border-2 border-dashed border-amber-300 rounded-2xl p-4 space-y-3 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span className="text-xs font-black text-amber-950 uppercase tracking-wider">
+                    🧪 1-Click Payment Simulator (Test All Options)
+                  </span>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 uppercase">
+                  Sandbox Active
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-800 leading-snug">
+                Select any payment instrument below to immediately simulate a real customer payment and verify how it displays in the Admin Orders panel:
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                {testPaymentOptions.map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setSelectedSimulatedOption(opt.method)}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-left text-xs font-bold transition-all cursor-pointer ${
+                      selectedSimulatedOption === opt.method
+                        ? 'border-amber-600 bg-white text-gray-900 shadow-xs ring-2 ring-amber-500/40'
+                        : 'border-amber-200/90 bg-amber-100/40 text-gray-700 hover:bg-white'
+                    }`}
+                  >
+                    <opt.icon className={`w-4 h-4 ${opt.color} shrink-0`} />
+                    <span className="truncate">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSimulatedTestPayment}
+                disabled={isSimulating || isProcessingPayment}
+                className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+              >
+                {isSimulating ? (
+                  <span className="animate-pulse">Simulating Test Payment...</span>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 text-amber-200 fill-current" />
+                    <span>⚡ Place Simulated Test Order (₹{grandTotal.toLocaleString('en-IN')})</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           <button
             type="submit"
