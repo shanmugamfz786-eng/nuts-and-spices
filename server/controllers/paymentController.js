@@ -14,6 +14,12 @@ export function extractPaymentMethodDetails(payment) {
     const lowerId = upiId.toLowerCase();
     const channel = (upi.channel || '').toLowerCase();
 
+    // Check if RuPay Credit Card on UPI / GPay was used
+    const isRupayUpi = (upi.account_type || '').toLowerCase() === 'credit' || 
+                       (upi.instrument || '').toLowerCase().includes('rupay') ||
+                       channel.includes('rupay') ||
+                       (upi.payer_bank_name || '').toLowerCase().includes('rupay');
+
     if (lowerId.endsWith('@okaxis') || lowerId.endsWith('@okhdfcbank') || lowerId.endsWith('@oksbi') || lowerId.endsWith('@okicici') || channel.includes('gpay') || lowerId.includes('gpay')) {
       app = 'Google Pay (GPay)';
     } else if (lowerId.endsWith('@ybl') || lowerId.endsWith('@ibl') || lowerId.endsWith('@axl') || channel.includes('phonepe') || lowerId.includes('phonepe')) {
@@ -25,6 +31,11 @@ export function extractPaymentMethodDetails(payment) {
     } else if (channel) {
       app = channel.toUpperCase();
     }
+
+    if (isRupayUpi) {
+      return `GPay · RuPay Credit Card Used (${upiId || 'RuPay on UPI'})`;
+    }
+
     return upiId ? `UPI · ${app} (${upiId})` : `UPI · ${app}`;
   }
 
@@ -35,7 +46,7 @@ export function extractPaymentMethodDetails(payment) {
     return `Net Banking · ${bankName}`;
   }
 
-  // 3. Card (Credit/Debit/GPay Card)
+  // 3. Card (Credit/Debit/RuPay/GPay Card)
   if (method.card || group.includes('card')) {
     const card = method.card || {};
     const scheme = card.card_scheme ? card.card_scheme.toUpperCase() : 'Card';
@@ -44,7 +55,12 @@ export function extractPaymentMethodDetails(payment) {
     const cardType = card.card_type ? ` ${card.card_type.replace(/_/g, ' ').toUpperCase()}` : '';
     const bankInfo = bank ? ` (${bank}${last4})` : (last4 ? ` (${last4})` : '');
     const channel = (card.channel || '').toLowerCase();
-    const gpayPrefix = channel.includes('gpay') ? 'GPay ' : '';
+    const gpayPrefix = channel.includes('gpay') ? 'GPay · ' : '';
+
+    if (scheme.includes('RUPAY') && cardType.includes('CREDIT')) {
+      return `${gpayPrefix}RuPay Credit Card Used${bankInfo}`;
+    }
+
     return `${gpayPrefix}Card · ${scheme}${cardType}${bankInfo}`;
   }
 
