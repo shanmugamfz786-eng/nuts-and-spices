@@ -51,19 +51,23 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     const method = String(ord.paymentMethod || ord.payment_method || 'Online (Cashfree)').trim();
     const pStatus = (ord.paymentStatus || ord.payment_status || 'paid').toLowerCase();
 
-    // 0. RuPay Credit Card (Used via Google Pay / UPI or Direct)
-    if (method.includes('RuPay Credit Card') || (method.includes('RuPay') && method.includes('Credit'))) {
-      const isGpay = method.includes('GPay') || method.includes('Google Pay');
+    // 0. RuPay / Credit Card on Google Pay or any RuPay Card
+    const lowerMethod = method.toLowerCase();
+    const isGpay = lowerMethod.includes('gpay') || lowerMethod.includes('google pay');
+    const isCardOrCredit = lowerMethod.includes('card') || lowerMethod.includes('credit');
+    const isRupay = lowerMethod.includes('rupay') || lowerMethod.includes('repay');
+
+    if ((isGpay && isCardOrCredit) || isRupay) {
       const bankMatch = method.match(/\((.*?)\)/);
       const bankText = bankMatch ? bankMatch[1] : '';
       return (
         <div className="flex flex-col gap-0.5">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black bg-orange-50 text-orange-950 border border-orange-300 shadow-2xs whitespace-nowrap">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black bg-orange-100 text-orange-950 border border-orange-300 shadow-2xs whitespace-nowrap">
             <CreditCard className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-            <span>RuPay Credit Card Used</span>
+            <span>RuPay Card Used</span>
           </span>
-          <span className="text-[10px] text-gray-600 font-semibold pl-1 truncate max-w-[180px]">
-            {isGpay ? `Google Pay (GPay)${bankText ? ` · ${bankText}` : ''}` : (bankText || 'RuPay Credit')}
+          <span className="text-[10px] text-gray-600 font-semibold pl-1 truncate max-w-[190px]">
+            {isGpay ? `Google Pay (GPay)${bankText ? ` · ${bankText}` : ''}` : (bankText ? `Card · ${bankText}` : 'RuPay Card')}
           </span>
         </div>
       );

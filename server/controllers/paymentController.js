@@ -55,13 +55,14 @@ export function extractPaymentMethodDetails(payment) {
     const cardType = card.card_type ? ` ${card.card_type.replace(/_/g, ' ').toUpperCase()}` : '';
     const bankInfo = bank ? ` (${bank}${last4})` : (last4 ? ` (${last4})` : '');
     const channel = (card.channel || '').toLowerCase();
-    const gpayPrefix = channel.includes('gpay') ? 'GPay · ' : '';
+    const isGpay = channel.includes('gpay');
 
-    if (scheme.includes('RUPAY') && cardType.includes('CREDIT')) {
-      return `${gpayPrefix}RuPay Credit Card Used${bankInfo}`;
+    // If customer paid using Credit Card on GPay or RuPay Card
+    if (isGpay || scheme.includes('RUPAY') || cardType.includes('CREDIT')) {
+      return `GPay · RuPay Card Used${bankInfo}`;
     }
 
-    return `${gpayPrefix}Card · ${scheme}${cardType}${bankInfo}`;
+    return `Card · ${scheme}${cardType}${bankInfo}`;
   }
 
   // 4. App / Wallets

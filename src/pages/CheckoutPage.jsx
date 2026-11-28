@@ -44,7 +44,7 @@ export default function CheckoutPage() {
 
   const testPaymentOptions = [
     { id: 'gpay', label: 'Google Pay (GPay UPI)', method: 'UPI · Google Pay (testuser@okhdfcbank)', icon: Smartphone, color: 'text-blue-600' },
-    { id: 'gpay_rupay_credit', label: 'GPay (RuPay Credit Card)', method: 'GPay · RuPay Credit Card Used (HDFC Bank ****7890)', icon: CreditCard, color: 'text-orange-600' },
+    { id: 'gpay_rupay_credit', label: 'Google Pay (RuPay Card Used)', method: 'GPay · RuPay Card Used (HDFC Bank ****7890)', icon: CreditCard, color: 'text-orange-600' },
     { id: 'gpay_card', label: 'Google Pay (Visa Card)', method: 'GPay Card · VISA (HDFC Bank ****4123)', icon: CreditCard, color: 'text-blue-600' },
     { id: 'phonepe', label: 'PhonePe UPI', method: 'UPI · PhonePe (testuser@ybl)', icon: Smartphone, color: 'text-purple-600' },
     { id: 'sbi', label: 'SBI Net Banking', method: 'Net Banking · State Bank of India', icon: Landmark, color: 'text-indigo-600' },
