@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, ShieldCheck, Scale, CreditCard, Banknote } from 'lucide-react';
 import { load } from '@cashfreepayments/cashfree-js';
@@ -33,8 +33,28 @@ export default function CheckoutPage() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState('Online (Cashfree)');
+  const [paymentConfig, setPaymentConfig] = useState({
+    isTestMode: true,
+    label: 'Testing Mode'
+  });
   const [errors, setErrors] = useState({});
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  useEffect(() => {
+    const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') || (
+      typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+        ? 'https://nuts-and-spices-dqzp.onrender.com'
+        : ''
+    );
+    fetch(BASE + '/api/payment/config')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          setPaymentConfig(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   if (!user) {
     return (
@@ -431,11 +451,26 @@ export default function CheckoutPage() {
                 <div className="mt-3 space-y-0.5">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-extrabold text-xs text-[#000000]">Online Payment</span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-[#128C7E]">Instant</span>
+                    {paymentConfig.isTestMode ? (
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300/80 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Testing</span>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-100 text-[#128C7E] border border-emerald-300 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                        <span>Real</span>
+                      </span>
+                    )}
                   </div>
                   <p className="text-[11px] text-[#8C7A6B] leading-tight">
                     UPI, Google Pay, PhonePe, Cards, NetBanking
                   </p>
+                  {paymentConfig.isTestMode && paymentMethod === 'Online (Cashfree)' && (
+                    <p className="text-[10px] text-amber-700 font-medium pt-0.5">
+                      🧪 Test Mode: Test cards & test UPI enabled
+                    </p>
+                  )}
                 </div>
               </div>
 

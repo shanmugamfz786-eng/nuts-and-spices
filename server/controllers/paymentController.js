@@ -1,6 +1,24 @@
 import crypto from 'crypto';
 import { queryDb } from '../config/db.js';
 
+export const getPaymentConfig = async (req, res) => {
+  try {
+    const appId = (process.env.CASHFREE_APP_ID || '').trim();
+    const envVar = (process.env.CASHFREE_ENV || '').trim().toUpperCase();
+    const isTest = envVar !== 'PRODUCTION' || appId.toUpperCase().startsWith('TEST');
+
+    return res.json({
+      success: true,
+      environment: isTest ? 'sandbox' : 'production',
+      isTestMode: isTest,
+      mode: isTest ? 'TESTING' : 'REAL',
+      label: isTest ? 'Testing Mode' : 'Real / Live'
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 /**
  * Check if the caller is authorized to operate on this order (for payment session creation & verification).
  * If authenticated token is provided, must be admin or order owner (matching phone/email).
