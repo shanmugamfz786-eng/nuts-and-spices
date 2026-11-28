@@ -16,6 +16,8 @@ const STORE_WHATSAPP_NUMBER = process.env.STORE_WHATSAPP_NUMBER || '919876543210
 export const createOrder = async (req, res) => {
   try {
     const { customer, items, notes } = req.body;
+    const paymentMethod = req.body.paymentMethod || req.body.payment_method || 'Online (Cashfree)';
+    const isCod = paymentMethod === 'Cash on Delivery';
 
     if (!customer || !customer.name || !customer.phone || !customer.address || !customer.city || !customer.pincode) {
       return res.status(400).json({ success: false, message: 'Missing required customer details (name, phone, address, city, pincode).' });
@@ -213,8 +215,8 @@ export const createOrder = async (req, res) => {
 
     await queryDb(
       `INSERT INTO orders 
-      (id, order_id, customer_name, phone, email, address, city, state, pincode, subtotal, delivery_charge, total_amount, status, items_json, notes) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, order_id, customer_name, phone, email, address, city, state, pincode, subtotal, delivery_charge, total_amount, status, payment_status, payment_method, items_json, notes) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         orderId,
         orderId,
@@ -228,7 +230,9 @@ export const createOrder = async (req, res) => {
         subtotal,
         deliveryCharge,
         totalAmount,
-        'pending',
+        isCod ? 'new' : 'pending',
+        isCod ? 'pending' : 'pending',
+        paymentMethod,
         itemsJson,
         fullNotes
       ]
@@ -247,7 +251,11 @@ export const createOrder = async (req, res) => {
       subtotal,
       deliveryCharge,
       totalAmount,
-      status: 'pending',
+      status: isCod ? 'new' : 'pending',
+      paymentStatus: 'pending',
+      payment_status: 'pending',
+      paymentMethod,
+      payment_method: paymentMethod,
       items,
       notes: notes || '',
       createdAt: new Date()
@@ -300,11 +308,11 @@ export const getAllOrders = async (req, res) => {
     const includeAll = req.query.includeAll === 'true' || req.query.includeUnpaid === 'true';
 
     // Only fetch orders where payment was completed (paid, refund_pending, refunded)
-    // or legacy confirmed orders where payment_status was not tracked.
+    // or Cash on Delivery orders, or legacy confirmed orders where payment_status was not tracked.
     // Unpaid checkout attempts (pending payment) are excluded unless explicitly requested.
     let sql = `
       SELECT * FROM orders 
-      WHERE (payment_status IN ('paid', 'refund_pending', 'refunded') OR (payment_status IS NULL AND status NOT IN ('pending', 'new')))`
+      WHERE (payment_status IN ('paid', 'refund_pending', 'refunded') OR payment_method = 'Cash on Delivery' OR (payment_status IS NULL AND status NOT IN ('pending', 'new')))`
     ;
     if (includeAll) {
       sql = "SELECT * FROM orders";
@@ -340,6 +348,8 @@ export const getAllOrders = async (req, res) => {
           status: (row.status || 'pending').toLowerCase(),
           paymentStatus: (row.payment_status || 'paid').toLowerCase(),
           payment_status: (row.payment_status || 'paid').toLowerCase(),
+          paymentMethod: row.payment_method || 'Online (Cashfree)',
+          payment_method: row.payment_method || 'Online (Cashfree)',
           items: parsedItems,
           notes: row.notes,
           date: row.created_at,
@@ -360,7 +370,9 @@ export const getAllOrders = async (req, res) => {
         memOrders = memOrders.filter(o => {
           const pStatus = (o.payment_status || o.paymentStatus || '').toLowerCase();
           const oStatus = (o.status || '').toLowerCase();
+          const pMethod = o.payment_method || o.paymentMethod || '';
           return ['paid', 'refund_pending', 'refunded'].includes(pStatus) ||
+                 pMethod === 'Cash on Delivery' ||
                  (!pStatus && !['pending', 'new'].includes(oStatus));
         });
       }
@@ -427,6 +439,10 @@ export const getOrderById = async (req, res) => {
         totalAmount: row.total_amount,
         total: Number(row.total_amount) || 0,
         status: (row.status || 'pending').toLowerCase(),
+        paymentStatus: (row.payment_status || 'paid').toLowerCase(),
+        payment_status: (row.payment_status || 'paid').toLowerCase(),
+        paymentMethod: row.payment_method || 'Online (Cashfree)',
+        payment_method: row.payment_method || 'Online (Cashfree)',
         items: parsedItems,
         notes: row.notes,
         date: row.created_at,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, ShieldCheck, Scale } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Building, Hash, FileText, ShoppingBag, Send, ShieldCheck, Scale, CreditCard, Banknote } from 'lucide-react';
 import { load } from '@cashfreepayments/cashfree-js';
 
 export default function CheckoutPage() {
@@ -32,6 +32,7 @@ export default function CheckoutPage() {
     notes: ''
   });
 
+  const [paymentMethod, setPaymentMethod] = useState('Online (Cashfree)');
   const [errors, setErrors] = useState({});
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
@@ -123,7 +124,8 @@ export default function CheckoutPage() {
           })), 
           notes: formData.notes || '',
           couponCode: appliedCoupon?.code || '',
-          discountAmount: discountAmount || 0
+          discountAmount: discountAmount || 0,
+          paymentMethod
         })
       });
 
@@ -151,6 +153,14 @@ export default function CheckoutPage() {
       }
 
       const phone4 = (formData.phone || '').replace(/\D/g, '').slice(-4);
+
+      // If Cash on Delivery was chosen, bypass payment gateway directly
+      if (paymentMethod === 'Cash on Delivery') {
+        clearPurchasedItems();
+        window.location.href = `${window.location.origin}/order-success?order_id=${backendOrderId}&phone4=${phone4}&cod=true`;
+        return;
+      }
+
       const returnUrl = `${window.location.origin}/order-success?order_id={order_id}&phone4=${phone4}`;
 
       // Initialize Cashfree Payment Session
@@ -393,19 +403,94 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* Payment Method Selector */}
+          <div className="space-y-3 pt-2">
+            <label className="text-xs font-extrabold text-[#000000] uppercase tracking-wider block">
+              Choose Payment Method
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Online Payment Card */}
+              <div
+                onClick={() => setPaymentMethod('Online (Cashfree)')}
+                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between relative ${
+                  paymentMethod === 'Online (Cashfree)'
+                    ? 'border-[#128C7E] bg-emerald-50/40 shadow-xs'
+                    : 'border-[#E5E7EB] bg-[#F9FAFB] hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100/80 text-[#128C7E] flex items-center justify-center">
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  {paymentMethod === 'Online (Cashfree)' ? (
+                    <span className="w-5 h-5 rounded-full bg-[#128C7E] text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                  ) : (
+                    <span className="w-5 h-5 rounded-full border border-gray-300"></span>
+                  )}
+                </div>
+                <div className="mt-3 space-y-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-extrabold text-xs text-[#000000]">Online Payment</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-[#128C7E]">Instant</span>
+                  </div>
+                  <p className="text-[11px] text-[#8C7A6B] leading-tight">
+                    UPI, Google Pay, PhonePe, Cards, NetBanking
+                  </p>
+                </div>
+              </div>
+
+              {/* Cash on Delivery Card */}
+              <div
+                onClick={() => setPaymentMethod('Cash on Delivery')}
+                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between relative ${
+                  paymentMethod === 'Cash on Delivery'
+                    ? 'border-[#128C7E] bg-emerald-50/40 shadow-xs'
+                    : 'border-[#E5E7EB] bg-[#F9FAFB] hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100/80 text-amber-700 flex items-center justify-center">
+                    <Banknote className="w-5 h-5" />
+                  </div>
+                  {paymentMethod === 'Cash on Delivery' ? (
+                    <span className="w-5 h-5 rounded-full bg-[#128C7E] text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                  ) : (
+                    <span className="w-5 h-5 rounded-full border border-gray-300"></span>
+                  )}
+                </div>
+                <div className="mt-3 space-y-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-extrabold text-xs text-[#000000]">Cash on Delivery</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">COD</span>
+                  </div>
+                  <p className="text-[11px] text-[#8C7A6B] leading-tight">
+                    Pay with cash at your door upon package arrival
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={isProcessingPayment}
-            className={`w-full py-4 text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 ${
+            className={`w-full py-4 text-white font-bold text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               isProcessingPayment ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#128C7E] hover:bg-[#075E54]'
             }`}
           >
             {isProcessingPayment ? (
-              <span className="animate-pulse">Processing Payment...</span>
+              <span className="animate-pulse">
+                {paymentMethod === 'Cash on Delivery' ? 'Placing COD Order...' : 'Processing Payment...'}
+              </span>
+            ) : paymentMethod === 'Cash on Delivery' ? (
+              <>
+                <Banknote className="w-4 h-4 text-amber-200" />
+                <span>Place Cash on Delivery Order (₹{grandTotal.toLocaleString('en-IN')})</span>
+              </>
             ) : (
               <>
                 <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                <span>Pay ₹{grandTotal.toLocaleString('en-IN')} Securely</span>
+                <span>Pay ₹{grandTotal.toLocaleString('en-IN')} Securely with Cashfree</span>
               </>
             )}
           </button>

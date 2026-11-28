@@ -20,9 +20,11 @@ export default function OrderSuccessPage() {
     
     if (urlOrderId) {
       const isTrackingOnly = urlParams.get('track') === 'true';
-      if (isTrackingOnly) {
+      const isCod = urlParams.get('cod') === 'true';
+      if (isTrackingOnly || isCod) {
         setPaymentStatus('success');
         setIsCashfreeCallback(false);
+        clearCart();
         // Only fetch order data
         fetch(API_BASE_URL + '/orders/' + urlOrderId + phone4Query, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuts_spices_auth_token') } })
           .then(res => res.json())
@@ -148,6 +150,11 @@ export default function OrderSuccessPage() {
           <>
             <h1 className="text-3xl font-black font-serif text-[#000000]">Order Tracking</h1>
             <p className="text-[#8C7A6B]">View your order status below.</p>
+          </>
+        ) : new URLSearchParams(window.location.search).get('cod') === 'true' || orderData?.paymentMethod === 'Cash on Delivery' ? (
+          <>
+            <h1 className="text-3xl font-black font-serif text-[#000000]">Order Placed Successfully!</h1>
+            <p className="text-[#8C7A6B]">Your Cash on Delivery order is confirmed. Please keep cash ready at delivery.</p>
           </>
         ) : (
           <>

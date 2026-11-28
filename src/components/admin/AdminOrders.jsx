@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { 
   Search, Trash2, Eye, Phone, MapPin, 
-  Calendar, X, MessageSquare, ChevronDown, Check, RefreshCw, ArrowRight
+  Calendar, X, MessageSquare, ChevronDown, Check, RefreshCw, ArrowRight,
+  CreditCard, Banknote, ShieldCheck
 } from 'lucide-react';
 
 export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
@@ -41,8 +42,40 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     date: o.date || o.created_at || o.createdAt,
     total: Number(o.total !== undefined ? o.total : (o.totalAmount || o.total_amount || 0)),
     status: (o.status || 'pending').toLowerCase(),
-    paymentStatus: (o.paymentStatus || o.payment_status || 'paid').toLowerCase()
+    paymentStatus: (o.paymentStatus || o.payment_status || 'paid').toLowerCase(),
+    paymentMethod: o.paymentMethod || o.payment_method || (o.paymentStatus === 'paid' ? 'Online (Cashfree)' : 'Online (Cashfree)'),
+    payment_method: o.paymentMethod || o.payment_method || (o.paymentStatus === 'paid' ? 'Online (Cashfree)' : 'Online (Cashfree)')
   }));
+
+  const renderPaymentBadge = (ord) => {
+    const method = ord.paymentMethod || ord.payment_method || 'Online (Cashfree)';
+    const pStatus = (ord.paymentStatus || ord.payment_status || 'paid').toLowerCase();
+
+    if (method === 'Cash on Delivery') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/90 shadow-2xs whitespace-nowrap">
+          <Banknote className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <span>Cash on Delivery</span>
+        </span>
+      );
+    }
+
+    if (pStatus === 'paid') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/90 shadow-2xs whitespace-nowrap">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span>Online (Cashfree)</span>
+        </span>
+      );
+    }
+
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200 shadow-2xs whitespace-nowrap">
+        <CreditCard className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+        <span>Online ({pStatus.toUpperCase()})</span>
+      </span>
+    );
+  };
 
   const filteredOrders = normalizedOrders.filter(o => {
     const statusNormalized = (o.status || '').toLowerCase();
@@ -58,7 +91,11 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
     }
 
     let matchesFilter = true;
-    if (activeFilter !== 'All Statuses' && activeFilter !== 'Unpaid Attempts') {
+    if (activeFilter === 'Cash on Delivery') {
+      matchesFilter = (o.paymentMethod || o.payment_method) === 'Cash on Delivery';
+    } else if (activeFilter === 'Online (Cashfree)') {
+      matchesFilter = (o.paymentMethod || o.payment_method) === 'Online (Cashfree)';
+    } else if (activeFilter !== 'All Statuses' && activeFilter !== 'Unpaid Attempts') {
       matchesFilter = statusNormalized === filterNormalized;
     }
 
@@ -169,6 +206,8 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
               <option value="OUT FOR DELIVERY">Out for Delivery</option>
               <option value="DELIVERED">Delivered</option>
               <option value="CANCELLED">Cancelled</option>
+              <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+              <option value="Online (Cashfree)">Online (Cashfree)</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -185,6 +224,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                 <th className="py-4 px-6">Customer</th>
                 <th className="py-4 px-6">Date</th>
                 <th className="py-4 px-6">Total Value</th>
+                <th className="py-4 px-6">Payment</th>
                 <th className="py-4 px-6">Status</th>
                 <th className="py-4 px-6 text-right">Actions</th>
               </tr>
@@ -192,7 +232,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
             <tbody className="divide-y divide-gray-50 text-xs">
               {loadingOrders && sortedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
+                  <td colSpan={7} className="py-12 text-center text-gray-400 font-medium">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin text-[#128C7E]" />
                       <span>Loading orders from database...</span>
@@ -201,7 +241,7 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                 </tr>
               ) : sortedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
+                  <td colSpan={7} className="py-12 text-center text-gray-400 font-medium">
                     No orders matching your search or filter.
                   </td>
                 </tr>
@@ -251,6 +291,11 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                       {/* Total Value */}
                       <td className="py-4 px-6 font-bold text-gray-900 text-xs">
                         ₹{ord.total ? ord.total.toLocaleString('en-IN') : '0'}
+                      </td>
+
+                      {/* Payment Method */}
+                      <td className="py-4 px-6">
+                        {renderPaymentBadge(ord)}
                       </td>
 
                       {/* Status Dropdown Pill */}
@@ -362,6 +407,45 @@ export default function AdminOrders({ selectedOrder, setSelectedOrder }) {
                   <strong>Notes:</strong> {selectedOrder.notes}
                 </div>
               )}
+
+              {/* Payment Information Card */}
+              <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200/80 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-extrabold uppercase text-emerald-950 tracking-wider flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Payment Information</span>
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                    (selectedOrder.paymentStatus || 'paid').toLowerCase() === 'paid' 
+                      ? 'bg-emerald-200 text-emerald-900' 
+                      : (selectedOrder.paymentMethod || selectedOrder.payment_method) === 'Cash on Delivery'
+                      ? 'bg-amber-200 text-amber-900'
+                      : 'bg-gray-200 text-gray-800'
+                  }`}>
+                    {(selectedOrder.paymentStatus || 'paid').toLowerCase() === 'paid'
+                      ? 'PAID'
+                      : (selectedOrder.paymentMethod || selectedOrder.payment_method) === 'Cash on Delivery'
+                      ? 'CASH ON DELIVERY (PENDING)'
+                      : (selectedOrder.paymentStatus || 'PENDING').toUpperCase()}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-emerald-200/60 text-gray-700">
+                  <div>
+                    <span className="text-[10px] text-gray-500 block">Payment Option</span>
+                    <span className="font-bold text-gray-900">
+                      {selectedOrder.paymentMethod || selectedOrder.payment_method || 'Online (Cashfree)'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-500 block">Gateway / Channel</span>
+                    <span className="font-bold text-gray-900">
+                      {(selectedOrder.paymentMethod || selectedOrder.payment_method) === 'Cash on Delivery'
+                        ? 'Doorstep Cash Collection'
+                        : 'Cashfree Payment Gateway'}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Items Ordered */}

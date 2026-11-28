@@ -62,6 +62,8 @@ export const createOrderSchema = z.object({
   })).min(1, 'Cart is empty').max(50, 'Too many items in order (max 50)'),
   couponCode: z.string().trim().max(50).optional().or(z.literal('')).nullable(),
   discountAmount: z.number().optional().nullable(),
+  paymentMethod: z.string().trim().max(100).optional().or(z.literal('')).nullable(),
+  payment_method: z.string().trim().max(100).optional().or(z.literal('')).nullable(),
   notes: z.string().trim().max(500).optional().or(z.literal('')).nullable()
 });
 
